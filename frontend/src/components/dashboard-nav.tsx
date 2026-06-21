@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, FileText, ListChecks, type LucideIcon } from "lucide-react";
+import { CalendarDays, ClipboardList, FileText, ListChecks, type LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const nav: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/dashboard/applications", label: "Applications", icon: ClipboardList },
   { href: "/dashboard", label: "Care Calendar", icon: CalendarDays },
   { href: "/dashboard/records", label: "Records & Renewal", icon: ListChecks },
   { href: "/dashboard/documents", label: "Documents", icon: FileText },
@@ -17,7 +18,9 @@ export function DashboardNav() {
   return (
     <nav className="space-y-1">
       {nav.map((item) => {
-        const active = pathname === item.href;
+        const active = item.href === "/dashboard"
+          ? pathname === "/dashboard"
+          : pathname.startsWith(item.href);
         return (
           <Link
             key={item.href}

@@ -124,3 +124,39 @@ export interface FormSchema {
   mapped_fields: number;
   total_schema_fields: number;
 }
+
+// ---------------------------------------------------------------------------
+// Applications
+// ---------------------------------------------------------------------------
+
+export type AppStatus = "open" | "in_progress" | "needs_info" | "completed";
+
+export interface ApplicationEntry {
+  program: string;
+  status: AppStatus;
+  form_ids: string[];
+  eligibility_status: EligibilityStatus | null;
+  confidence: number;
+  rationale: string;
+  roadblocks: string[];
+  required_documents: string[];
+  next_steps: string[];
+  sources: string[];
+  has_forms: boolean;
+}
+
+export interface AppQuestion {
+  field: string;
+  label: string;
+  type: string;
+  form_id: string;
+}
+
+export interface StartApplicationResult {
+  program: string;
+  form_ids: string[];
+  autofilled: number;
+  total_fields: number;
+  questions: AppQuestion[];
+  error?: string;
+}
