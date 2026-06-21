@@ -80,7 +80,7 @@ def resolve_fields(form_id: str, profile: CaseProfile) -> dict[str, Any]:
     """Return resolved field values and lists of missing/needs_user_input fields."""
     schema = load_schema(form_id)
     fields_map = schema.get("fields", {})
-    if not fields_map:
+    if not fields_map and "fields" not in schema:
         # Fall back to legacy flat schema (form_id -> profile_path)
         fields_map = {k: v for k, v in schema.items() if k != "_meta"}
         if fields_map:

@@ -123,8 +123,8 @@ export default function EligibilityPage() {
         })}
       </div>
 
-      <Button render={<Link href="/dashboard" />}>
-        Continue to dashboard
+      <Button render={<Link href="/dashboard/applications" />}>
+        Continue to applications
         <ArrowRight />
       </Button>
       </main>
