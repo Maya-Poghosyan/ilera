@@ -295,3 +295,20 @@ def api_run_now(reminder_id: str) -> dict:
     r.last_sent_at = datetime.now(timezone.utc).isoformat()
     save_reminder(r)
     return {"sent": True, "poke": result}
+
+
+# ---------------------------------------------------------------------------
+# Poke message/email scanning → suggested events
+# ---------------------------------------------------------------------------
+
+
+@app.post("/api/poke/scan")
+def poke_scan_events() -> dict:
+    """Ask Poke to scan the user's messages/emails for medical events."""
+    if not poke.available():
+        raise HTTPException(status_code=400, detail="POKE_API_KEY not configured")
+    try:
+        result = poke.scan_for_events()
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Poke scan failed: {exc}") from exc
+    return {"scanned": True, "poke": result}

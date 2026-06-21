@@ -72,3 +72,11 @@ export function sendTestMessage(message: string): Promise<{ sent: boolean; poke:
 export function getReminderTemplates(): Promise<ReminderTemplates> {
   return request<ReminderTemplates>("/api/reminders/templates");
 }
+
+// ---------------------------------------------------------------------------
+// Poke scanning
+// ---------------------------------------------------------------------------
+
+export function scanForEvents(): Promise<{ scanned: boolean; poke: unknown }> {
+  return request<{ scanned: boolean; poke: unknown }>("/api/poke/scan", { method: "POST" });
+}
