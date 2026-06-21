@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
-import { cn } from "@/lib/utils";
 import { determineEligibility } from "@/lib/api";
 import type { EligibilityResponse, EligibilityStatus } from "@/lib/types";
 
@@ -17,16 +16,6 @@ const statusColor: Record<EligibilityStatus, string> = {
   possible: "border-transparent bg-amber-500 text-white",
   unlikely: "border-transparent bg-rose-500 text-white",
   needs_info: "border-transparent bg-sky-600 text-white",
-};
-
-const statusAccent: Record<
-  EligibilityStatus,
-  { bar: string; header: string; title: string }
-> = {
-  likely: { bar: "bg-primary", header: "bg-brand-subtle", title: "text-primary" },
-  possible: { bar: "bg-amber-500", header: "bg-amber-50", title: "text-amber-900" },
-  unlikely: { bar: "bg-rose-500", header: "bg-rose-50", title: "text-rose-900" },
-  needs_info: { bar: "bg-sky-600", header: "bg-sky-50", title: "text-sky-900" },
 };
 
 export default function EligibilityPage() {
@@ -92,33 +81,29 @@ export default function EligibilityPage() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {data.results.map((r) => {
-          const accent = statusAccent[r.status];
           const pct = Math.round(r.confidence * 100);
           return (
-            <Card key={r.program} size="sm" className="gap-0 overflow-hidden py-0">
-              <div className={cn("h-1 w-full", accent.bar)} />
-              <CardHeader className={cn("gap-2 py-3", accent.header)}>
+            <Card key={r.program} size="sm" className="gap-3">
+              <CardHeader className="gap-2">
                 <div className="flex items-center justify-between gap-2">
-                  <CardTitle className={cn("text-base", accent.title)}>
-                    {r.program}
-                  </CardTitle>
+                  <CardTitle className="text-base">{r.program}</CardTitle>
                   <Badge className={statusColor[r.status]}>
                     {r.status.replace("_", " ")}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-background/70">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                     <div
-                      className={cn("h-full rounded-full", accent.bar)}
+                      className="h-full rounded-full bg-primary"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <span className="text-xs font-semibold tabular-nums text-foreground/70">
+                  <span className="text-xs font-semibold tabular-nums text-muted-foreground">
                     {pct}%
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2.5 py-3 text-xs">
+              <CardContent className="space-y-2.5 text-xs">
                 <p className="text-muted-foreground">{r.rationale}</p>
                 {r.roadblocks.length > 0 && (
                   <Detail label="Roadblocks" items={r.roadblocks} />
@@ -137,24 +122,6 @@ export default function EligibilityPage() {
           );
         })}
       </div>
-
-      {data.followups.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">A few follow-up questions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2 text-sm">
-              {data.followups.map((q) => (
-                <li key={q.id}>
-                  <span className="font-medium">{q.prompt}</span>
-                  {q.why && <span className="block text-xs text-muted-foreground">{q.why}</span>}
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
 
       <Button render={<Link href="/dashboard" />}>
         Continue to dashboard

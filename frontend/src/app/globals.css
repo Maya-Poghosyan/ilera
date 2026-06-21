@@ -175,6 +175,7 @@
   h2,
   h3 {
     font-family: var(--font-heading);
+    color: var(--brand);
   }
   ::selection {
     background-color: var(--brand-subtle);
