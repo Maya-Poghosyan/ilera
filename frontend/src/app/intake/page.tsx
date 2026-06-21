@@ -19,9 +19,29 @@ import {
   validateQuestions,
 } from "@/lib/intake-schema";
 
-type Step =
-  | { kind: "screen"; screen: Screen }
-  | { kind: "module"; module: MiniModule };
+const MAX_PER_PAGE = 5;
+
+interface Page {
+  key: string;
+  title: string;
+  isModule: boolean;
+  introText?: string;
+  showIntro: boolean;
+  questions: Question[];
+}
+
+// Split a screen's visible questions into balanced pages of at most MAX_PER_PAGE
+// (the spec groups up to 6 questions on a screen, but no page may show > 5).
+function paginate(questions: Question[]): Question[][] {
+  if (questions.length <= MAX_PER_PAGE) return questions.length ? [questions] : [];
+  const pageCount = Math.ceil(questions.length / MAX_PER_PAGE);
+  const perPage = Math.ceil(questions.length / pageCount);
+  const out: Question[][] = [];
+  for (let i = 0; i < questions.length; i += perPage) {
+    out.push(questions.slice(i, i + perPage));
+  }
+  return out;
+}
 
 export default function IntakePage() {
   const router = useRouter();
@@ -39,15 +59,40 @@ export default function IntakePage() {
       .catch(() => setLoadError("Could not load the intake form. Is the backend running on :8000?"));
   }, []);
 
-  // The active step list = all base screens + any triggered mini-modules (A–F).
-  // Recomputed from answers so modules appear/disappear as the user responds.
-  const steps: Step[] = useMemo(() => {
+  // The active flow = all base screens + any triggered mini-modules (A–F), each
+  // split into pages of ≤5 visible questions. Recomputed from answers so
+  // conditional questions and mini-modules appear/disappear as the user responds.
+  const pages: Page[] = useMemo(() => {
     if (!schema) return [];
-    const base: Step[] = schema.screens.map((screen) => ({ kind: "screen" as const, screen }));
-    const modules: Step[] = schema.mini_modules
-      .filter((m) => evalCondition(m.trigger, answers))
-      .map((module) => ({ kind: "module" as const, module }));
-    return [...base, ...modules];
+    const sections: { id: string; title: string; intro?: string; isModule: boolean; questions: Question[] }[] = [
+      ...schema.screens.map((s: Screen) => ({
+        id: s.id,
+        title: s.title,
+        intro: s.intro_text,
+        isModule: false,
+        questions: s.questions,
+      })),
+      ...schema.mini_modules
+        .filter((m: MiniModule) => evalCondition(m.trigger, answers))
+        .map((m: MiniModule) => ({ id: m.id, title: m.title, isModule: true, questions: m.questions })),
+    ];
+
+    const out: Page[] = [];
+    for (const section of sections) {
+      const visible = section.questions.filter((q) => evalCondition(q.show_when, answers));
+      const chunks = paginate(visible);
+      chunks.forEach((chunk, i) => {
+        out.push({
+          key: `${section.id}-${i}`,
+          title: section.title,
+          isModule: section.isModule,
+          introText: section.intro,
+          showIntro: i === 0,
+          questions: chunk,
+        });
+      });
+    }
+    return out;
   }, [schema, answers]);
 
   if (loadError) {
@@ -85,16 +130,12 @@ export default function IntakePage() {
     );
   }
 
-  const safeIndex = Math.min(stepIndex, steps.length - 1);
-  const step = steps[safeIndex];
-  const title = step.kind === "screen" ? step.screen.title : step.module.title;
-  const introText = step.kind === "screen" ? step.screen.intro_text : undefined;
-  const allQuestions: Question[] = step.kind === "screen" ? step.screen.questions : step.module.questions;
-  // Apply per-question show_when within the current step.
-  const visibleQuestions = allQuestions.filter((q) => evalCondition(q.show_when, answers));
+  const safeIndex = Math.min(stepIndex, pages.length - 1);
+  const page = pages[safeIndex];
+  const visibleQuestions = page.questions;
 
-  const pct = ((safeIndex + 1) / steps.length) * 100;
-  const isLast = safeIndex === steps.length - 1;
+  const pct = ((safeIndex + 1) / pages.length) * 100;
+  const isLast = safeIndex === pages.length - 1;
 
   function setAnswer(fieldId: string, value: AnswerValue) {
     setAnswers((prev) => ({ ...prev, [fieldId]: value }));
@@ -118,7 +159,7 @@ export default function IntakePage() {
       void finish();
       return;
     }
-    setStepIndex((s) => Math.min(s + 1, steps.length - 1));
+    setStepIndex((s) => Math.min(s + 1, pages.length - 1));
     setErrors({});
     if (typeof window !== "undefined") window.scrollTo({ top: 0 });
   }
@@ -145,8 +186,8 @@ export default function IntakePage() {
       <div className="space-y-2">
         <Progress value={pct} />
         <p className="text-sm text-muted-foreground">
-          Step {stepIndex + 1} of {steps.length}: {title}
-          {step.kind === "module" && (
+          Step {safeIndex + 1} of {pages.length}: {page.title}
+          {page.isModule && (
             <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
               Follow-up for programs that may fit
             </span>
@@ -156,11 +197,11 @@ export default function IntakePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle>{page.title}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {introText && (
-            <p className="text-sm text-muted-foreground">{introText.replaceAll("[recipient name]", name)}</p>
+          {page.showIntro && page.introText && (
+            <p className="text-sm text-muted-foreground">{page.introText.replaceAll("[recipient name]", name)}</p>
           )}
           {visibleQuestions.map((q) => (
             <QuestionField
