@@ -60,15 +60,15 @@ export default function CalendarPage() {
     <div className="space-y-6">
       <div className="space-y-3">
         <div>
-          <h1 className="text-2xl font-bold">Care Calendar</h1>
+          <h1 className="text-4xl font-bold">Care Calendar</h1>
           <p className="text-sm text-muted-foreground">
             Agents can scan email to auto-create events and text reminders.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm">+ Appointment</Button>
-          <Button variant="outline" size="sm">+ Visit</Button>
-          <Button variant="outline" size="sm">+ Deadline</Button>
+          <Button className="hover:font-bold">+ Appointment</Button>
+          <Button className="hover:font-bold">+ Visit</Button>
+          <Button className="hover:font-bold">+ Deadline</Button>
         </div>
       </div>
 
