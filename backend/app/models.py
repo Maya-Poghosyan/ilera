@@ -4,8 +4,17 @@ from pydantic import BaseModel, Field
 
 
 class CareRecipient(BaseModel):
+    name: str = ""
+    date_of_birth: str = ""  # ISO date (YYYY-MM-DD)
     age: Optional[int] = None
+    gender: str = ""
     state: str = "CA"
+    street_address: str = ""
+    city: str = ""
+    zip_code: str = ""
+    phone: str = ""
+    email: str = ""
+    ssn: str = ""  # stored only in-memory; never logged
     conditions: list[str] = Field(default_factory=list)
     veteran: bool = False
     insurance: Literal["medi-cal", "medicare", "private", "none", "unknown"] = "unknown"
@@ -14,9 +23,12 @@ class CareRecipient(BaseModel):
 
 
 class Caregiver(BaseModel):
+    name: str = ""
     relationship: str = ""
     employment_status: str = ""
     hours_per_week: Optional[int] = None
+    phone: str = ""
+    address: str = ""
 
 
 class Household(BaseModel):

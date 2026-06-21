@@ -11,32 +11,57 @@ import { submitIntake } from "@/lib/api";
 import type { CaseProfile, Insurance } from "@/lib/types";
 
 type Form = {
+  // Care recipient personal info
+  recipient_name: string;
+  date_of_birth: string;
+  gender: string;
+  phone: string;
+  email: string;
+  street_address: string;
+  city: string;
+  zip_code: string;
+  // Care recipient medical
   age: string;
   state: string;
   insurance: Insurance;
   veteran: boolean;
   care_needs: string;
+  // Caregiver
+  caregiver_name: string;
   relationship: string;
   employment_status: string;
+  caregiver_phone: string;
+  // Household
   household_size: string;
   income_monthly: string;
+  // Goals
   goals: string;
 };
 
 const empty: Form = {
+  recipient_name: "",
+  date_of_birth: "",
+  gender: "",
+  phone: "",
+  email: "",
+  street_address: "",
+  city: "",
+  zip_code: "",
   age: "",
   state: "CA",
   insurance: "unknown",
   veteran: false,
   care_needs: "",
+  caregiver_name: "",
   relationship: "",
   employment_status: "",
+  caregiver_phone: "",
   household_size: "",
   income_monthly: "",
   goals: "",
 };
 
-const steps = ["Care recipient", "About you", "Household", "Goals"] as const;
+const steps = ["Personal info", "Care recipient", "About you", "Household", "Goals"] as const;
 
 export default function IntakePage() {
   const router = useRouter();
@@ -52,8 +77,17 @@ export default function IntakePage() {
     const profile: Partial<CaseProfile> = {
       id: "",
       care_recipient: {
+        name: form.recipient_name,
+        date_of_birth: form.date_of_birth,
         age: form.age ? Number(form.age) : null,
+        gender: form.gender,
         state: form.state,
+        street_address: form.street_address,
+        city: form.city,
+        zip_code: form.zip_code,
+        phone: form.phone,
+        email: form.email,
+        ssn: "",
         conditions: [],
         veteran: form.veteran,
         insurance: form.insurance,
@@ -61,9 +95,12 @@ export default function IntakePage() {
         care_needs: form.care_needs ? form.care_needs.split(",").map((s) => s.trim()) : [],
       },
       caregiver: {
+        name: form.caregiver_name,
         relationship: form.relationship,
         employment_status: form.employment_status,
         hours_per_week: null,
+        phone: form.caregiver_phone,
+        address: "",
       },
       household: {
         size: form.household_size ? Number(form.household_size) : null,
@@ -98,11 +135,82 @@ export default function IntakePage() {
         <CardContent className="space-y-4">
           {step === 0 && (
             <>
+              <Field label="Care recipient full name">
+                <Input
+                  placeholder="First and last name"
+                  value={form.recipient_name}
+                  onChange={(e) => set({ recipient_name: e.target.value })}
+                />
+              </Field>
+              <Field label="Date of birth">
+                <Input
+                  type="date"
+                  value={form.date_of_birth}
+                  onChange={(e) => set({ date_of_birth: e.target.value })}
+                />
+              </Field>
+              <Field label="Gender">
+                <select
+                  className="h-9 w-full rounded-md border bg-transparent px-3 text-sm"
+                  value={form.gender}
+                  onChange={(e) => set({ gender: e.target.value })}
+                >
+                  <option value="">Select…</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </Field>
+              <Field label="Phone number">
+                <Input
+                  type="tel"
+                  placeholder="(555) 123-4567"
+                  value={form.phone}
+                  onChange={(e) => set({ phone: e.target.value })}
+                />
+              </Field>
+              <Field label="Email">
+                <Input
+                  type="email"
+                  placeholder="name@example.com"
+                  value={form.email}
+                  onChange={(e) => set({ email: e.target.value })}
+                />
+              </Field>
+              <Field label="Street address">
+                <Input
+                  placeholder="123 Main St"
+                  value={form.street_address}
+                  onChange={(e) => set({ street_address: e.target.value })}
+                />
+              </Field>
+              <div className="grid grid-cols-3 gap-2">
+                <Field label="City">
+                  <Input
+                    value={form.city}
+                    onChange={(e) => set({ city: e.target.value })}
+                  />
+                </Field>
+                <Field label="State">
+                  <Input
+                    value={form.state}
+                    onChange={(e) => set({ state: e.target.value })}
+                  />
+                </Field>
+                <Field label="Zip">
+                  <Input
+                    value={form.zip_code}
+                    onChange={(e) => set({ zip_code: e.target.value })}
+                  />
+                </Field>
+              </div>
+            </>
+          )}
+
+          {step === 1 && (
+            <>
               <Field label="Care recipient age">
                 <Input type="number" value={form.age} onChange={(e) => set({ age: e.target.value })} />
-              </Field>
-              <Field label="State">
-                <Input value={form.state} onChange={(e) => set({ state: e.target.value })} />
               </Field>
               <Field label="Primary insurance" hint="Medi-Cal status strongly affects eligibility for IHSS.">
                 <select
@@ -135,8 +243,15 @@ export default function IntakePage() {
             </>
           )}
 
-          {step === 1 && (
+          {step === 2 && (
             <>
+              <Field label="Your full name">
+                <Input
+                  placeholder="First and last name"
+                  value={form.caregiver_name}
+                  onChange={(e) => set({ caregiver_name: e.target.value })}
+                />
+              </Field>
               <Field label="Your relationship to the care recipient">
                 <Input
                   placeholder="daughter, spouse, friend…"
@@ -151,10 +266,18 @@ export default function IntakePage() {
                   onChange={(e) => set({ employment_status: e.target.value })}
                 />
               </Field>
+              <Field label="Your phone number">
+                <Input
+                  type="tel"
+                  placeholder="(555) 123-4567"
+                  value={form.caregiver_phone}
+                  onChange={(e) => set({ caregiver_phone: e.target.value })}
+                />
+              </Field>
             </>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <>
               <Field label="Household size">
                 <Input
@@ -173,7 +296,7 @@ export default function IntakePage() {
             </>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <Field label="What are you hoping to get help with? (comma separated)">
               <Input
                 placeholder="get paid to provide care, lower medical costs"
