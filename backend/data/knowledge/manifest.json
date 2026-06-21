@@ -1,0 +1,705 @@
+{
+  "docs": [
+    {
+      "document_id": "ACL-FED-CAREGIVER-INVENTORY",
+      "program": "federal_routing",
+      "agency": "ACL",
+      "collection": "Federal-Caregiver-Routing",
+      "title": "Inventory of Federal Caregiver Support",
+      "source_url": "https://acl.gov/sites/default/files/RAISE_SGRG/FedCaregiverSupport-Inventory%28ACL%29.docx",
+      "priority": "P0",
+      "authority_level": "federal_program_inventory",
+      "distribution": "shareable",
+      "tags": [
+        "federal",
+        "caregiver",
+        "program-inventory",
+        "routing"
+      ],
+      "source_ext": "docx",
+      "text_path": "federal_routing/ACL-FED-CAREGIVER-INVENTORY.txt",
+      "chars": 176277
+    },
+    {
+      "document_id": "ACL-NATIONAL-STRATEGY",
+      "program": "federal_routing",
+      "agency": "ACL",
+      "collection": "Federal-Caregiver-Routing",
+      "title": "National Strategy to Support Family Caregivers",
+      "source_url": "https://acl.gov/sites/default/files/RAISE_SGRG/NatlStrategyToSupportFamilyCaregivers-2.pdf",
+      "priority": "P0",
+      "authority_level": "federal_strategy",
+      "distribution": "shareable",
+      "tags": [
+        "federal",
+        "caregiver",
+        "coordination",
+        "aging",
+        "disability"
+      ],
+      "source_ext": "pdf",
+      "text_path": "federal_routing/ACL-NATIONAL-STRATEGY.txt",
+      "chars": 244369
+    },
+    {
+      "document_id": "ACWDL-25-14",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "Medi-Cal-Policy-Letters",
+      "title": "ACWDL 25-14 \u2014 Reinstatement of the Non-MAGI Asset Test",
+      "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/25-14.pdf",
+      "priority": "P0",
+      "authority_level": "current_policy_letter",
+      "distribution": "shareable",
+      "tags": [
+        "medi-cal",
+        "assets",
+        "2026",
+        "non-magi"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medical/ACWDL-25-14.txt",
+      "chars": 40121
+    },
+    {
+      "document_id": "ACWDL-25-26",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "Medi-Cal-Policy-Letters",
+      "title": "ACWDL 25-26 \u2014 Medicare Premiums and Social Security COLA",
+      "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/12/25-26.pdf",
+      "priority": "P0",
+      "authority_level": "current_policy_letter",
+      "distribution": "shareable",
+      "tags": [
+        "medi-cal",
+        "medicare",
+        "cola",
+        "msp",
+        "2026"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medical/ACWDL-25-26.txt",
+      "chars": 6933
+    },
+    {
+      "document_id": "ACWDL-26-01",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "Medi-Cal-Policy-Letters",
+      "title": "ACWDL 26-01 \u2014 Federal Poverty Levels",
+      "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2026/04/26-01.pdf",
+      "priority": "P0",
+      "authority_level": "current_policy_letter",
+      "distribution": "shareable",
+      "tags": [
+        "medi-cal",
+        "income-limits",
+        "fpl",
+        "2026"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medical/ACWDL-26-01.txt",
+      "chars": 5293
+    },
+    {
+      "document_id": "CMS-MSP-CHAPTER-1",
+      "program": "medicare",
+      "agency": "CMS",
+      "collection": "Medicare-Medicaid-Coordination",
+      "title": "Medicare Savings Program Eligibility and Enrollment \u2014 Chapter 1",
+      "source_url": "https://www.cms.gov/files/document/chapter-1-program-overview-and-policy.pdf",
+      "priority": "P0",
+      "authority_level": "federal_program_manual",
+      "distribution": "shareable",
+      "tags": [
+        "medicare",
+        "medicaid",
+        "dual-eligible",
+        "msp"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medicare/CMS-MSP-CHAPTER-1.txt",
+      "chars": 149634
+    },
+    {
+      "document_id": "EDD-DE2475",
+      "program": "pfl",
+      "agency": "California-EDD",
+      "collection": "Paid-Family-Leave",
+      "title": "Guide for Completing a Paid Family Leave Claim",
+      "source_url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2475.pdf",
+      "priority": "P1",
+      "authority_level": "state_claim_guidance",
+      "distribution": "shareable",
+      "tags": [
+        "california",
+        "pfl",
+        "claim"
+      ],
+      "source_ext": "pdf",
+      "text_path": "pfl/EDD-DE2475.txt",
+      "chars": 6473
+    },
+    {
+      "document_id": "EDD-DE2511",
+      "program": "pfl",
+      "agency": "California-EDD",
+      "collection": "Paid-Family-Leave",
+      "title": "Facts About Paid Family Leave",
+      "source_url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2511.pdf",
+      "priority": "P1",
+      "authority_level": "state_consumer_guidance",
+      "distribution": "shareable",
+      "tags": [
+        "california",
+        "pfl",
+        "wage-replacement"
+      ],
+      "source_ext": "pdf",
+      "text_path": "pfl/EDD-DE2511.txt",
+      "chars": 4923
+    },
+    {
+      "document_id": "EDD-FMLA-CFRA-FAQ",
+      "program": "pfl",
+      "agency": "California-EDD",
+      "collection": "Paid-Family-Leave",
+      "title": "FMLA and CFRA Frequently Asked Questions",
+      "source_url": "https://edd.ca.gov/en/disability/faqs-fmla-cfra/",
+      "priority": "P1",
+      "authority_level": "official_web_guidance",
+      "distribution": "shareable",
+      "tags": [
+        "california",
+        "pfl",
+        "fmla",
+        "cfra",
+        "interaction"
+      ],
+      "source_ext": "txt",
+      "text_path": "pfl/EDD-FMLA-CFRA-FAQ.txt",
+      "chars": 3220
+    },
+    {
+      "document_id": "HCBA-APPROVED-WAIVER",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "California-HCBS",
+      "title": "Home and Community-Based Alternatives Approved Waiver",
+      "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/HCBS-Waiver-CA0431R0312-Nov2023.pdf",
+      "priority": "P0",
+      "authority_level": "approved_medicaid_waiver",
+      "distribution": "shareable",
+      "tags": [
+        "hcba",
+        "waiver",
+        "wpcs",
+        "ihss",
+        "nursing-level-care"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medical/HCBA-APPROVED-WAIVER.txt",
+      "chars": 365253
+    },
+    {
+      "document_id": "HCBS-WAIVER-INDEX",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "California-HCBS",
+      "title": "California 1915(c) HCBS Waiver Index",
+      "source_url": "https://www.dhcs.ca.gov/services/1915c-home-and-community-based-services-waivers/",
+      "priority": "P0",
+      "authority_level": "approved_waiver_index",
+      "distribution": "shareable",
+      "tags": [
+        "california",
+        "hcbs",
+        "waiver",
+        "respite",
+        "transition"
+      ],
+      "source_ext": "txt",
+      "text_path": "medical/HCBS-WAIVER-INDEX.txt",
+      "chars": 2569
+    },
+    {
+      "document_id": "IHSS-ADVISEMENT-CHECKLIST",
+      "program": "ihss",
+      "agency": "CDSS",
+      "collection": "IHSS-Assessment",
+      "title": "IHSS Applicant/Recipient Advisement Checklist",
+      "source_url": "https://www.cdss.ca.gov/Portals/9/IHSS/ITA/IHSS%20Tools/ApplicantRecipientAdvisementChecklist.pdf",
+      "priority": "P0",
+      "authority_level": "official_assessment_tool",
+      "distribution": "not_shareable",
+      "tags": [
+        "ihss",
+        "assessment",
+        "recipient",
+        "checklist"
+      ],
+      "source_ext": "pdf",
+      "text_path": "ihss/IHSS-ADVISEMENT-CHECKLIST.txt",
+      "chars": 1076
+    },
+    {
+      "document_id": "IHSS-ANNOTATED-ASSESSMENT",
+      "program": "ihss",
+      "agency": "CDSS",
+      "collection": "IHSS-Assessment",
+      "title": "IHSS Annotated Assessment Criteria",
+      "source_url": "https://www.cdss.ca.gov/Portals/9/IHSS/ITA/IHSS%20Tools/AnnotatedAssessmentCriteria.pdf",
+      "priority": "P0",
+      "authority_level": "official_assessment_guidance",
+      "distribution": "not_shareable",
+      "tags": [
+        "ihss",
+        "adl",
+        "iadl",
+        "assessment"
+      ],
+      "source_ext": "pdf",
+      "text_path": "ihss/IHSS-ANNOTATED-ASSESSMENT.txt",
+      "chars": 58610
+    },
+    {
+      "document_id": "IHSS-CASE-ASSESSMENT-CHECKLIST",
+      "program": "ihss",
+      "agency": "CDSS",
+      "collection": "IHSS-Assessment",
+      "title": "IHSS Social Worker Case Assessment Checklist",
+      "source_url": "https://www.cdss.ca.gov/Portals/9/IHSS/ITA/IHSS%20Tools/SWCaseAssessmentChecklist.pdf",
+      "priority": "P0",
+      "authority_level": "official_assessment_tool",
+      "distribution": "not_shareable",
+      "tags": [
+        "ihss",
+        "assessment",
+        "social-worker",
+        "checklist"
+      ],
+      "source_ext": "pdf",
+      "text_path": "ihss/IHSS-CASE-ASSESSMENT-CHECKLIST.txt",
+      "chars": 2154
+    },
+    {
+      "document_id": "IHSS-FIELD-HANDBOOK",
+      "program": "ihss",
+      "agency": "CDSS",
+      "collection": "IHSS-Assessment",
+      "title": "IHSS Social Worker Assessment Field Handbook",
+      "source_url": "https://www.cdss.ca.gov/Portals/9/IHSS/ITA/IHSS%20Tools/SWAssessmentFieldHandbook.pdf",
+      "priority": "P0",
+      "authority_level": "official_assessment_handbook",
+      "distribution": "not_shareable",
+      "tags": [
+        "ihss",
+        "assessment",
+        "social-worker",
+        "handbook"
+      ],
+      "source_ext": "pdf",
+      "text_path": "ihss/IHSS-FIELD-HANDBOOK.txt",
+      "chars": 40067
+    },
+    {
+      "document_id": "IHSS-HOURLY-TASK-GUIDELINES",
+      "program": "ihss",
+      "agency": "CDSS",
+      "collection": "IHSS-Assessment",
+      "title": "Functional Index Ranks / Hourly Task Guidelines Grid",
+      "source_url": "https://www.cdss.ca.gov/Portals/9/IHSS/ITA/HTG%20Chart_Social%20Worker-Accessible%20FINAL%205.29.19.pdf?ver=2019-06-13-130542-983",
+      "priority": "P0",
+      "authority_level": "official_assessment_guidance",
+      "distribution": "not_shareable",
+      "tags": [
+        "ihss",
+        "hours",
+        "tasks",
+        "assessment"
+      ],
+      "source_ext": "pdf",
+      "text_path": "ihss/IHSS-HOURLY-TASK-GUIDELINES.txt",
+      "chars": 2790
+    },
+    {
+      "document_id": "IHSS-MPP-30-700-764",
+      "program": "ihss",
+      "agency": "CDSS",
+      "collection": "IHSS-Regulations",
+      "title": "IHSS MPP Handbook Division 30, Sections 30-700 through 30-764",
+      "source_url": "https://www.cdss.ca.gov/Portals/9/Regs/Man/SS/ssman2.docx",
+      "priority": "P0",
+      "authority_level": "state_program_manual",
+      "distribution": "not_shareable",
+      "tags": [
+        "ihss",
+        "regulations",
+        "manual"
+      ],
+      "source_ext": "docx",
+      "text_path": "ihss/IHSS-MPP-30-700-764.txt",
+      "chars": 146168
+    },
+    {
+      "document_id": "IHSS-MPP-30-765-785",
+      "program": "ihss",
+      "agency": "CDSS",
+      "collection": "IHSS-Regulations",
+      "title": "IHSS MPP Regulations Division 30, Sections 30-765 through 30-785",
+      "source_url": "https://www.cdss.ca.gov/Portals/9/Regs/ssman3.pdf",
+      "priority": "P0",
+      "authority_level": "state_program_regulation",
+      "distribution": "not_shareable",
+      "tags": [
+        "ihss",
+        "regulations",
+        "manual"
+      ],
+      "source_ext": "pdf",
+      "text_path": "ihss/IHSS-MPP-30-765-785.txt",
+      "chars": 226607
+    },
+    {
+      "document_id": "IHSS-TRAINING-ACADEMY-INDEX",
+      "program": "ihss",
+      "agency": "CDSS",
+      "collection": "IHSS-Assessment",
+      "title": "IHSS Training Academy \u2014 Official Index",
+      "source_url": "https://www.cdss.ca.gov/inforesources/ihss/training-academy",
+      "priority": "P0",
+      "authority_level": "official_training_index",
+      "distribution": "not_shareable",
+      "tags": [
+        "ihss",
+        "assessment",
+        "training",
+        "index"
+      ],
+      "source_ext": "txt",
+      "text_path": "ihss/IHSS-TRAINING-ACADEMY-INDEX.txt",
+      "chars": 3196
+    },
+    {
+      "document_id": "IRS-MEDICAID-WAIVER-FAQ",
+      "program": "tax",
+      "agency": "IRS",
+      "collection": "Tax",
+      "title": "Certain Medicaid Waiver Payments May Be Excludable From Income",
+      "source_url": "https://www.irs.gov/individuals/certain-medicaid-waiver-payments-may-be-excludable-from-income",
+      "priority": "P1",
+      "authority_level": "current_official_faq",
+      "distribution": "shareable",
+      "tags": [
+        "tax",
+        "notice-2014-7",
+        "medicaid",
+        "earned-income"
+      ],
+      "source_ext": "txt",
+      "text_path": "tax/IRS-MEDICAID-WAIVER-FAQ.txt",
+      "chars": 19819
+    },
+    {
+      "document_id": "IRS-NOTICE-2014-7",
+      "program": "tax",
+      "agency": "IRS",
+      "collection": "Tax",
+      "title": "IRS Notice 2014-7",
+      "source_url": "https://www.irs.gov/pub/irs-drop/n-14-07.pdf",
+      "priority": "P1",
+      "authority_level": "official_tax_notice",
+      "distribution": "shareable",
+      "tags": [
+        "tax",
+        "medicaid-waiver",
+        "live-in-caregiver",
+        "income-exclusion"
+      ],
+      "source_ext": "pdf",
+      "text_path": "tax/IRS-NOTICE-2014-7.txt",
+      "chars": 13523
+    },
+    {
+      "document_id": "IRS-PUB-501",
+      "program": "tax",
+      "agency": "IRS",
+      "collection": "Tax",
+      "title": "Publication 501 \u2014 Dependents, Standard Deduction, and Filing Information",
+      "source_url": "https://www.irs.gov/pub/irs-pdf/p501.pdf",
+      "priority": "P1",
+      "authority_level": "annual_tax_publication",
+      "distribution": "shareable",
+      "tags": [
+        "tax",
+        "dependent",
+        "support-test"
+      ],
+      "source_ext": "pdf",
+      "text_path": "tax/IRS-PUB-501.txt",
+      "chars": 209466
+    },
+    {
+      "document_id": "IRS-PUB-502",
+      "program": "tax",
+      "agency": "IRS",
+      "collection": "Tax",
+      "title": "Publication 502 \u2014 Medical and Dental Expenses",
+      "source_url": "https://www.irs.gov/pub/irs-pdf/p502.pdf",
+      "priority": "P1",
+      "authority_level": "annual_tax_publication",
+      "distribution": "shareable",
+      "tags": [
+        "tax",
+        "medical-expenses",
+        "dependent"
+      ],
+      "source_ext": "pdf",
+      "text_path": "tax/IRS-PUB-502.txt",
+      "chars": 123099
+    },
+    {
+      "document_id": "IRS-PUB-503",
+      "program": "tax",
+      "agency": "IRS",
+      "collection": "Tax",
+      "title": "Publication 503 \u2014 Child and Dependent Care Expenses",
+      "source_url": "https://www.irs.gov/pub/irs-pdf/p503.pdf",
+      "priority": "P1",
+      "authority_level": "annual_tax_publication",
+      "distribution": "shareable",
+      "tags": [
+        "tax",
+        "dependent-care",
+        "employment"
+      ],
+      "source_ext": "pdf",
+      "text_path": "tax/IRS-PUB-503.txt",
+      "chars": 91880
+    },
+    {
+      "document_id": "IRS-PUB-926",
+      "program": "tax",
+      "agency": "IRS",
+      "collection": "Tax",
+      "title": "Publication 926 \u2014 Household Employer\u2019s Tax Guide",
+      "source_url": "https://www.irs.gov/pub/irs-pdf/p926.pdf",
+      "priority": "P1",
+      "authority_level": "annual_tax_publication",
+      "distribution": "shareable",
+      "tags": [
+        "tax",
+        "caregiver-employment",
+        "household-employee"
+      ],
+      "source_ext": "pdf",
+      "text_path": "tax/IRS-PUB-926.txt",
+      "chars": 89572
+    },
+    {
+      "document_id": "MEDICARE-AND-YOU",
+      "program": "medicare",
+      "agency": "CMS",
+      "collection": "Medicare",
+      "title": "Medicare & You",
+      "source_url": "https://www.medicare.gov/publications/10050-medicare-and-you.pdf",
+      "priority": "P0",
+      "authority_level": "current_year_consumer_handbook",
+      "distribution": "shareable",
+      "tags": [
+        "medicare",
+        "annual",
+        "coverage",
+        "caregiver"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medicare/MEDICARE-AND-YOU.txt",
+      "chars": 303885
+    },
+    {
+      "document_id": "MEDIL-I-26-05",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "Medi-Cal-Policy-Letters",
+      "title": "MEDIL I 26-05 \u2014 Non-MAGI Eligibility Screening Procedures",
+      "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2026/04/I-26-05.pdf",
+      "priority": "P0",
+      "authority_level": "current_policy_letter",
+      "distribution": "shareable",
+      "tags": [
+        "medi-cal",
+        "non-magi",
+        "screening",
+        "aged",
+        "blind",
+        "disabled"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medical/MEDIL-I-26-05.txt",
+      "chars": 5846
+    },
+    {
+      "document_id": "MEPM-ARTICLE-15",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "Medi-Cal-MEPM",
+      "title": "MEPM Article 15 \u2014 Other Health Coverage and Medicare Buy-In",
+      "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article15-OHC-MedicareBuyin.pdf",
+      "priority": "P0",
+      "authority_level": "agency_eligibility_manual",
+      "distribution": "shareable",
+      "tags": [
+        "medi-cal",
+        "medicare",
+        "other-insurance",
+        "coordination"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medical/MEPM-ARTICLE-15.txt",
+      "chars": 118938
+    },
+    {
+      "document_id": "MEPM-ARTICLE-19",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "Medi-Cal-MEPM",
+      "title": "MEPM Article 19 \u2014 Special Services",
+      "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article19-SpecialServices.pdf",
+      "priority": "P0",
+      "authority_level": "agency_eligibility_manual",
+      "distribution": "shareable",
+      "tags": [
+        "medi-cal",
+        "hcbs",
+        "waiver",
+        "institutional-level-care"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medical/MEPM-ARTICLE-19.txt",
+      "chars": 205874
+    },
+    {
+      "document_id": "MEPM-ARTICLE-22",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "Medi-Cal-MEPM",
+      "title": "MEPM Article 22 \u2014 Disability Determination Referrals",
+      "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article22-DisabilityDeterminationReferrals.pdf",
+      "priority": "P0",
+      "authority_level": "agency_eligibility_manual",
+      "distribution": "shareable",
+      "tags": [
+        "medi-cal",
+        "disability",
+        "ssa",
+        "referral"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medical/MEPM-ARTICLE-22.txt",
+      "chars": 217767
+    },
+    {
+      "document_id": "MEPM-ARTICLE-5L-5Z",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "Medi-Cal-MEPM",
+      "title": "MEPM Article 5L\u20135Z \u2014 Medi-Cal Programs",
+      "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article5-Medi-CalProgram-5L-5Z.pdf",
+      "priority": "P0",
+      "authority_level": "agency_eligibility_manual",
+      "distribution": "shareable",
+      "tags": [
+        "medi-cal",
+        "msp",
+        "working-disabled",
+        "dual-eligible"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medical/MEPM-ARTICLE-5L-5Z.txt",
+      "chars": 376255
+    },
+    {
+      "document_id": "MEPM-ARTICLE-8",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "Medi-Cal-MEPM",
+      "title": "MEPM Article 8 \u2014 Responsible Relatives and Unit Determination",
+      "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article8-RR-UnitDeterminations.pdf",
+      "priority": "P0",
+      "authority_level": "agency_eligibility_manual",
+      "distribution": "shareable",
+      "tags": [
+        "medi-cal",
+        "household",
+        "spouse",
+        "parent",
+        "deeming"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medical/MEPM-ARTICLE-8.txt",
+      "chars": 307510
+    },
+    {
+      "document_id": "MEPM-ARTICLE-9",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "Medi-Cal-MEPM",
+      "title": "MEPM Article 9 \u2014 Property",
+      "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article9-Property.pdf",
+      "priority": "P0",
+      "authority_level": "agency_eligibility_manual",
+      "distribution": "shareable",
+      "tags": [
+        "medi-cal",
+        "assets",
+        "trusts",
+        "property"
+      ],
+      "source_ext": "pdf",
+      "text_path": "medical/MEPM-ARTICLE-9.txt",
+      "chars": 312105
+    },
+    {
+      "document_id": "MEPM-INDEX",
+      "program": "medical",
+      "agency": "DHCS",
+      "collection": "Medi-Cal-MEPM",
+      "title": "Medi-Cal Eligibility Procedures Manual \u2014 Official Index",
+      "source_url": "https://www.dhcs.ca.gov/services/medi-cal-resources/medi-cal-eligibility-division/medi-cal-eligibility-procedures-manual/",
+      "priority": "P0",
+      "authority_level": "official_manual_index",
+      "distribution": "shareable",
+      "tags": [
+        "california",
+        "medi-cal",
+        "manual",
+        "eligibility"
+      ],
+      "source_ext": "txt",
+      "text_path": "medical/MEPM-INDEX.txt",
+      "chars": 2210
+    },
+    {
+      "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+      "program": "va",
+      "agency": "VA",
+      "collection": "Federal-Benefits",
+      "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+      "source_url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+      "priority": "P0",
+      "authority_level": "annual_federal_benefits_guide",
+      "distribution": "shareable",
+      "tags": [
+        "va",
+        "caregiver",
+        "pension",
+        "health",
+        "survivor"
+      ],
+      "source_ext": "pdf",
+      "text_path": "va/VA-FEDERAL-BENEFITS-GUIDE.txt",
+      "chars": 211964
+    }
+  ]
+}

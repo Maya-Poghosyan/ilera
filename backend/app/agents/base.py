@@ -8,8 +8,25 @@ EligibilityResult. Without a key it falls back to the program's heuristic.
 from abc import ABC, abstractmethod
 
 from .. import llm
-from ..models import CaseProfile, EligibilityResult, FollowupQuestion
+from ..models import Citation, CaseProfile, EligibilityResult, FollowupQuestion
 from ..rag.index import get_index
+
+
+def _citations(hits) -> list[Citation]:
+    """De-duplicate retrieved chunks down to one citation per source document."""
+    seen: dict[str, Citation] = {}
+    for h in hits:
+        key = h.document_id or h.source
+        if key and key not in seen:
+            seen[key] = Citation(
+                document_id=h.document_id or h.source,
+                title=h.title or h.source,
+                source_url=h.source_url,
+                page=h.page,
+                program=h.program,
+            )
+    return list(seen.values())
+
 
 _SYSTEM = (
     "You are a benefits eligibility specialist helping unpaid family caregivers. "
@@ -40,7 +57,10 @@ class SpecialistAgent(ABC):
         return get_index().search(query, k=k, program=self.doc_key)
 
     def _sources(self, query: str) -> list[str]:
-        return sorted({r.source for r in self.retrieve(query)})
+        return sorted({(r.title or r.source) for r in self.retrieve(query)})
+
+    def _citations(self, query: str) -> list[Citation]:
+        return _citations(self.retrieve(query))
 
     @abstractmethod
     def _heuristic_assess(self, profile: CaseProfile) -> EligibilityResult: ...
@@ -55,8 +75,11 @@ class SpecialistAgent(ABC):
         return self._heuristic_assess(profile)
 
     def _llm_assess(self, profile: CaseProfile) -> EligibilityResult:
-        hits = self.retrieve(f"{self.program} eligibility requirements and application", k=4)
-        context = "\n\n".join(f"[{h.source}] {h.text}" for h in hits) or "(no documentation found)"
+        hits = self.retrieve(f"{self.program} eligibility requirements and application", k=6)
+        context = "\n\n".join(
+            f"[{h.title or h.source}" + (f", p.{h.page}" if h.page else "") + f"] {h.text}"
+            for h in hits
+        ) or "(no documentation found)"
         user = (
             f"PROGRAM: {self.program}\n\n"
             f"OFFICIAL DOCUMENTATION:\n{context}\n\n"
@@ -86,5 +109,6 @@ class SpecialistAgent(ABC):
             next_steps=[str(x) for x in data.get("next_steps", []) or []],
             missing_info=[str(x) for x in data.get("missing_info", []) or []],
             followups=followups,
-            sources=sorted({h.source for h in hits}),
+            sources=sorted({(h.title or h.source) for h in hits}),
+            citations=_citations(hits),
         )

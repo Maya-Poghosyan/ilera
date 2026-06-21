@@ -46,6 +46,25 @@ class FollowupQuestion(BaseModel):
     why: str = ""
 
 
+class Citation(BaseModel):
+    """A reference to an official source document backing an agent's reasoning."""
+
+    document_id: str = ""
+    title: str = ""
+    source_url: str = ""
+    page: str = ""
+    program: str = ""
+
+
+class InteractionNote(BaseModel):
+    """A cross-program eligibility interaction, grounded in inter-eligibility advising docs."""
+
+    note: str = ""
+    programs: list[str] = Field(default_factory=list)
+    action: str = ""  # recommended sequencing / next step, if any
+    citations: list[Citation] = Field(default_factory=list)
+
+
 class EligibilityResult(BaseModel):
     program: str
     confidence: float = 0.0  # 0..1
@@ -57,6 +76,7 @@ class EligibilityResult(BaseModel):
     missing_info: list[str] = Field(default_factory=list)
     followups: list[FollowupQuestion] = Field(default_factory=list)
     sources: list[str] = Field(default_factory=list)
+    citations: list[Citation] = Field(default_factory=list)
 
 
 CaseProfile.model_rebuild()

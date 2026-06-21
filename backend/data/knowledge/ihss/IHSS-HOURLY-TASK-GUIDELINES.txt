@@ -1,0 +1,59 @@
+[page 1]
+Hourly Task Guidelines 
+Social workers also use Hourly Task Guidelines (HTGs) as specified in State regulations to determine the appropriate time needed on a weekly basis in each 
+service category. Regulatory Authority:  Manual of Policies and Procedures (MPP) section 30-757.11 through 30-757.14(k) 
+Note:  This tool does not invalidate current HTG regulations. 
+Service Category Rank 2 
+(Low) 
+Rank 2 
+(Mid) 
+Rank 2 
+(High) 
+Rank 3 
+(Low) 
+Rank 3 
+(Mid) 
+Rank 3 
+(High) 
+Rank 4 
+(Low) 
+Rank 4 
+(Mid) 
+Rank 4 
+(High) 
+Rank 5 
+(Low) 
+Rank 5 
+(Mid) 
+Rank 5 
+(High) 
+Preparation of Meals ** 3:01 5:00 7:00 3:30 5:15 7:00 5:15 6:08 7:00 7:00 7:00 7:00 
+Meal Clean-up ** 1:10 2:20 3:30 1:45 2:38 3:30 1:45 2:38 3:30 2:20 2:55 3:30 
+Bowel and Bladder 
+Care 
+0:35 1:17 2:00 1:10 2:15 3:20 2:55 4:23 5:50 4:05 6:02 8:00 
+Feeding 0:42 1:30 2:18 1:10 2:20 3:30 3:30 5:15 7:00 5:15 7:17 9:20 
+Routine Bed Baths 0:30 1:08 1:45 1:00 1:40 2:20 1:10 2:20 3:30 1:45 2:38 3:30 
+Dressing 0:34 0:53 1:12 1:00 1:26 1:52 1:30 1:55 2:20 1:54 2:42 3:30 
+Ambulation 0:35 1:10 1:45 1:00 1:33 2:06 1:45 2:38 3:30 1:45 2:38 3:30 
+Transfer 0:30 0:50 1:10 0:35 0:59 1:24 1:06 1:43 2:20 1:10 2:20 3:30 
+Bathing, Oral Hygiene, 
+and Grooming 
+0:30 1:13 1:55 1:16 2:13 3:09 2:21 3:13 4:05 3:00 4:03 5:06 
+Service Category Low (Time Guidelines) Mid (Time Guidelines) High (Time Guidelines) 
+Menstrual Care 0:17 0:32 0:48 
+Repositioning and Rubbing Skin 0:45 1:47 2:48 
+Care of and Assistance with Prosthetic Devices 0:28 0:47 1:07 
+Services with Time Guidelines: 
+Service Category Time Guidelines 
+Domestic and Related Services 6:00 total maximum per month per household unless adjustments* apply; Prorations may apply** 
+Shopping for Food 1:00 per week per household unless adjustments* apply; Prorations may apply **
+Other Shopping/Errands 0:30 per week unless adjustments* apply; Prorations may apply **
+Laundry 1:00 per week (facilities within home); 1:30 per week (facilities out of home); per household; Prorations may apply **
+* Adjustments refer to a need met in common with housemates.
+** When prorating Domestic and Related Services, the natural or adoptive children of the recipient who are under 14 are not considered (MPP section
+30-763.46).  Other children in the household (i.e., grandchildren, nieces, nephews, etc.) under 14 are considered.
+Updated 5/29/2019 
+NOTE:  Current MPP regulations define the HTGs in decimal format, e.g., 1.50 hours. To align service assessment/authorization with the Case Management, 
+Information, and Payrolling System (CMIPS) data entry, time allocations are re-formatted to hours:minutes. This change in format does not contradict current 
+program regulation and reduces confusion regarding the entry of time into CMIPS [MPP sections 30-757.11 through 30-757.14(k)].

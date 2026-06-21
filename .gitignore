@@ -7,6 +7,9 @@ __pycache__/
 !.env.example
 !*.env.example
 
+# Band per-agent credentials (use band_agents.example.json as a template)
+backend/band_agents.json
+
 # Node / Next
 node_modules/
 .next/

@@ -1,0 +1,2422 @@
+[page 1]
+MEDSeAL ElIGIBlLlfY MANUAL - PROCEDURES SECTION 
+Artide 15 - OTHER HEALTH COVERAGE AND MEDICARE B WAN COVERAGE 
+1% - IDP~MNG, REPORTING AND CODING om- HEALTH COVERAGE 
+1. Background and Overview 
+2 Definition -of Other Heatth Coverage 
+3. Types af Other Heaith Coverage Tha! Must Be Reported 
+4. Types af Caverage/Benefirs and Sins When Other He! Coverage 
+Should Nut be Reported 
+5. County R- for Identifyhg Other Health Coverage (OHC) 
+6. Reporting Other Hem Caverage Information-County and 
+Applicant- RespMsibaies 
+7. Wmg Other Health Coverage lnfomration on the Medii Eligibility Data 
+system 
+8 scope 'of Coverage 
+9. Current and/or Prior Month Changes to Other Hem Cov- Codes 
+10. MecTi Bi Data System On-line Other Hem Cwenpe Code 
+Override Process 
+12 Beneficiary and County Weffare Depamnem Inquiries Regarding Other 
+Heah Coverage 
+158 - MEDI-CAL CASUALM CWMS 
+15D - MEDICARE GENERAL INFORMATION 
+1. Part A Medii 
+2 Part B Medicare 
+15E - AGED ALIENS lNE!JGlBLE FOR MEDICARE 
+1. -- 
+2 Supplemental Sewrity income (SSI) AJiens 
+MANUAL ETER NO.: 141 DATE: JAR ? 3 ms 
+- - . - - - -- -
+
+[page 2]
+MEDEAL ELIGIBlLlTY MANUAL - PROCEDURES SECTION 
+3. Medicany Needy (MN) Aliens 
+4. County Procedures 
+15F - MEDICARE AND MEDICARE PREMIUM PAYMENT 
+1. Medicare 
+3- Agency Responsibilities 
+4. Medicare Premkrm Payment Processes and Systems 
+6. Buy-ln Wective Date for Medically Needy (MN) Persons 
+7. QtdSed Disabied Working Individual (QDWI) Program 
+10. Reporting Pro$lems To the ws premium Payment Unit 
+12 Resdraion Time 
+13. SSI BuyJn Robiems 
+14. INQB Screen Forma! and DeiWiorts 
+15H - HEALTH INSURANCE PREMIUM PAYMENT PROGRAM 
+- 
+WUAL LEnER NO.: 141
+
+[page 3]
+MEDI-CAL EUGIBIUTY PROCEDURES MANUAL 
+15A-IDENTIFYING, REPORTlNG AND CODING OTHER HEALTH COVERAGE fOHC) 
+This section provides information and procedures regarding identifying, reporting and coding of Other 
+Health Coverage (OHC). Eligibidity workers code OHC on the Medi-Cal Eligibility Data System (MEDS) and 
+issue the Health Insurance Questionnaire (DHS 61 55, revision date 2/90 or later) during each application 
+and demmimhn interview when applicant or beneficiary responds with a positive answer to the Other 
+Health Coverage Question on the Aid to Families with Dependent Children fAFDC) Statement of Facts 
+Supporting EIigibiiii for Assistance form (SAWS 2) or Statement of Facts form (MC 21 0). Form DHS 61 55 
+is used by county WeIfare Offices to report Other Heatth Coverage to the Deparbnent of Heakb Services 
+(DHS) for inclusion on the Health Insurance System (HIS). 
+The Department of HeaM Services is responsibie for ensuring that Medi-Cal is the payor of last 
+resort for medical care used by Med,i-Cal eligibles in accordance with State Statute Weffare and . . hblutmm Code Section 141 24.90 and Federal Law (Section 1902(a) (25) of the Social Security 
+Act). State laws Welfare and Institutions Code, Sections 10020, 14000, 14003, 14005, 
+1401 6.3, and 14024) require Mediil beneficiaries to report and utilize these resources before 
+using Medii. In instances where Medi-Cal has paid for a beneficiary's medical care first, these 
+laws also require the program to seek reimbursement from the responsible third party. 
+Since the Mew program is ptM by federal law from paying for services which are covered 
+by the beneficiary's health insurance or health plan, in most instances, providers must bill the 
+appropriate canier before biIling Medical. This is called cost avoidance. If a beneficiary is 
+enrolled in a private Repaid Heatth PlanNeatth Maintenance Organitation (PHPRIMO), the 
+beneficiary must be directed to tis or her respective plan for treatment. Mediil is not obligated 
+to pay for services available through a .PHP/HMO plan when the beneficiary chooses to seek 
+treaaerrt elsewhere. 
+In limited instances, a provider may bill the Medi-Cal program diiecth/ wen though a beneficiary 
+has OHC. The Department of Health Services then recovers the Medi-Cal payment from health 
+insurance carriers using the State's automated billing system. 
+Other Health Coverage (OHC) is defined as benefits for health related senrices or entitlements for 
+which a Medi-Cal beneficiary is eligible under any private, group, or indemnification insurance 
+program, under any other State or federal medical care program, or u,der other contractual or legal 
+entidement. 
+lrw~rance polides on the Wowing tist provide Other He&b Coverage benefits. A Heatth Insurance 
+Questionnaire (DHS 61 55, revision date 2/90 or later) must be completed to identify the health 
+coverage source and scope of coverage for these insurance types. 
+a. Cameddy - Policies that cover medical expenses related to cancer treatment only. 
+SECTION NO.: 5 0 7 6 1 MANUAL LETTER NO.: 1 5 5 DATE: 1-16-96 1SA-1
+
+[page 4]
+MEDI-CAL EUGlSlUTY PROCEDURES MANUAL 
+CHAMBE -The Civi6an Health and Medical Program of the Uniformed Services pays for 
+care delivered by heath provkks to retired members and dependems of active and retired 
+members of the Armed Forces under 65. 
+hxtaLhb - Policies that cover exsenses related to dental work. 
+- Health insurance provided to employees and their 
+dependents. This coukl include health insurance through union membership or 
+membership in a national organhation, fraternity or trust fund. 
+TnrdF - Any health insurance that is 
+offered through a trust fund operated by an empioyer.under the authority of the U.S. 
+of Labor (e.~., Carpenters, Pipefitters, Plumbers, Laborers, etc.). 
+- Policies that provide heatth benefits to persons employed by or affiliated 
+with an entity such as an employer, union, association or organization. 
+Clnlfth - Policies that cover hospital expenses, surgical expenses, routine medical 
+expemes, or major medical. 
+khq&d - Policies that cover e>cpenses inanred during hospitalin. 
+-ty-Pdidesthapaybenefitsintheformofwshpaymerrts. Thesebenefitsare 
+paid to the insured instead of -the provider or services. 
+rana - Policies that cover long term care expenses (e.g., amodiil care, 
+intermediae care, skilled nursing care). 
+Maiar - Pdicies that cover medical expenses over and above those expenses 
+covered by a basic benefit plan. 
+Ah-* Mems - An absent parent may be required to provide 
+medical insurance premium payments or be responsible for a portion of medical bills, or, 
+if employed, may be required to indude dependent children in the medical insurance plan 
+provided by the employer. 
+m. - Policies which pay that portion of medical services which 
+Medicare does not pay. 
+n. rPHPMdlU - Any heahb benefit 
+plan which provides a wide range of comprehensive heatth care se~ces for persons 
+insured by the policy or plan. Se~ces are provided by plan designated providers at 
+desigrmdfadiibies. 
+. . 0. Biscqmm - Poiicies that cover pmsxhd dmgs only. 
+P- - Health insuance offered through an educational imaimtkn for enrolled 
+students. 
+9. S.Wd - Policies that cover surgery-related expenses only. 
+SECTION NO.: 5 0 7 6 3 MANUAL LEHEFI NO.: 15 5 DATE: 1-16-96 1-2
+
+[page 5]
+-MEDI-CAI. ELIGlBIllTY PROCEDURES MANUAL 
+r. Yisim - Policies that cover vision-related expenses only. 
+The Department is specifically excluding the following coverage from the Other Health Coverage 
+(OHC) coding requirements andlor reporting on a revision date 2/90 or later. 
+a. Accident Benefits. 
+b. Automobile, Burial, and Life Insurance benefits. 
+c. Casualty Workers Compensation benefits. 
+d. Diii benefits. 
+e. Medicare me XVlll benefits). 
+f. Veteran's Administation (VA) benefits. 
+B. Coverage under a PHPRIMO which has contracted with the Departmerrt to provide 
+Medical services to enrolled beneficiaries. (Mediil Capitated Health Plans) 
+h. Coverage which is considered unavailable in the following situations: 
+(1 1 Coverage under any plan which is limited to a specific geographic service area and 
+the beneficiary rives outside tha area or the plan requires use of specified 
+providers(s) and the beneficiary lives more than 60 miles or 60 minutes travel time 
+from the specified provider(s1. The beneficiary shouM be advised that many of 
+these plans cover out of area care in emergency situations. In this situation, the 
+benefidary should provide OHC information to the emergency medical provider so 
+that the provider may bill the plan before billing Medi-Cal. 
+(2) Coverage to which a child may be entided when: 
+(a) The parent or gwrdian refuses to provide the necessary information due 
+to "good cause". Good cause shall be determined by the county. Good 
+cause exists when cooperation in searring medical support and payments, 
+establishing paternity, and obtaining or providing information concerning 
+liable or potentially liable third parties from the absent parent can be 
+reasonably anticipated to result in serious physical or emotional harm to 
+the chiM for whom support is to be sought or to the parent or caretaker 
+with whom the child is living, or; 
+SECTlON NO.: 5 O 7 6 3 MANUAL LETTER NO.: 15 5 DATE: 1-16-96 1 5A-3
+
+[page 6]
+MEDI-CAL ELIGIBILITY PROCEDURES MANUAL 
+(b) The absent parent cam be located; a& 
+(c) The child is applying for Medi-Cal independemiy and would be in a 
+separate Mdil Famii Budget Unit (MFBU) from the custodial parent 
+or guardian. 
+(dl the child is appiyhg for Mdil independently and has no custodiai 
+parent or guardian. Adult chiidren under Section 50014. 
+(3) Any coverage to which a chii may be enMled in those instances whe-re the chikl 
+is for minor consmt services in accordance with Cal'rfomia Administative 
+Code, Ti 22, Section 50147.1. The obiiion to report and utitiie OHC before 
+using MdXd co- is not enforced in this situation, since utnion of OHC 
+would violate the minor's right to confidentiality regarding histher medical 
+se~ces. 
+a. Review Statement of Facts 
+Review the appticant'~ry's MC 21 0 or CA 2 to determine if there is a positive 
+msponse to the question about having private health inntrance or hospitaiion 
+insurance. ff there is a positive response, go to procedure 6 (Reporting Ottrer Health 
+Coveage If there is no positive response to having private health insurance 
+on the MC 210 or CA 2, but the apPr~cantbr&ciary is or was recently employed; has 
+health insuance avaiiabk through an employer or family member's employer, but has not 
+ended; retired; serves or sewed m the mThary; or there is an absent parent, proceed to 
+procedure (b). W .there is no pee response after determining non-availabili of 
+insurance, there is no need to complete the DHS 61 55. 
+Section 4402, Omniikrs Budget Re~oncT~on Act of 1990 (OBRA '90) mandates that 
+when it is cost effective, enrollment in an employer or group heafth plan is a condition of 
+Medicaid eliii. Addirtionally, Section 50763(a)(1) California Code of Regulations 
+rewires that a Mediil beneficiary shall apply for, and/or main any available hearth 
+inaaance when no cost is -hvolved. 
+b. Ask Ouestions to Identify OHC: 
+The following are key questions to ask applicants~ciaries for identifying the 
+availability of OHC: 
+SECTION NO-: 50765 MANUAL LRTER NO-: 15 5 DATE: 1-16-96 15A4
+
+[page 7]
+MEDW EUGIBJUTY PROCEDURES MANUAL 
+SECTION NO.: 5 0 7 6 5 MANUAL LETTrR NO.: 1s 5 DATE: 1-16-96 3 5A-5 
+TO EXPLORE WORK RELATED 
+QUESTlONS 
+Does your empioyer (or a family 
+member's employer) provide a 
+health insurance plan? 
+Did your fonner employer (or a 
+family member's employer) 
+provide health insurance 
+coverage within the last thee 
+(3) years? 
+Are you coveted by your 
+union's health insurance plan? 
+Were you covered by your 
+union's health insurance plan 
+within the last three (3) years? 
+Does an absent parent (or the 
+absent parent's employer) 
+provide heatth insurance 
+coverage for you and/or your 
+children? 
+Did an absent parent (or the 
+absent parent's empioyer) 
+provide health insurance 
+coverage for you and/or your 
+children within the last three 
+(31 years? 
+YES 
+tf appiicantheneficiary 
+currently HAS heatth insurance 
+through an employer (or family 
+member's employer), complete 
+the DHS 6155 wiih the mnt 
+insurance information. tf 
+insurance is available, but 
+appiicantkneficiary has not 
+enrolled, complete the DHS 
+61 55 as an Employer Group 
+Health Plan EGHP) referral 
+(refer to Section 1 5H for 
+further information regarding 
+EGHP). 
+Complete the DHS 61 55 and 
+provide the insurance beginning 
+and ending dates. 
+Complete the DHS 61 55 w-ith 
+the heatth insurance 
+infortnation. 
+Complete the DHS 6155 and 
+provide the insurance beginning 
+and ending dates. 
+Complete the DHS 61 55. 
+Complete the DHS 61 55 and 
+provide the insurance beginning 
+and ending dates. Complete 
+the CA2.1 Medical Support 
+Referral packet also, 
+NO 
+Do not complete the 
+DHS 61 55. 
+Do not complete the 
+DHS 61 55. 
+Do not complete the 
+DHS 61 55. 
+Do not complete the 
+DHS 61 55. 
+Complete the CA2'1 Medical 
+Support Referral packet. Do 
+not complete the DHS 61 55. 
+Complete the CA2.1 Medical 
+Support Referral packet. Do 
+not complete the DHS 61 55. 
+-
+
+[page 8]
+MEDECAL EUGIBIUW PROCEDURES MANUAL 
+SECTION NO.: 5 07 6 5 MANUAL LETTER NO.: 1 5 s DATE: 1-16-96 1 5A-6 
+Do yw belong to any national 
+organization (e.g., Foresters, 
+Eagles, etc.)? Do you have 
+health insurance through the 
+organization? 
+Were you ever covered by 
+insurance through any Mtional 
+organization (e.g. Foresters, 
+Eagles, etc.) within the last (3) 
+years? 
+IF ?HE 
+APPUCANTlB€NEFICIARY IS 
+OVER AGE 65, R€IlED, OR 
+DISABLB): 
+Do you have Medicare 
+covefa-? 
+Do you have health insurance 
+in addm to Medicare (such as . 
+a Medigap or Medicare 
+sp9lemem Ww)? 
+Didyouhavehealth~kurance' 
+in addition to Medicare within 
+the iast three (3) yean? 
+Do you have health insurance 
+through a pension or retirement 
+pbn? 
+Did you have health insurance 
+through a pension or retirement 
+plan within the last three (3) 
+years? 
+Complete the DHS 6155 with 
+the health insurance 
+infomration. 
+Complete the DHS 6155 and 
+provide the insurance beginning 
+and ending dates. 
+YES 
+If applicanthem- ONLY 
+has Medicare coverage and NO 
+wi- 
+insuanceplan,donot 
+compkte the DHS 61 55. 
+C0mpkt.e the DHS 61 55 with 
+the heafth insurance 
+information. 
+Inform person they do not need 
+OHC. 
+CompletetheDtlS6155and 
+provide the insutance beginning 
+and ending dates. 
+lnform person they do not need 
+OHC. 
+CMpiete the DHS 6155 with 
+the health insurance 
+information. 
+Complete the DHS 61 55 and 
+provide the insurance beginning 
+and ending dates. 
+Do not complete the 
+DHS 6155. 
+Do not complete the 
+DHS 6155. 
+NO 
+Do not complete the 
+DHS 6155. 
+Donotcompletethe 
+DHS 61 55. 
+Do not complete the 
+DHS 6155. 
+Do not cornpiete the 
+DHS 61 55.
+
+[page 9]
+MEDECAL EUGIBIW PROCEDURES MANUAL 
+SECTlON NO.: 5 0 7 6 5 MANUAL LETER NO.: 15 5 
+NO 
+Do not complete the 
+DHS 6155. 
+Do not complete the 
+DHS 61 55. 
+Do not complete the 
+DHS 61 55. 
+Do not complete the 
+DHS 61 55. 
+(CHAMPUS) is a heatth 
+TO EXPLOWE OTHER 
+INSURANCE POSSIBIIlTIES: 
+Are you (or spouse or absent 
+parent) enrdied in any 
+educational program? If so, is 
+health insurance available 
+through a student health plan? 
+Were you (or your spouse or 
+absent parent) enrolled in any 
+educational program that 
+offered health insurance within 
+the last three (3) years? 
+Are you (or your spouse or 
+absent parem) in the miiitary? 
+DO NOT ASSUME THAT ONLY 
+MEN HAM SERVED IN THE 
+MILITARY! If so, ask if military 
+insurance is available to 
+applicanthrdlciary and/or 
+hisher dependent(s1. ' 
+Were you (or your spwse or 
+absent parent) in the military 
+within the last three (3) 
+years?' 
+'NOTE: Civilian Health and Medical 
+benefits program for all seven uniformed services: the Army, Navy, Marine Corps, Air Force, Coast 
+Guard Public Health Services, and National Oceanic and Atmospheric Administration. Covered 
+persons indude, but are not limited to: 
+hubads, wives, and unmarried children of active-duty senrice members; 
+retirees, their husbands or wives, and unmarried children; and 
+unrernarried husbands and wives and unmarried chiklren of active duty or retired service 
+members who have died. 
+YES 
+Complete the DHS 6155 with 
+the heah insurance 
+information. 
+Compiete the DHS 61 55 and 
+provide the insurance beginning 
+and ending dates. 
+If the applicantbeneficiary 
+currendy has insurance 
+available through CHAMPUS, 
+cMnplete the DHS 61 55 with 
+the health insurance 
+information. If insurance is 
+available, but applicant/ 
+beneficiary has not enrolled, 
+they should be instnraed to 
+contact the Caliimia Defense 
+Enrollment Eligibility Reporting 
+System (DEERS) Center at 
+1-800-33441 62 to find out 
+how to go about enrolling for 
+CHAMPUS benefits. 
+Complete the DHS 61 55 and 
+provide the insurance beginning 
+and ending dates. 
+Program of the Uniformed SeMces
+
+[page 10]
+MEDI-CAL ELIGIBILITY PROCEDURES MANUAL 
+SECTION NO.: 5 0 7 6 5 MANUAL LEIl'ER NO.: 15 5 DATE: 1-16-96 1 5A-8 
+TO EXPLORE OTHER 
+WSURANCE POSSIBIUI1ES: 
+Howhaveyoupaidforyout 
+medical care, prescriptions, and 
+eyeglasses before now? 
+7 
+YES 
+If the applicant/beneficiary 
+indicates that these services 
+have or are covered by 
+insurance, compiete the 
+DHS 6155 with the heatth 
+insurance infomration. Provide 
+the ending instmame date if 
+applicable. 
+NO
+
+[page 11]
+MEDI-CAL EUGlBlUTY PROCEDURES MANUAL 
+c. Inform AppticantBeneficiary: 
+(1 Reponing OHC Does Not Affect Medi-Cal Eligibility: 
+Inform appiiimskmkiaries that having and reporting OHC does not in any way 
+interfere with their eligibility for or use of Mediil benefits. Under federal law 
+Medi-Cal providers cannot deny care because a beneficiary has OHC. 
+(2) Do Not Advise Applicants/Beneficiaries To Drop OHC: except if they are on 
+Medicare. Federal law requires us to inform them they do not need Medigap 
+insurance. 
+(3) Responsibilii To And Apply ForlRetain Employer Related Health Coverage 
+Benefits: 
+Advise appiicants/beneficiaries that federal law requires an individual, as a 
+condiion of Mediil eligibility (in order to become or remain Medi-Cal eligible), 
+to report employer related health insurance benefits available to hirnther. The 
+Medi-Cal program may pay the heatth coverage premiums if it is determined 
+cost-effective. Forward any infqrmation obtaii from applicants/beneficiaries 
+with avaibbk employer related health benefits to the Department's Heaith 
+Insurance Premium Payment program for review of cost-effectiveness (refer to 
+Rocedure Manual, Article 15, Section 15H - Health Insurance Premium Payment 
+Program). 
+(4) Responsibility To Report and Repay Medi-Cal For Insurance Payments Received: 
+(a) Forward reimbursement payments to: 
+Depmment of Health Services 
+Third Party Liability Branch 
+P.O. Box 671 
+Sacramento, CA 9581 2-0671 
+(b) Beneficiaries hid endorse checks from insurance carriers as follows: 
+Name of Payee - Party to whom the check is made payable. 
+Signed either by the payee or their agent. 
+Medi-Cal Identification Number of Beneficiary - This may be a 
+different person than the one who received the check. 
+"For Deposit Onty to Health Care Deposit Fund' - This will ensure 
+that the check will be properly applied to the State fund oniy. 
+(c) Beneficiaries must enclose with the check the date(s) of service, the 
+provider's name, and a daytime phone number where they can be 
+reached . 
+SECTlON NO.: 5 0 7 6 5 MANUAL LETTER NO.: 15 5 DATE: 1-16-96 ISAS
+
+[page 12]
+MEDGAL EUGIBILIW PROCEDURES MANUAL 
+(5) Confidentiari for Minor Consent Services: 
+Inform applicams/beneficiaries for minor consem services that Medi-Cal will not 
+report coverage nor bill private insurance carriers for such services provided to 
+beneficiaries under 21 years of age who are receiving minor consent services. 
+When a rest&& Mi Consem service card is issued to a minor, the card should 
+not be coded with an OK code and OHC should nat be reported on MEDS nor on 
+a Health Insurance Questionnaire (DHS 6155, revision date 2/90 or later). 
+County Responsibilities 
+a. Issuance of Health Insurance Questionnaire (DHS 6155): 
+If the a&icarrt/beneficMry indicates, either on the statement of facts or verbally, that 
+heishe has OHC or OHC is miiabie through an employer, issue the Health Insurance 
+Questionnaire (DHS 6155, revision date 2/90 or later). The appiicantlbeneficiary 
+compietes the DHS 61 55 for the types of coverage oudined in Section 1 5A 3. (Types of 
+Other Iiwtth Cwerage That Must be Reported) for all members of the family budget unit 
+with OHC. Help the applicantlbeneficiary cornpiete the form by asking if heishe has an 
+insurance identification card or other materials that may contain the necessary 
+information. 
+b. Completion And Accuracy of The DHS 61 55: 
+Review the DHS 61 55 for compiete a& accurate information. 
+Check the accuracy of information, particularty numbers. Be sure to check the 
+Social Security numbers, birth dates, poIicy/grwp numbers and phone numbers. 
+tf possible, attach a copy of the pdi or copy of the insurance card. 
+Be sure the appiicant'dbeneficiary's name is listed, if covered, and is spelled 
+correctly. 
+Be sure the applicant'sheneficiary's complete address is provided. 
+Be sure ~ -hwanc.e pd'i holder's name is provided and spelled correctly. This 
+name may be dierent from the applicant's/beneficiary's name. 
+Be sure the insurance policy holder's Social Security number is provided. 
+and acasate efigirty worker information. This includes worker 
+number and telephone number, including area code. 
+Be sure the form is signed by the appiicantkneficiary and dated. 
+-- - -- -- 
+SECTIW NO.: S O 7 6 5 MANUAL LFlTER NO.: 155 DATE 1-16-96 15A-lo
+
+[page 13]
+MEDI-CAL EUGlBlLlTY PROCEDURES MANUAL 
+c. Information On Scope of coverage: 
+When reviewing a completed DHS 61 55, check the scope of coverage field, item 10, to 
+inswe this infomytion is reported. tf the applicantbeneficiary does not know the scope 
+of coverage, request that heishe either rwiew the policy or contact the insurance carrier 
+to obtain this information. Scope of coverage information is essential in completing the 
+DHS 6155 and must be provided. See Section 15A (8. Scope of Coverage) for more 
+information about scope of coverage. 
+d. Applicants/Beneficiaries Wrth More Than One Insurance Policy: 
+If the appiicant/beneficiary has more than one inswance policy, provide himher with a 
+DHS 6155 to be cornpieted for each carrier. This includes policies covering single 
+se~ces, such as dental only coverage and vision se~ces. 
+e. Code MEDS with the Appropriate OHC Code: 
+Please refer to Section 15A (7. Coding Other Health Coverage Information on The 
+Mediil Oigibiiii Data System) for procedures. 
+f. Batching and Mailing DHS 61 55: 
+WeeW, batch and mail the white copy of the DHS 6155 and any copies of health 
+insurance identification cards or health insurance policies to: 
+~OfHsalthSwvices 
+mhsurancbSscbion 
+P.O. Box 1287 
+-, CA 95812-1287 
+9- Retain the Yellaw Copy of the DHS 6155: 
+Retain a copy of the DHS 6155 form in appliis/beneficiary's case He. 
+Send the pink copy of the DHS 6155 to the DA's office in absent parent cases. Give it to the 
+beneficiary when it is not an absent parent shetion (refer to Procedure Manual, Artide 23, 
+Medical Support Program). 
+i Notify the Departmerrt of OHC Changes, Lapses in Coverage, or Changes in Scope of 
+ccwa~e-. 
+When there has been a change to the scope of coverage, pofii number, insurance biling 
+infomration, or if the beneficiary's OHC has hpsed, will lapse or change, update MEDS with 
+the conected OHC code as needed. Courtly ETii Workers (EWs) must send in corrected 
+OHC Mmalbn on a completed DHS 6155 or by ding the Department of Health Se~ces 
+HeakhlnsuranceSectionat1-8CKMS2-5294wtlen: 
+SECTlON NO.: 5 0 7 6 5 MANUAL LETTER NO.: 15 5 DATE: 1-16-96 15A-11
+
+[page 14]
+MEDI-CAL ELlGIBlUrY PROCEDURES MANUAL 
+(I) OHC has changed or is -; 
+(2) If reporting was not timely, but the county learns OHC bas terminated or changed 
+m12rnonthsprior!Orede!t~ . . ask beneficiary to complete a DHS 61 55. 
+Include the polis termbtiltian date. 
+irfom,beneCiclanes . . that such -Mmmtion rmst be reported to the county within ten (1 0) days 
+idlowing the event 
+i. Verification af~ermii.iated Other Hsatth Coverage 
+When a beneficiary indicates that */her OHC has terminated counties must obtain 
+vemCalhdWtermerabon . . pior to removing the OHC code from Medii Eligibai Data 
+System. VeriCicabionofOHCterminationwinbeeither. 
+(1) A paw or pension ched< stub which shcms deductions fw private health insurance 
+have ceased. 
+(2) An Exphmh~ of Benefits from the insurance carrier showing the date the pdicy 
+(3) A temtinabbn letter from the hwmce carrier and/or the employer showing the date 
+the pd'i terminated tf the letter indii that continuadion of rnedii benefas is 
+avalable under &rmWatd omibus Budget Recondiation Act (COBRA) Iaw, and 
+the beneficiary has a high cost medical condition, complete a Health Insurance 
+Questionnaire @HS 6155) in time to ensure that the poiicy can be continued and 
+send it tothe Dqmmnfs Health Insurance Premium Payment Unit, P.O. Box 1287, 
+Sauamento, CA 95812-1287. Yw may fax the DHS 6155 to (91 6) 322-8778 or CAI 
+1 -6294 for m~re 
+(4) Aff&vit signed by the applim stating he/she no longer has, or never 
+had, OHC. This aRciavP shorrid also indude the date the policy terminated, if lcnomr 
+This affidavit shwld be used when an emneous OHC code appears on a mipienfs 
+Medi card afWr the Department conducts a data match with an insumnce 
+- 
+k. High Cost Medical CMdin 
+Medi-Cal eligibles who have a high cost medical condition should be referred to the 
+Department's Heatth k.rsaance Premium Payment (HIPP) Program as specified above. For 
+more information about the HiPP Program, please refer to Section 15H of the Medi-Cal 
+Eligibiiii Procedures Manual. 
+1. Employer Group Health Plan 
+MediiCal eligibles who have health insurance aMilabie through an employer (or a family 
+member's employer) should be referred to the Department's Empioyer Group Heah man 
+EGHP) Program. For more information about the EGHP Progam, please refer to 
+Section 15H of Medi-Cal Eligibility Procedures Manual. 
+SECTION NO,: 5 0 7 6 5 MANUAL LETTER NO.: 155 DATE: 1-16-96 15A-12
+
+[page 15]
+MEDIICAL EUGIBIUTY PROCEDURES MANUAL 
+m Notify the Deparbnent of OHC Termination 
+Colarty eligibility workers must maintain a copy af the verification of OHC termination in the 
+case file as well as send a completed DHS 6155, shaving the pdicy stop date, to the 
+Departmer$ For- SewayIncome/State Supplemental Payment cases, county 
+eligibility workers should delete the OHC code, attach a copy of the verification of OHC . . temwrrabon dthe completed copy ofthe DHS 6155 showing termination date and send both. 
+documentstotheDepartment 
+(1) Report Current OHC informtion to Counties: 
+Appli-- . . who have contracbal or legal entitlement(s) to any health we 
+coverage must disdose this inbmathn to the RN and must also provide specific health 
+mfwmfkn to the health care provider so that the provider may bill the Jiie third party. 
+(2) Report Avaaable OHC to Counties: 
+ApFJ1-v . * 
+are required to report the aMJabilii of employer related health 
+benefits 
+(3) Report OHC Changes to Courrtiex 
+Ap@cank- who mmbte, or obtain OHC must report such information 
+tothe countywahin ten (10) daysfdlwbgtheerent 
+(4) Report OHC information to Providers 
+Applicants- . . are required to provide cum OHC billing information to the 
+provider at the time rnedi/dental services are received. This information shall indude 
+gollp nsnber and Wing aRice address WMd failure to provide such information may aliow 
+a provider to bill the beneficiary as a private pay patient 
+7. Coding Other Health Coverage Infomation on the Medi-Cal Eligibility Data System 
+Eligibility Workers (EWs) must code Other Health Coverage (OHC) on the Medii Eiigibility Data 
+Sys&m (MEDS) at the time eligiblily is dePemrined or rederermined or at any time a beneficiary reports 
+a change in coverage. 
+a Coding for No OHC: 
+When an applii/bedkhy states that he/* does not have WC, enter the letter code 
+W (No Other Heatth coverage) on MEDS in the OHC field. 
+SECTION NO.: 5 0 7 6 9 MANUAL LElTER NO.: 15 5 DATE: 1-16-96 35A-13
+
+[page 16]
+MEDECAL EUGIBIUTY PROCEDURES MANUAL 
+b. Coding WC: 
+The fdlowkrg is a Iii of OHC codes and instNcbions on haw to determine the appropriate 
+OHC code to place on MEDS. in order to determine the approp&e de, the foliowing 
+questionS sholrld be asked at the application and red&- intecview once the 
+has reported OHC: 
+Does your heatth insorance provide or pay for hospital inpatient care? 
+lftheappkant~~~toatleastthreeofthefwrq~nslisted 
+abwe,~meapproprtade~avoidancecodeonMEDS. Costavoidancecod= 
+to use are: 
+Blue Cross 
+CHAMPuSPrime* 
+Aebra 
+Medii HMO Risk 
+GenemiAmerican 
+MrrtuddOnraha 
+- Life 
+JotmHancodc 
+user 
+DentdlWPdides 
+PHP/HMO, nat oqhemise specmed 
+EcpS#lr 
+EUue Shield 
+Traveiers 
+~omecbicrrt ~erreral (aGw) 
+Variable,anycarriernatuniquelyidentiCied 
+Great West Life Insurance 
+Providerrt Lifeand Acdderrt 
+PrindpalFarancialGroup 
+Pacific Mutual Life Insurance 
+AltaHeam~~Inc. . . Asoaatm of Retired Persons (AARP) 
+Nw Yorlc LiFe insurance 
+Plsase note ektk Aogust 10,1994 CHAMWS Star&rd or CHAMPUS Ejara other he* coverage shwld 
+becodedwiththeOHCcostV. 
+SECTION NO.: 5 0 7 6 9 MANUAL l.EllER NO.: 15 5 DATE: 1-16-96 IS14
+
+[page 17]
+MEDW EUGIBIUTY PROCEDURES MANUAL 
+(2) Prepaid Healtt~ Plan/Heatth Maintenance Orgamatm . . /Competitive Medical Plan 
+(PHP/HMO/CMP) Other Health Coverage Codes: 
+If you determine from the qws2hs abcwe that an appliint/beWkky record 
+requires a cost avoidance code, ask the 
+appiikantm arrswers 'yes', enter a PHP/HMO/CMP code on MEDS. If the 
+applkantm has Kaiser or CHAMPUS Prime, assign a 'K' or 'C code. If the 
+applmnt/be&k&y has Medii HMO/CMP coverage, assign an F code. Code 
+any other PHP/HMo with a P, even though a lrnique cost avoidance code may exist 
+for the caws fee-br-snhce coverage For example, should an 
+m/bm&&y have M1 wvwage through Travelers Insurance, but coverage 
+is IitniW to senrices pm&d by a spedfic group af prufessjds and hospitals, use 
+the PHP/HMO code F instead of the cost avoidance code T. 
+Medii benefiaanes . . covered by Kaiset, WPUS Prime, or ather 
+PHP/HMO/CMPs must use desigmd fadii Mi will reject bills for services 
+pwidedwbenefiaanes . . with cards coded 'K. %, Y, or T. MedW will pay for 
+senrices only when the sewice is not a covered benelit under the designated plan 
+The service pmkkr, hwmm, must aach payment denial -hfamalion from the plan 
+irdicatbrg the service is not a cowed pian benefa. This will generate an override in 
+theciaimspaymerttsystemandaUowpaymenttothe~. 
+~theDepammtc#MatoWainreimb~fKwnKaiser,CHAMPUSPrime, 
+or crther PHP/HMO/CMPs, the impommx 05 the IC, 'C, 'P, w T coding on the 
+Medicardcannatbeoveremphasized. 
+(3) Post Payment Recovery OHC Codes 
+If the applicant/be&&ry responds 'yesm to fewer than three of the four -ens 
+listed abcwe, or if the applW/beneficiary does not know the scope of coverage, 
+enterthefdlawingpost~recoverycodes: 
+A Other Caverage code for any insurance company; 
+M Mdtiple coverage; beneficiary has more than one ins- 
+company(useoniywhenconrpaniesareiderdified =post paw 
+tecwery -1. 
+X BLUE SHIELD 
+Z BLUE CROSS 
+(4) Muttiple Cwt Avoidance or PHP/HMO/CMP Other Hem Caverage: 
+tf an appkmt/beneficiary has multiple (Mro or more) full axerage policies, one of 
+whkh isa PHP/HMO/CMP, use the appropriate PHP/HMO/CMP code (Y C, P, or 
+F). Otherwise, assign the appropriate cost avoidance code for the canier that 
+provides the most comprehensive coverage. 
+SECTION NO.: 5 07 69 MANUAL ETEFi NO.: 1 5 5 DATE: 1-16-96 IS-15
+
+[page 18]
+MEDI-CAL EUGIBIUTY PROCEDURES MANUAL 
+If the appIikant/bewkhy responds W to all four questions I'i above, ask if 
+he/* has an insuance pdicy for dental ody coverage. If the appiicant/benekiary 
+msp~nds 'yes' to hhg dental only coverage and he/& does not have any other 
+heafth insurance pdi, enter the cost avaidance code 'Lm (Dental Only Policies) on 
+MEDS. 
+8. Scope of Coverage 
+Upon receipt of a Health Insurance Q uestiorvlaire @HS .6l55, revision date 2/90 or her), the 
+Department enters insurance Wli Momration and scope of coverage codes onto the Health 
+Insurance System (HIS). This infomration is printed on h4edii cards. The scope of coverage 
+arSormation assists providers in ckbmmg . . which services must be billed to the beneficiary's 
+b.rsumnce. The scope of coverage codes are as fdlm: 
+Hospaallnpatientcare 
+Hospital Outpatient Care 
+AAedical~sVrsits 
+PrescriptionDNgs 
+LongTmCare 
+vi Care 
+Dental Care 
+When an EW Mially asigs a post payment re~cnrery code m the MEDS, the Department will change 
+itto a cast avoidance code upon receiving the DHS 6155 and enter the scope of coverage codes on 
+HIS. Replacement of the post payment recovery code with a wst avoidance code when scope of 
+caverage has been entered is a cwred procedure. Counties are not to change the cost avoidance 
+code back to the original post payment recovery code. 
+If Medi-Cal benefictanes . . have health insurance, but the MediLCal program has not yet received 
+rnfomzation about the bsumnce coverage, the word COMPREHENSM: wiJl appear on Med'i 
+cards irstead d scope of coverage codes This designation 'COMPRMENSIV€ alerts providers to 
+wtheotherheaminsumnceforaaservicesprovided. 
+When a change tothe scope OF caueage, pdicy number, or in#rmnce Wing infonnatian is necessary, 
+request conections by either submWng a med D?iS 6155 or cding the Department's Hem 
+Insurance Sectionat 1-6294. 
+9. Current and/or Prior Month Changes to Other Health Coveraqe Codes 
+a Current and/or Prior Month Changes for New Eli: 
+~~areinWy~forMediCatand are repottedwith a costavoided insurance 
+poky, cauntks may enter a cost avoidarm code for curtent and/or prior months. 
+SECTION NO.: 5 0 7 6 9 MANUAL LEllER NO.: 15 5 DATE: 1-16-96 15A-16 
+8
+
+[page 19]
+MEDI-CAL EUGIBILITY PROCEDURES MANUAL 
+b. Current and/or Rior Month Changes fur Ongoing Cases: 
+No cost- Other Heatth Coverage (OHC) codes may be assigned to current and/or 
+prior montirs for ongoing cases The message M373 'ONLY PAY AND CHASE (POST 
+PAYMUJT RECOVERY) OTHER-COV ALLOWED WHEN ELIGIBLE ON MEDS will appear 
+when EWs attempt to enter a cost avoidance OHC code to current and/or prior months for 
+a beneficiary who is already MEDS eiiibie, 
+tf an ongoing elii has been id- with unreported OHC which is cunenUy amiable or 
+was aMaable at any time during MEDS history months, assign the post payment recovery 
+cade 'A' for the clinent and prior months and use the appropriate OHC code for the peMmg 
+munth Send a completed Health lnsumnce Quesbjonnaire @tiS 6155, revision date 2/90 or 
+ater) to the Department tt is very important for EWs to make sure the insurance policy start 
+date is induded on the DHS 6155 because the retroactive post payment recovery process 
+errablestheDepammtt0 bill theinsurancecarrierforsenricesalreadyreceived. 
+The fdlouring illatmSes the propriety of various OHC code changes for current and/or prior 
+months: 
+PERMISSIBLE CHANGES 
+Post Payment Recovery Code 
+NoorherHealth 
+C<rverage Code N 
+Post Payment Reanmy Code 
+PROHIBITED CHANGES 
+No other Health Coverage (N) TO Cost Avoidance Code 
+PostPaymeraFkcoveryCode TO Cost Avoidance Code 
+Cost Avoidancecode TO A DW Cost Avoklance Code 
+10. Mdi Eii~iba'i Data System On-Line Other Heatth Coverage Code Override Process 
+To change the Other Health Cmemge (OHC) code to cost avoidance for the'~ure month on 
+report the proper cost avoidance code by using an EW20 or EW30. 
+tf a cwrected NledCCal card is required for a current and/or prior months, use an EW15 to 
+change the OHC cade to a post paymerrt recavery code ,K and issue the corrected Medii 
+cam). 
+When making on-line changes to OHC codes, always send in a Health Insurance 
+Questionnaire @HS 6155, revision date 2/90 or later) containing the dd insurance policy 
+information to the Department (indude termination date of the pol'iT Submit another 
+DHS 6155 coraahdng the - new insurance pdicy information (indude the start date and scope 
+of coverage of the policy). 
+- 
+SECTImNO.: 50769 MANUAL LEtlER NO.: 1 5 5 DAm. 1-16-96 1 SA-I7
+
+[page 20]
+MEDI-CAL EUGIBIUTY PROCEDURES MANUAL 
+b. Suppiemental Scurity Income/State Supplemental Payment Cases: 
+TocirangetheOHCcodetocostavddancefw~fu$nemorahmSupplemental Security 
+Incorne/State Suppiemeneal Faymen? (SSI/SSP) report the proper cost avoidance 
+code for the future month by submitting a completed WS 6155 to the Department The 
+Department will assign the proper #rst avoidance . . code and scope of coverage. Submit 
+anather DHS 6155 contarnnrg the* insurance infomation Cmdude termination date of the 
+-1- 
+If a conected Medi card is teqrdted for a current and/or prior months, use EW55 to 
+change the OHC code to a post payment recovery code 'N and issue the corrected 
+Wi card(@. 
+~henmahgorrlinechangesto~m=~'ahyssend intwo~ti~6l55s, onecontaining 
+theoJinsurancepdiiksormation(indudi.thepolicy'st~ . . date) and the other 
+containingthenewinsurancepdicy~ - 
+Be aware that dmging the OHC code will dele& scope of covemge and health insurance 
+dmnafim on the Medii card. This safety measure is intended to prevent the possii8'i 
+dthe insurance information Wing to match the new OHC value 
+EWs must issue replacement Medi cards for bath countycontrdled and SSI/SSP eIiiible cases 
+when the OHC code is m m. tf a Wciary needs an IMMEDIATE NEED CARD onty because the 
+OHC code is incorrect, Wow the oniine instructions described in Section 15A (10. MEDS OrrLine 
+Other HedtJ'~ Ccr~emge Code Ovwide Recess). If the beneficiary needs an IMMEDIATE NEED CARD 
+becausethesoopeofcauemgecodiis~proceedasfdl~~~: 
+If the beneficiaty can wait a few days for a card, cd the Heatth Insurance Secbn at 
+14004526294 and request a change to the scope of coverage coding on the Heaitt~ 
+Insurance System (HIS). Allowing one day for the HIS update, request a Medii card the 
+ned day using the Ew45. 
+If the be. needs a cad the same day, use the EM5 or EW 55 transaction to change 
+the OHC code to an 'A' and to issue a MdCd card TM action waf suspend HIS so 
+scope t3 coverage or hedth *haram is displayed on the IMMEDIATE NEED CARD. In order 
+toreportthepropercostavoidancecodeforthefuhaemonthoncwnty~cases, 
+in-* an OHC code change using the EW20 .or EW30 and send a comple?ed Health 
+Insurance Q uestionnaire @tls 6155, nevision date 2/90 or=-) containing the amcted 
+scope of coverage to the Department For SSI/SSP cases, send a completed DHS 6155 to 
+theDqmtrm& TheDepartmentw3assipthepropetcostavoidancecodeand qxjateHIS 
+wahtheconec&dscopeofcovera~e. 
+SECTK)EINOI: 50769 MANUALElERNO-: 155 DATE: 1-16-96 15A-18
+
+[page 21]
+MEDI-CAL EUGlBlUTY PROCEDURES MANUAL 
+12 Beneficiary and County WeSfare Department Inquiries Regarding Other Health Coverage 
+Other Health Coverage questions can be answer& between RW am. and 5:W p.m, Monday through 
+Friday, by W'slg the Hdh Insurance Section's tdl-free number, 1800-952-5294- Spanish speaking 
+opatm are also aMihble from 8:00 am to 5:W p.m., Monday through Friday. Eligibifity Workers 
+maygiVedlistdEireenumbert0~ . * 
+with the raderstan&ng that only health -nswance related 
+qmstknscanbeanswered. 
+- - 
+SECTION NO.: 5 0 7 6 9 MANUAL WR NO.: 15 5 DATE:l-16-96 4SA-19
+
+[page 23]
+MEDI-CAL ELIGIBILITY PROCEDURES MANUAL 
+15B - MEDI-CAL CASUALTY CLAIMS 
+County welfare departments are required to notify the Department of Health Services (DHS) 
+when they obtain information that a beneficiary sustained injury forwhich Medi-Cal may have 
+paid benefits and where the beneficiary or hislher representative has initiated an inskance 
+claim; workers' compensation claim; or wrongful death, malpractice, or similar civil suit against 
+a potentially liable third party. 
+One important source of information is the Statement of Facts for Medi-Cal (MC 210). 
+Question 9C asks whether an applicant is seeking compensation through an insurance 
+settlement or lawsuit when a physical or emotional problem was caused by an injury. 
+Question 34 also asks whether the applicant or any family member has a pending suit or 
+insurance settlement for accident or injury. 
+The county must notify DHS of a potential third-party liability claim when: 
+1. Information on the MC 210 or from other sources indicates potential third-party liabil~ty; 
+2. Eligibility is granted or has been in existence for any length of time; and 
+3. The beneficiary intends to use Medi-Cal to pay for injury-related services. 
+All notifications should contain the following information: 
+1. Medi-Cal beneficialy's name. If a minor, the parents'/ guardians' names should also be 
+given. 
+2. Current address and telephone number. 
+3. Fourteen-digit Medi-Cal identification number(s) (for example. 19-20-2001246-001). All 
+numbers must be reported; a beneficiary may have had more than one number if the aid 
+calegory or the ~amil~ Budget Unit and-person number changed. 
+4. Social Security Number. 
+5. Date of Birth. 
+6. Date of injury. 
+7. Name, address. and telephone number of third-party recovely source(s) (i.e., attorney, 
+insurance company, elc.). 
+8. Name, address, and telephone number of treating providers of health care and dates of 
+service (if available). 
+9. For workers' compensation claims. a copy or the number of the Application for 
+Adjudication of Claim (if available). 
+SECTION NO.: 50771 MANUAL LETTER NO.: 298 DATE: 10/04/05 158-1
+
+[page 24]
+MEDI-CAL ELIGIBILITY PROCEDURES MANUAL 
+Notifications may be reporled by calling (800) 952-5776 or (916) 322-0521. or by writing 
+to: 
+Department of Health Services 
+CasualtyMTorkers Compensation Section 
+P.O. Box 2471 
+Sacramento, CA 9581 Id471 
+In no event should any county agency place liens upon beneficiaries' judgments. 
+settlements. or other assets or in any way attempt to recover from a beneficiary or hislher 
+attorney any amount reimbursable to Medi-Cal in casualty cases. 
+When the CasualtyMlorkers Compensation Section receives payment on an account. a 
+written notification is sent to the welfare department of the county in which the beneficiary 
+resides. This is to alert the county that a settlement was reached which may affect the 
+eligibility of the individual. 
+SECTION NO.: 50771 MANUAL LEITER NO.: 298 DATE: 10/04/05 158-2
+
+[page 25]
+DEPARTMENT OF HEALTH SERVICES 
+BT*mORKEICT-IKY)LEMY 
+r.0. .ox *?I 
+SACUULMTQ U ))I11 
+1tu~lrunderStgdingthttkcrstipientlr)onthc~codoredlutmry~rsctindaorh~t 
+from a petsonat in- case which ha been rrccmly molnd. The aact amount of ash rstivcd. if 
+any.byachrccipiartbunlrnorm 
+This infwnutian 
+. .. may amkt you in dcPmrunmg the rcdpimt's eliiility for wbli asirttncc or 
+Mcd'il. 
+If the fifth (5th) digit of the ase numkr ha nine 191. it rrprenntr an SS1/55P fesipiient 
+--------------------------------------------------- 
+Section 507fl l4miAL LETTER NO. 91 (8-25~86) 15B-3 
+_--_-----------------------------------------------
+
+[page 27]
+- MEDI-CAL EUGiBiLllY MANUAL - PROCEDURES SECnON 
+- - 
+1SP-MEDICARE GENERAL INFORMATION 
+PART A MEDICARE 
+1. MONTHLY PREMIUMS MEDI-CAL PAYMENT ON BEHALF 
+OF THE EUGIBLE BENEFICIARY 
+Nonlonmyptemirnnlader $221 -00 effective 1 /93 
+Medieare Part A for mast 
+-biQ: 
+- Those who buy Medii Part A 
+pay'a monPhiy Pan A premkms and 
+-the pmfm may be higher forthuse 
+whoerndltate. 
+2 HOSWrAL CARE 
+DeducWe required rrpon fbst $676.00 effective 1/93 
+admissh to a hospital and 
+su&eqwaadmbionfne>d . . adrmsstonisafter60daysfrorn 
+disctrarge. 
+FLrstWdays None; fully covered by 
+Medim for rehabaim 
+of mwsodbl care 
+6lsttOmday 
+Laethneresave-60days 
+3. SKILLED NURSING FACIUM 
+Fast 20 days 
+sl69.00 per day Me&& 1/93 
+$338.00 per day &ectiYe 1 /93 
+N-; buy covered by ~~~ 
+for rehabai or no- 
+cafe 
+$84.50 per day effective 1/93 
+SECTION: SO775 MANUAL LEHEFl NO.: 127 DATE: FEB 0 1 1994 IsD-1
+
+[page 28]
+MEDIeAL EUGIBILSW MANUAL - PROCEDURES SECflON 
+PART B MEDICARE (Supplementary Medical lnsumnce) 
+I. MONTHLY PREMIUM .e $36.60 effective 1 /93 
+2 DEDUCRBLE FOR COVERED 
+SERVICES 
+$1 00.00 per year for 1993 
+3. MEDICAL tNSURANCE BENEFITS 80 percent of approved charges 
+forcoveredservicesaftet 
+deductible is met 
+Heat&h Care Fm Adminisbation cmmcrs with Health Maintenance Organization/Competitive 
+Medical Plans (HMO/CMP) to allow certain indiiuafs who are entitted to benefas under Medilcare Part 
+B or Patts A and B to el& to receive those benefh through an HMO/WP. Medii beneficiaries 
+cuuefed by the WI HMO/W must use designated facWes. Treatment from nor* providers 
+mustbethmghampmea&withthepbt Suchber&kms 
+*. 
+can be identified by an T in the OHC 
+Wd on MEDS record ad on the Me-Cal card. 
+SECTION: 50775 MANUAL L€l7ER NOI:
+
+[page 29]
+MEDKAL EUGIBlLtTY MANUAL - PROCEDURES SECTlON 
+15D MEDICARE GENERAL lNFORMAnON 
+PAFIT A MEDICARE 
+1. MONTHLY PREMIUMS MEDK'AL PAYMENT ON BEW 
+OF ME ELIGIBLE 8-UARY 
+NomonthlypPemitgn~ SZ21.m eRedive 1/93 
+Medicare Part A for most . - beneffcraneskrt: 
+-Thsewho buy Medicare Part A 
+payamonWyPartApterrrirrnSand 
+-theptemium~ybe~forthose 
+whomlate .. 
+Deduc!ible required on fbst -. admssrontoahospitalatxj 
+subsqwaadmbsicmifnerd 
+adrrdssionkafter60daysfrom 
+-@me- 
+Srstto90thday i 
+Lifetime fsem - 60 days 
+Fast2ortays 
+Zlst to 100th day 
+PART B MEDICARE (Supplementary Medical insurance) 
+1. MONTHLY PREMIUM 
+$676.00 effective 1/43 
+None: fdty #nrered by 
+Medicarefor-i 
+orecare 
+2 DEDUCTlBLE FOR COVERED $1#MK)per~fOr1= 
+SDIVlCES 
+3. MEDICAL INSURANCE BENEFITS =)perCentafapptwed 
+chargesfor#rveredsenricesaher 
+deductible is met 
+SECTION: SOnS MANUAL NO.: 119 DATE: 8/11/93 Pm 4-1
+
+[page 31]
+- 
+MEDJ-CAL EUGIBtUTY MANUAL - PROCEDURES SECTlON 
+15E AGED UENS INEUGlBLE FOR MEDICARE 
+BACKGROUND 
+Smbn 1836 (2) of the Social Se#aity Ad provides that any alii age 65 or older, who is not entitled to 
+morrWy Social Searrity Reahement/Dii (l%e 11) benefits or Raarwd Retirement Benefits must be a 
+Iawhdty admitted resident of the United States with five (5) years continuous residence to be efigible for 
+pmhase of Medicate Part B coverage. 
+When of Medicare digibilii is received through Buy411 or the Beneficiary and Earnings Data 
+Exdrange (ENDEX). the Medii Oii Data System (MEDS) record is autornabliy coded to indicate 
+Medicare eligIMily (cocks 1.2 3.4. or 5 in the first and/or second digit of the Medicare status). In both 
+sbmtbq the beneficiary's Media card is coded to indicate Medii coverage, and prwrders are 
+reeuiredtoMIW-priormMlingMedi-Calforservicesproviddtothesebeneficiaries 
+-A1 SECURllY. INCOME (SSI1 AUENS 
+Alien krformatbn from the State Data Exd'mge (SDX) fae identifies aged aliens eligible for Supplemental 
+Security lncwne (SSJ). These eiigibles are coded with a 99 ahm indicator on the Medicare status line of 
+MEDS to suppress prhting of the Medicare Wior code on the Medii catd This process uses the 
+Alien Code and the ImmQmbn and -on Service QNS) Entry Date from the SDX fae. !f there is 
+no INS Erdry Date, a date is eSabMed using the Medi-Cal date of elQWity from !he SDX record. 
+SSI/SSP eligbles & Wude sane aged akm who are no! entiUed to Medimre. If such persons come 
+tocwrrtyoRices~theirMed'~card~shawsMedicarecoverage,cotadiesaretotepwt the s&mtbn using the State Buy-tn Problem Report (Medhre Part A and 0) DHS 6166 (4/90). This form 
+k to be fded to the Prendum Payment. Unit. . 
+BsredupoocotmiyipuCtheRen*lmPaymeRUnitwllupdateMEDSsoMedi-CalLardrfor~pe~ns 
+are~codeds)rawbigMediwreenMemenL TheINSEntryDateisusedtodet~whentheS~ 
+rasidency Is met so action can be taken to attempt Me&cate Buy-ln Semiannually, an hJii Register (@ 
+datlaliensmeetingthe5yearresidencyreqrriremerd)isprovidedtoSSAdistridofficessobeneficiarieS 
+canbeinsmrctedtoapplyforMedkarePart Bbenefas 
+MEDICALLY NEEDY IMN) AUMS 
+Under the pteviws system. unmties reported the Date of Residence (ADOR) into the Wed States 
+for these aged aliens to the Mum Paymenl Unif on form DtfS 6166 (formerty HAS 8). The Premium 
+Payment Unit mrW#l -to iderdaythe beneficiaryasanagedalien (RAedicare St-99) and posted 
+!he ADOR. This in turn suppressed the Medicate bd@alor on tM Media card until the five year residency 
+requirement was met The ADOR was used to initiate Buy* actioh 
+in order for the Premium Payment Unit to determine which -ry is eligible for Medicare ben&S. 
+cwnties must row provide Jim WomWon when srrbmdeing approved case infMmarion to MEDS for d 
+colaay detemrined cases 
+SECTION: SOrn MANUAL LETTER NO.: 119 DATE: 8/11/93 PAGE: 15-1
+
+[page 32]
+MEDIeAL ELlGfBlUTY MANUAL - PROCEDURES SECTION 
+COUNTY PROCEDURES 
+MEDS has three data elements (Refugee/4ed Alien indicator, INS Entry Date and 5igibaity me) which 
+are reposted by comties when submiLting case infonnatjon for all county determined cases These data 
+dements are used by the State to debmine Medicare card coding and whether to anempt Medicare Buy-ln. 
+1. REFUGEWAGED ALIEN INDICATOR 1 = indochinese Refugee 
+(MEDS Name = Aged Aim Indicator) 7 = Other Refugee 
+(DE -1 . 8 = ctbaftmw 
+9 =AgedAlien 
+= Delete Rehrgee/Nren Infomption 
+a) Codes1.7.and8areusedt~aentayre4ugees@revioustytepo~edontheMC255) 
+c)  he astertik p) is used to delePe codes brconectty entered on MEDS. 
+INS ENTRY DATE 
+(MEDS Name = INSEnay-MMYY) 
+@E -1 
+EUGIBrUN APPROVAL DATE 
+~p-~ -- 
+SECnON: 50727 MANUAL LETTER NO,: 1 19 DATE: 8/11/93 PAGE. 1s-2
+
+[page 33]
+MEDEAL EUGIBIUTY MANUAL - PROCEDURES SECTION 
+1. EXF'lANATION OF MEDICARE 
+Mediire. administered by the federal Social Security Ad- (SSA), is a Mdth insurance 
+program that pays for certain medical senrices provided to individuals entideb to coverage. !t 
+carers the aged (65 and ww), blii or died @ersons di fw Social Security Msabai 
+paymerds)'and persorrs in need of renal didpis or nansplarrt There are two parts to the Medicare 
+program: 
+a Part A Hospital Insurance is aMaaMe to persons at no cost and helps pay for 
+irpatiern hospilal care. some inpatient care in a skiled nursing facility, home heath care 
+and hospice care. Those who do not for 'iree' Part A can pmhiwie such coverage 
+through Pay- of a m premium 
+b Part B Supplemental Medical insurance may be pmhased from SSA through paw of 
+a monthly premium and helps pay for dodor's services, otdpatient b@al swvices, 
+dumble medical eqtdpment, and a number of other medical services and supplies that an? 
+not wveredbythehas@alinsurancepartofMediicare. 
+2 MEDlCARE HEALTH INSURANCE CARD 
+Medicate Health insurance cards are prepared ard n@ed by SSA and the Railroad Retiwrnent 
+Baard~minstanceswheteRailroadRetiremerdbenefidariesareinvdved)to~ . - whohave 
+~entkmatoMediiebenefits. 
+The red. white and blue card shcrm the Heatth InsUranCe aabn (HIc)nUmber. to Part 
+A and/or Part B and the efiecrive date of each. The Mecrkare beneficiary mceiws a new card 
+each time his- Mediire eli@Wy status changes 
+3. HEALTH INSURANCE CWM (HIC) NUMBER 
+TheHICnumberisanhnportarOpieceofinf~usedbytheStateand#wntiestoid~an 
+individual's Medii record. A HIC number must be alpha/numeric and cons& af ten to twehre 
+posiWns The HIC number must be in Social Security Number (SSN) or Ftailroad Relimnat Board 
+(RW - - 
+(1) The first nine positions must be numeric 
+(2) Po&h 10 must be alphabetic; position 1 1 must be a@hbetk numeric, or bfank; 
+and position 12 must be blank (e.g.1234567898.1234S7SZ 1234561898P ). 
+SECTION: 50773 MANUAL LETTER NO-: 119 DATE: 811 1/93 PAGE SF-1
+
+[page 34]
+MEDI-CAL EUGIBILITY MANUAL - PROCEDURES SECTION 
+b. RRB Format: If the first nine positions are not numeric. the HIC number is assumed to be 
+in RRB format The number constits of a one to three alphabetic character prefix in the firs 
+three positions, fdlowed by a sbc or nine digit number. The fdtowing criteria must be met: 
+(1) The p&k must be A, H. CA, JA. MA. MH. PA PD. pH. W4 WD. WH. Wa WCD. 
+or WCH. left justified (beginning in first posaion of field) wah traPkrg blanks cd 
+appIie). If the tast nine positions are numeric, they must contain a vald SSN 
+(eg.. A 123456789. WC 123456789. WCA123456f89). 
+(2) if prefk is a singe alpha character, it must be fdiowed by two bWcs (e.9. 
+A 123456789). ff ptefk has two atpha characters, it must be fdlowed by a single 
+blank (e-g. WA 123456789). 
+MEDICARE PREMIUM PAYMENT 
+1. PART B PREMIUM PAYMENT (BUY-IN1 PROGRAM 
+Buy-In refers to the arrangement through which the State uses MediCaI funds to pay the rnMdhty 
+Medicare Part 8 insurance premiums for qualiing Medical recipierns who are also Jig& for 
+Medicare. 
+The Buy-ln agreement was initiated tmenabie the State to obtain marimurn Federal Fnrancial .. . Fbmqmcm (FFP) for Wi tecipi. 
+Under the Part B Bvy-ln agreement, the SWe may begin to pay Part B premhrms for quaimed Mdk 
+Wredpierrtsatanytimeandisnotlimaedto SSA'sdefinedopenenrdl~periods TheState 
+may also BuyJn renoactkely to the entitlemeht date of an individual at any time wahOut paying a 
+~~penatty. AaMediirecipients~ieforMedicarePart8~~earereqrrired 
+to partidp;&e in the Medicare BuyJn program in accordance with Sedion SOTn of Tidie 22 of the 
+QTiCodedR~ 
+PART A PRmAlUM PAYMENT 
+Medii pays Part A premiums dyfor OMBs whodonotqualiforfree Part Aand forOuatified 
+DbbW Working Individuals (QDW) (refer to Section 19 for a detailed scptat\arion of these 
+m). Unlii Part 8, the State does not have a Buy-ln agreemnl for Part A The State 
+cannottherefore.wretroactiveeartAmgeasitdwforPartB&theBuy-ln 
+agreement In addii, etWhen! of MeditCal redpients is ihited to SSA's o~en erodiment 
+periods 
+In-hSanceswherethetecipi.entdid natq@yforMedicarePartAJiiwithinhis/herseven m 
+month Initial Enrollment Period (EP). the State is assesed a ten percent (10%) penalty for kite 
+snrdtment The QDWl program offers a twelve (12) month grace perEod after the IEP to the Stale 
+to begin payment of Part A premiums If the individual enrdis after the twelve (12) months. the 
+State will then be assessed the ten percent (1 0%) perratty for late enrdlmerO Once the W and any 
+~periodtras~anirrdividualmay~orrtydtaingtheGeneral~mentPeriod (W) 
+OfJanuary~Matchwitheli~by~inJUly. 
+SECTION: 50773 MANUAL NO.: 119 DATE- 811 1/93 PAGE: SF-2
+
+[page 35]
+MEDW EUGIBILIlY MANUAL- PROCEDURES SECTION 
+A Medicare Part B Buy-ln 
+(1) Part B Buy-ln #ruerage begins 
+(a) ForSSI/SSP Recipients 
+The fust mmIh an bdi k eligible for both Part B coversge and an 
+=/ssp cash Pam 
+The sec#d monthafter the month hwhM an indivldwl's dQWkyfar 
+Medi k apptrrved,pfuuidiitheindiirrdk~forPartB 
+cerveage. Appervedinthis~meansmedateonwhictrtheEW 
+makes the determinarion !ha! & benefictary is eligible for MedW 
+(a) Theendafthe~month.fotwMchan~rcal&~efor~ 
+McLcal progmm 
+(c) The end d the tast mah for which an Wid under sbdy-five (65) Is 
+carsidered~orbliunderSocialSecurity. 
+NOn? faMN- 
+-.- 
+6uy-h cawrage can end no eartier than the 
+secorrd~beforethernonthin~SSA~theddetion 
+recplestfromthestate. 
+Part A cowage is paid by Medi for QMBs and QDWk not for the regdar Medii 
+poputafion 
+(a) ~sned~edto~re~nhanfree~~~ 
+@) Has emdied in Part A and has met his/her Par$ A entMmm date. 
+(2) QDY Part A awerage begins thew month in which an indiiua( k appmved for 
+QDW -iand meetsthe~owingcriterta: 
+(a) IsnotentitkdtoprenrhanfreeFartA 
+@) Has enrolled in Part A and has met Nsjher Part A entttlement date. 
+SECTION: Sn'3 MANUAL LETTER NO.: 119 DATE. 8/11/93 PAGE: IS-3
+
+[page 36]
+MEDI-CAL EUGIBIUN MANUAL - PROCEDURES SECTION 
+(3) Part A coverage ends 
+(a) The end of the hst month for which an individual is eligible for the QMB or 
+QDWl program. 
+@) The month in which an individual dies. 
+(c) The end of the Last month for which an individual under six~y-five (65) is 
+. entitled to Part A 
+AGENCY RESPC)NSfBIUTIES * 
+The Brry-in Premium Payment programs and atdomated systems ak adminis!ered jo'adty by the 
+HealthCareF~Adminisbation(HCFA).theSocialSeWayAdminisnation(SSA),WState~ 
+dHealthSewkes'PtemknnPaymentUnitandtheamties 
+1. HEAL. CARE FlNANClNG MNISTRATION R1CFA) 
+HCFA central aRice has averall responsibai for administration of the Buy-tn Agreement and the 
+premiumPaymentprovisionsoftheSocialSeaaityAQ 
+SSA ofiices are tesponsible for deemiring SSI/SSP eligibility, processing applications far Medicare, 
+providing bfomaib about SSA and Medicare benePas and rephung lost or stden Medicare catds 
+SSA providesthe Statewith infcmmbn onSSI/SSP.recipierbs by the way ofthe Stdte Data 
+-(SDX)fite TheStatethenutaizesthiShlfOtm8iM)to~iShilTd~Med~ 
+~~ay. 
+3. PRmml M PAYMENT UNIT 
+ft.leRemiumPa~Urrit~~arn~Alle&carePremhsnPaymentsystemswhfch 
+-bW'lace wih federal Social Security systems and the State Medi-Cal EJi~ity Data System (MEDS). 
+The Unit identi& and evaluates Medii ec@kn& who may be ~JW& to Medicare 
+ques& additjOnal inbmatbn from counties 3 neebed, and with SSA to plaCe dl quafmed 
+MediCal tecipierns onto the Buy-in, Ouaiified Medicare kwkWes (OMB) and QualiIW 0'i 
+Working lndividrats (ODWI) progranrs. The actions of the Premium Payment Unit it a &ifl 
+of medical costs from the State/fedeml Medi Program to the federal Wcfkae program 
+A Identifying and Repom'srg Potentid Medicare Eligibles 
+Counties deemhe Wi and/or QMB e@iM&y and enterdata on MEDS. The courdies 
+atso det- QDWl elii and tarrsma infwmatKur . . - 0npOtenwOOWIeligitJesusiryl the Dectronic Mail &mmmamn CentetfloWy Puftomated Olke (EMQFAO) system 
+TheStateuseshEDSandQWDiirdormaoiontoidentity~MedkzwetJigibles. 
+r;nformatiocr such as name, ssc. date af birth, Med'i eligibility effecliw date and the 
+Health Insurance CJaim (HIC) wmber is edited and matched with records at SSA and HCFA 
+SECTlON: 50113 MANUAL NO.: 119 DATE 8/11/93 PAOE: 1-
+
+[page 37]
+MEDI-CAL ELIGIBILITY PROCEDURES MANUAL 
+Central Offices to determine whether Medi-Cal eligibles may also qualify for the 
+Medicare program. 
+B. Verification of Data Reported 
+Procedures established by CMS require a match of more than one characteristic of 
+an individual's case in order to locate a corresponding record on CMS's Health 
+Insurance Master file. All of the information collected by the county EW must be 
+I 
+complete and accurate to be of maximum benefit. It is important to verify that the 
+HIC number is correct by checking the beneficiary's Medicare card. Additionally. 
+when a disabled beneficiary received hislher disability claim number (Title II), it 
+should be reported to MEDS since it can also be used for Buy-In andlor QMB 
+purposes. 
+C. Dealing with Incomplete Information 
+If the applicant is unable to provide the county EW with the necessary'information 
+(such as age, citizensh~p, or lawful alien status and residency), the county must 
+assume the burden of establishing the applicant's medical insurance eligibility or 
+refer the case to the Premium Payment Unit. If the applicant refuses to provide 
+information needed to determine Medicare status, the county musl deny Medi-Cal 
+eligibility due to lack of cooperation. 
+D. Informing the Beneficiary 
+The county EW should advise the applicant of the following: 
+IlI Bv filino an a~~lication for Medicare benefits. the individual mav establish . , 
+e;ltitler;;ent to'~ed1care Part B. If an individua~wishes to enroll in ihe QMB or 
+QDWl programs. helshe must first establish Part A eligibility. 
+(2) Refusal to apply for Medicare benefits may result in a denial of Medi-Cal 
+benefits. 
+E. Establishing Medicare Entitlement 
+If an applicant has yet to establish Medicare entitlement, the county EW must refer 
+the applicant to the nearest local SSA district office lo apply for Medicare benefits. It 
+is very important that the applicant establishes Medicare entitlement so that the State 
+may defer costs of medical services to Medicare. 
+F. Handling Premium Payment Problems 
+The Premium Payment Unit is available to assist in resolving county Buy-In. QMB 
+and QDWl problems. Counties are encouraged to use the services of this unit. 
+SECTION NO.: 50773 MANUAL LETTER NO.: 298 DATE: 10/04/05 1 SF-5
+
+[page 38]
+- 
+MEDI-CAL ELIGIBILITY PROCEDURES MANUAL 
+To resolve a Buy-In andlor QMB problem that has been detected by a county, complete and 
+forward form DHS 6166 to: 
+Department of Health Services 
+Medicare Operations Unit 
+MS 4719 
+P.O. Box 997422 
+Sacramento, CA 95899-7422 
+To resolve a QDWI problem that has been detected, send all pertinent information to the 
+Premium Payment Unit via the Totally Automated Office (TAO). 'E-Mail for QDWI" screen, found 
+in the forms section of TAO. 
+MEDICARE PREMIUM PAYMENT PROCESSES AND SYSTEMS 
+Medi-Cal recipients who are eligible for Medicare Part A andlor Part B benefits are identified via the State 
+Medi-Cal Eligibility Data System (MEDS) which is maintained through State, county and federal Social 
+Security Administration (SSA) data input. The State issues a Medi-Cal card each month. Fmm that 
+action, the State Medi-Cal and Medicare Premium Payment systems are alerted and. when appropriate. 
+Premium Paymenl activity is initiated for eligibility beneficiaries by the State of CMS. 
+1 MEDICARE PREMIUM PAYMENT SYSTEM 
+The month-lo-month operations of the Medicare Part B Buy-In and Part A QMB programs are 
+accomplished though an automated exchange of data between the State and SSA. The State 
+computer file, containing accretion and deletion records for potential Medicare eligibles who are on 
+a county-administered Medi-Cal Program, is sent to SSA in Baltimore. Maryland. no later than the 
+25" of each month in order to be included in the next month's Premium Payment update 
+operations. 
+The Premium Payment Unit maintains the Stale's Medicare Part B Buy-In and Part A Premium 
+Payment systems which interface with federal Social Security systems and MEDS. These 
+automated svstems are desianed to Dav the Medicare Part B andlor Part A ~remiums for the Medi- 
+Cal program. The ~ualified Disabled working individual (QDWI) program'is the only program not 
+fully incorporated into MEDS and the automated Buy-In and Premium Payment systems. 
+2. MEDI-CAL AND MEDI-CAL ELIGIBILITY DATA SYSTEM (MEDS) MEDICARE CODING 
+The two digit Medicare status codes on MEDS (refer to next page) identify Medicare Part A andlor 
+Part B coveraae for eligible Medi-Cal recidents. These codes are translated to a one-diait code on 
+the Medi-Cal &rd which alerts providers to the type of Medicare coverage available to a beneficiary 
+and is used to determine if Medicare must be billed prior to billing Medi-Cal. 
+3. COUNTY ALERTSIMESSAGES 
+County AlertslMessages are generated to the counties as part of the monthly processi~ of the 
+Buy-In Response File received from CMS for Medicare part A and Part B. ~hese ~ler~~issages 
+provide county staff with a quick reference to the updated status of each eligible beneficiary under 
+SECTION NO.: 50773 MANUAL LETTER NO.: 298 DATE: 10/04/05 15F-6
+
+[page 39]
+MEDI-CAL EUGIBIUN MANUAL - PROCEDURES SECTION 
+his/her control without having to access MEDS. AlMs/tulessages are med in the sequence each 
+cornrty has requested. Messages are generated only for cunent active county- recipients 
+or for OMBs. 
+The fdlowing is a Summary Table of the Buy-In County Alerts/Messages each county receives: 
+HlWO CHANGED. BY.PREMIUM PAYMENT UNIT OR SSA 
+This alert kdomrsawntystafFthateithefSSAorthePremhrm~aymentunit haschangedthebeneficiary's 
+HIC nwnber on MEDS. Data elemems associated with this alert diiy the new HIC number from the 
+transaction, the dd HIC number from MEDS. and the HICSOURCE. 
+RESPONSE: County records should be updated 10 reflect the new HIC number so that if elgibili is 
+terminated and later reestablshed. the iatw HIC n-~rnber will be.reported to MEDS. 
+SECTION: 50m bAANUAL NO,: 1 19 DATE: 8/11/93 PAGE: 1s-7
+
+[page 40]
+MEDI-CAL ELIGIBIUTY MANUAL - PROCEDURES SECTION 
+8004 CLOSED PERIOD ACCRmON (part B only) 
+This is an infonnabml aien to inform county staff that a Buy-in accretion transaction coverbrg a history 
+period has been received from SSA Data elements associated with this den dispby the HIC number and 
+the Buy* UfeChe Date. 
+RESPONSE: No response necessary. 
+BDQS DISABLED BUT NOT YET ELIGIBLE FOR MEDICARE 
+This is an infomrational alert to infonn county s&ff that-an accretion tamadion was rejected by W!imore 
+with a slams code indii that the qnt is not yet eligibIe for Medicare but wal be as soon as the 
+~periodis~etedasind~&bytheDateofMedicateEntitlement DatadementsasocbW 
+withthisdertdi@aythe HIC -and the Date of Medicare En&brmt 
+RESPONSE: No response necessary 
+8006 ACCREnON FAILED HCFA MATCH CRITERIA 
+This alert indii that an attempt to purchase Medicare #weage was rejected by HCFA because the 
+recipierd--- . . n did not match any red on HCFA's Health lnsumrtce Master File. Data 
+elemerds assxkted with this alert display the HE number and the Bvy-Ln ERective Da&. hEDS will Miale 
+a Buy-In a#retiosl for anyone in a potential Medicare covered aid code who is not identiFied as a Medicare 
+. Wigibieaknand~. 
+A has a HIC number on MEDS; 
+6. is age sbby-five (65) or over, or. 
+C. isehgibleinabiiior~aid~. 
+If the acmtb attempt did not match a record on HCFA's Health Insurance Master Fiie, the system is 
+unable to cordirm wlWher or not the Wi recipient is entitled to Mediire. 
+RESPONSE: The response win vary depending on the fdlanmrg cb#nnstances: 
+A If the redpient is sbdy-five (65) yean 05 age or over. and: 
+1. recipient is an aged alien who is breIigble for Medicare, enter the 1- and . . bkmkatm Service (INS) entry date and the aiien -diw code of 9 dii onto MEDS. 
+This process Wn suppress Medii indii cadi on tfie Medii card: 
+2 recipient~notyetappflediorM~~~~e.noffytherecipierddthereqrPiement 
+to apply for Mdcare coverage as a &in of Media eIiii or 
+3. neahw 1. nor 2. apply. check for probierrrs as noted under item 2 below. 
+SECTION: 50m MANUAL LETTER NO.: I 19 DATE: 8/11/93 PAGE: SF4
+
+[page 41]
+MEDI-CAL EUGlBlllTY MANUAL - PROCEDURES SECTION 
+B. If the recipient is a dialysis digibie w if you have infonrration confimdng that the recipient 
+is either receiving Social Secinity di&y benefits (TI It) or is erbirled to Medimre mge; and 
+7. the HIC number and/or sex on MEDS is incorrect. submit a cwrection to update MEDS 
+using the approp&!e EW Bansaction: 
+2. the name and/or birtMate on MEDS does not match kdormation on the redpient's 
+Mediire Card or his/her disabili TUle ti) award letter from SS4 report !he name and 
+birtMae information from the Mediire Card or award Imef to the Remium Payment Unit 
+on Form WS 6166 to update the alternate narne/bkhWe infomalion on MEDS; and. 
+3. neither1. nor2~.reportthax*~to~PtwnhanPaymentUrritonformDHS 
+6166. ThePremiwnPaymerdUnitwilI#m~actSSAtoresdvetheproblemtharispreventing 
+the Premium Payment accretion from matching HCFA's file. 
+C. When the recipient is under 65. is not receiving Social Sew dii benefib (Time II), is no5 
+ent&d to Medii coverage; and 
+1. the HIC number diqlayed with this message is blank, no action is reqtrired; 
+2. the HIC number dii with this message is not blank, submit rhe appropriate M 
+trarrsacbcm to remove the HIC rnanber from MEDS. 
+8007 STATE lNmATED ACCREnON 
+This alert bdorms CDMty W fhat a Srafe h&!ed Buy-In accretion famaclion.was accepted by HCFA 
+Dasa elements assodated with this alert dii the HIC number and W Buy-in Effective Date. 
+RESPONSE: No response mcesary- 
+8008 FED IMTIATED. STATE CONTROLLED ACCRETION 
+Tiis is an -hfomShd alert to inform county staff that an acaetion transaction was iniWed by HCFA A 
+HCFA inirkred acaetion action nomatly results &her from a wmpbhl or from a Medii applicard 
+reporting Mediil eiigibai. The &la elements associated with this alert diiy !he HJC number and the 
+Ekry4n Eifective Date. 
+RESPONSE: No response necessary. 
+&009 FED DELETlON INEUGIBE FOR MEDICARE 
+This Aef? informs county staff that a dele!ion transaction was inil&ed by HCFA becawe, accMding to 
+HCFA it appears that the Medi-Cal redpient does not meet eIigiWii byuimment~ for Medicare. Data 
+dements asoc&ed with !his alert diiy the HIC number and the Bvy-ln Effective Date. 
+RESPONSE: If the Medi-Cai recipient believes that he/she is entitled to Medicare, refer fecipient to an SSA 
+district mi. 
+SECTIDN: 50'273 WUA~ LEITER NO.: 1 19 DATE: 8/11/93 PA= t5F-9
+
+[page 42]
+MED- EUGlBIW MANUAL - PROCEDURES SECTlON 
+801 1 FED INITIATED OELRlON 
+This is an infomatbai alerr to Worm county s!aff that a deletion transaction was med by HCFA based 
+on either a comptaht, a problem memorandurn or other wrinen request to terminate Medicare Part A and/or 
+B. Da!a elements assocbted with this aiert dispiay tt~e HIC number and the Buy-in Effective Date. 
+RESPONSE: No responSe V- 
+90W ACTIVE MEW RECIPIENT - DECEASED PER HCFA 
+This deft infomrs cwnty staff UKU eaher a State initiated accretion transaction was rejected by HCFA or 
+HCFA iniWed a deletion tmnsactionbecarrse, accordii ro .HCFk this beneficiary is deceased. MEDS 
+shows this beneficiaty as a crarerPfy ac!be Medii.recipient .Data ekments assocbted with this alert 
+dii the MC number and the Buy-In Eff&ve Date. 
+RESPONSE Catmy staff shoutd verity whether the rec@knt is in fact deceased and. if so. temrbrate 
+Medi-Cal di. tf the recipierd is noz deeased, refer recipknt to an SSA district aRice to conect the 
+pr- 
+9005 ACTIVE MEDI-CAl RECIPIENT - OUT-OF-STATE PER HCFA 
+This alert informs county Saff thaf acuxdbg to HCFA, this recipient has changed the state of residence 
+to a state other than Caliiomia MEDS shows !his mc@ient as a currentty active Medii recipient The 
+dara elemerds associated with this alert diy the HIC number and the Boy-ln Effective Date. 
+This aiert infons wunty staff that the State's a#retion attempt fa Part B Buy-In for a QMB die has 
+been rejected by HCFA because, acuxdbg to HCFk this rec@knl is not entitled to Medicare Part A 
+Nonentafement to Medii Part A would make a recipient ineiigaJe as a QMB. Data dements associated 
+with this alert the HIC number and the Buy-In Effective Date. 
+RESPONSE County staff should verify if the recipient has amhm~km of Part A dement and. if 
+temrinate QMB eliity. if the redpient Wi that he/* is amemjy entitled to Medicare Part A 
+BeneMs, refer recipient to. an SSA district ,aQfice to cone~t the problem. if the recipient does have 
+co&math of Part A entitlement, send proof of Part A enWemmt along with a DHS 6166 corn* fom, 
+t0thePlemhanPaymerdUni.t 
+* NOTE. UlED~aler?sthat read PCWW ~u~4na~e64 -9 morrths or owfa 
+generatedforcountyhfcnmhnandusa ~ountyEWsshor9deitherassisttheMedi-Cal 
+recipient to enroll into the Medicare Part B Buy-ln Rogram or enter the INS enby date and 
+alien code 9 on MEDS. 
+SECTION: 50?73 MANUAL LEITER NO,: 11 g DATE 8/11/93 Pm IS-10
+
+[page 43]
+MEDK=AL EUGtBILfTY MANUAL - PROCEDURES SECTlON 
+6. DATA EXCHANGE WRH SSA 
+The SWe processes Medicare PaR B Buy-fn. OMB and QDW tapes for transmission to Baltimore Data 
+RPcessing (E3DP). Accretiorrs/deletions are processed in BDP around the 25th calendar day of each month. 
+HCFA hitiales actions for Part B SSI beneficiaries; the State is responsible for non-SSI beneficiaries. QMBs 
+and QDWls. A separate We. Third Party Master (TPM), is maintained by BDP to control premhnn billing to 
+states and other ttrird-party payers. These tapes contain acaetions, deletions or changes for Buy-In, QMB 
+and QDWl beneficiaries. 
+BUY-iN EFFECTM DATE FOR MEDICALLY NEEDY (MN) PERSONS 
+In order to amply with Federal requirements for determining the Bvy-ln efiectiw date, counties must report 
+Medi appro~l date to MEDS for potenW Buy-tn-of MN nqxerus 
+*. ' 
+- Thisapproval date k required for 
+each new period of MN elii timl is not contiguws with prior el'i. (Prior eiigibiii can indude 
+Supplemental Security In#rme/State Supplemental Program or Aid to Famiiii wah Dependent Children 
+cash eligibai which automatidly confened WcCal eligMi). 
+Buy* coverage for a qualM Aged. Blind or Disabled MN eligible beneficiary begins the second month 
+after the month in which Media eiigiba'i is approved for medii asisme, unless the indii was 
+a Public Arsistance (PA) or other PA eligible m the month immediatety preceding the month in which MN 
+e@Wty began The two month kg time for an MN Eligible BeneSidary is aubmk&y calcutated by the 
+State fmm the date of el'ii apptaval by the county. When a beneficiary receiving Medicate changes 
+from PA to MN status, there should be contkwous Buy-ln and the two month tag time does not apply. 
+Apprwai datemeansthe monthand yearmwhich the EJiiWolker makeshe determmmon . - tm 
+the beneficiary is eligible fw MediCal. For exampie. an appficant applies for Medi-Cal on May 5. 1992. 
+requesting rermauive coverage to Febntary.1992. On June 20.1992. !he EW determines the i3pplicant is 
+eliiretroactivetoFebnsry1992 fhe~dateinthiscaseisJ~1992. 
+Theappmddateshcdd berqxxtedonEW05. EW20 wEW30tmsahnsm es!a&h nw MN 
+eligbili on MEDS: (1) when the redpierd is a potenlid Medicare eliie (aged, blind, or disabkd, including 
+chronic renal disease); or, (2) the mipknt is AFDCMN and either has a valid HlC number with an 'A'. or 
+W prefk: or an A J1-4. M. MI or f strffk. or is ow age 65. 
+Any overstated shares of cost resul?hg from the 'third month' Buy-In assumption [LC, asmption mat 
+Buy-in will occur in the second mwdh after the nmnlh in which eiigWii is approved) can be adjusted in 
+hter mwdhs as provided in Titie 22. Section 506533. Adjusanents should however, be mbimal. 
+QUAUFIED DISABLED -KING INOMDUALS (OWD1) PROGRAM 
+Section 6408(d) of the Omnibus Bodget ReccmSiiation Act of 1989 (OBRA 89) reqtrbes that the State pay 
+Part A Medicare premiums for individuals who lost Tie li and Medicare benefits due to earned income 
+abwe the requid Substantial Gainfui Aaivity (SGA) li beghhg Jlriy 1. 1990. Unlike the QUdified 
+Medicare Beneficiary Program (OMB). States are-not required to pay coinsurance and deductibles or the 
+Part B premium A QDWl is eligible to wdt in.prsmium Medicare Pan A Hospital insurance, under a 
+special pragram and: 
+o has not attained age 65; 
+SECTION: 507?3 MANUAL LETTER NO.: 1 19 DAE 811 1/93 PAGE: 15F-11
+
+[page 44]
+MEDKAL EUGlBlUTY MANUAL - PROCEDURES SECTION . 
+o has been entitled to disability inswance benefits under Tie 11; 
+o continues to have a dii phystcal or mental condition; 
+o has lost TiUe I1 beneiits due to earnings exceeding the SGA limb; 
+0 is not athenrvise erditled b Medii; 
+0 whase incurne does not exceed the incume level established ar an amount 
+of 200% of the federal income poverty line; 
+o whose momes do not ereeed twice the SSl standad;. and 
+A QDWl is cursidered a Medi recipim and must meet all other candiions of efigibiiity such as aing an - - appbbm, dtbenstrip, status reporting. etc; therefwe, an OBRA Jien is not &ie for QDWI 
+benefas. 
+Due to the snafl number of QDWl eligibles. MEDS wiU not carry QDWl records. nor issue the QDWls 
+Mebi cards Instead QDWI records win be esW&ed by county reporting ebgiidy using the 
+Ektmic W System and maintained manually by the Premium Payment Una QDWl 
+benetieiarieswinrseaMedicarecardissuedbytheSociaimAdmbrisbationtoobSain#wered 
+medicalcare. 
+County~hatdrepon~~wl digiMiitothek~ymenUnitviathe~UI~~7~0fom 
+screennolaterthanthel7thafthe~ TbPrerrrhrmPayment UnitwiilthennatifyHealthCare 
+~~~CFA)obQDWIaccrebionranddelebjonsbythe25th0fthe~ The 
+PrenrirrmPayment~winthen~ttlecwntyEw,rtrrorrghE-Mail,whenHCFAcordimrs;m 
+aamion/deletion ~maycoaauthePremiumPaymentmtegarding~011~ 
+or to correa or revise a QDWl recud. Use the E-Mail address 'Buy-In'. 
+3. E-MAIL SCREEN 
+Fdlowing is a copy of the 'E Maa for QDW screen and its instNctions To the EM=/TAO 
+screen for QDWls, sign on ttPough MEDS. At the EMC2flAO User Menu select optb 
+bubthbaard TheaOWIformistrmr#iunderoption'forms~- Thefintscreentoappear~be 
+the 'EW for QDWI' screen. Compkte all apprtcable fields A second screen provides irrstruetiorrs 
+foraddbrgot~eiigbieswittIinthe~edfieMs 
+SECTION: Smt3 UUNUAL NO-: 1 19 DATE: 8/11 /93 PAGE: 15F-12
+
+[page 45]
+- ~~ 
+MEDW UlGlBlUTY MANUAL - PROCEDURES SECTlON 
+4. DUAL ELIGIBIUTY 
+The Department of Xeatth Services @HS) will pay Medicare Part A premiums from State funds for 
+Dually Uiible QDWls (imdividuaJs receiving Medi-CaJ after meeting their share d cwt or W a 
+share of cost), thus allowing coverage of this group. 
+5. MEDICARE PART A ENROLLMENT PERIODS 
+The Medicare Part A Initial Enroilrnent Period (IEP) for a QDWl begins with the month in which the 
+individual receives notice that hisjher Part A benefits under the reguhr Medimre program will end 
+due to excess earnings and ends 7 months iater. 
+Forthaseenrdliduringthe IEP. berefitsbegin eitherrhefintdayofthe secwdmoahafterthe 
+monthaf~~orthefirstdayofthethird~de~m~the~uaienrdls. 
+rtthe irdirral fa& to enrdl for Medicare Part A benefits during the IEe. he/& must wait until 
+the General Enrollment Period (GEP) of January through March. Those who enrdi in the GEP witl 
+norreceivebeneditsuntaJ~. 
+Medicare entitlement under these provisions ends when an bditral is either no longer disabled. 
+tequestsvolltntary- 
+-. of the coverage. becomes eligible for Medii under some other 
+pmvision (iie, premium free Medire), tails to pay the required premiums, or no longer meets 
+Ji factors, 
+QUALIFIED MEDICARE BENEFICWRY fOMB) PROGRAM 
+Section 301 ofthe Medii catstrophic Co=age Act (MCCA) of 1988 requires- State to paythe -. Medii Part A and B cost sharing apems for certain low income Medicare beneficranes Cost 
+expemes are: 
+o Prwnbnns ($221.00 for Part A if nor aMJable free, and $36.60 for Part B fn 19%); 
+o DducWe ($676-00 for Pan A and $100.00 for Part B in 1993); and 
+o Coinsurance fees in Part A and B. 
+Due to the need for Srate legklatkm Camomia was granted a waiver to delay mpl- of the CM.8 
+pogramuntaJaruJary1.1990. 
+A) Meet the OM0 pmpetty requirements under the reg* MediCal program or have net 
+no- property. as determined for a QMB, at or beicrw twice Camomia's regular 
+Medi property limits; 
+B) Meet the QMB income standard. That is, a QMB must have n& nonexempt 'm at Or 
+Wow 100% of the fed& poverty level; 
+C) Be eiigble for Part A Medicare hospirtal insurance with or wahout a premium; and, 
+SECTION: som MANUALE~ER NO.: 119 DATE: 8/11/93 PAGE: ts-13
+
+[page 46]
+MWtCAL EUGZBIUN MANUAL - PROCEDURES SECnOIJ 
+D) Be otherwise digible for Medii, ie.. meet all other Media requireme* such as 
+Wiomia residency and linkage (eg.. being aged, Mi, disabled). 
+QUAUFIED MEDICARE BENEFICIARIES 
+There are two groups of QMBs: 
+A QAAB Dual; 
+Those receiving regutar, full scope Media eaher as cash grant redpients (e-g, 
+Supplemental Seanity In#wne/SWe Supplemental Rogram (=/SSP)) or Medicalfy 
+Needy (MN) beneficiaries. These eiigibIes already meet the Medi plow 
+(OM8 property lii -are .two times the MediCaf pmperty limits) and must be 
+deermind to meet the OMB incum reqtlirement Titis group is dttaPy elie fie. 
+. eligible for regular Mec&Cal and UMB beneSits), 
+Those eIigble as QMB Only do not want reg* Medii or are'- eligible for reguQr 
+Medii due topsoperty above the regutarMediiCalpropertylimitsbut~mexcess 
+0ftheQMB.propertyri. 
+3. Am CODE 
+Aid code 80 was &abIi&hed as the aid code to iderrtij. QMB eliii. Dual eiigbles will have bath 
+a regdar MedCCal aid code and the OhdB aid code QhdB Ody dies will have just the QMB aid 
+code. The indii mhW in the Specia) Program 1 segment of MEDS is used !o show UMB 
+di. 
+4. MEDICARE PART A AND B ENROLLMENT PERIODS 
+A Part A Enrollment 
+1) If an MNiduaJ is not already mehbg Medicare Part 4 appblkm fot Part A can - 
+be made only. 
+a Draing the Initial Enrdmen! Period (1EP): 
+0 Noeariierthantfvee monthsbeforeage65 butno~tfr;ulthree 
+mordhs after the indiuaI's 65th birhday. 
+o After 24 matdhs of receivirtg Title II dkab%ty benefa, to be 
+effective in the 25th month. 
+b. During the Special Enrollment Period m), which is the month after an 
+individual Stops working if he/* is wer 65. 
+SECTION: 50T73 MANUAL EITEF4 NO2 1 19 DATE: 811 1/93 PAGE 1s-14
+
+[page 47]
+MEDI-CAL UJGIBIUP/ MANUAL - PROCEDURES SECTION 
+c During the General ENdlment Period (GEP) of Jawy - March to be 
+effective rhe fdlowing July, for a Medicare beneQiciary who did not end 
+in an IEP or SEP. Su,& eiigibles must apply at the SociaJ .Security 
+Ad- (SSA) odfice during the GEP. If they fail to do so. they 
+would have to wait until the ne>d year's GEP and wouid not be eligIbte for 
+Part A Medicare and therefore QblB rm5a July of hat year. 
+An kdividual who does not apply for Part A at the fast opportunity is charged a 
+10% penatty by SSA Undw the QMB prom the State will pay the penalty fw 
+a Medicare beneficiary's late enrdlment in Part A 
+1) Part B enrollment #iteria for an individual not on Buy-Ln are the same as for Part 
+A however, forthose individlrals who are Medii and/or OMB eligible, 
+theGEP.SEPorIEPiswaived. TheStatemaybeginpayingthePartBpremiton 
+after conditions of eligibility are met (ia, benefits for a WB Ordy begin no &kr 
+than the month after the date of county approval). 
+2) Thefe are Part B penah& for late enrdlrnent similar to those of late ewdtment for 
+Partk-bwew, underZheBvy-lnagteemenf theSrateisnot chargedapemky 
+for Medicare beneficiaries who would otherwise be assessed a penalty fot late 
+emchent in Part B. 
+QMB BENEFITS EFFECTIVE DATE - 
+QMB~may&eRectiveEhefirstofthe~fdlowingthe~eofapproval~~.~ofthe 
+morrth following the date the coun¶y makes the determination of eliii) ik 
+A) Benefickq is already ewdled in Patt A; or 
+6) Benefidary enrdls in Part A during */her IEP or SEP. If a beneficiary ertrdls in Part A 
+dwing the W, QMB benefas may be effective the fdlosving Jdy. There are no tetroadive 
+QMB benefits 
+6. PART A AND B COVERAGE ENDS 
+A) The end of the hst morith during which an individuaI is eligible for the QMB progmm; Or. 
+7. FEDERAL FINANCIAL PARTlClPATlON 
+Although Medi pays Mediire Part 6 premiums, or %uys-ino, for Medically Needy 0 
+bemfkiaries because it is cost effective. the MediCal Program amenUy does mt receive Federal 
+Faranciai Participation (FFP) h Part B premiums for MNs. WBh rhe implemenration of the OW 
+program, FFP is avaaabie for MNs who are also eligible for the QMB progtam. Thus, i! is to the 
+SECTION: 50773 MANUAL LRTER NO.: 119 DATE: 8/11/93 PAGE 1s-15
+
+[page 48]
+MEDEAL EUGlBlLCrY MANUAL - PROCEDURES SECTtON 
+State's aduanrage to end MN individuals with free Part A as OMBs. 8 eligible. The State receives 
+FFPforpaymeraod~ PartApremhrms 
+MEDICARE CODJNG. MEDI-CAL CARDS AND MEDLCAL WGlBnrrY DATA SYSTEM MEDS) 
+Medicare cod'i on MEDS is dm from infwmaion on the MEDS Medicare Buy-tn brfMmation screen. 
+MEDS BENDM Tale I1 information screen and MEDS Mi saeen Counties are not able to 
+dii input w change the Medicare Coding on the MEDS Medicare Status Line. Hawever, 3 a ooding 
+enw is deeaed, Bi Worlcers 0 strould detaa the problem on the State BWn Problem Report 
+Form @HS6166) and send it totheptemitnn Paymerrt Unit (seesecthn 15F%eporting Roblemstothe 
+State's Remhrm Payment UW). 
+1. MEDICARE CODING ON MEDq 
+The MEDS Wi status Line shaws Medicare Part A and Part B entitiernen! informath as well 
+aswheaherapremiumisrequhedandwhopaystheprerrdran . ' 
+The MEDS'Wkare Stabs codes are shown Wow. The left di indicates the Medicare Part A 
+status,whiletherig&diiindicatestheMedicarePartB~ 
+PAKT A PART B 
+BiankfO-NoMedicarePmA Btank/O - No Medicare Part B 
+1- PaidbyBmeficiary 1 - Paid by Benediciary 
+2 - Paid by State 2- Paidbystate 
+3 - Free 3 - Not Appri 
+4- Notapplie 4 - Paid by Other Entity . 
+5 - Bl Reject BENDEX Eligible 1/ 5 - BI Reject. BENDM Elme 1 / 
+6 - ' BJ Reject Presumed Eiigitde 1/ 6- BIReject.ResumedEligibie~/ 
+7 - Presumed Eligible 7- etesumedEiiie 
+8 - BI Rejed. Not Presumed 8 - Bi Reject Not Presumed 
+.Eiiiibie I/ E3igible 1/ 
+1 / BI Reject means a rejection by Social Secra'by Admaustrat##r -. - (SSA) of the Statens aaempt to BwJn 
+SECTIDN: 50lt3 LRTER NO: 119 DATE: 8/11 /93 PAGE: 1s-I6
+
+[page 49]
+MEDI-CAL ELIGIBILITY PROCEDURES MANUAL 
+2. MEDICARE CODING ON MEDI-CAL ID CARDS 
+The Medicare lndicator codes which appear on the Medi-Cal ID cards are shown below. The Automated 
+Eligibility Verification System which answers provider inquiries regarding Medi-Cal eligibility also uses the 
+following codes' 
+Blank - No Medicare Coverage 
+1 Medicare Part A Coverage Only 
+2 - Medicare Part B Coverage Only 
+3 Medicare Part A and B Coverage 
+This coding alerts providers to the type of Medicare coverage for which the recip~ent is eligible so they can 
+determlne if Medicare should be billed prior to billing Medi-Cal. For example, if the recipient's Medi-Cal 
+card shows and indicator of '1" P part^ only), a hospital will know it must bill ~edicare for inpatient 
+sewices. 
+3. HAND TYPED CARDS 
+In those rare instances where counties are required to hand type an MC 301 Medi-Cal card, the following 
+procedures should be followed: 
+0 If the beneficiary is over 65 years old and has not met the 5 year residency requirement, leave 
+the Medicare lndicator blank to indicate no Med~care entitlement. If he or she is not identified 
+as an alien. Medicare Part B eligibility is presumed, so use an indicator of "2"; 
+0 Use a Medicare lndicator of "1" if the beneficiary has proof of entitlement from Medicare Part 
+A only; and. 
+0 Use a Med~care indicator of '3" if the beneficialy has proof of eligibility from Medicare for both 
+Part A and Part B. 
+The Department of Health Service's Premlum Payment Unit is'available to assist in resolving county Buy- - 
+In problems. Each county is encouraged to use the services of this unit when regular Buy-In procedures 
+to not accomplish lhe desired result. Prior to reporting problems to the State's Premium Payment Unit, 
+the MEDS INQB "Buy-In and BENDEX Information" screen should be reviewed for the current Buy-In 
+status. 
+When incorrect information is discovered in any of the screen's fields, attach a printout of the INQB 
+screen to a State Buy-In Problem Report (DHS 6166), enter the nature of the error and the correct 
+information in the "Remarks" section of the form and mail to: 
+State of California 
+Department of Health Services 
+Medicare Operations Unit 
+P.O. Box 997422 
+Sacramento, CA 95899-7422 
+-- 
+SECTION NO.: 50773 MANUAL LETTER NO.: 298 DATE: 10/04/05 15F-17 
+-
+
+[page 50]
+MEDI-CAL ELIGIBILITY PROCEDURES MANUAL 
+COUNTY PROCEDURES FOR COUNTY ADMINISTERED PERSON 
+In order to resolve a Buy-In problem, provide the following information on the DHS 6166. All data is 
+needed to fully describe the case in question and enable the State to determine the appropriate 
+period of Buy-In eligibility. 
+1. Health Insurance Claim (HIC) number. Social Security, or RR HIC number. 
+2. Name. 
+3. Sex. 
+4. Date of birth. 
+5. County code, aid code, case number. family budget unit and person's number (use the 
+appropriate 14-digit case identification for each period of eligibility identified for this individual). 
+6. Beginning effective date (for each closed period of Medi-Cal eligibility in which there is a 
+discrepancy). 
+7. Ending effective date (for each closed period of Medi-Cal eligibility in which there is a 
+discrepancy). 
+8. For Medically Needy recipients, we need the eligibility approval dale as described in Section 15F 
+'Buy-In Effective Date for Medically Needy (MN) persons". 
+RESOLUTION TIME 
+Considerable time is needed to correct Buy-In Medicare coding problems. The time required for a 
+problem resolution results from a long sequence of activities involving the processing of an 
+individual problem through county, State and Social Security Administration (SSA) channels and 
+numerous data processing files. 
+For example, a beneficiary complaining about a premium should expect a minimum wait of four 
+months from the time of the complaint until the billing is corrected by SSA. Once a problem is 
+resolved, a beneficiary must allow SSA 90 to 120 days to refund erroneously deducted or paid 
+premiums. 
+SSI BUY-IN PROBLEMS 
+Refer lo Sections 148 and 14E of the Medi-Cal Eligibility Manual for handling of Supplemental 
+Security IncomeIState Supplementary Payment Medi-Cal card coding problems. 
+SECTION NO.: 50773 MANUAL LElTER NO.: 298 DATE: 10/04/05 15F-18
+
+[page 51]
+MEDXAL ELIGIBILITY MANUAL - PROCEDURES SECTION 
+lNQB SCREEN FORMAT AND DEFNIITIONS 
+The following are the field definitions.for the Buy-In and BENDM segments of the INQB screen: 
+MDS BUY-IN AND BENEFICIARY AND EARNINGS DATA EXCHANGE (BEND= INQUIRY (INQB) 
+SCREEN 
+This MEDS screen (exampie shawn below) provides various data to askt county staff in determining the 
+Buy-In status of Medi-Cal eligibles. Refer to Appendix 1 for INQB Screen Definitions. 
+IN50 * BUY-IN AND BENDEX INFORMATION " 
+MEDS-ID NAME MEDS-CUR-MMW 
+A HlC-NO D. HICSOURCE F. BUYJN-EUG-CD 
+B. CUR-BW-IN-STATUS E. BWJN-EFF-DT G. LAST-PART-SCHG 
+C. DOME-DT ------------- - - - - - - - - - - - - - MmJCARE PARf 'A' BUY-IN INFORMATION= = = = = = = = = = = = = = = = = = = 
+H CUR-BW-IN-STATUS J. BW-IN-EFF-DT K LAST-PARTA-CHG 
+I. DOME-DT 
+------------------- ------------------- BENDMTIN:lI lwORMAnON====================== 
+L CLAIM40 U. LAST-BENDEX-CHG 
+M. INmALm-DAlE 0. BENDEX-PAYSTATUS V. COMMUNICATION-CODE 
+N OU)BENEFIldAAT$ R. HI-ENTL-DATE W. SMLENTL-DATE 
+0. CURgENmfdMT t S. HI-TERM-DATE X SMI-TERM-DATE 
+P. DUAL-ENTL-IND T. HI-OPTION-CD Y. SMI-CODE 
+Z PREMIUM-PAYOR 
+W - ENTER Qk0F,Qii,aNLQO.QP,QXQ1 .MXC.XE,XM,XN ENTER KEY WlURNS TO UST 
+BUY-IN AND BENDEX lNOU1RY (INOB) SCREEN DEnNmONS 
+1. MEDICARE PAR7 B INFORMATION SEGMEM MflNmONS 
+A HIC-NO (?-iea!th I- aabn Number) 
+This fdd will sttow the current HIC number 3 it was reported by eaher the county or federal 
+government (for WCSOLIRCE, see letler 0); othemrise a blank will show. The HlC number 
+Shawn may not be the coned HIC number. 
+B. CUR-BUYJN-STATUS (Cumen! Buy-In Status) 
+The following is a list of valid Buy-In Status Codes with explanatiorts: 
+Valid Buv-In Status Cadets) Exdarratian 
+Codes 
+Used by the Sate to accrete an iridiiual to the 
+1. State Initiated Accretions State's ~u~-ln Program Expect response from 
+SECTION: 50Tf3 MANUAL LRTER NO.: 119 DATE: 8/ 11/93 PAGE: IS-19
+
+[page 52]
+MEDJ-CAL EUGIBIUN MANUAL - PROCEDURES SECTION 
+2 State Controlled 
+1161, 1164, 1165,1167 
+3. State Initiated Deletions 
+50.51.53.81 
+HCFA within one month from the mrd date. 
+An accretion submitted by the State has been 
+added to the Buy-ln Program. 
+Used by the State to delete an individual from the 
+State's Buy-ln Program. Expect response from 
+HCFA withim one month from cuneIlt date- 
+A deleti& subm'bed by the State has been 
+dropped from the Buy-ln Program. 
+5. federal Controlled Informs the State that HCFA has estabiii a 
+Accretions 1180 Buy-ln record on the Rtird Party Master (PM) 
+File for an SSI recipient The acmetion was 
+added to the Buy-ln f rogram. 
+6. Federal ConWled HCFA informs the Stare that an SSI recipierrt was 
+Deletions 1500, 1600, deleted from the OMB Part A program. 
+1728.1759,1787 
+7. Interim/Special lnformstheState~atthoughthereiSn0 
+1800.1900.3200.3300. evidence of Medicare entitkment a dam for 
+3662 ~isbeingdevelopedbySocial~ 
+10. DOME 
+2200 
+12 Biank 
+lrdwms the' sate m the subm'med BuyJn 
+Aecretbn~wasrejeuedbecawed 
+ems): HIC nrrmber, effective date, ek 
+/DeMiibrader~ . . Bvy-tn - 
+Expecl a response from HCFA within one month 
+from current date. 
+1ndic;ites PmpeAim Medicare Entitlement (For 
+Date d Medii Entitlement, see Letter C Mow). 
+Indies prospective Wcare entitiement for 
+Aged Aiiens (for Date Of Med'i Erditlemerrt 
+see lener C below). 
+indicates no Current Buy-In AUjvity- 
+SECTIOX: ~1173 MANUAL LETTER NO.: I 19 DATE: 8/11 /93 PAGE: 15F-20
+
+[page 53]
+- 
+MEDkCAL EUGIBIUN MANUAL - PROCEDURES SECTION 
+C. DOME-DT (Date of Medire Entitlement) (MMm 
+This field indicates the prospective Medie Entitlement Date unless there is tennixition 
+of Diii Benefii. 
+Fot State Use Only. fhis fieid cuntains an intend code that identifies the county. 
+federal or State system through which the HIC number was hst reported. 
+E BW-IN-EW-~ (Effective Date) (MM/W) 
+This field indies Efiective month and'year, of cunent Buy-ln sratus 
+F, BUY-IN-EUG-CD (Eli* Code) 
+For State Use Only. This field 'lndiites awbM&y of Federal F~nancial Partidpation in the 
+pamafpte- 
+G LAST-PAKT-BUiG (Med'ie Change Date) (MMpDyw) 
+This field indicates the month and year in which Bvy4n activity most. tecently updated the 
+MEDS record. Buy-In updates occur between the 19th and 25th of !he month 
+2 MEDICARE PART A INFORMATION SEGMENT DEFlNmONS 
+H CUR-BUYAN-STATUS (Cunent Bvy4n Status) 
+I. DOME-DT (Dare of Medicare Entitlement) (MMm 
+This fw id- the prospedive Medicare Entitlm Data. 
+J. BUY-IN-EFF-DT (Effective Date) (MM/YY) - 
+This field indies Bedive month and year of wnerd Pari A BuyJn Stahls 
+K LAST-PARTACHG (Medicare Change Date) (MM/DD/YY) 
+This Wd indimes the mMdh and year in which Part A Buy-In activay most recently updated 
+the MEDS record. Bq-tn updates occur between the 19th and 25th of the month 
+3. BENDEX TITLE I1 lNFORMATlON SEGMENT -DEFINCTIONS ' 
+Claim Number or Social Seanity Number under whkb SSA benefi is filed. 
+SECTION: 50773 MANUAL WR NO.: 1 19 DAfE: 8/ 1 1 /93 PAGE: 15F-21
+
+[page 54]
+MEDECAL ELIGIBILITY MANUAL - PROCEDURES SECTION 
+M. INITIAL-ENTL-DATE (MM/YY) 
+Jninial dare of entiti- to Tie I1 benefits 
+Net amount previously certified by SSA for payment 
+The net amount due the beneficiary under Tie I1 on the 3rd of !he next month after the 
+BENDEX record is produced. MAMPLE: The BENDEX fae produced on 4/11/90 
+amtahxl payment information iff the-6/3/90 SSA check. 
+Morrey amourrts are diyed even if the be~fkiary was onty prwiousiy entitied or is in 
+a nonpayment status (see letter Q for current BENDEX-PAY- STATUS). Zeros nomrally 
+appearif.thebenefi.ciarywasdeniedbeneMs 
+Indicates wbther the beneficiary is or was entitied to SSA Tdie I1 benefits under more than 
+onectabnmlmber. 
+1. Beneficiary is enMed on more than one daim number and all records are 
+active . 
+The BENDB( payment status code Sicaxes whether the beneM amwnt in 
+CUR-BENEFK-AMT is payable ot the reason it is not payable; a CP in this field indicates 
+that the benefit is payable. Other codes have the fdlowing meanings: 
+A one or *podion code refieUing the SSA payment status for this ben&&uy. 
+Adjustment 
+AA withdrawal to spr'n paynms 
+AC Correction in beneM me 
+AD Ad- for dual-entitlement 
+AE Withdrawnforreawnprdation 
+AJ Worker's compensation offset 
+AM Wirawat from Hionly ?ctah~; mon!Hy !mei%s being armled 
+AR Wdhdrawalfrom SorTstatustophcein CP status 
+SECTION: 50773 ~AL~NO~ 119 D*m8/11/93 PAGE: ISf0.22
+
+[page 55]
+- -- 
+MEDkCAL EUGfBSLlTY MANUAL - PROCEDURES SECfiON 
+AW Worker's compensation offset 
+A% WdhdrawnfmmnonpaymenrsratusroplaceinCPstatus 
+A- WaMtamiromCP~tobeplacedinnonpayme~~ 
+AO.A&, Rate reduction is being figured 
+A3As.M 
+A6A7B 
+49 . Miscdtaneoos adjustment not separately defined 
+Abatement 
+8 aaimant died prior to dement 
+Current Pa- 
+CP CwrerrtPaymeMStatus 
+Defened: 
+DP Receipt of public assistance 
+Receipt of worker's cornpensation DW 
+M Engaging in foreign work 
+D2. BeneficiaryoverpaidbecauseafMnk 
+D3 Arpcaiary's benefits witNtetd because of D2 st ah^^ for prhnary beneficiary 
+D4 Failwe to have chid in care- 
+D5 Auxiliary's benefirs wiWd because af a Dl status for primary beneficiary 
+' 06 Deferredm recovercnmpaymentforteaswr not attribrda$le to ez@ngs 
+D9 Miinewscniebment 
+Denied: 
+N Disaaaweddaim 
+ND ~isabaay ctaim de;ded for nowmedici reason 
+Detayed: 
+K Advanced mng for deferred pa- 
+1 AdMncedaing 
+P Adjudication pending 
+PB Benefits due but not paid 
+m aaim~edfromde4yedstatus 
+PF,PH,PJ, The beneficiary is to be placed in S staars upon final adjudim 
+PKPLPM The lav order positiwt has the same meaning as the corresponding low 
+PF+.PW,PO order of payment stam S. Upon final adjudication 
+PI ,RP3 
+P4,P5.P6. 
+PI,e8,P9 
+Suspended: 
+SO Deoesmin;ationof~~ispendkrg' 
+S1 Beneficiary engaged in work ouLside the US. 
+S2 Beneficiary is working in the U.S. and expects to earn 
+in excess of annual allowable tima 
+S3 Arrrdiary'sbenefaswahheldbecauseofS2staarsof 
+prtrrary beneficiary 
+S4 Failure to have Chad in care 
+S5 Auxikry's benefas withheld due to S1 status for prhnary 
+beneficiary 
+SECTION: 50773 MANUAL LEl7ER NO.: 119 DAZ' 8/11/93 PAGE: 1s-23
+
+[page 56]
+MEDECAL EUGIBILII"Y MANUAL - PROCEDURES SECTION 
+Check was returned - conect address bag developed 
+Died bemf&ky suspended due to refusal of 
+vocatianal rehabaitation; imprisoned; ex!ended triai work period 
+Suspended while payee is being detemrined 
+Suspended for reason not separately defined 
+Technical entitiefnefit only. Beneficiary is entiried on another daim 
+Special age 72 beneficiary faas to meet residency requirement 
+Special age 72 beneficiary is receiving a gavwnmerd pension 
+Alien suspension 
+BeneficiarV has been deported 
+Beneficiary resides in a country to which checks cannot 
+be sent 
+Beneficiaty refused cash benefits (entitled to HISW 
+only) 
+Special age 72 beneficiary suspended due to receivirrg 
+WE - 
+Postseccmmystudentsummer~ 
+kpnded because of worker's compensation 
+Temwratedpriartoentitlement 
+Mather, father termhated because beneficiary is 
+entitied to dii widuw(er)'s benefits 
+Di widow attahed age 62 and is not entitled as an aged widow 
+Advmcd filed daim termbaed afwrmahrrity 
+Tenninatioclafpostse##wfarystudent 
+f-becauseof changeintypeof beneMorpostentittementadion 
+ThecWnmasw'dhdrarm 
+Convertedfrom~ibenefastoretirement 
+-up#1reaching~65 
+Benefirs are payable by some aSher agency 
+Temhted due to death of tbe benekby 
+I\lpdiary~dueto~ afthe primary 
+Temrhr;ited due40 divorce marriage w mmmiage of the beneficiary 
+Chjd altahed age 18 or 22 and is nos disabled; mother/falkr terminated 
+becauseMchadatcainedage18 
+'Beneficiaryentitiedto~benefit 
+CMd is no longer a Went or dii; or the hist entitled cWd died or 
+malTied 
+Chad beneficiary was adopted; mo~her/father teminated as last chad 
+adopted 
+Rhay benefidary nd longer rlicslhled; M the hst disabled cMd no longer 
+died 
+T-ed for reason not sepamtely defined 
+SECTION: 50773 MANUAL LETTER NO.: 119 DATE: 8/11/93 PAGE: 1s-24
+
+[page 57]
+MEDECAL ELIGIBILITY MANUAL - PROCWURES SECnON 
+U Benediciary is entitied ordy to.HI or SMI 
+w&hdrawal: 
+W Wdhdrawal before entitlement 
+Other Adjustment or ternination stalus: 
+XO Cbim transferred to RRB 
+XI Beneficiary di 
+x5 Entitledtootherbenefus 
+X7 WB/SMIB terminated 
+X0 Payee is being developed 
+X9 TetmhaW for reason not separately defined 
+XD Wdhdrawn for adjustment 
+XF Entitlwnent transfend to another PSC 
+XK Benefidary d-ed 
+XR wwrawn from SMIB 
+R. HI-ENTL-DATE (MM/YY) 
+Thisfieldwinsi.ic~lthe~dateoferditlemerrttoflospaallrtsraaraceW) Part AbeneMs 
+S. HI-TERM-DATE (MMm 
+This field MI show the most recent termirration date from HI benefits 
+T. H-OPTION-CD 
+This field will show the current HI sta!us code 
+C No (cessation of ckbW) 
+D No (denied) 
+E Yes (arftMnatic entitlement no premium my) 
+F No (terminated for irnmlid enrollment or enrdlmerd voided) 
+G Yes (good cause) 
+SECTION: 50773 MANUAL LRTER NO.: 119 DATE: 8/11/93 PAGE: 1s-25
+
+[page 58]
+MEDl-CAL .EUGIBILIlY MANUAL - PROCEDURES SECTION 
+H No (not eligible for free heatth insurance benefits (Part A)) 
+P Railroad jurisdiction 
+R No (refused free Part A) 
+S No (no longer under renal disease prwision) 
+T No (terminated for non payment of premium) 
+, W No (withdrawal from premium Part A) 
+X No (Part ktembted because or-T* li temrirration (Section 2268)) 
+Suppiemental insurance medical bendits (Part B) mchged 
+Y Yes @remhrm is payable) 
+The last dale, month, day and year, BENDEX updated bEDS. 
+V. COMMUNICATTON-CODE MATCHED 
+TtrisirrformationissuppliedbySSAto~~Stare~recotds~inresponse 
+to State dbea input records being accxeteb ttvough the Buy-In System, and records 
+ptwiwrsfy~ztsBENDEXwhkbareundergoingcttmge 
+Nbha Numeric Codes derived by the BENDE% system to help the State interpret the data 
+received 
+WASbXX%b BENDEXexchangeistransfemdtoywragency:AgencyXXX -no 
+lorrger receive BENDEX mcchange. See Cfb>O(Xbb below. 
+MATCHEDb Cunent data was extracted from the Master Beneficiary Recad (MBR). 
+. REPbPAYE fhisisafa~llyprocessedrec~dw'dh~~~ctedfromthebABR 
+check is pqdde to someone other than the benekiary. 
+FINbMMW The benehs for !his beneficiary termirrated for the month indiied. If 
+aanrhrgsdatawasreqesed,PwiIl be- 
+XEFbNUM Beneficiary is temimed on this reaxd; there is no aoss reference M3R 
+or other erdiljernerd 
+-- 
+SECTIOEI: ST13 MANUAL NO.: 119 DATE: 8/11/93 PAGE: 15F-26
+
+[page 59]
+MEDKAL EUGIBIUrY MANUAL - PROCU)URES SECTlON 
+LmbXRD Pertinentdatawasextractedonthisdaimrwmber. NoMBRttasbeen 
+located howwer, for a crosdeence number. 
+CFbXXXbb Record is in cod& with another agency, XXX This record represents the 
+W arsomated data for the receiving agency. Since BENDM receives 
+input from most States, as weil as other SSA systems, a priority of 
+processing tras been established to follow in the event rmdtiple actions are 
+received in a month for an individual- 
+W. SMi-ENL DATE (MM/W) 
+This W win shawthe aarent date of entitlement to Supp&~Ual Medical Insurance (SMI) 
+PartBbenefas. 
+WfieldwiU shcrwthe most recenttemrination date from SMI benefa. 
+This field witl show the current SMI status code: 
+No (diii ceased) 
+No {denied) 
+No @mhaW for imaGd enrdiment) 
+Yes (good cause, enrdled in SMI) 
+No (dual tedmidy enfitled benefidary nat &ed b SMI) 
+Railmad hasjtaisdictionand cdiectsthepremhrm 
+No (tefused) No (no longer under renal &isease provision) 
+No (terminatedfor~Wofpremiums) 
+No (witMm@ 
+Yes (endled in SMI) 
+Indicates the Mity making the Wemerrtal Medical lnwrance (Part 8) Premium pa- 
+The fdlawing is an - d legends/codes: 
+I. CML Civil service is biUed for SMI premium payments 
+2 PRrrP - Private Third Party is billed for SMI ptemhrms 
+3. RRB - RailroadBwrdhasJurisdich'on 
+4. Sflf - The beneficiary is responsible for the SMI ptemhrm 
+5. 01Oto650 - indicates the State is paying the Part B premhrm Caldomia's 
+Stare Code for Pat B bmebaes . - is 050. 
+SECTION: 50773 MANUAL W NO< llg DATE: 8/11/93 PAGE: 15F-27
+
+[page 60]
+.- . . -. 
+MWW EUGIBlUTY MANUAL - PROCEDURES SECTION 
+TABLE OF BENEnCtARY 1DENTlRCATION CODES (BICs) 
+SA 81s TYPE OF BENEFlT 
+A 
+B 
+B1 
+B2 
+83 
+B4 
+85 
+06 
+87 
+B8 
+89 
+BA 
+BD 
+BG 
+BH 
+BI 
+BK 
+BL 
+BN 
+BP 
+BQ 
+BR 
+BT 
+BW 
+BY 
+Range Cl Rw C9 
+Range CA Thru CK 
+D 
+Dl 
+D2 
+W 
+04 
+DS 
+D6 
+D7 
+D8 
+D9 
+DA 
+DC 
+OD 
+DG 
+DH 
+w 
+PrSmaryCtaimant 
+Aged We, age 62 or over (1st mM) 
+Aged husband age 62 or over (1st dabnant) 
+Ywrng wife, with a chad in her care (1st mnt) 
+Ages-W-) 
+Aged - (2nd -a) 
+ywnswifem-1 
+Divorced wife, age 62 or aver (1st dahmt) 
+young (3rd -) 
+Aged*(--) 
+Divorced wife (2nd ctaimant) 
+Aged wiFe (4th daimant) 
+Aged wife (5th &m) 
+Aged (3rd darn) 
+AgedM(rn-1 
+Aged - (5th -1 
+Young wife (4th daimant) 
+Youngwae(5thctaimant) 
+Diiwife(3rddabant) 
+Dii wife (4tJl daimard) 
+Dii wife (5th daimant) 
+Divorced husband (1st daimant) 
+DivoreedW(2nddaim;lnt) 
+youns -nd (2nd - 
+Young husband (1st ckimant) 
+chad~hdudesrrrinor,sCuderd,orcfii~ 
+CWd (inciudes~.studentordiichad) 
+Agedwidow,age60orover(lstdairrrartt) 
+Aged widower, age 60 or over (1st dainmt) 
+Aged widow (2nd claimant) 
+Aged-m-1 
+Wdaw (rwcwied after ainmerd of age 60) (1st ctabnard) 
+Wdower (rermied after altaimm of age 60) (1st -1 
+Sunrivingdhrcedwife,age6Doraver(1stdabnarrt) 
+suwmgdii*(md~) 
+Aged widow (3rd dairrrarrt) 
+Rem;uried widow (2nd daimant) 
+Remmied widow (3rd daimmd) 
+Survbing d'i husband (1st daimant) 
+Aged widow (m daimant) 
+Aged widow (5th daimant) 
+Aged widower (3rd daimard) 
+Aged widower (4th daimant) 
+SECTION: 50773 PAGE: 1s-28
+
+[page 61]
+MEDKAL ELIGIBILITY MANUAL 0, PROCEDURES SECTJON 
+Aged widower (5th daimant) 
+Remarried widow (4th dainrant) 
+Surviving divorced husband (2nd claimant) 
+Remanied widow (5th daiman!) 
+RefmriedWawer(2nddaimant) 
+Remanied wid- (3rd dam) 
+Remarried widower (4th ctaimant) 
+Slmhhgdivorced- (3rdcjaimant) 
+Remaniedwidawer~-) 
+Smiving divorced wife (3rd daimant) 
+Smiving divorced wife (4th daimant) 
+Sunivingdiihusband(4hcfainrard) 
+Swviving divorced wife (5th daimarrt) 
+Sravivingdihusband(5th-) 
+Masher (widow) (1st claimant) 
+Surviving divorced mather (1st chi) 
+MotherWmm-) 
+smivingdimother(2nddaimant) 
+Father (widower) (1st ckhard) 
+SLsvivingdiifather(widower) (la-) 
+Fathw (widower) (2nd dahnard) 
+- wm (3rd -1 
+Mother m) (4th daimm) 
+swvhg dii .fathet (wid-) (2nd daimant) 
+Mather (widow) (5th ctaiman) 
+Survivingdiimather(3rdctabrrar8) 
+sulvmgdivoreedmoSher(4thctahnarQ) 
+%wiving divwced mother (5th ctaimard) 
+fathet (wid-) (3rd -1 
+Father (wid- (4th dairrrar0) 
+Father 0 (5th 
+Survivingdivorcedfather(3rddabnant) 
+~diifather~~ 
+Swiving divwced father (5th dahnant) 
+Father 
+Mother 
+Stepfather 
+stepmottrer 
+Adopting father 
+Adopting- 
+Second alleged father 
+Second alleged mother 
+Primary Prouty entitled to kahh insumnce benefits (HIB) (iess than 3 
+quarters d coverage (Q-C-)) (General Fund) 
+- - 
+SECTION: 50773 WUAL lJ3TER NO.: 119 DATE: 8/11/93 PAGE: 1SF-29
+
+[page 62]
+MEDK=AL EUGIBfLlTY MANUAL - PROCEDURES SECTlON 
+-A BIC lYPE OF BENEFIT 
+Primary Prouty entitled to HI0 (over 2 Q.C.) (Retirement and Survivors 
+insurance (RSI) TNst Fund) 
+Rimary Prorrty not erdiried to HI6 (iess than 3 Q.C.) (Generat Fund) 
+Prbrrary Routy not en&iUed to HIB (ow 2 Q.C.) (RSI Trust Fund) 
+Prouty wife entitled to HIB (less than 3 Q.C.) (General Fund) (1st claimant) 
+Prwty wiFe enhitled to HIB (over 2 Q.C.) (RSI Trust Fund) (1st dairrrant) 
+Prouty wife not entiaed to HIB (less than 3 Q.C.) (General Fund) (1st 
+-) 
+Proirty wife nu? entitled to H1B (over2 Q.C.) (RSI TNst Fund) (1st daimant) 
+Protdywife enbitied to HIB (less than 3 Q.C.) (General Fund) (2nd dainrard) 
+Pr#by wife entitled to HB (over 2 QC) (RSI Ttust Fund) (2nd claim) 
+R#rty wife not entitied to HIB fless ttian 3 Q.C.) (General Fund) (2nd 
+- 
+Rotdy wife not errbitled to HIB (over 2 Q.C.) (RSI TNst Fund) (2nd 
+-1 
+Rwty wife entltied to HIB (less than 3 Q.C) (General Fund) (3rd daimard) 
+Rwty wife wtitled to HB (over 2 Q.C.) (RSI Ttust Fund) (3rd daii) 
+Roray hik not enb'dfed to HIB (less than 3 Q.C.) (General Fund) (3rd 
+-1 
+R#by wife not entitled to HI5 (aver 2 Q.C.) (RSI Trust Fund) (3rd 
+-) 
+Pr0~tywiFeentiUedtoHlB(lessthan3Q-C.) (-Fund) (4thdam) 
+ProutywifeerrtitledtoHIB (ow2Q-C.) (RSITnrst Fund) (4thdaimant) 
+Prwty wife nat entitled to HIB (iess than 3 Q.C.) (Geneal fund) (4th 
+daimara). 
+PrwtywifenoterWedtoHIB (avef2Q.C.) (RSITnrst fund) (4thdaimard) 
+RotdywifeerrfZtledto HB (lessthan3 Q.C.) (General FMd) (4th ctaimant) 
+RorayWaeentDtledtoHiB(o~er2Q-C,(RSTTnstFund)(5th~) 
+Proray wife not entitied to HIB (less than 3 Q.C..) (General Fund) (5th 
+-1 
+Prouty wife not entitled to HIB (over2 Q.C.) (RSI Tnrst Frmd) (5th dam) 
+Uninsured beneficiary (not gualified for automatic HIB) 
+Urrinsured beneficiary (qtraliSieb for arftomadic HB brrt requests anfy SMIB) 
+Fdlyirrsuredbenefici;rrieswhotraveelected~~to 
+MB (ustgay but not afways dong with SMIB) 
+Uninswedbeneficimywrenddbease~ciafyonfy 
+Deemedirrsned(hospaalhrsuance~) 
+Medicare QualiKed Government Employmen! (MOGE) prhnary benefidary 
+MQGE aged spouse (1st dainr;rrrt) 
+MQGE childhood dbbifii benefits (CDB) (1st daimant) 
+MQGE aged widaw(er) (1st daimard) . 
+MQGE ywnd widow(er) (1st daimant) 
+parent (-1 
+aged w=e (2nd -1 
+MOGE aged spouse (3rd d;iimard) 
+SECTION: 54173 LE'rER NO-: 119 DATE: 8/11/93 PAGE: 15F-30
+
+[page 63]
+MEDI-CAL ELlGlBIUTY MANUAL - PROCEDURES SECTION 
+TJ 
+fK 
+n 
+N 
+M 
+TP 
+TQ 
+fR 
+TS 
+TT 
+TU 
+N 
+TW 
+TX 
+M 
+R 
+Range 
+W 
+w 
+W2 
+W3 
+w4 
+W5 
+W6 
+W7 
+W8 
+W9 
+WB 
+wc 
+WF 
+WG 
+WJ 
+WR 
+wr 
+MCIGE aged spouse (4th claimant) 
+MQGE aged spouse (5th -1 
+MQGE aged wfdow(er) (2nd daimant) 
+MQGE aged widw(er) (3rd dahant) 
+MQGE aged widaur(er) (4th dabnant) 
+MQGE aged widw(er) (5th dahnard) 
+MQGE m (f-e) 
+MQGE young widow(erj (2nd daimant) 
+. MQGE young widow(er) (3rd chimant) 
+MQGE young widow(er) (4th daimant) 
+MQGE young widow(@ (5th cfaimard) . 
+MQGE died widow(@ (5th daimant) 
+MQGE disabled widow(er) (1 st daimard) . 
+MUGE 6ied widow(er) (2nd daimant) 
+MQGE disabled widow@) (3rd dabrtard) 
+MQGE disabled widow(er) (4th da'anant) 
+T2 M T9 MQGE (CDB) (2nd to 9th dairrtarrt) 
+Disabled widow, age 50 or over (1st claimant) 
+DbbM widower, age 50 or over (1st daimant) 
+Disabted widow (2nd daimant) 
+Disabled widow(er) (2nd ctaimant) 
+Di widow (3rd dahant) 
+Disabled widower (3rd daimant) 
+Disabled survivingdivorcedwife (1st dahmt) 
+Disabled smvivhg divorced wife (2nd daimard) 
+Disabled surviving divorced wiFe (3rd daim-arrt) 
+Oisabied widow (4th dabnant) 
+Disabled widawer (4th ctaimant) 
+Disabledswvivingdivorcedwife(9th~) 
+Disabled widow (5th dabnant) 
+Dhbiedwidawer(5thdaimard) 
+Disabled surviving di (5thdaimant) 
+Disabledsurv'rvingdivorcedhUsband(1stdaimard) 
+Died surviving di husband (2nd -) 
+127 
+SECTION: 501;13 MANUAL LETTER NO.: DATE: FEB 0 1 1994 PAGE: 15F-31
+
+[page 64]
+MEDK=AL EUGIBIIJTY MANUAL - PROCEDURES SECTION 
+TABLE OF RAILROAD RETIREMENT BOARD PREFIXES AND EQUIVALENT 
+SSA BENEnClARV iDUJflRCATlON CODES (BICs) 
+RRB Claim Prefix SSA Biq Tme RRB Beneficiaw 
+Rehiement-empioyee or annuitant 
+RR pensioner (age or diity) 
+Spouse of RR employee or annuitant 
+(husband or -1 
+Spouse af RR pensioner 
+Chad of RR employee 
+ChPdafRRannuitant 
+Disabled adott child of RR annuitant 
+Wdworwidowerofan RR employee 
+Wdow or widower of an RR anntriEard 
+Wdoworwidowerofan RR pensioner 
+Wdow of employee with a child in her care 
+WdwodannuaantwithacMdtnhercare 
+WidowafpendonerwithacMdinhercare 
+-afRF?empioyee 
+ParentofRF?~ 
+Parent of RF? pensioner 
+swivorjoirrt~(anannuitardwho 
+has taken a reduced amMad to 
+guarantee payment to a surviving 
+spouse) 
+SEmON: 50773 MANUAL LmlER NO: 
+127 DATE: 0 1 1394 ¶SF-32
+
+[page 65]
+MEDI-CAL EUGIBIUTY PROCEDURES MANUAL 
+15H-HEALTH INSURANCE PREMIUM PAYMENT PROGRAM 
+This section provides background information and procedures pertaining to the Health Insurance Premium 
+Payment (HIPP) and Employer Group Heatth Pian (EGHP) Programs. 
+The HlPP Program Welfare and Institutions Code, Section 14124.91) was established by 
+enacttnent of AssemMy Bin 3328 Nargolin, Chapter 940, Statutes of 1986). This law authorizes 
+the Department of Heatth Services (DHS), whenever it is cost effective, to pay health coverage 
+premiums on behalf of Medi-Cal beneficiaries. Cost effectiveness is defined by Section 50778, 
+California Code of Regulations (CCR) as when the annual cost of the premium is less than half the 
+estimated cost of Medi-Cal benefits. The primary objective of the Program is to continue a 
+higkcost Medil beneficiary's other health coverage by paying medical coverage premiums 'for 
+the beneficiary. Paying premiums for high-cost medical results in a reduction of Medi-Cal costs. 
+The EGHP Program (Section 4402, Omnibus Budget Reconciliition Act of 1990 (OBRA '90)) 
+mandates (effective January 1, 1991 1, that all states, when it is cost effective, pay the heatth 
+insurance premiums, deductible., co-payment and other cost-sharing obligations for Medi-Cal 
+recipients eligible for enrollment in an employer group health plan. The State may also pay the 
+premiums (but not other costsharing obligations) for a non-Mediil eligible if the Medi-Cal 
+eligible's enrollment in the health plan is dependent on the non-Medi-(=a1 eligible's enrollment. In 
+addition, OBRA '90 mandates that when it is cost effective, enrollment in an employer or group 
+health plan is a condition of Medicaid eligibility except for an individual (such as a child) who is 
+unable to enroll on hislher own behalf. 
+To participate in the Hiff and EGHP Programs, applicants will have to prove that their monthly 
+medical costs are at least twice as much as the monthly insurance premiums. 
+a. The applicant must currently be on Medi-Cal. 
+b. The MediiCal Share of Cost, if any, must be $200 ndess. 
+c. There is a expensive medical condition. The average monthly savings to Medi-Cat from 
+the heah insurance must be a least twice the monthly insurance premiums. The monthly 
+Share of Cost will be subbacted from the monthly health care costs to determine if paying 
+the premiums is cost effective. 
+d. There is a current health insurance policy, COBRA continuation policy, or a COBRA 
+conversion policy in effect, or an employer group health plan for which enrollment 
+application has not been made, but which is available to the beneficiary. 
+e. The application must be completed and returned in tiine for the State to process the 
+application and pay the premium. 
+f. The heatth insurance policy must cover the high cost medical condition. 
+SECTION NO.: 50778 MANUAL LRTER NO.: 155 DATE: 1-16-96 15H-1
+
+[page 66]
+MEDI-CAL ELlGlBlLlTY PROCEDURES MANUAL 
+9- The poky must not be issued through the Cariornia Major Risk Medical Insurance Board 
+(MRMIB). 
+h. There is no enrdlment in a MecTi-Cal related prepaid health plan, County HeaJth Initiative, 
+Geographic Managed Care, or the County Medical Services Program (CMSP). 
+I. The premiums are not the responsibiiity of an absent parent. 
+In order tn identify Medi-Cal ;rppiiFes who are potentially eligible for the HIPPEGHP 
+Program, county workers must: 
+LssueaHeaithtnsurance- a. CDHS 61 55-Rea 10190) form to the beneficiary 
+to complete during the apprion and redeterminaion processes when the 
+-ficiary indicates: 1) that heishe or a family member is employed and that 
+~~ bakh brsrance is a~aable but has nut been applied for, 2) that helshe 
+or a family member maend$ has individual, group or employer-related heatth insurance 
+and has a high cost medical coruiiion. 
+(1) If the a~pticant/beneficiav currendy has hem insurance (private or employer 
+dated) AND a high cost medical condition. 
+(a) Complete the DHS 6155. Indicate the illness and Ute name of the 
+applicantlbeneficiary with the illness in the 89 area of the form. In the 
+upper right had corner of the DtlS 6155 form, write the notation 'HIPP'. 
+(2) H the applicantlbeneficiary is not covered by a health pkn, but has a high cost 
+medical condiion, AND health -mnce is available through an empioyer (or 
+family member's employer), but the applicanvbeneficiary has not ertro1led: 
+(a) Complete the DHS 6155. Indicate the illness, and the name of the 
+applicam/beneficiary with the iUness in the #9 area of the form. Also, 
+indicate the m(s) and Social Security Number(s) of beneficiaries who 
+could be enrolled, the nameiaddress of .the employer, the name of the 
+avaihble heatth inarrance, and the name and Social Security Number of 
+the employee who has the insurance avaiible to himfher. Check the #6 
+box 'Medical coverage available through employer, but has not been 
+appIied for". In the upper rigtrt hand comer of the DHS 61 55 form, write 
+the notation 'EGHP REFERRAL ONLY. This indicates that the 
+applicant(s)/beneficary(s) listed do not currentty have the insurance and 
+you are completing an EGHP refenal so that DHS can determine if it 
+would be cost effect& .to prrdrase the employer-related health insurance 
+for the appficam/beneficiary with a high cost medical condition. 
+SECTION NO.: 50778 MANUAL LRTER NO.: 155 DATE: 1-16-96 15H-2
+
+[page 67]
+MEDI-CAL ELIGIBILITY PROCEDURES MANUAL 
+(3) If insurance is available through an employer (or family member's employer). but has 
+not been enrolled in and no one in the case has a high cost medical condition. 
+(a) Complete the DHS 6155. Indicate the name(s) and Social Security Number(s) 
+of beneficiaries who could be enrolled. the nameladdress of the employer. the 
+name of the available health insurance, and the name and Social Security 
+Number of the employee who has the insurance available to himlher. Check 
+the #6 box 'Medical coverage available through employer, but has not been 
+applied for." In the upper right hand corner of the DHS 6155 form, write the 
+notation 'EGHP REFERRAL ONLY". This indicates that the 
+applicant(s)/beneficiary(s) listed do not currently have the insurance and you are 
+completing an EGHP referral so that DHS can determine if it would be cost 
+effective to purchase the employer-related health insurance. 
+b. Assure that critical segments of the DHS 6155 (applicantlbeneficiary name, Medi-Cal 
+identification number. applicanubeneficiary telephone number, insurance carrier name. 
+unionlemployer name and telephone number) are complete, accurate, and readable. 
+SPECIAL NOTE: If the beneficiary cannot be given the form in person and the beneficiary 
+notifies the CWD that hislher health insurance has or is about to terminate. or the beneficiaw 
+has not applied for employer-related health insurance, the Eligibility Worker (EW) must send 
+the Health lnsurance Questionnaire (DHS 61 55) form to the beneficiary to complete, sign, and 
+a 
+date. Instructions must be given to the beneficiary to mail the form to the DHS. 
+c. Advise the applicantlbeneficiary that providing the health insurance information will not 
+interfere with Medi-Cal Eliaibilitv. but if ~avment for the aroup or emplover-related health 
+insurance plan is approved by the ~e~artment. enrollm&t in'the heaith plan is mandatory. 
+Disenrollment from the plan bv the appltcan~beneficiaw. without the approval of 
+Department of Health services, i; cause for discontinuance-of Medi-Cal eligit;ility. 
+d. Advise the applicantlbeneficiarv that if health insurance coveraae is available from anv . . " 
+~~~~ 
+source. (i.e.. employer. union), at no cost to the beneficiary. the applicantlbeneficialy& 
+enroll. If the applicantlbeneficialy fails to cooperate by not enrolling in the plan. the county 
+worker must deny or discontinue Medi-Cal eligibility. 
+e. Retain a copy of the Health Insurance Questionnaire (DHS 6155) in the case file. 
+. 
+f. Mail the completed Health Questionnaire (DHS 6155) within five (5) days to the' 
+Department of Health Services. Send the HlPP or EGHP DHS 6155 application form in a 
+separate envelope from all other DHS 6155 forms to: 
+Department of Health Services 
+MediGal Third Party Liability Branch 
+HIPP Unit' 
+MS 4719 
+P.O. Box 997422 
+Sacramento, CA 95899-7422 
+SECTION NO.: 50778 MANUAL LElTER NO.: 298 DATE: 10/04/05 15H-3
+
+[page 68]
+MEDI-CAL ELIGIBILITY PROCEDURES MANUAL 
+g. Notify the Department immediately by calling (866) 298-8443 if the Countydetermines 
+lhat a beneficiary has withdrawn from enrollment in a plan for which DHS pays 
+I 
+premiums under HIPP or EGHP. The Department will direct the County by leierb 
+discontinue Medi-Cal eligibility upon verification.of the beneficiary's disenrollment from 
+the plan. The County must noti$ the beneficiary that eligibility has been withdrawn in 
+accordance with Section 50179(c)(7). Title 22. CCR. when instructed by the 
+Department to discontinue Medi-Cal eligibility. 
+h. Review and recompute the beneficiary's Share of Cost as necessary in accordance 
+with Articles 12A and 128 (Share of Cost) of the procedures portion of the Medi-Cal 
+Eligibility Manual. 
+4. Department of Health Services Responsibilities 
+Utilizing the HlPPlEGHP qualifying criteria the Department shall: 
+a. Review the Health Insurance Questionnaire (DHS 6155), contadapplicantlbeneficiary 
+for additional documentation and approve the application when it is determined to be 
+cost effective for the State to pay the health insurance premiums. 
+b. Notify the County and the beneficiary of State's intent to approve andlor terminate 
+payment of the health insurance coverage. 
+SECTION NO.: 50778 MANUAL LETTER NO.: 298 DATE: 10/04/05 15H4

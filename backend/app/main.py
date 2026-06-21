@@ -13,9 +13,9 @@ from .agents.routing import run_routing
 from .config import get_settings
 from .forms.filler import resolve_fields
 from .integrations import poke
-from .models import CaseProfile, EligibilityResult, FollowupQuestion
+from .models import CaseProfile, EligibilityResult, FollowupQuestion, InteractionNote
 from .rag.embeddings import provider as embedding_provider
-from .rag.index import get_index
+from .rag.index import get_index, rebuild_index
 from .reminders import (
     TEMPLATES,
     Reminder,
@@ -108,6 +108,7 @@ def health() -> dict:
         "status": "ok",
         "redis": settings.has_redis,
         "llm": settings.has_llm,
+        "band": settings.has_band,
         "poke": poke.available(),
         "embeddings": embedding_provider(),
         "rag_backend": index.backend,
@@ -140,6 +141,7 @@ class EligibilityResponse(BaseModel):
     results: list[EligibilityResult]
     followups: list[FollowupQuestion]
     strategy_notes: list[str]
+    interaction_notes: list[InteractionNote]
 
 
 @app.post("/api/eligibility/{case_id}", response_model=EligibilityResponse)
@@ -154,6 +156,7 @@ def determine_eligibility(case_id: str) -> EligibilityResponse:
         results=routing.results,
         followups=routing.followups,
         strategy_notes=routing.strategy_notes,
+        interaction_notes=routing.interaction_notes,
     )
 
 
@@ -167,10 +170,25 @@ def rag_search(q: RagQuery) -> dict:
     hits = get_index().search(q.query, k=q.k)
     return {
         "results": [
-            {"text": h.text, "program": h.program, "source": h.source, "score": round(h.score, 4)}
+            {
+                "text": h.text,
+                "program": h.program,
+                "source": h.source,
+                "title": h.title,
+                "source_url": h.source_url,
+                "document_id": h.document_id,
+                "page": h.page,
+                "score": round(h.score, 4),
+            }
             for h in hits
         ]
     }
+
+
+@app.post("/api/rag/rebuild")
+def rag_rebuild() -> dict:
+    index = rebuild_index()
+    return {"backend": index.backend, "indexed": index.size}
 
 
 @app.get("/api/forms/{program}/{case_id}")

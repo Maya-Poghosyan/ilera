@@ -1,0 +1,1454 @@
+	SOCIAL SERVICES STANDARDS
+	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORTIVE SERVICES	
+	TABLE OF CONTENTS
+	CHAPTER 30-700  SERVICE PROGRAM NO. 7:  IN-HOME SUPPORTIVE SERVICES
+	Section   
+Program Definition	   30-700   
+Special Definitions	   30-701 
+ Assurance and Quality Improvement 	   30-702 
+Health Care Certification	   30-754   
+Persons Served by the Non-PCSP IHSS Program	   30-755   
+Need	   30-756   
+Program Service Categories and Time Guidelines	   30-757   
+Time Per Task and Frequency Guidelines	   30-758   
+Application Process	   30-759   
+Responsibilities	   30-760   
+Needs Assessment Standards	   30-761   
+Service Authorization	   30-763   
+Individual Providers Compensation	   30-764   
+Cost Limitations	   30-765   
+County Plans	   30-766   
+Service Delivery Methods	   30-767   
+Overpayments/Underpayments	   30-768   
+Payrolling for Individual Providers	   30-769   
+Eligibility Standards	   30-770   
+Linkage	   30-771   
+Resources	   30-773   
+Income	   30-775   
+Provider Enrollment	   30-776   
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-16-02	Effective   10/1/16
+	Page 50
+	SOCIAL SERVICES STANDARDS
+	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORTIVE SERVICES	
+	TABLE OF CONTENTS (Continued)
+	Section   
+Provider Employment Eligibility Verification	   30-777   
+General Exception Requirements	   30-778   
+Personal Care Services Program (PCSP) Eligibility	   30-780   
+In-Home Supportive Services (IHSS) Plus Waiver Program 	   30-785   
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-19-01	Effective   7/1/19
+	Page 50.1
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-700 
+30-700	PROGRAM DEFINITION			30-700
+.1	The In-Home Supportive Services (IHSS) Program provides assistance to those eligible aged, blind and disabled individuals who are unable to remain safely in their own homes without this assistance. IHSS is an alternative to out-of-home care.  Eligibility and services are limited by the availability of funds.
+.2	The Personal Care Services Program (PCSP) provides personal care services to eligible Medi-Cal beneficiaries pursuant to Welfare and Institutions Code Section 14132.95 and Title 22, California Code of Regulations, Division 3 and is subject to all other provisions of Medi-Cal statutes and regulations.  The program is operated pursuant to Division 30.
+.3	The IHSS Plus Waiver program provides IHSS Plus Waiver services, to eligible Medi-Cal beneficiaries, subject to Medi-Cal provisions, statutes and regulations, pursuant to Welfare and Institutions Code Section 14132.951 and Title 22, California Code of Regulations, Division 3, and is operated pursuant to Division 30.
+	.31	These services are available as described in MPP Section 30-757, when services are provided by a parent of a minor child recipient or a spouse; and/or when the recipient receives a Restaurant Meal Allowance; and/or when the recipient receives Advance Payment for in-home care services.
+	.32	Recipients in any one of the categories described in Section 30-700.31, who have been determined eligible for Medi-Cal, qualify for the IHSS Plus Waiver program.
+	.33	The IHSS Plus Waiver Program is a "Section 1115 Demonstation Project" as defined in 42 USC, Section 1315. This demonstration project has been approved for 5 years, beginning August 1, 2004.  Eligibility and services are limited to the availability of funds and potential extensions to the demonstration.
+.4	Individuals who qualify for both IHSS and PCSP funding shall be funded by PCSP.
+.5	All civil rights laws, rules, and regulations of Division 21 shall be complied with in administering IHSS program regulations.
+NOTE:  Authority cited:  Sections 10553, 10554, 12300, 14142.95,  and 14132.951, Welfare and Institutions Code; Chapter 939, Statutes of 1992; and 42 USC, Section 1315(a) of the Social Security Act.  Reference:  Sections 12300, 14132.95, and 14132.91, Welfare and Institutions Code.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-03	Effective   
+	Page 51
+	SOCIAL SERVICES STANDARDS
+30-701	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	Regulations 
+30-701	SPECIAL DEFINITIONS			30-701
+(a)	(1)	Administrative costs are those costs necessary for the proper and efficient administration of the county IHSS program as defined below.  Activities considered administrative in nature include, but are not limited to:
+(A)	Determine eligibility;
+(B)	Conduct needs assessments;
+(C)	Give information and referrals;
+(D)	Establish case files;
+(E)	Process Notices of Action;
+(F)	Arrange for services;
+(G)	Compute shares of cost;
+(H)	Monitor and evaluate contractor performance;
+(I)	Respond to inquiries;
+(J)	Audit recipient and individual provider timesheets;
+(K)	Enter case and payroll information into the CMIPS;
+(L)	Screen potential providers and maintain a registry or list.
+(2)	Administrative activities for PCSP are those activities necessary for the proper and efficient administration of the .  In addition to all activities listed in Section 30-753(a)(1) as administrative activities for IHSS except Section 30-753(a)(1)(G), the following activities are considered administrative in nature, subject to PCSP funding:
+(A)	Nursing supervision;
+(B)	Clerical staff directly supporting nursing supervision of PCSP cases;
+(C)	Physician certification of medical necessity when such certification is completed by a licensed health care professional who is a county employee;
+(D)	Provider enrollment certification.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-03	Effective   
+	Page 52
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-701 (Cont.)
+30-701	SPECIAL DEFINITIONS			30-701
+		(Continued)
+(3)	Allocation means federal, state, and county monies which are identified for a county by the Department for the purchase of services in the IHSS Program.
+	(4)	Applicant provider means an individual who is seeking to become a provider but who has not yet completed any of the provider enrollment requirements.
+(b)	(1)	Base Allocation means all federal, state and county monies identified for counties by the Department for the purchase of services in the IHSS Program, exclusive of any provider COLA allocation, but including recipient COLA.
+(2)	Base Rate means the amount of payment per unit of work before any premium is applied for overtime or related extraordinary payments.
+(c)	(1)	Certified Long-Term Care Insurance Policy or Certificate or certified policy or certificate means any long-term care insurance policy or certificate, or any health care service plan contract covering long-term care services, which is certified by the California Department of Health Services as meeting the requirements of Welfare and Institutions Code Section 22005.
+(2)	Compensable services are only those services for which a provider could legally be paid under the statutes.
+(3)	Consumer means an individual who is a current or past user of personal care services, as defined by Section 30-757.14, paid for through public or private funds or a recipient of IHSS or PCSP.
+	(4)	ONLY FOR THE PURPOSES OF THE PROVIDER ENROLLMENT REQUIREMENTS, AS SPECIFIED IN SECTION 30-776, county means the county IHSS office, or any other organization or agency, such as the county IHSS Public Authority, or Non-Profit Consortium, designated by the county to perform provider enrollment functions.
+(5)	County Plan means the annual plan submitted to the California Department of Social Services specifying how the county will provide IHSS and PCSP.
+(6)	CRT or Cathode Ray Tube means a device commonly referred to as a terminal which is used to enter data into the IHSS payrolling system.
+(7)	CRT County means a county in which one or more CRTs have been located allowing the county to enter its data directly into the payrolling system.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-16-01	Effective   1/1/16
+	Page 52.1
+THIS PAGE IS INTENTIONALLY LEFT BLANK
+SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-701 (Cont.)
+30-701	SPECIAL DEFINITIONS (Continued)	30-701
+(d)	(1)	Deeming means procedures by which the income and resources of certain relatives, living in the same household as the recipient, are determined to be available to the recipient for the purposes of establishing eligibility and share of cost.
+(2)	Designated county department means the department designated by the county board of supervisors to administer the IHSS program.
+(3)	Direct advance payment means a payment to be used for the purchase of authorized IHSS which is sent directly to the recipient in advance of the service actually being provided.
+(e)	(1)	Employee means the provider of IHSS under the individual delivery method as defined in Section 30-767.13.
+(2)	Employer means the recipient of IHSS when such services are purchased under the individual delivery method as defined in Section 30-767.13.
+(3)	Equity Value means a resource's current market value after subtracting the value of any liens or encumbrances against the resources which are held by someone other than the recipient or his/her spouse.
+(f)		(Reserved)
+(g)		Gatekeeper Client means a person eligible for, but not placed in a skilled or intermediate care facility as a result of preadmission screening.
+(h)	(1)	Hours Worked means the time during which the provider is subject to the control of the recipient, and includes all the time the provider is required or permitted to work, exclusive of time spent by the provider traveling to and from work.
+(2)	Housemate means a person who shares a living unit with a recipient.  An able and available spouse or a live-in provider is not considered a housemate.
+(i)	(1)	"" means a transfer of responsibility for the provision of IHSS services from one county to another when the recipient moves to a new county and continues to be eligible for IHSS:
+(A)	"" means the county currently authorizing IHSS services.
+(B)	"" means the county to which the recipient moves to make his/her home.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-16-01	Effective   1/1/16
+	Page 53
+	SOCIAL SERVICES STANDARDS
+30-701 (Cont.)	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	Regulations 
+30-701	SPECIAL DEFINITIONS (Continued)	30-701
+(C)	"Transfer Period" means the period during which the transferring county remains responsible for payment of IHSS services, after which the receiving county will be responsible for payment.  The transfer period starts when the transferring county sends the documentation, including the notice of transfer form, and records to the receiving county.
+(D)	"Expiration of Transfer Period" means the end of the transfer period.  The transfer period shall end as soon as administratively possible but no later than the first day of the month following 30 calendar days after the notification of transfer form is sent to the receiving county or as allowed in Section 30-759.96.
+	HANDBOOK BEGINS HERE
+(E)	Example:  The transferring county sends a notification of transfer form along with documents to the receiving county on January 20th.
+	The receiving county has 30 calendar days to return the transfer form.  The receiving county returns the transfer form on February 19th, stating that they will assume responsibility effective March 1st.
+	- The transfer period begins January 20th.
+	- The transfer period ends on March 1st.  IHSS payment is terminated by the transferring county.
+	- The receiving county begins IHSS payment effective March 1st and the transfer is complete.
+	HANDBOOK ENDS HERE	
+(j)		(Reserved)
+(k)		(Reserved)
+	CALIFORNIA-DSS-MANUAL-SS 
+MANUAL LETTER NO. SS-16-01	Effective   1/1/16
+	Page 53.1	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-701 (Cont.)
+30-701	SPECIAL DEFINITIONS (Continued)
+(l)	(1)	Landlord/Tenant Living Arrangement means a shared living arrangement considered to exist when one housemate, the landlord, allows another, the tenant, to share housing facilities in return for a monetary or in-kind payment for the purpose of augmenting the landlord's income.  A landlord/tenant arrangement is not considered to exist between a recipient and his/her live-in provider.  Where housemates share living quarters for the purpose of sharing mortgage, rental, and other expenses, a landlord tenant relationship does not exist, though one housemate may customarily collect the payment(s) of the other housemate(s) in order to pay mortgage/rental payments in a lump sum.
+(2)	A Licensed Health Care Professional for the purposes of signing the Health Care Certification (LHCP-HCC) is an individual licensed in the State of California by the appropriate regulatory agency, acting within the scope of his/her license or certificate as defined in the Business and Professions Code, and whose primary responsibilities are to diagnose and/or  provide treatment and care for, physical or mental impairments which cause or contribute to an individual's functional limitations.  
+(3)	Live-In Provider means a provider who is not related to the recipient and who lives in the recipient's home expressly for the purpose of providing IHSS-funded services.
+(4)	A list means any informal or formal listing or registry of written name(s) of prospective In-Home Support Services providers maintained by the county agency, county social services staff, a contractor as defined under Welfare and Institutions Code Section 12302.1, or any public or private agency for purposes of referring the prospective providers for employment.
+(m)		Minor means any person under the age of eighteen who is not emancipated by marriage or other legal action.
+(n)	(1)	Net Nonexempt Income means income remaining after allowing all applicable income disregards and exemptions.
+(2)	Nonprofit consortium means an association that has a tax-exempt status and produces a tax exempt status certificate and meets the definition of a nonprofit organization as contained in OMB Circular A-122 found at Federal Register, Vol. 45, No. 132, dated .
+	(3)	Nonself-directing individuals, for the purpose of Protective Supervision eligibility, are individuals who due to their cognitive impairment, mental health condition or other condition that impairs their cognitive ability to assess danger and risk of harm, are
+		(A)	unable to cognitively assess danger and the risk of harm, and
+		(B)	at risk of injury, hazard, or accident.
+	CALIFORNIA-DSS-MANUAL-SS 
+MANUAL LETTER NO. SS-24-01	Effective   7/1/24
+	Page 54
+	SOCIAL SERVICES STANDARDS
+30-701 (Cont.)	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	Regulations
+30-701	SPECIAL DEFINITIONS (Continued)
+	HANDBOOK BEGINS HERE
+(A)	OMB Circular A-122 found at Federal Register, Vol. 45, No. 132, dated July 8, 1980, defines a nonprofit organization as one which:
+(1)	Operates in the public interest for scientific, educational, service or charitable purposes;
+(2)	Is not organized for profit making purposes;
+(3)	Is not controlled by or affiliated with an entity organized or operated for profit making purposes; and
+(4)	Uses its net proceeds to maintain, improve or expand its operations.
+	HANDBOOK ENDS HERE	
+(o)	(1)	Out-of-Home Care Facility means a housing unit other than the recipient's own home, as defined in (o) (2) below.  Medical out-of-home care facilities include acute care hospitals, skilled nursing facilities, and intermediate care facilities.  Nonmedical out-of-home care facilities include community care facilities and homes of relatives which are exempt from licensure, as specified in Section 46-325.5, where recipients are certified to receive board and care payment level from SSP.
+(2)	Own Home means the place in which an individual chooses to reside.  An individual's "own home" does not include an acute care hospital, skilled nursing facility, intermediate care facility, community care facility, or a board and care facility.  A person receiving an SSI/SSP payment for a nonmedical out-of-home living arrangement is not considered to be living in his/her home.
+(p)	(1)	 means a county which sends its data in paper document form for entry into the payrolling system to the IHSS payrolling contractor.
+(2)	Payment Period means the time period for which wages are paid.  There are two payment periods per month corresponding to the first of the month through the fifteenth of the month and the sixteenth of the month through the end of the month.
+(3)	Payrolling System means a service contracted for by the state with a vendor to calculate paychecks to individual providers of IHSS; to withhold the appropriate employee taxes from the provider's wages; to calculate the employer's taxes; and to prepare and file the appropriate tax return.
+(4)	Personal Attendant means a provider who is employed by the recipient and, as defined by 29 CFR 552.6, who spends at least eighty percent of his/her time in the recipient's employ performing the following services:
+(A)	Preparation of meals, as provided in Section 30-757.131.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-16-01	Effective   1/1/16
+	Page 55
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-701 (Cont.)
+30-701	SPECIAL DEFINITIONS (Continued)
+(B)	Meal clean-up, as provided in Section 30-757.132.
+(C)	Planning of menus, as provided in Section 30-757.133.
+(D)	Consumption of food, as provided in Section 30-757.14(c).
+(E)	Routine bed baths, as provided in Section 30-757.14(d).
+(F)	Bathing, oral hygiene and grooming, as provided in Section 30-757.14(e).
+(G)	Dressing, as provided in Section 30-757.14(f).
+(H)	Protective supervision, as provided in Section 30-757.17.
+(5)	Preadmission Screening means personal assessment of an applicant for placement in a skilled or intermediate care facility, prior to admission to determine the individual's  ability to remain in the community with the support of community-based services.
+	(6)	Prospective provider means an individual who is seeking to become a provider and who has completed at least one, but not all, of the enrollment requirements.
+(7)	Provider Cost-of-Living Adjustment (COLA) means all federal, state and county monies identified for counties by SDSS for the payment of wage and/or benefit increases for service providers in the IHSS program.
+(8)	Public Authority means:
+(A)	An entity established by the board of supervisors by ordinance, separate from the county, which has filed the statement required by Section 53051 of the Government Code, and
+(B)	A corporate public body, exercising public and essential governmental functions and that has all powers necessary and convenient to carry out the delivery of in-home supportive services, including the power to contract for services and make or provide for direct payment to a provider chosen by a recipient for the purchase of services.
+(q)		(Reserved)
+(r)	(1)	Recipient means a person receiving IHSS, including applicants for IHSS when clearly implied by the context of the regulations.
+(2)	Reduced payment means any payment less than full payment that may be due.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-16-01	Effective   1/1/16
+	Page 56
+	SOCIAL SERVICES STANDARDS
+30-701 (Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-701	SPECIAL DEFINITIONS (Continued)
+(s)	(1)	Severely Impaired Individual means a recipient with a total assessed need, as specified in Section 30-763.5, for 20 hours or more per week of service in one or more of the following areas:
+(A)	Any personal care service listed in Section 30-757.14.
+(B)	Preparation of meals.
+(C)	Meal cleanup when preparation of meals and consumption of food (feeding) are required.
+(D)	Paramedical services.
+(2)	Shared Living Arrangement means a situation in which one or more recipients reside in the same living unit with one or more persons.  A shared living arrangement does not exist if a recipient is residing only with his/her able and available spouse.
+(3)	Share of cost means an individual's net non-exempt income in excess of the applicable SSI/SSP benefit level which must be paid toward the cost of IHSS authorized by the county.
+(4)	Spouse means a member of a married couple or a person considered to be a member of a married couple for SSI/SSP purposes.  For purposes of Section 30-756.11 for determining PCSP eligibility, spouse means legally married under the laws of the state of the couple's permanent home at the time they lived together.
+(5)	SSI/SSP means the Supplemental Security Income and State Supplementary Program administered by the Social Security Administration of the United States Department of Health and Human Services in .
+(6)	State Allocation Plan means that process whereby individual  program allocations are developed in a manner consistent with a) Welfare and Institutions Code Sections 10102 and 12300 et seq., and b) funding levels appropriated and any control provision contained in the Annual Budget Act.
+(7)	State-mandated program cost means those county costs incurred for the provision of IHSS to recipients, as specified in Section 30-757, in compliance with a state approved county plan.  Costs caused by factors beyond county control such as caseload growth and increased hours of service based on individually assessed need, shall also be considered state-mandated.
+(8)	Substantial Gainful Activity means work activity that is considered to be substantial gainful activity under the applicable regulations of the Social Security Administration, 20 CFR 416.932 through 416.934.  Substantial work activity involves the performance of significant physical or mental duties, or a combination of both, productive in nature.  Gainful work activity is activity for remuneration of profit, or intended for profit, whether or not profit is realized, to the individual performing it or to the persons, if any, for whom it is performed, or of a nature generally performed for remuneration or profit.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-16-01	Effective   1/1/16
+	Page 57
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-701
+30-701	SPECIAL DEFINITIONS (Continued)
+(9)	Substitute Payee means an individual who acts as an agent for the recipient.
+(t)	(1)	Tier 1 disqualifying crime means any one of the crimes specified in Welfare and Institutions Code Sections 12305.81(a)(1) and 12305.81(a)(2), namely:
+		(A)	Fraud against a government health care or supportive services program; or
+		(B)	A violation of subdivision (a) of Section 273a of the Penal Code; or
+		(C)	A violation of Section 368 of the Penal Code; or
+		(D)	A violation(s) similar to those specified in Section 30-701(t)(1)(B) or 30 701(t)(1)(C) in another jurisdiction.
+	(2)	Tier 2 disqualifying crime means any one of the crimes specified in Welfare and Institutions Code Sections 12305.87(b)(1), 12305.87(b)(2) and 12305.87(b)(3), namely:
+		(A)	A violent or serious felony, as specified in Penal Code section 667.5(c), and Penal Code Section 1192.7(c); or
+		(B)	A felony offense for which a person is required to register as a sex offender pursuant to Penal Code Section 290(c); or
+		(C)	A felony offense for fraud against a public social services program, as defined in Welfare and Institutions Code Sections 10980(c)(2) or 10980(g)(2).
+	(3)	Turnaround Timesheet means a three-part document issued by the state consisting of the paycheck, the statement of earnings, and the timesheet to be submitted for the next pay period.
+(u)		(Reserved)
+(v)	(1)	Voluntary Services Certification is the form numbered SOC 450 (10/98) which is incorporated by reference and which is to be used statewide by person(s) providing voluntary services without compensation.
+(w)		(Reserved)
+(x)		(Reserved)
+(y)		(Reserved)
+(z)		(Reserved)
+NOTE:  Authority cited:  Sections 10553, 10554, 12301.1, and 22009(b), Welfare and Institutions Code; and Chapter 939, Statutes of 1992 (AB 1773).  Reference:  Sections 10554, 11102, 12300(c), 12301, 12301.6, 12304, 12305.81, 12305.87,12306, 12308, 12309.1, 13302, 14132.95, 14132.95(e), 14132.95(f), and 22004, Welfare and Institutions Code; Marshall v. McMahon (1993) 17 Cal.App.4th 1841, and Calderon v. Anderson (1996) 45 Cal.App.4th 607.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-24-01	Effective 7/1/24
+	Page 58
+	SOCIAL SERVICES STANDARDS
+30-702	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-702	COUNTY QUALITY ASSURANCE AND QUALITY IMPROVEMENT
+.1	Each county shall establish a Quality Assurance (QA) unit or function which, at a minimum, will be required to perform the following tasks:
+	.11	Develop and regularly review policies and procedures, implementation timelines, and instructions under which county QA and Quality Improvement (QI) programs will function.
+	.12	Perform routine, scheduled reviews of supportive services cases which include reviewing a sample of case files and other documents.
+		.121	The county shall define routine, scheduled reviews in their QA procedures. 
+		.122	The county's QA case sample shall:
+			(a)	Include cases from all district offices and all workers involved in the assessment process. 
+			(b)	Include a minimum number of cases determined by CDSS based on the county's caseload and QA staffing allocation.
+		.123	If the county is unable to meet the requirements of Section 30-702.122, the county shall submit a written alternative proposal to CDSS outlining the reason as well as an alternative sample method.  CDSS shall review the proposal and determine if it is acceptable for compliance with Section 30-702.122.
+		.124	The county's routine, scheduled reviews shall consist of desk reviews and home visits.
+		.125	The review process shall be a standardized process, including standard forms for completing desk reviews of cases and for completing home visits.
+			(a)	The desk reviews must include:
+				(1)	A sample of denied cases.
+				(2)	Validation of case file information by recipient contact using a sub-sample of cases.	
+				(3)	A process to verify:
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 59
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-702(Cont.)
+30-702	COUNTY QUALITY ASSURANCE AND QUALITY IMPROVEMENT	30-702
+		(Continued)
+					(A)	Required forms are present, completed, and contain appropriate signatures.
+					(B)	There is a dated Notice of Action in the case file for the current assessment period.
+					(C)	The need for each service and hours authorized is documented.
+			(b)	The county shall conduct home visits using a sub-sample of their desk reviews to confirm that the assessment is consistent with the recipient's needs for services and the applicable federal and state laws and policies have been followed in the assessment process.  When conducting home visits the county shall:
+				(1)	Notify the recipient prior to the home visit.
+				(2)	Verify the recipient's identity.
+				(3)	Verify the need for any IHSS service tasks, not just the task currently authorized.
+				(4)	Verify all data on the G-Line of the SOC 293 (1/91), which includes specific information that may impact the assessment of need.
+				(5)	Verify the recipient understands which services have been authorized and the amount of time authorized for each.
+				(6)	Discuss with the recipient, the recipient's health issues and physical limitations to assist in identifying the recipient's functional limitations.
+				(7)	Discuss any changes in the recipient's condition or functional limitations since the last assessment.
+				(8)	Discuss the quality of services provided by the county with the recipient, including addressing the recipient's awareness of, and the ability to, contact and communicate with his/her worker.
+				(9)	Verify that the recipient understands his/her ability to request a fair hearing.
+				(10)	Ensure a completed back-up plan, that indicates the steps the recipient must take in the event of an emergency, is in the recipient's file and a copy has been provided to the recipient to use as a future resource.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 60
+	SOCIAL SERVICES STANDARDS
+30-702(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-702	COUNTY QUALITY ASSURANCE AND QUALITY IMPROVEMENT	30-702
+		(Continued)
+	.126	The county's QA review process shall also identify any optional county special requirements.
+	.127	When the county QA staff is prevented from completing a review on a specific case, this information shall be conveyed to the appropriate staff and an alternative case shall be selected.
+.13	Develop procedures to report QA findings to county and State management and to ensure that deficiencies identified are appropriately reported and corrected.
+	.131	The county's reporting procedures shall identify a standardized process for communicating results of routine, scheduled reviews to management, line staff, and the immediate supervisors of line staff.  The process shall include:
+			(a)	A specified time frame for response to QA findings and a follow-up process.
+			(b)	Protocols for identifying and responding to a need for immediate action.
+			(c)	Measures to ensure that corrective actions address problems that are systematic in nature.
+	.14	Review and respond to information provided as a result of data matches conducted by the State with other agencies that provide services to program recipients or State control agencies.
+		.141	In performing data match activities, counties shall ensure that confidentiality requirements are adhered to.
+	.15	Develop procedures to detect and prevent potential fraud by providers, recipients, and others, which include informing providers, recipients, and others that suspected fraud of supportive services can be reported by using the toll-free Medi-Cal fraud telephone hotline and/or internet web site.
+	.16	Conduct appropriate follow-up of suspected fraud and seek recovery of any overpayments, as appropriate.
+	.17	Identify potential sources of third-party liability and make appropriate referrals.  Potential sources of third-party liability include but are not limited to:
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 61
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-702
+30-702	COUNTY QUALITY ASSURANCE AND QUALITY IMPROVEMENT	30-702
+		(Continued)
+		.171	Long-Term Care Insurance.
+		.172	Worker’s Compensation Insurance.
+		.173	Victim Compensation Program Payments.
+		.174	Civil Judgment/Pending Litigations.
+	.18	Conduct joint case review activities with State QA staff.
+	.19	Develop a plan for and perform targeted QA/QI studies based on:
+		.191	Analysis of data acquired through the county’s quality assurance program; or
+		.192	Analysis of data available through Case Management Information Payrolling System  (CMIPS), county systems; or
+		.193	Other information, including but not limited to:
+Data from QA case review findings; or
+Input from Public Authorities and other consumer groups.
+		.194	The county shall submit a quarterly report of their QA/QI activities to CDSS on the SOC 824 (3/06) form fifteen days after the report quarter ends.  (Quarters end on March 31, June 30th, September 30th, and December 31st).
+.2	Each county shall develop and submit an annual QA/QI Plan to CDSS no later than June 1 of each year.
+	.21	The QA/QI Plan shall identify how the county will use the information gathered through QA   activities to improve the quality of the IHSS program at the local level.
+NOTE: Authority Cited:  Sections 10553 and 10554, Welfare and Institutions Code. Reference: Section 12305.71, Welfare and Institutions Code.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 61.1
+This page is intentionally left blank.SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-754 (Cont.)
+30-754	HEALTH CARE CERTIFICATION	30-754
+.1	As a condition of receiving services, each applicant shall provide a health care certification.  
+	.11	The health care certification shall:  
+		.111	Indicate that the applicant is unable to independently perform one or more activities of daily living;  
+		.112	Indicate that without services to assist the applicant with activities of daily living, the applicant is at risk of placement in out-of-home care;  
+		.113	Provide a description of any condition or functional limitation that has resulted in, or contributed to, the applicant’s need for services; and  
+		.114	Be signed by a LHCP-HCC, as defined in Section 30-701(l)(2).
+	HANDBOOK BEGINS HERE
+			(a)	Individuals who are considered to be LHCP-HCCs include, but are not limited to, the following:
+				(1)	A Physician;  
+				(2)	A Physician Assistant;  
+				(3)	A Regional Center Clinician or Clinician Supervisor;  
+				(4)	An Occupational therapist;  
+				(5)	A Physical Therapist;  
+				(6)	A Psychiatrist;  
+				(7)	A Psychologist;  
+				(8)	An Optometrist;  
+				(9)	An Ophthalmologist;  
+				(10)	A Public Health Nurse;  
+				(11)	A Licensed Clinical Social Worker; or  
+				(12)	A Marriage and Family Therapist.  
+	HANDBOOK ENDS HERE	
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-16-02	Effective   10/1/16
+	Page 61.1a
+	SOCIAL SERVICES STANDARDS
+30-754 (Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-754	HEALTH CARE CERTIFICATION	30-754
+		(Continued)
+	.12	The completed and signed health care certification shall not be dated more than 60 days prior to the date it is submitted to the county.  
+	.13	The health care certification shall not be required on subsequent reassessments.  
+.2	The health care certification shall be provided on a department-approved form, incorporated in its entirety herein by reference, the California Department of Social Services In-Home Supportive Services Program Health Care Certification (SOC 873 (10/16)).  
+	.21	The county shall accept alternative documentation in place of the SOC 873 (10/16) provided that the alternative documentation meets the following criteria:  
+		.211	Alternative documentation shall include all of the following elements:  
+			(a)	A statement or description indicating the applicant is unable to independently perform one or more activities of daily living, and that without services to assist the applicant with activities of daily living, the applicant is at risk of placement in out-of-home care;  
+			(b)	A description of the applicant’s condition or functional limitation that has contributed to the need for assistance; and  
+			(c)	A signature with date of a LHCP-HCC, as defined in Section 30-701(l)(2).  
+		.212	Alternative documentation shall not be dated more than 60 days prior to the date it is submitted to the county.
+	.22	Alternative documentation refers to clinical or casework documents generated for some purpose other than IHSS certification that also meets the criteria above.  
+	HANDBOOK BEGINS HERE
+		.221	Examples of alternative documentation include, but are not limited to, the following:  
+			(a)	A hospital or nursing facility discharge plan;  
+			(b)	Minimum Data Set forms, which is a standardized screening and assessment tool used to evaluate the physical, clinical, psychological and psycho-social functioning and document the life care wishes of residents of long-term care facilities certified to participate in Medicare or Medicaid (Medi-Cal); or 
+	HANDBOOK CONTINUES	
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS 16-02	Effective   10/1/16
+	Page 61.1b
+SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-754 (Cont.)
+30-754	HEALTH CARE CERTIFICATION	30-754
+		(Continued)
+	HANDBOOK CONTINUES
+			(c)	An Individual Program Plan, which is an agreement developed by the planning team for a developmentally disabled individual who receives Regional Center services, that outlines the individual’s goals and objectives, and specifies the services and supports he/she will need to achieve them.  
+	HANDBOOK ENDS HERE	
+	.23	In the absence of such alternative documentation, the SOC 873 (10/16) shall be utilized.  
+.3	The county shall request the health care certification from the applicant at or before the time of the in-home assessment.  
+	.31	If the health care certification is requested before the in-home assessment, the county shall screen applications received and, for those in which clear evidence of a need for services exists, the county shall not delay conducting the in-home assessment until the completed and signed health care certification is received by the county.  
+	.32	At the time the county requests the health care certification, the county shall provide the applicant with the department approved notice, the California Department of Social Services In-Home Supportive Services Program Notice to Applicant of Health Care Certification Requirement (SOC 874 (10/16)), incorporated in its entirety herein by reference, on which the county has specified the date by which the completed and signed health care certification shall be returned.  
+		.321	The county shall retain a copy of the notice, which includes the specified due date, in the applicant’s file.  
+.4	The county shall allow 45 calendar days from the day the county requests the health care certification for the completed and signed health care certification to be submitted to the county.  
+	.41	The completed and signed health care certification shall be received by the county or postmarked no later than the 45th calendar day after it is requested by the county.  
+.5	The county shall consider the heath care certification as one indicator, but not the sole determining factor, in determining an applicant’s need for services.  
+.6	The county may not authorize services in the absence of the health care certification except in following circumstances:  
+	.61	When services have been requested by or on behalf of an applicant who is being discharged from a hospital or a nursing home and services are needed to return safely to the community.  
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-16-02	Effective   10/1/16
+	Page 61.1c
+SOCIAL SERVICES STANDARDS
+30-754 (Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-754	HEALTH CARE CERTIFICATION	30-754
+		(Continued)
+	.62	When the county determines the applicant is at imminent risk of out-of-home placement.  
+	HANDBOOK BEGINS HERE
+		.621	An example of imminent risk of out-of-home placement:  
+			(a)	An Adult Protective Services worker advised the county that an IHSS applicant is at imminent risk of out-of-home placement without IHSS services in place.  If the county determines that waiting up to 45 calendar days for the health care certification to be returned would place an IHSS applicant at risk of out-of-home placement, services can be granted temporarily pending receipt of the health care certification or alternative documentation.  
+	HANDBOOK ENDS HERE	
+	.63	Applicants who have been granted an exception, pursuant to Sections 30-754.6 through 30-754.62, shall return the completed health care certification within 45 calendar days from the date it is requested by the county.  
+	.64	Applicants who have been granted an exception, pursuant to Sections 30-754.6 through 30-754.62, may be granted an additional 45 calendar days for good cause.  
+		.641	Good cause means a substantial and compelling reason beyond the control of the applicant who has been granted an exception.  
+		.642	Counties shall inform the applicant who has been granted an exception, pursuant to Sections 30-754.6 through 30-754.62, that he/she may request additional time to provide the health care certification or alternative documentation.  
+		.643	Applicants who have been granted an exception, pursuant to Sections 30-754.6 through 30-754.62, shall notify the county of the need for a good cause extension no later than 45 calendar days from the date the county requests the certification.  
+		.644	Counties have the discretion to determine on a case-by-case basis when good cause exists. 
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS 16-02	Effective   10/1/16
+	Page 61.1d
+SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-754
+30-754	HEALTH CARE CERTIFICATION	30-754
+		(Continued)
+	HANDBOOK BEGINS HERE
+		.645	Some examples of good cause include but are not limited to:  
+			(a)	Applicant was in the hospital for much of the 45-day timeframe;  
+			(b)	The LHCP-HCC was scheduling appointments out for more than the 45-day timeframe; or  
+			(c)	The form was lost in the mail.  
+	HANDBOOK ENDS HERE	
+	.65	When the county grants an exception pursuant to Section 30-754.61 and authorizes services before the in-home assessment has been conducted, the county shall provide the applicant with a notice of provisional approval of his/her application for services.  
+		.651	The notice shall include information about the specific services and the amount of time being provisionally authorized.  
+		.652	The notice of provisional approval shall be in lieu of the Notice of Action required pursuant to Section 10-116 and shall not confer the right to a hearing pursuant to Section 10-117.  
+		.653	Once the in-home assessment has been conducted, the county shall provide the applicant a Notice of Action as required pursuant to Section 10-116 which shall confer the right to a hearing pursuant to Section 10-117.  
+NOTE:  Authority Cited:  Sections 10553 and 10554, Welfare and Institutions Code.  Reference:  Section 12309.1, Welfare and Institutions Code.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-16-02	Effective   10/1/16
+	Page 61.1e
+SOCIAL SERVICES STANDARDS
+30-755	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-755		PERSONS SERVED BY THE NON-PCSP IHSS PROGRAM	30-755
+.1	Eligibility
+.11	A person is eligible for IHSS who is a California resident living in his/her own home, and who meets one of the following conditions:
+.111	Currently receives SSI/SSP benefits.
+.112	Meets all SSI/SSP eligibility criteria including income, but does not receive SSI/SSP benefits.
+.113	Meets all SSI/SSP eligibility criteria, except for income in excess of SSI/SSP eligibility standard or immigration criteria, and meets applicable share of cost obligations. 
+			(a)	A person must meet immigration status criteria as provided in 20 CFR Part 416, subpart P, or must meet the state program noncitizen status criteria as provided in PP Section 30-770.51.
+.114	Was once eligible for SSI/SSP benefits, but became ineligible because of engaging in substantial gainful activity, and meets all of the following conditions:
+(a)	The individual was once determined to be disabled in accordance with Title XVI of the Social Security Act (SSI/SSP).
+(b)	The individual continues to have the physical or mental impairments which were the basis of the disability determination.
+(c)	The individual requires assistance in one or more of the areas specified under the definition of "severely impaired individual" in Section 30-753.
+(d)	The individual meets applicable share of cost obligations.
+.12	Otherwise eligible applicants, currently institutionalized, who wish to live in their own homes and who are capable of safely doing so if IHSS is provided, shall upon application receive IHSS based upon a needs assessment.
+.121	Service delivery shall commence upon the applicant's return home, except that authorized services as specified in Section 30-757.12 may be used to prepare for the applicant's return home.
+.2	Eligibility Determination
+.21	Eligibility shall be determined by county social service staff at the time of application, at subsequent 12-month intervals, and when required based on information received about changes in the individual's situation.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS 09-01	Effective   2/5/09
+	Page 61.2
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-755 (Cont.)
+30-755	PERSONS SERVED BY THE NON-PCSP IHSS PROGRAM (Continued)	30-755
+.22	Eligibility for current recipients of SSI/SSP shall be determined by verifying receipt of SSI/SSP.  This can be done in any of the following ways:
+.221	Seeing the current SSI/SSP Notice of Determination.
+.222	Seeing the current SSI/SSP benefit check.
+.223	Contacting the Social Security District Office.
+.224	Checking the Medi-Cal Eligibility Data System (MEDS) or the State Data Exchange (SDX) screens.
+.23	Eligibility for those persons described in Sections 30-755.112, .113, and .114 above shall be determined as follows:
+.231	Age, blindness, and disability shall be determined by social service staff using the eligibility standards specified in Sections 30-770 through 30-775.
+(a)	Age, blindness or disability may be established by looking at the third and fourth digits of the Medi-Cal number.  If the number is 10, the recipient is aged; if 20,  the recipient is blind; and if 60, the recipient is disabled.  However, if the third and fourth digits of the number are not 20 or 60, a new determination of blindness or disability may be required.
+.232	Residence,  property, and net nonexempt income shall be determined by social service staff using the eligibility standards specified in Sections 30-770 through 30-775.
+.233	Net nonexempt income in excess of the applicable SSI/SSP benefit level shall be applied to the cost of IHSS.
+(a)	Payment of the entire obligated share of cost is a condition of eligibility for IHSS.
+(b)	Providers shall have the primary responsibility for collecting any share of cost owed to them.
+(1)	The county may collect the share of cost.
+(2)	Counties shall have the responsibility for collection of any share of cost which must be paid against the provider's tax liability.
+(c)	If a recipient fails to pay his/her entire obligated share of cost within the month for which it is obligated, IHSS shall be terminated.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 61.3
+	SOCIAL SERVICES STANDARDS
+30-755 (Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-755	PERSONS SERVED BY THE NON-PCSP IHSS PROGRAM (Continued)	30-755
+(1)	Termination will be effective the last day of the month following the month of discovery of the recipient's failure to pay his/her entire obligated share of cost.
+(d)	If an applicant/recipient states verbally or in writing that he/she will not pay his/her share of cost, the applicant/recipient shall not be eligible for IHSS services.
+.24	Notwithstanding Section 30-755.232 above, net nonexempt income for persons specified in Section 30-755.113 above shall be determined, depending on the aid category to which the individual was linked in December, 1973, according to the Old Age Security (OAS), Aid to the Blind (AB) and Aid to the Totally Disabled (ATD) income regulations which would have been applicable in the individual's case in June, 1973, if it is to the person's advantage and either of the following conditions is met:
+.241	In December 1973 the person was receiving only homemaker/chore services or was receiving an OAS, AB or ATD cash grant solely for attendant care, and has received IHSS services continuously since that date.
+.242	In December 1973 the person had applied for attendant care of homemaker/chore service, met all eligibility requirements in that month, and has received IHSS services continuously since that date.
+.25	The case record for persons specified in .111 above shall indicate the information used to determine receipt of SSI/SSP benefits.
+.26	The case record for persons specified in Sections 30-755.112, .113, and .114 above shall include:
+.261	The information used by the county to determine age, blindness or disability.
+.262	The information regarding the recipient's property, income, and living situation used by the county in determining eligibility.  Such information shall be recorded on a statement of facts form which shall be signed by the recipient or his/her authorized representative under penalty of perjury, and shall be dated.  The county shall verify income.  The county may verify other information if necessary to insure a correct eligibility determination.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 61.4
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-755
+30-755	PERSONS SERVED BY THE NON-PCSP IHSS PROGRAM (Continued)	30-755
+.263	For persons eligible under .114 above, the information used to decide that the recipient was once determined to be eligible for SSI/SSP, was once determined to be disabled as provided in .114(a)  above, and was discontinued from SSI/SSP because of engaging in substantial gainful activity.
+.264	The computation of the amount the recipient must pay toward the cost of in-home supportive services.
+.3	Medi-Cal
+.31	Recipients of services under .112, .113, and .114 above are eligible for Medi-Cal, provided that any net nonexempt income in excess of the SSI/SSP benefit level shall be applied to the cost of in-home supportive services.
+NOTE:  Authority cited:  Sections 10553, 10554, and 12150, Welfare and Institutions Code; Chapter 939, Statutes of 1992; and Senate Bill 1569 (Chapter 672, Statutes of 2006). Reference:  Sections 10554, 12304.5, 12305, 12305.6, 13283, 14132.95, and 18945 Welfare and Institutions Code.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-09-01	Effective   2/5/09
+	Page 61.5
+This page is intentionally left blank.
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-756 (Cont.)
+30-756	NEED					30-756
+.1	Staff of the designated county department shall determine the recipient's level of ability and dependence upon verbal or physical assistance by another for each of the functions listed in Section 30-756.2.  This assessment shall evaluate the effect of the recipient's physical, cognitive and emotional impairment on functioning.  Staff shall quantify the recipient's level of functioning using the following hierarchical five-point scale:
+.11	Rank 1:	Independent:  able to perform function without human assistance, although the recipient may have difficulty in performing the function, but the completion of the function, with or without a device or mobility aid, poses no substantial risk to his or her safety.  A recipient who ranks a "1" in any function shall not be authorized the correlated service activity.
+.12	Rank 2:	Able to perform a function, but needs verbal assistance, such as reminding, guidance, or encouragement.
+.13	Rank 3:	Can perform the function with some human assistance, including, but not limited to, direct physical assistance from a provider.
+.14	Rank 4:	Can perform a function but only with substantial human assistance.
+.15	Rank 5:	Cannot perform the function, with or without human assistance.
+.2	Staff of the designated county department shall rank the recipient's functioning in each of the following functions.
+(a)	Housework;
+(b)	Laundry;
+(c)	Shopping and errands;
+(d)	Meal preparation and cleanup;
+(e)	Mobility inside;
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-93-03	Effective   
+	Page 62
+	SOCIAL SERVICES STANDARDS
+30-756 (Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-756	NEED (Continued)				30-756
+(f)	Bathing and grooming;
+(g)	Dressing;
+(h)	Bowel, bladder and menstrual;
+(i)	Repositioning;
+(j)	Eating;
+(k)	Respiration;
+(l)	Memory;
+(m)	Orientation; and
+(n)	Judgment.
+.3	Staff of the designated county department shall use the following criteria to support the determination of functional impairment:
+.31	The recipient's diagnosis may provide information to substantiate demonstrated functional impairments, but the recipient's functioning is an evaluation of the recipient's capacity to perform self-care and daily chores.
+.32	Need may be distinct from current practice.  The assessment of need shall identify the recipient's capacity to perform functions safely.  The assessment of need shall identify the recipient's capacity rather than level of dependence.
+.33	The recipient's needs shall be assessed within his/her environment, considering the mechanical aids or durable medical appliances the recipient uses.
+.34	The scales are hierarchical.  The higher the score, the more dependent the recipient is upon another person to perform IHSS services activities.
+.35	Most functions are evaluated on a five-point scale.  However, the functions of memory, orientation and judgment contain only three ranks.  The function of respiration contains only ranks 1 and 5.  These inconsistencies in the ranking patterns exist because differing functional ability in these areas does not result in significantly different need for human assistance.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-93-03	Effective   
+	Page 63
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-756
+30-756	NEED (Continued)				30-756
+.36	The order in which the physical functions are listed in Sections 30-756.2(a) through (k) is hierarchical.
+	HANDBOOK BEGINS HERE
+.361	In 95 percent of any impaired population, people tend to lose functioning in the inverse order of normal infant development.  Therefore, it would be unlikely for a recipient to score higher ranks in the functions listed at the bottom of the list than those at the top.  This listing should assist in the assessment process.
+	HANDBOOK ENDS HERE	
+.37	Mental functioning shall be evaluated as follows:
+.371	The extent to which the recipient's cognitive and emotional impairment (if any) impacts his/her functioning in the 11 physical functions listed in Sections 30-756.2(a) through (k) is ranked in each of those functions.  The level and type of human intervention needed shall be reflected in the rank for each function.
+.372	The recipient's mental function shall be evaluated on a three-point scale (Ranks 1, 2, and 5) in the functions of memory, orientation and judgment.  This scale is used to determine the need for protective supervision.
+.4	Notwithstanding Section 30-756.11, staff shall rank a recipient the rank of "1" if the recipient's needs for a particular function are met entirely with paramedical services as described in Section 30-757.19 in lieu of the correlated task.
+.41	If all of the recipient's ingestion of nutrients occurs with tube feeding, the recipient shall be ranked "1" in both meal preparation and eating because tube feeding is a paramedical service.
+.42	If all the recipient's needs for human assistance in respiration are met with the paramedical services of tracheostomy care and suctioning, the recipient should be ranked a "1" because this care is paramedical service rather than respiration.
+NOTE:  Authority cited:  Sections 10553 and 10554, Welfare and Institutions Code; and Chapter 939, Statutes of 1992.  Reference:  Section 12309, Welfare and Institutions Code; and the State Plan Amendment, approved pursuant to Section 14132.95(b), Welfare and Institutions Code.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-93-03	Effective   
+	Page 64
+This page is intentionally left blank.
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-757 (Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+.1	Only those services specified in Sections 30-757.11 through .19 shall be authorized through IHSS.  A person who is eligible for a personal care service provided pursuant to the PCSP shall not be eligible for that personal care service through IHSS.  A service provided by IHSS shall be equal to the level of the same service provided by PCSP.
+	(a)	For services in this section where time guidelines are specified, the services shall be subject to the specified time guideline unless the recipient's needs require an exception to the guideline.  When assessing time for services (both within and outside the time guidelines), the time authorized shall based on the recipient's individual level of need necessary to ensure his/her health, safety, and independencased on the scope of tasks identified for service.  In accordance with Welfare and Institutions Code Section 12301.2, the dual purpose of the guidelines is to provide counties with a tool for both consistently and accurately assessing service needs and authorizing time.
+		(1)	In determining the amount of time per task, the recipient's ability to perform the tasks based on his/her functional index ranking shall be a contributing factor, but not the sole factor.  Other factors could include the recipient's living environment, and/or the recipient's fluctuation in needs due to daily variances in the recipient's functional capacity (e.g., "good days" and " bad days").
+			(A)	In determining the amount of time per task, universal precautions should be considered.
+				1.	Universal precautions are protective practices necessary to ensure safety and prevent the spread of the infectious diseases.  Universal precautions should be followed by anyone providing a service, which may include contact with blood or body fluids such as saliva, mucus, vaginal secretions, semen, or other internal body fluids such as urine or feces.  Universal precautions include the use of protectivarriers such as gloves or facemask depending on the type and amount of exposure expected, and always washing hands before and after performing tasks.  More information regarding universal precautions can be obtained by contacting the National Center for Disease Control.
+	(2)	An exception to the time guideline may result in receiving more or less timased on the recipient's need for each supportive service and the amount of time needed to complete the task.
+	(3)	Exceptions to the hourly task guidelines identified in this section shall be made when necessary to enable the recipient to establish and maintain an independent living arrangement and/or remain safely in his/her home or abode of his/her own choosing and shall be considered a normal part of the authorization process.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+(4)	No exception shall result in the recipient's hours exceeding the maximum limits of 195 hours per month as specified at Section 30-765.121 for nonseverely impaired cases or 283 hours per month for severely impaired cases as specified in Section 30-765.111.  No exception shall result in the recipient's hours exceeding the maximum limit for PCSP cases as specified at Section 30-780.2(b).
+(5)	No exceptions to hourly task guidelines shall be made due to inefficiency or incompetence of the provider.
+(6)	When an exception to an hourly task guideline is made in a recipient's case, the reason for the exception shall be documented in the case file.
+					HANOOK BEGINS HERE
+			(A)	Documentation of the reason for the exception will provide necessary data to audit the effectiveness of each guideline in terms of:
+				1.	Achieving equity in service authorizations; and
+				2.	Evaluating program costs.
+			(B)	In documenting an exception, the county worker can record the circumstances requiring more or less time than the range recommends.  Examples of written documentation may include:
+				1.	Writing a few words, phrases, or sentences (e.g., more time needed due to frequent urination, etc.); or 
+				2.	Citing the regulation that identifies the exception reason when the reason is listed as one of the exception criteria provided in regulation for that particular service (e.g., under "bowel and bladder" care, frequent urination per Section 30-757.14(a)(4)(A)).
+			(C)	The worker's supervisor should review the documentation of the worker in accordance with current county procedures and current program regulations.  The purpose of supervisory case review is to assure that service hours authorized by workers accurately reflect the individual's care needs and that these needs have been appropriately documented in the case file by the worker.
+			(D)	Consistent with current practice, if the supervisor determines that the worker's documentation is not sufficient, the supervisor should discuss the case with the worker and identify any additional items needed to see if the worker can substantiate the exception prior to the supervisor making any changes.
+	HANOOK ENDS HERE	
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.1
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+.11	Domestic services which are limited to the following:
+(a)	Sweeping, vacuuming, washing and waxing of floor surfaces.
+(b)	Washing kitchen counters and sinks.
+(c)	Cleaning the bathroom.
+(d)	Storing food and supplies.
+(e)	Taking out garbage.
+(f)	Dusting and picking up.
+(g)	Cleaning oven and stove.
+(h)	Cleaning and defrosting refrigerator.
+(i)	Bringing in fuel for heating or cooking purposes from a fuel bin in the yard.
+(j)	Changing bed linen.
+(k)	Miscellaneous domestic services (e.g., changing light bulbs, wheelchair cleaning, and changing and recharging wheelchair batteries) when the service is identified and documented by the caseworker as necessary for the recipient to remain safely in his/her home.
+	(1)	The time guideline for "domestic services" shall not exceed 6.0 hours total per month per household unless the recipient's needs require an exception.
+.12	Heavy cleaning which involves thorough cleaning of the home to remove hazardous debris or dirt.
+.121	The county shall have the authority to authorize this service only at the time IHSS is initially granted, to enable the provider to perform continuous maintenance; or if a lapse in eligibility occurs, eligibility is reestablished, and IHSS has not been provided within the previous 12 months.  The county shall also have the authority to authorize this service should the recipient's living conditions result in a threat to his/her safety and such service may be authorized where a recipient is at risk of eviction for failure to prepare his/her home or abode for fumigation as required by statute or ordinance.  The caseworker shall document the circumstances, justifying any such allowance.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.2
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+.13	Related services which are limited to the following:
+.131	Preparation of meals, which includes planning menus; removing food from the refrigerator or pantry; washing/drying hands before and after meal preparation; washing, peeling, and slicing vegetables; opening packages, cans and bags; measuring and mixing ingredients; lifting pots and pans; trimming meat; reheating food; cooking and safely operating the stove; setting the table; serving the meals; pureeing food; and cutting the food into bite-size pieces.
+	(a)	The time guidelines range for " preparation of meals" shall be as follows unless the recipient's needs require an exception:
+Note:	Rank represents the recipient's level of functioning (functional index as provided in Section 30-756.1.
+(b)	Factors for the consideration of time include, but are not limited to:
+				(1)	The extent to which the recipient can assist or perform tasks safely.
+				(2)	The types of food the recipient usually eats for breakfast, lunch, dinner, and snacks and the amount of time needed to prepare the food (e.g., more cooked meals versus meals that do not require cooking).
+		(3)	Whether the recipient is able to reheat meals prepared in advance and the types of food the recipient eats on days the provider does not work.
+		(4)	The frequency the recipient eats.
+		(5)	Time for universal precautions, as appropriate.
+	(c) 	Exception criteria to the time guideline range include, but are not limited to:
+		(1)	If the recipient must have meals pureed or cut into bite-sized pieces.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.3
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+	(2)	If the recipient has special dietary requirements that require longer preparation times or preparation of more frequent meals.
+	(3)	If the recipient eats meals that require less preparation time (e.g., toast and coffee for breakfast).
+.132	Meal clean-up, which includes loading and unloading dishwasher; washing, rinsing, and drying dishes, pots, pans, utensils, and culinary appliances, and putting them away; storing/putting away leftover foods/liquids; wiping up tables, counters, stoves/ovens, and sinks; and washing/drying hands.
+	(a)	Meal clean up does not include general cleaning of the refrigerator, stove/oven, or counters and sinks.  These services are assessed under "domestic services" in Section 30-757.11.
+	(b)	The time guideline range for "meal cleanup" shall be as follows unless the recipient's needs require an exception:
+	(c)	Factors for consideration of time include, but are not limited to:
+	(1)	The extent to which the recipient can assist or perform tasks safely.
+					(A)	A recipient with a Rank 3 in "meal cleanup" who has been determined able to wash breakfast/lunch dishes and utensils and only needs the provider to cleanup after dinner would require time based on the provider performing cleanup of the dinner meal only.
+					(B)	A recipient who has less control of utensils and/or spills food frequently may require more time for cleanup.
+				(2)	The types of meals requiring the cleanup.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective  
+	Page 65.4
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+.		 			HANOOK BEGINS HERE
+			(A)	A recipient who chooses to eat eggs and bacon for breakfast would require more time for cleanup than a recipient who chooses to eat toast and coffee.
+	HANOOK ENDS HERE	
+	(3)	If the recipient can rinse the dishes and leave them in the sink until the provider can wash them.
+	(4)	The frequency that meal cleanup is necessary.
+	(5)	If there is a dishwasher appliance available.
+	(6)	Time for universal precautions, as appropriate.
+	(d)	Exceptions criteria to the time guideline range may include, but are not limited to:
+	(1)	If the recipient must eat frequent meals which require additional time for cleanup.
+		(2)	If the recipient eats light meals that require less time for cleanup.
+.133	Restaurant meal allowance.
+(a)	An aged or disabled client who has adequate cooking facilities at home but whose disabilities prevent their use shall be advised of his/her option to receive a restaurant meal allowance in lieu of the services specified in .131 through .133, above, and shopping for food which the recipient would otherwise receive.
+(1)	The amount of the restaurant meal allowance shall be that specified in Welfare and Institutions Code Section 12303.7 or as otherwise provided by law.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.5
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+(A)	IHSS restaurant meal allowances established in accordance with Welfare and Institutions Code Section 12303.7 shall be as follows:
+Allowance for	Allowance for
+an Individual 	    a Couple    
+$62.00 per	$124.00 per
+month	month
+(2)	A recipient who receives a restaurant meal allowance as part of his/her SSP grant shall not receive a restaurant meal allowance from IHSS.
+(3)	An aged or disabled recipient who is an SSP recipient, who requests a restaurant meal allowance, and who does not have adequate cooking facilities at home shall be referred to SSP.
+.134	Laundry services which includes the tasks of washing and drying laundry, mending, ironing, folding, and storing clothes on shelves or in drawers.
+(a)	Laundry facilities are considered available in the home if, at a minimum, there exists a washing machine and a capability to dry clothes on the premises.
+(b)	The need for out-of-home laundry services exists when laundry facilities are not available on the premises and it is therefore necessary to go outside the premises to accomplish this service.  Included in out-of-home laundry is the time needed to travel to/from a locally available laundromat or other laundry facility.
+(c)	The time guideline for laundry service where laundry facilities are available in the home shall not exceed 1.0 hours total per week per household unless the recipient's need requires an exception to exceed this limit.
+.		 			HANOOK BEGINS HERE
+	(1)	In assessing time for in-home laundry services, it is expected that the provider will accomplish other tasks while clothes are washing and drying.
+	HANOOK ENDS HERE	
+(d)	The time guideline for laundry services where laundry facilities are not available in the home shall not exceed 1.5 hours total per week per household unless the recipient's need requires an exception to exceed this limit.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.6
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+.		 			HANOOK BEGINS HERE
+				(1)	It is expected that the typical provider will use a local laundromat as necessary for efficient time utilization.
+	HANOOK ENDS HERE	
+			(e)	An exception to grant more time than the time guidelines specified in Sections 30-757.134(c) and (d) may be necessary for recipients who have incontinence.
+.135	Food shopping which includes reasonable food shopping and other shopping/errands limited to the nearest available stores or other facilities consistent with the recipient's economy and needs.
+(a)	The county shall not authorize additional time for the recipient to accompany the provider.
+(b)	Food shopping includes the tasks of making a grocery list, travel to/from the store, shopping, loading, unloading, and storing food.
+				(1)	The time guideline for " food shopping" shall not exceed 1.0 hour total per week per household unless the recipient's need requires an exception to exceed this limit.
+(c)	Other shopping/errands includes the tasks of making a shopping list, travel to/from the store, shopping, loading, unloading, and storing supplies purchased, and/or performing reasonable errands such as delivering a delinquent payment to avert an imminent utility shut-off or picking up a prescription, etc.
+				(1)	The time guideline for "other shopping/errands" shall not exceed 0.5 hour total per week per household unless the recipient's need requires an exception to exceed this limit.
+.14	Personal care services, limited to:
+(a)	"Bowel and bladder" care, which includes assistance with using, emptying, and cleaning bed pans/bedside commodes, urinals, ostomy, enema and/or catheter receptacles;, application of diapers; positioning for diaper changes; managing clothing; changing  disposable barrier pads; putting on/taking off disposable rubber gloves; wiping and cleaning recipient; assistance with getting on/off commode or toilet; and washing/drying recipient's and providers hands.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.7
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+	(1)	"Bowel and bladder" care does not include insertion of enemas, catheters, suppositories, digital stimulation as part of a bowel program, or colostomy irrigation.  These tasks are assessed as "paramedical services" specified at Section 30-757.19.
+	(2)	The time guideline range for "bowel and bladder" care shall be as follows unless the recipient's needs require an exception:
+	(3)	Factors for consideration of time include, but are not limited to:
+		(A)	The extent to which the recipient can assist or perform tasks safely.
+		(B)	The frequency of the recipient's urination and/or bowel movements.
+		(C)	If there are assistive devices available which result in decreased or increased need for assistance.
+.		 			HANOOK BEGINS HERE
+					1.	Situation where elevated toilet seats and/or Hoyer lifts are available may result in less time needed for "bowel and bladder" care if the use of these devices results in a decreased need for assistance by the recipient.
+					2.	Situations where a bathroom door is not wide enough to allow for easy wheelchair access may result in more time needed if its use results in an increased need.
+	HANOOK ENDS HERE	
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.8
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+		(D)	Time for universal precautions, as appropriate.
+	(4)	Exception criteria to the time guideline range may include, but are not limited to:
+		(A)	If the recipient has frequent urination or bowel movements.
+		(B)	If the recipient has frequent bowel or bladder accidents.
+		(C)	If the recipient has occasional bowel or bladder accidents that require assistance from another person.
+		(D)	If the recipient's morbid obesity requires more time.
+		(E)	If the recipient has spasticity or locked limbs.
+		(F)	If the recipient is combative.
+(b)	Respiration limited to nonmedical services such as assistance with self-administration of oxygen and cleaning IPPB machines.
+(c)	"Feeding," which includes assistance with consumption of food and assurance of adequate fluid intake consisting of feeding or related assistance to recipients who cannot feed themselves or who require other assistance with special devices in order to feed themselves or to drink adequate liquids.
+	(1)	"Feeding" tasks include assistance with reaching for, picking up, and grasping utensils and cup; cleaning recipient's face and hands; and washing/drying hands; and washing/drying hands before and after feeding.		
+	(2)	"Feeding" tasks do not include cutting food into bite-sized pieces or pureeing food, as these tasks are assessed in "preparation of meals" services specified at Section 30-757.131.	
+
+	(3)	The time guideline range for "feeding" shall be as follows unless the reciepient's needs require an exception:
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.9
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+(4)	Factors for consideration of time include, but are not limited to:
+	(A)	The extent to which the recipient can assist or perform tasks safely.
+	(B)	The amount of time it takes the recipient to eat meals.
+	(C)	The type of food that will be consumed.
+	(D)	The frequency of meals/liquids.
+	(E)	Time for universal precautions, as appropriate.
+(5)	Exception criteria to the time guideline range may include, but are not limited to:
+	(A)	If the constant presence of the provider is required due to the danger of choking or other medical issues.
+	(B)	If the recipient is mentally impaired and only requires prompting for feeding him/herself.
+	(C)	If the recipient requires frequent meals.
+	(D)	If the recipient prefers to eat foods that he/she can manage without assistance.
+	(E)	If the recipient must eat in bed.
+		(F)	If food must be placed in the recipient's mouth in a special way due to difficulty swallowing or other reasons.
+			(G)	If the recipient is combative.
+(d)	Routined baths, which includes cleaning basin or other materials used for bed spongaths and putting them away; obtaining water and supplies; washing, rinsing, and drying body; applying lotion, powder and deodorant; and washing/drying hands before and after bathing.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.10
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+(1)	The time guideline range for "bed baths" shall be as follows unless the recipient's needs require an exception:
+(2)	Factors for consideration of time include, but are not limited to:
+	(A)	The extent to which the recipient can assist or perform tasks safely.
+	(B)	If the recipient is prevented from bathing in the tub/shower.
+	(C)	If bed baths are needed in addition to baths in the tub/shower.
+	(D)	Time for universal precautions, as appropriate.
+(3)	Exception criteria to the time guideline range may include, but are not limited to:
+	(A)	If the recipient is confined to bed and sweats profusely requiring frequent bed baths.
+	(B)	If the weight of the recipient requires more or less time.
+	(C)	If the recipient is combative.
+(e)	Bathing, oraygiene and grooming:
+(1)	Bathing includes cleaning thody in a tub or shower; obtaining water/supplies and putting them away; turning on/off faucets and adjusting water temperature; assistance with getting in/out of tub or shower; assistance with reaching all parts of thody for washing, rinsing, drying and applying lotion, powder, deodorant; and washing/drying hands.
+(2)	Oraygiene includes applying toothpaste, brushing teeth, rinsing mouth, caring  for dentures, flossing, and washing/drying hands.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.11
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+(3)	Grooming includes hair combing/brushing; hair trimming when the recipient cannot get to the barber/salon; shampooing, applying conditioner, and drying hair; shaving; fingernail/toenail care when these services are not assessed as "paramedical" services for the recipient; and washing/drying hands.
+(4)	"Bathing, oraygiene, and grooming," does not include getting to/from thathroom.  These tasks are assessed as mobility under "ambulation" services specified at Section 30-757.14(k).
+(5)	The time guideline range for "bathing, oraygiene, and grooming," shall be as follows unless the recipient's needs require an exception:
+(6)	Factors for consideration of time include, but are not limited to:
+	(A)	The extent to which the recipient can assist or perform tasks safely.
+	(B)	The number of times the recipient may need to bathe.
+	(C)	If the recipient requires assistance in/out of tub/shower.
+	(D)	If the recipient needs assistance with supplies.
+	(E)	If the recipient requires assistance washing his/her body.
+	(F)	If the provider must be present while the recipient bathes.
+	(G)	If the recipient requires assistance drying his/her body and/or putting on lotion/powder after bathing.
+	(H)	If the recipient showers in a wheelchair.
+	(I)	Universal precautions, as appropriate.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.12
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+(7)	Exceptions to the time guideline range may include, but are not limited to:
+	(A)	If the provider's constant presence is required.
+	(B)	If the weight of the recipient requires more or less time.
+	(C)	If the recipient has spasticity or locked limbs.
+	(D)	If a roll-in shower is available.
+	(E)	If the recipient is combative.
+(f)	Dressing, which includes washing/drying of hands; putting on/taking off, fastening/unfastening, buttoning/unbuttoning, zipping/unzipping, and tying/untying of garments, undergarments, corsets, elastic stockings and braces; changing soiled clothing; and bringing tools to the recipient to assist with independent dressing.
+(1)	The time guideline range for "dressing" shall be as follows unless the recipient's needs require an exception.
+(2)	Factors for consideration of time include, but are not limited to:
+	(A)	The extent to which the recipient can assist or perform tasks safely.
+	(B)	The type of clothing/garments the recipient wears.
+	(C)	If the recipient prefers other types of clothing/garments.
+	(D)	The weather conditions.
+	(E)	Universal precautions, as appropriate.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.13
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+(3)	Exception criteria to the time guideline range may include, but are not limited to:
+	(A)	If the recipient frequently leaves his/her home, requiring additional dressing/undressing.
+	(B)	If the recipient frequently bathes and requires additional dressing or soils clothing, requiring frequent changes of clothing.
+	(C)	If the recipient has spasticity or locked limbs.
+	(D)	If the recipient is immobile.
+	(E)	If the recipient is combative.
+(g)	Repositioning and rubbing skin, which includes rubbing skin to promote circulation and/or prevent skin breakdown; turning in bed and other types of repositioning;  and range of motion exercises which shall be limited to the following:
+(1)	General supervision of exercises which have been taught to the recipient by a licensed therapist or other health care professional to restore mobility restricted because of injury, disuse or disease.
+(2)	Maintenance therapy when the specialized knowledge and judgment of a qualified therapist is not required and the exercises are consistent with the patient's capacity and tolerance.
+	(A)	Such exercises shall include the carrying out of maintenance programs, i.e., the performance of the repetitive exercises required to maintain function, improve gait, maintain strength, or endurance; passive exercises to maintain range of motion in paralyzed extremities; and assistive walking.
+(3)	"Repositioning and rubbing skin" does not include:
+(A)	Care of pressure sores (skin and wound care).  This task is assessed as a part of "paramedical" services specified at Section 30-757.19.
+(B)	Ultraviolet treatment (set up and monitor equipment) for pressure sores and/or application of medicated creams to the skin.  These tasks are assessed as part of "assistance with prosthetic devices" at Section 30-757.14(i).
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.14
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+(Continued)
+(4)	The time guideline range for "repositioning and rubbing skin" shall be as follows unless the recipient's needs require an exception:
+		(5)	Factors for consideration of time include, but are not limited to:
+			(A)	The extent to which the recipient can assist or perform tasks safely.
+			(B)	If the recipient's movement is limited while in the seating position and/or in bed, and the amount of time the recipient spends in the seating position and/or in bed.
+			(C)	If the recipient has circulatory problems.
+			(D)	Universal precautions, as appropriate.
+	(6)	Exceptions criteria to the time guideline range may include, but are not limited to:
+	(A)	If the recipient has a condition that makes him/her confined to thed.
+	(B)	If the recipient has spasticity or locked limbs.
+	(C)	If the recipient has or is at risk of having decubitus ulcers which require the need to turn the recipient frequently.
+	(D)	If the recipient is combative.
+(h)	"Transfer," which includes assisting from standing, sitting, or prone position to another position and/or from one piece of equipment or furniture to another.  This includes transfer from a bed, chair, couch, wheelchair, walker, or other assistive device generally occurring within the same room.
+(1)	"Transfer" does not include:
+(A)	Assistance on/off toilet.  This task is assessed as part of "bowel and bladder" care specified at Section 30-757.14(a).
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 65.15
+SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+			(B)	Changing the recipient's position to prevent skin breakdown and to promote circulation.  This task is assessed as part of "repositioning and rubbing skin" specified at Section 30-757.14(g).
+		(2)	The time guideline range for "transfer" shall be as follows unless the recipient's needs require an exception:
+(3)	Factors for consideration of time include, but are not limited to:
+	(A)	The extent to which the recipient can assist or perform tasks safely.
+	(B)	The amount of assistance required.
+	(C)	The availability of equipment, such as a Hoyer lift.
+	(D)	Universal precautions, as appropriate.
+(4)	Exception criteria to the time guideline range may include, but are not limited to:
+	(A)	If the recipient gets in and out of bed frequently during the day or night due to naps or use of thathroom.
+	(B)	If the weight of the recipient and/or condition of his/her bones requires more careful, slow transfers.
+	(C)	If the recipient has spasticity or locked limbs.
+	(D)	If the recipient is combative.
+(i)	Care of and assistance with prosthetic devices and assistance with self-administration of medications, which includes assistance with taking off/putting on and maintaining and cleaning prosthetic devices, vision/hearing aids and washing/drying hands before and after performing these tasks.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 66
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+(1)	Assistance with self-administration of medications consists of reminding the recipient to take prescribed and/or over-the-counter medications when they are to be taken and setting up Medi-sets.
+(2)	The time guideline range for "care and assistance with prosthetic devices" shall be as follows unless the recipient's needs require an exception:
+		(3)	Factors for consideration of time include, but are not limited to:
+			(A)	The extent to which the recipient is able to manage medications and/or prosthesis independently and safely.
+			(B)	The amount of medications prescribed for the recipient.
+			(C)	If the recipient requires special preparation to distribute medications (e.g., cutting tablets, putting medications into Medi-sets, etc.).
+			(D)	If the recipient has cognitive difficulties that contribute to the need for assistance with medictions and/or prosthetic devices.
+			(E)	Universal precautions, as appropriate.
+		(4)	Exception criteria to the time guideline range may include, but are not limited to:
+			(A)	If the recipient takes medications several times a day.
+			(B)	If the pharmacy sets up medications in bubble wraps or Medi-sets for the recipient.
+			(C)	If the recipient has multiple prosthetic devices.
+			(D)	If the recipient is combative.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 67
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+	(j)	Routine menstrual care which is limited to external application of sanitary napkins and external cleaning and positioning for sanitary napkin changes, using and/or disposing of barrier pads, managing clothing, wiping and cleaning, and washing/drying hands before and after performing these tasks.
+.					HANOOK BEGINS HERE
+		(1)	In assessing "menstrual" care, it may be necessary to assess additional time in other service categories specified in this section, such as "laundry," "dressing," "domestic," "bathing, oraygiene, and grooming."
+(2)	In assessing "menstrual" care, if the recipient wears diapers, time for menstrual care should not be necessary.  This time would be assessed as a part of "bowel and bladder" care. 
+	HANOOK ENDS HERE	
+		(3)	The time guideline range for "menstrual care" shall be as follows unless the recipient's needs require an exception:
+		(4)	Factors for consideration of time include, but are not limited to:
+			(A)	The extent to which the recipient can assist or perform tasks safely.
+			(B)	If the recipient has a menstrual cycle.
+			(C)	The duration of the recipient's menstrual cycle.
+			(D)	If there are medical issues that necessitate additional time.
+			(E)	Universal precautions, as appropriate.
+		(5)	Exception criteria to the time guideline range may include, but are not limited to:
+			(A)	If the recipient has spasticity or locked limbs.
+			(B)	If the recipient is combative.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 68
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+	(k)	Ambulation, which includes assisting the recipient with walking or moving from place to place inside the home, including to and from thathroom; climbing or descending stairs; moving and retrieving assistive devices, such as a cane, walker, or wheelchair, etc. and washing/drying hands before and after performing these tasks. "Ambulation" also includes assistance to/from the front door to the car (including getting in and out of the car) for medical accompaniment and/or alternative resource travel.
+		(1)	The time guideline range for "ambulation" shall be as follows unless the recipient's needs require an exception:
+		(2)	Factors for consideration of time include, but are not limited to:
+			(A)	The extent to which the recipient can assist or perform tasks safely.
+			(B)	The distance the recipient must move inside the home.
+			(C)	The speed of the recipient's ambulation.
+			(D)	Any barriers that impede the recipient's ambulation.
+			(E)	Universal precautions, as appropriate.
+		(3)	Exceptions to the time guideline range may include, but are not limited to:
+			(A)	If the recipient's home is large or small.
+			(B)	If the recipient requires frequent help getting to/from thathroom.
+			(C)	If the recipient has a mobility device, such as a wheelchair that results in a decreased need.
+			(D)	If the recipient has spasticity or locked limbs.
+			(E)	If the recipient is combative.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 69
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES
+		(Continued)
+.15	Assistance by the provider is available for transportation when the recipient's presence is required at the destination and such assistance is necessary to accomplish the travel, limited to:
+.151	Transportation to and from appointments with physicians, dentists and other health practitioners.
+.152	Transportation necessary for fitting health related appliances/devices and special clothing.
+.153	Transportation under .151 and .152 above shall be authorized only after social service staff have determined that Medi-Cal will not provide transportation in the specific case.
+.154	Transportation to the site where alternative resources provide in-home supportive services to the recipient in lieu of IHSS.
+.16	Yard hazard abatement is light work in the yard which may be authorized for:
+.161	Removal of high grass or weeds, and rubbish when this constitutes a fire hazard.
+.162	Removal of ice, snow or other hazardous substances from entrances and essential walkways when access to the home is hazardous.
+.163	Such services are limited by Sections 30.763.235(b) and .24.
+.17	Protective Supervision consists of observing behavior of nonself-directing recipients and intervening as appropriate, in order to safeguard the recipient against injury, hazard, or accident.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-24-01	Effective 7/1/24
+	Page 69.1
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES
+		(Continued)
+.171	Protective Supervision is only available for observing the behavior of individuals who are nonself-directing, per MPP Section 30-701(n)(3).
+(a)	Protective Supervision may be provided through the following, or combination of the following arrangements.
+	(1)	In-Home Supportive Services program;
+	(2)	Alternative resources such as adult or child day care centers, community resource centers, Senior Centers; respite centers;
+	(3)	Voluntary resources;
+	(4)	Repealed by Manual Letter No. SS-07-01
+.172	Protective Supervision shall not be authorized:
+(a)	For friendly visiting or other social activities;
+(b)	When the need is caused by a medical condition and the form of the supervision required is medical.
+(c)	In anticipation of a medical emergency;
+(d)	To prevent or control anti-social or aggressive recipient behavior.
+			(e)	To guard against deliberate self-destructive behavior, such as suicide, or when an individual knowingly intends to harm himself/herself.
+		.173	Protective  Supervision is only available under the following conditions as determined by social service staff:
+			(a)	At the time of the initial assessment or reassessment, a need exists for twenty-four-hours-a-day of supervision in order for the recipient to remain at home safely.
+				(1)	For a person identified by county staff to potentially need Protective Supervision, the county social services staff shall request that the form SOC 821 (3/06), “Assessment of Need for Protective Supervision for In-Home Supportive Services Program," which is incorporated by reference, be completed by a physician or or other appropriate medical professional to certify the need for Protective Supervision and returned to the county.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-24-01	Effective 7/1/24
+	Page 70
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+		(A)	For purposes of this regulation, appropriate medical professional shall be limited to those with a medical specialty or scope of practice in the areas of memory, orientation, and/or judgment.
+	(2)	The form SOC 821 (3/06) shall be used in conjunction with other pertinent information, such as an interview or report by the social service staff or a Public 	Health Nurse, to assess the person’s need for Protective Supervision.
+	(3)	The completed form SOC 821 (3/06) shall not be determinative, but considered as one indicator of the need for Protective Supervision.
+	(4)	In the event that the form SOC 821 (3/06) is not returned to the county, or is returned incomplete, the county social services staff shall make its determination of need based upon other available information.
+HANOOK BEGINS HERE
+	(5)	Other available information can include, but is not limited to, the following:
+		(A)	A Public Health Nurse interview;
+	(B)	A licensed health care professional reports;
+					(C)	Police reports;
+		(D)	Collaboration with Adult Protective Services, Linkages, 	and/or other social service agencies;
+		(E)	The social service staff’s own observations.
+	HANOOK ENDS HERE	
+.		 
+	(b)	At the time of reassessment of a person receiving authorized Protective Supervision, the county social service staff shall determine the need to renew the form SOC 821 (3/06).
+	(1)	A newly completed form SOC 821 (3/06) shall be requested if determined necessary, and the basis for the determination shall be documented in the recipient’s case file by the county social service staff.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-04	Effective    
+	Page 70.1
+	SOCIAL SERVICES STANDARDS
+30-757(Cont.)	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	Regultions
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+			(c)	Recipients may request protective supervision.  Recipients may obtain documentation (such as the SOC 821) from their physicians or other appropriate medical professionals for submission to the county social service staff to substantiate the need for protective supervision.
+.174	Social Services staff shall explain the availability of protective supervision and discuss the need for twenty-four-hours-a-day supervision with the recipient, or the recipient's parent(s), or the recipient's guardian or conservator, the appropriateness of out-of-home care as an alternative to Protective Supervision.
+.175	(Reserved.)
+.176	 staff shall obtain a signed statement from the provider(s) of  record or any other person(s) who agrees to provide any In-Home Supportive Services (IHSS) or PCSP compensable service voluntarily.  The statement [Form SOC 450 (10/98)] shall indicate that the provider knows of the right to compensated services, but voluntarily chooses not to accept any payment, or reduced payment, for the provision of services.
+(a)	The voluntary services certification for IHSS shall contain the following information:
+(1)	Services to be performed;
+(2)	Recipient(s) name;
+(3)	Case number;
+(4)	Day(s) and/or hours per month service(s) will be performed;
+(5)	Provider of services;
+(6)	Provider's address and telephone number;
+(7)	Provider's signature and date signed;
+(8)	Name and signature of Social Service Worker;
+(9)	County; and
+(10)	Social Security Number (Optional, for identification purposes only [Authority: Welfare and Institutions Code Section 12302.2]).
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS 06-04	Effective    
+	Page 70.2
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-757(Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+.18	Teaching and demonstration services provided by IHSS providers to enable recipients to perform for themselves services which they currently receive from IHSS. Teaching and demonstration services are limited to instruction in those tasks specified in .11, .13, .14, and .16 above.
+.181	This service shall be provided by persons who ordinarily provide IHSS.  The hourly rate of provider compensation shall be the same as that paid to other IHSS providers in the county for the delivery method used.
+.182	This service shall only be provided when the provider has the necessary skills to do so effectively and safely.
+.183	Services shall be authorized for no more than three months.
+.184	Services shall be authorized only when there is a reasonable expectation that there will be a reduction in the need for a specified IHSS funded service as a result of the service authorized under this category which is at least equivalent to the cost of the services provided under this category.
+(a)	The reduction in cost is equivalent if the full cost of service authorized under this part is recovered within six months after the conclusion of the training period.
+.185	Within  seven months after completion of teaching and demonstration in a specific case, social service staff shall report in to the Department on the results of the service.  The report shall include:
+(a)	The tasks taught.
+(b)	The instructional method used.
+(c)	The delivery method used.
+(d)	The frequency and duration of the instruction.
+(e)	The total need for each service to be affected both before and six months after the instruction.
+(f)	The results of instruction including the number of hours of each authorized IHSS funded service to be affected by the instruction both before and six months after the end of the instruction in hours per month.
+(g)	The hourly rate paid the provider.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS 06-02	Effective    
+	Page 71
+	SOCIAL SERVICES STANDARDS
+30-757 (Cont.)	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	Regulations
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES	30-757
+		(Continued)
+.19	Paramedical services, under the following conditions:
+.191	The services shall have the following characteristics:
+(a)	are activities which persons would normally perform for themselves but for their functional limitations,
+(b)	are activities which, due to the recipient's physical or mental condition, are necessary to maintain the recipient's health.
+(c)	are activities which include the administration of medications, puncturing the skin, or inserting a medical device into a body orifice, activities requiring sterile procedures, or other activities requiring judgment based on training given by a licensed health care professional.
+.192	The services shall be provided when ordered by a licensed health care professional who is lawfully authorized to do so.  The licensed health care professional shall be selected by the recipient.  The recipient may select a licensed health care professional who is not a Medi-Cal provider, but in that event shall be responsible for any fee payments required by the professional.
+.193	The services shall be provided under the direction of the licensed health care professional.
+.194	The licensed health care professional shall indicate to social services staff the time necessary to perform the ordered services.
+.195	This service shall be provided by persons who ordinarily provide IHSS.  The hourly rate of provider compensation shall be the same as that paid to other IHSS providers in the county for the delivery method used.
+.196	The county shall have received a signed and dated order for the paramedical services from a licensed health care professional.  The order shall include a statement of informed consent saying that the recipient has been informed of the potential risks arising from receipt of such services.  The statement of informed consent shall be signed and dated by the recipient, or his/her guardian or conservator.  The order and consent shall be on a form developed or approved by the department.
+.197	In the event that social services staff are unable to complete the above procedures necessary to authorize paramedical services during the same time period as that necessary to authorize the services described in .11 through .18, social services staff shall issue a notice of action and authorize those needed services which are described in .11 through .18 in a timely manner as provided in Section 30-759.  Paramedical services shall be authorized at the earliest possible subsequent date.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective    
+	Page 72
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-759 (Cont.)
+30-757	PROGRAM SERVICE CATEGORIES AND TIME GUIDELINES  (Continued)
+.198	In no event shall paramedical services be authorized prior to receipt by social services staff of the order for such services by the licensed health care professional.  However, the cost of paramedical services received may be reimbursed retroactively provided that they are consistent with the subsequent authorization and were received on or after the date of application for the paramedical services.
+NOTE:  Authority cited:  Sections 10553, 10554, 12300, 12301.1 and 12301.21, Welfare and Institutions Code; and Chapter 939, Statutes of 1992.  Reference:  Peremptory Writ of Mandate, Disabled Rights Union v. Woods, Superior Court, Los Angeles County, Case #C 380047; Miller v. Woods/Community Services for the Disabled v. Woods, Superior Court, San Diego County, Case Numbers 468192 and 472068; and Sections 12300, 12300(c)(7), 12300(f), 12300(g), 12300.1, and 12301.2, Welfare and Institutions Code; Marshall v. McMahon (1993) 17 Cal.App.4th 1841, and Calderon v. Anderson (1996) 45 Cal.App.4th 607.
+30-758	TIME PER TASK AND FREQUENCY GUIDELINES
+Repealed by Manual letter No. SS-06-02, effective 
+NOTE:  Authority cited:  Sections 10553, 10554, 12300, and 12301.2, Welfare and Institutions Code; and Chapter 939, Statutes of 1992.  Reference:  Peremptory Writ of Mandate, Disabled Rights  v. Woods, Superior Court, , Case #C 380047; and Sections 12300, and 12301.2, Welfare and Institutions Code.
+30-759	APPLICATION PROCESS
+.1	Each request or application for services shall have been made in accordance with Section 30-009.22.
+.11	Recipient information including ethnicity and primary language (including sign language) shall be collected and recorded in the case file.
+.2	Applications shall be processed,  including eligibility determination and needs assessment, and notice of action mailed no later than 30 days following the date the written application is completed.  An exception may be made for this requirement when a disability determination in accordance with Section 30-771 has not been received in the 30-day period.  Services shall be provided, or arrangements for their provision shall have been made, within 15 days after an approval notice of action is mailed.
+.3	Pending final determination, a person may be considered blind or disabled for purposes of non-PCSP IHSS eligibility under the following conditions:
+.31	For a disabled applicant, eligibility may be presumed if the applicant is not employed and has no expectation of employment within the next 45 days, and if in the county's judgment the person appears to have a mental or physical impairment that will last for at least one year or end in death.
+.32	For a blind applicant, eligibility may be presumed if in the county's judgment the person appears to meet the requirements of Section 30-771.2.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-24-01	Effective 7/1/24
+Page 73
+(Next page is 77)
+THIS PAGE IS INTENTIONALLY LEFT BLANK
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-759 (Cont.)
+30-759	APPLICATION PROCESS (Continued)	30-759
+.4	In-Home Supportive Services payment shall be made for authorizable services, as specified in Section 30-761.28, received on or after the date of application or of the request for services as provided in Section 30-009.224, if either the recipient or the provider does not qualify for PCSP.  If the ineligible recipient/provider becomes eligible for payment under PCSP, payment shall be made from PCSP as soon as administratively feasible in lieu of IHSS.
+.5	Once services have been authorized, the authorization shall continue until there is a change in eligibility or assessed level of need.
+.6	The availability or continuity of services to a recipient shall not be limited or reduced because the county fails to comply with administrative processing standards in this section and in Section 30-761.2, unless the recipient has substantially contributed to the county's failure to comply.
+.7	A written notice of action containing information on the disposition of the request for service shall be sent to the applicant in accordance with MPP Sections 10-116 and 30-763.8.
+.8	Emergency services may be authorized to aged, blind, or disabled persons prior to the completion of a needs assessment if the recipient meets the eligibility criteria specified in .3 above or in Section 30-755 and the recipient's needs warrant immediate provision of service.  The county shall subsequently perform a complete needs assessment within 30 days after the date of application as specified in .4 above, and comply with the standards for application processing.
+.9	An intercounty transfer shall be initiated by the transferring county after receiving notification from the recipient or person as described in Section 30-760.1 of his/her move to a new county.  This transfer shall be accomplished in accordance with the following procedures:
+	.91	The transferring county shall, within ten calendar days from the original date of notification, send (by mail or FAX) a notification of transfer form which includes a place for the names and numbers and telephones numbers of the social service workers from both the sending and receiving counties, the statement "Please sign and return a copy of this document which will verify that your county will accept responsibility for the case effective (date to be filled in)," a space for additional comments, and other documents pertaining to the transfer of responsibility and provision of IHSS to the receiving county.  If faxed, mailed copy(ies) shall follow in a timely manner for auditing purposes. 
+		.911	The documents required in Section 30-759.91 include, but are not limited to, an application for In-Home Supportive Services (SOC 295, 10/90); the most recent IHSS assessment, an IHSS provider eligibility update, a personal care services program provider enrollment form (SOC 428, 5/90), if applicable; a paramedical authorization form (SOC 321, 10/88), if applicable; current NOAs, and any information pertaining to overpayments and fraud investigations, if applicable.
+	.92	There shall be no interruption or overlapping of services as the result of a recipient moving from one county to another.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-00-01	Effective    
+	Page 77
+	SOCIAL SERVICES STANDARDS
+30-759 (Cont.)	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	Regulations
+30-759	APPLICATION PROCESS (Continued)	30-759
+		.921	The transferring county is responsible for authorizing and funding services until the transfer period expires, at which time the receiving county becomes responsible.
+		.922	If the recipient moves from the receiving county to a third county during the transfer period, the transferring county is responsible for canceling the transfer to the original receiving county and initiating the transfer to the new receiving county.
+	.93	The receiving county shall complete and return a notification of transfer form to the transferring county within 30 days of receipt of the form.
+		.931	If the notification of transfer form has not been returned within 30 calendar days by the receiving county, the transferring county shall contact the receiving county to assure that the new county has received the notification of transfer and is taking action.
+	.94	As part of the transfer process, the receiving county shall complete a face-to-face assessment with the recipient during the transfer period.
+		.941	There shall be no change in the recipient's level of authorized hours/benefits taken or initiated by the transferring county during the transfer period unless there is a substantive change in living arrangements or other eligibility factors as verified by the receiving county.
+	HANDBOOK BEGINS HERE
+			(a)	Some examples of what is considered a "substantive change in living arrangements" follow:
+				1.	A change in the number of persons living in the household;
+				2.	A change in the age(s) of persons living in the household;
+				3.	A change in the layout or location of living areas;
+				4.	A change in the number of rooms in the living space;
+				5.	A change in the availability of cooking facilities;
+				6.	A change in the availability of alternate resources.
+			(b)	The receiving county should be notified immediately once appropriate action, including a notice of action (NOA) is taken.
+	HANDBOOK ENDS HERE	
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-00-01	Effective    
+	Page 77.1
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-759
+30-759	APPLICATION PROCESS (Continued)	30-759
+	.95	When services are discontinued by the transferring county during the transfer period, and the recipient does not appeal the discontinuance through the state hearing process, any reapplication shall be treated as a new application with the county in which the recipient currently resides (receiving county).
+	.96	When an IHSS recipient appeals a discontinuance, decrease of hours, or any adverse action against him/her by the transferring county during the transferring process, the transferring county shall maintain full responsibility for the case.  The transferring county is accountable for the hearing and aid paid pending (if applicable), until a hearing decision is made, after which the transfer of the case to the receiving county can be completed.
+	.97	If a person has an IHSS application pending at the time he/she moves to a new county, the responsibility for completion of the application shall remain with the transferring county in accordance with the following:
+		.971	If the person is eligible at the time the county of residence changes, a transfer process can be initiated.
+		.972	If a Determination of Disability is pending, responsibility shall be retained by the transferring county until the disability determination is received.  The transferring county shall forward the disability determination, along with a notification of transfer form (see Section 30-759.91), within 10 calendar days of the date the determination was received.
+NOTE:  Authority cited:  Sections 10553 and 10554, Welfare and Institutions Code; and Chapter 939, Statutes of 1992.  Reference:  Sections 10950, 11102, 12301, 12305.71, and 14132.95, Welfare and Institutions Code.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-00-01	Effective    
+	Page 77.2
+This page is intentionally left blank.
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-760
+30-760	RESPONSIBILITIES			30-760
+.1	Applicant/Recipient Responsibilities
+The applicant/recipient, his/her conservator, or in the case of a minor, his/her parents or guardian shall be responsible for:
+.11	Completing or participating in completion of all documents required in the determination of eligibility and need for services.
+.12	Making available to the county all documents that are in his/her possession or available to him/her which are needed to determine eligibility and need for service.
+.13	Cooperating with county fraud detection and prevention and quality assurance activities including case reviews and home visits.
+.14	Reporting all known facts which are material to his/her eligibility and level of need.
+.15	Reporting within ten calendar days of the occurrence, any change in any of these facts.
+.16	Reporting all information necessary to assure timely and accurate payment to providers of service.
+.17	Reporting within 10 calendar days when a change of residence places the recipient within the jurisdiction of another county.
+.2	
+.21	Informing recipients of their rights and responsibilities in relation to eligibility and need for services.
+.22	Evaluating the capacity of applicants or recipients to discharge their responsibilities as set forth in .1 above.
+.23	Assisting recipients as needed in establishing their eligibility and need for service.
+.24	Correctly determining eligibility and need.
+.25	Complying with administrative standards to ensure timely processing of recipient requests for service.
+NOTE:  Authority Cited:  Sections 10553 and 10554, Welfare and Institutions Code; and Chapter 939, Statutes of 1992.  Reference:  Sections 11102, 12301, and 14132.95, Welfare and Institutions Code.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-02	Effective   
+	Page 78
+	SOCIAL SERVICES STANDARDS
+30-761	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-761	NEEDS ASSESSMENT STANDARDS	30-761
+.1	Services shall be authorized only in cases which meet the following condition:
+.11	The recipient is eligible as specified in Sections 30-755 or 30-780, except that services may be authorized on an interim basis as provided in Section 30-759.3.
+.12	A needs assessment establishes a need for the services identified in Section 30-757 consistent with the purposes of the IHSS program, as specified in Section 30-700.1, except as provided in Section 30-759.8.
+.13	Social services staff of the designated county department has had a face-to-face contact with the recipient in the recipient's home at least once within the past 12 months, except as provided in Sections 30-761.215 through .217, and has determined that the recipient would not be able to remain safely in his/her own home without IHSS.  If the face-to-face contact is due but the recipient is absent from the state but still eligible to receive IHSS pursuant to the requirements stated in Section 30-770.4, Residency, the face- to-face requirement is suspended until such time as the recipient returns to the state.
+.14	Performance of the service by the recipient would constitute such a threat to his/her health/safety that he/she would be unable to remain in his/her own home.
+.2	Needs Assessments
+.21	Needs assessments are performed:
+.211	Prior to the authorization of IHSS services when an applicant is determined to be eligible, except in emergencies as provided in Section 30-759.8.
+.212	Prior to the end of the twelfth calendar month from the last face-to-face assessment except as provided in Sections 30-761.215 through .217.
+(a)	If a reassessment is completed before the twelfth calendar month, the month for the next reassessment shall be adjusted to the 12-month requirement except as provided in Section 30-761.215 through .217.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-01	Effective   
+	Page 79
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-761 (Cont.)
+30-761	NEEDS ASSESSMENT STANDARDS (Continued)	30-761
+	HANDBOOK BEGINS HERE
+.213	Example:  If a recipient’s initial face-to-face assessment for IHSS was completed on December 12th, the county may complete the next reassessment anytime prior to December 31st of the following year.
+.214	Example:  If a reassessment is completed on September 15th, prior to the actual twelfth calendar month because of a change in the recipient’s condition, the next reassessment shall occur anytime prior to September 30th of the following year. 
+	HANDBOOK ENDS HERE	
+.215	Except for IHSS Plus Waiver cases, prior to the end of the eighteenth calendar month from the last reassessment if the county opted to extend the assessment in accordance with these regulations.  A county may opt to extend the time for a reassessment for up to six months beyond the regular 12-month period on a case-by-case basis if the county can document that all the following conditions exist, except as provided in Section 30-761.216:
+The recipient had at least one reassessment since the initial program intake assessment: and
+			(b)	The recipient’s living arrangement has not changed since the last annual assessment; and:
+The recipient lives with others (i.e., spouse, parent, live-in provider, housemate, children, a relative or non-relative); or
+Has regular meaningful contact with persons interested in the recipient’s well being other then his/her provider; and
+ 	The recipient is able to satisfactorily direct his/her care; or:
+If the recipient is a minor, his/her parent or legal guardian is able to satisfactorily direct the recipient’s care; or
+If the recipient is incompetent, his/her conservator is able to satisfactorily direct the recipient's care; and
+			(d)	There has not been any known change in the recipient’s supportive services needs in the previous 24 months; and
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-04	Effective   
+	Page 79.1
+	SOCIAL SERVICES STANDARDS
+30-761 (Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-761	NEEDS ASSESSMENT STANDARDS (Continued)	30-761
+			(e)	There have not been any reports to, or involvements of, an adult protective services agency or other agencies responsible for addressing the health and safety of individuals documented in the case record since the last assessment; and
+			(f)	The recipient has not had a change in provider(s) in the previous six months; and
+			(g)	The recipient has not reported a change in his/her supportive services needs that requires a reassessment; and
+			(h)	The recipient has not been hospitalized in the previous three months.
+		.216	If some, but not all, conditions specified in Section 30-761.215(a) through (h) are met, the county may consider other factors in determining if the extended assessment period is appropriate.  The factors include, but are not limited to:
+			(a)  	Involvement in the recipient's care from a social worker case manager or similar representative of a human services agency, such as Multi Services Seniors Program (MSSP), Linkages, a regional center, or county mental health program; or
+			(b)	Prior to the end of the twelfth calendar month following the last assessment, the county receives a medical report from a physician or other licensed health care professional that states the recipient's medical condition is not likely to change.
+				(1)	For purposes of this regulation, a licensed health care professional means a medical professional licensed in California by the appropriate California Regulatory Agency, acting within the scope of his or her license or certificate as defined in the California Business and Professions Code, and who has knowledge of the recipient's medicaistory.
+		.217	If the county opts to extend the reassessment period as provided in Section 30-761.215 through .216, the county shall document the basis of the decision in the case file.
+		.218	When the county has information indicating that the recipient's need for supportive services is expected to decrease in less than 12 months, the county may reassess the recipient's needs in less than 12 months since the last assessment.
+		.219	The county shall reassess the recipient's need for services:
+			(a)	Any time the recipient notifies the county of a need to adjust the service hours authorized due to a change in circumstances; or
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-07-01	Effective   
+	Page 79.2
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-761 (Cont.)
+30-761	NEEDS ASSESSMENT STANDARDS (Continued)	30-761
+		(b)	When there is other pertinent information which indicates a change in circumstances affecting the recipient's need for supportive services.
+.22	Repealed by Manual Letter No. 82-67 ().
+.23	The designated county department shall not delegate the responsibility to do needs assessments to any other agency or organization.
+.24	The needs assessment shall identify the types and hours of services needed and the services which will be paid for by the IHSS program.
+.25	No services shall be determined to be needed which the recipient is able to perform in a safe manner without an unreasonable amount of physical or emotional stress.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-01	Effective   
+	Page 80
+	SOCIAL SERVICES STANDARDS
+30-761 (Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-761	NEEDS ASSESSMENT STANDARDS (Continued)	30-761
+.26	Social service staff shall determine the need for services based on all of the following:
+.261	The recipient's physical/mental condition, or living/social situation.
+(a)	These conditions and situations shall be determined following a face-to-face contact with the recipient, if necessary.
+.262	The recipient's statement of need.
+.263	The available medical information.
+.264	Other information social service staff consider necessary and appropriate to assess the recipient's needs.
+.27	A needs assessment and authorization form shall be completed for each case and filed in the case record.  The county shall use the needs assessment form developed or approved by the Department.  The needs assessment form shall itemize the need for services and shall include the following:
+.271	Recipient information including age, sex, living situation, the nature, and extent of the recipient's functional limitations, and whether the recipient is severely impaired.
+.272	The types of services to be provided through the IHSS program, the service delivery method and the number of hours per service per week.
+.273	Types of IHSS provided without cost or through other resources, including sources and amounts of those services.
+.274	Unmet need for IHSS.
+.275	Beginning date of service authorization.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-93-03	Effective   
+	Page 81
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-763 (Cont.)
+30-761	NEEDS ASSESSMENT STANDARDS (Continued)	30-761
+.28	Services authorized shall be justified by and consistent with the most recent needs assessment, but shall be limited by the provisions of Section 30-765.
+.3	IHSS staff shall be staff of a designated county department.
+.31	Classification of IHSS assessment workers shall be at the discretion of the county.
+.32	IHSS assessment workers shall be trained in the uniformity assessment system.
+NOTE:  Authority cited:  Sections 10553 and 10554, Welfare and Institutions Code.  Reference:  Sections 12301.1 and 14132.95, Welfare and Institutions Code; and the State Plan Amendment, approved pursuant to Section 14132.95(b), Welfare and Institutions Code.
+30-763	SERVICE AUTHORIZATION		30-763
+.1	Services staff shall determine the need for only those tasks in which the recipient has functional impairments.  In the functions specified in Section 30-756.2, a functional impairment shall be a rank of at least 2.
+.11	The applicant/recipient shall be required to cooperate to the best of his/her ability in the securing of medical verification which evaluates the following:
+.111	His/her present condition.
+.112	His/her ability to remain safely in his/her own home without IHSS services.
+.113	His/her need for either medical or nonmedical out-of-home care placement if IHSS were not provided.
+.114	The level of out-of-home care necessary if IHSS were not provided.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-06-01	Effective   
+	Page 82
+	SOCIAL SERVICES STANDARDS
+30-763 (Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-763	SERVICE AUTHORIZATION (Continued)	30-763
+.12	Applicant/recipient failure to cooperate as required in Section 30-763.11 shall result in denial or termination of IHSS.
+.2	Using the needs assessment form, services staff shall calculate the number of hours per week needed for each of the services determined to be needed by the procedure described in Section 30-763.1.
+.3	Shared Living Arrangements:  The following steps apply to  assessing need for clients who live with another person(s).  With certain exceptions specified in Section 30-763.4, the need for IHSS shall be determined in the following manner.
+.31	Domestic Services and Heavy Cleaning
+.311	The living area in the house shall be divided into areas used solely by the recipient, areas used in common with others, and areas not used by the recipient.
+.312	No need shall be assessed for areas not used by the recipient.
+.313	The need for services in common living areas shall be prorated to all the housemates, the recipient's need being his/her prorated share.
+.314	For areas used solely by the recipient, the assessment shall be based on the recipient's individual need.
+.32	Related Services need shall be assessed as follows:
+.321	When the need is being met in common with those of other housemates, the need shall be prorated to all the housemates involved, and the recipient's need is his/her prorated share.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-93-03	Effective   
+	Page 83
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-763 (Cont.)
+30-763	SERVICE AUTHORIZATION (Continued)
+.322	When the service is not being provided by a housemate, and is being provided separately to the recipient, the assessment shall be based on the recipient's individual need.
+.33	The need for protective supervision shall be assessed based on the recipient's individual need.  For service authorization purposes, no need for protective supervision exists during periods when  a provider is in the home to provide other services.
+.34	The need for teaching and demonstration services shall be assessed based on the recipient's individual need, except when recipients live together and have a common need, the need shall be met in common when feasible.
+.35	Other IHSS Services:
+.351	The recipient's need for transportation services, paramedical services and personal care services shall be assessed based on the recipient's individual need.
+.352	The need for yard hazard abatement shall not be assessed in shared living arrangements, except when all housemates fall into one or more of the following categories:
+(a)	Other IHSS recipients unable to provide such services.
+(b)	Other persons physically or mentally unable to provide such services.
+(c)	Children under the age of fourteen years.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-24-01	Effective 7/1/24
+	Page 84
+This page is intentionally left blank.
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IHSS	30-763 (Cont.)
+30-763	SERVICE AUTHORIZATION (Continued)	30-763
+.4	Exceptions when assessing needs in shared living arrangements:
+.41	Able and Available Spouse
+.411	When an IHSS recipient has a spouse who does not receive IHSS, the spouse shall be presumed able to perform certain specified tasks unless he/she provides medical verification of his/her inability to do so.
+.412	An able spouse of an IHSS recipient shall be presumed available to perform certain specified tasks except during those times he/she is out of the home for employment, health or for other unavoidable reasons and the service must be provided during his/her absence.
+.413	When the recipient has an able and available spouse there shall be no payment to the spouse or any other provider for the following services as described in 30-757:
+(a)	Domestic
+(b)	Related Services
+(c)	Yard Hazard Abatement
+(d)	Teaching and Demonstration
+(e)	Heavy Cleaning
+.414	When an able spouse is not available because of employment, health, or other unavoidable reasons, a provider may be paid for the following services only if they must be provided during the spouse's absence:
+(a)	Meal Preparation
+(b)	Transportation
+(c)	Protective Supervision
+.415	An able and available spouse or other provider may be paid for providing:
+(a)	Personal care services
+(b)	Paramedical service
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-93-03	Effective   
+	Page 85
+	SOCIAL SERVICES STANDARDS
+30-763 (Cont.)	SERVICE PROGRAM NO. 7:  IHSS	Regulations
+30-763	SERVICE AUTHORIZATION (Continued)	30-763
+.416	In addition to those services listed in Section 30-763.445, a spouse may be paid to provide the following services when he/she leaves full-time employment or wishes to seek employment but is prevented from doing so because no other suitable provider is available:
+(a)	Transportation
+(b)	Protective Supervision
+.42	Landlord/Tenant Arrangements
+.421	When the recipient is the tenant, the need for domestic and heavy cleaning services shall be based on the living area used solely by the recipient.  No need for yard hazard abatement shall be assessed.  The needs assessment shall take into account any services the landlord is obligated to perform under the rental agreement.
+.422	When the recipient is the landlord, the need for domestic and heavy cleaning services shall be assessed for all living areas not used solely by the tenant.  The needs assessments shall take into account any services the tenant is obligated to perform under the rental agreement.
+.43	If the recipient has moved into a relative's home primarily for the purpose of receiving services, the need for domestic and heavy cleaning services shall be assessed only for living areas used solely by the recipient.  Yard hazard abatement services shall not be provided.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-93-03	Effective   
+	Page 86
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-763 (Cont.)
+30-763	SERVICE AUTHORIZATION (Continued)	30-763
+.44	When the recipient is under eighteen years of age and is living with the recipient's parent(s), who has a legal duty pursuant to the Family Code to provide for the care of his/her child, IHSS may be purchased from a provider other than the parent(s) when no parent is able and available to provide the IHSS services for any of the following reasons, and services must be provided during the inability or unavailability of the parent(s):
+.441	When the parent(s) is unavailable because of employment or is enrolled in an educational or vocational training program.
+.442	If the parent(s) is physically or mentally unable to provide the needed IHSS services.
+.443	When the parent is unavailable because of on-going medical, dental or other health-related treatment.
+.444	When the parent(s) must be unavailable to perform shopping and errands essential to the family, search for employment, or for essential purposes related to the care of the recipient's minor siblings, IHSS may be purchased from a provider other than the parent(s) for up to eight hours per week to perform IHSS tasks necessary during the unavailability of the parent(s).
+.45	When the recipient is under eighteen years of age and is living with the recipient's parent(s), who has a legal duty under the Family Code to provide for the care of his/her child, the IHSS specified in Section 30-763.456 may be purchased from a parent under the following condition:
+.451	The parent has left full-time employment or is prevented from obtaining full-time employment because no other suitable provider is available and the inability of the parent to perform supportive services may result in inappropriate placement or inadequate care.
+(a)	For the purposes of this section, full-time employment means working an average of 40 or more hours per week regardless of worksite location.  A parent providing IHSS-funded care to his/her own child is not full-time employment.
+.452	For the purposes of Section 30-763.451, a suitable provider is any person who is willing, able, and available to provide the needed IHSS.  A suitable provider who is a person having a duty pursuant to the Family Code need only be able and available to provide the needed IHSS; the person is only considered to be unavailable if that unavailability occurs during a time the recipient must receive a specific service, for the following reasons:  employment, enrollment in an educational or vocational training program, or employment searches.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-15-01	Effective   1/1/15
+	Page 87
+	REQUIRED SERVICE PROGRAMS
+30-763 (Cont.)	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	Regulations
+30-763	SERVICE AUTHORIZATION (Continued)	30-763
+	HANDBOOK BEGINS HERE
+		.453	Example:  Both parents are employed full-time.  Their minor child is eligible to receive IHSS.  One parent leaves his full-time job in order to provide IHSS to the child; the other parent retains full-time employment.  If the other requirements in Section 30-763.451 are met, IHSS may be purchased from the parent who left his job since he left full-time employment to provide IHSS to the child.
+		.454	Example:  When one parent is employed full-time and the other parent, who has never been employed, is at home, able and available to provide IHSS.
+			(a)	When the employed parent left his/her job to provide IHSS to his/her child, IHSS could not be purchased from that parent since the conditions pursuant to Section 30-763.451 are not met because the other parent is a suitable provider.
+			(b)	When the employed parent did not leave full-time employment, the non-working parent may qualify as a paid provider only if that parent is prevented from obtaining full-time employment in order to provide IHSS to the child and other requirements pursuant to Section 30-763.451 are met.  When the non-working parent cannot be employed full-time for reasons other than the need to provide IHSS to the child, the non-working parent does not qualify as a paid provider.
+	HANDBOOK ENDS HERE	
+		.455	A parent provider who meets the requirements in Section 30-763.451 shall be paid for performing authorized services regardless of the presence of the other parent in the home, including non-work hours, weekends, and holidays.
+.456	The IHSS provided shall be limited to:
+(a)	Related services, as specified in Section 30-757.13.
+(b)	Personal care services, as specified in Section 30- 757.14.
+(c)	Accompaniment when needed during necessary travel to health-related appointments or to alternative resource sites, as specified in Section 30 757.15.
+(d)	Protective supervision, as specified in Section 30-757.17, limited to protective supervision needed because of the functional limitations of the recipient.  This service shall not include routine child care or supervision.
+			(e)	Paramedical services, as specified in Section 30-757.19.
+	CALIFORNIA-DSS-MANUAL-SS 
+MANUAL LETTER NO. SS-15-01	Effective   1/1/15
+	Page 88
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-763 (Cont.)
+30-763	SERVICE AUTHORIZATION (Continued)	30-763
+		.457	A recipient's parent(s) is not eligible to be an IHSS provider to his/her minor child under the Personal Care Services Program pursuant to Welfare and Institutions Code section 14132.95(f).
+.46	When the recipient is a parent living with his/her child(ren) who is under fourteen years of age and who is not eligible or does not need IHSS.
+.461	The recipient's need for domestic and heavy cleaning services in common living areas, and for related services shall be assessed as if the child(ren) did not live in the home.
+.462	The child(ren)'s needs shall not be considered when assessing the need for services, including domestic or heavy cleaning in areas used solely by the child(ren).
+.47	Live-in Providers:
+.471	Domestic and heavy cleaning services shall not be provided in  areas used solely by the provider.  The need for related services may be prorated between the provider and the recipient, if the provider and the recipient agree.  All other services shall be assessed based on the recipient's individual need, except as provided in Sections 30-763.33 and .34.
+.5	Having estimated the need according to Sections 30-763.1 and .2, and after making the adjustments identified in Sections 30-763.3 and .4 as appropriate, the remaining list of services and hours per service is the total need for IHSS services.
+.6	Identification of Available Alternative Resources
+.61	Social services staff shall explore alternative in-home services supportive services which may be available from other agencies or programs to meet the needs of the recipient as assessed in accordance with Section 30-761.26.
+.611	Social services staff shall arrange for the delivery of such alternative resources as necessary in lieu of IHSS program-funded services when they are available and result in no cost to the IHSS program or the recipient except as provided in Section 30-763.613.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-15-01	Effective   1/1/15
+	Page 89
+	SOCIAL SERVICES STANDARDS
+30-763 (Cont.)	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	Regulations
+30-763	SERVICE AUTHORIZATION (Continued)	30-763
+.612	The IHSS program shall not deliver services which have been made available to the recipient through such alternative resources, except as provided in Section 30-763.613.
+.613	In no event shall an alternative resource be used at the financial expense of the recipient, except:
+(a)	At the recipient's option; or
+(b)	When the recipient has a share of cost obligation which shall be reduced by the amount necessary for the purchase of the alternative resource.
+.62	Social services staff shall explore with the recipient the willingness of relatives, housemates, friends or other appropriate persons to provide voluntarily some or all of the services required by the recipient.
+.621	Social services staff shall obtain from the recipient a signed statement authorizing discussion of the case with any persons specified in Section 30-763.62.
+.622	Social services staff shall not compel any such volunteer to provide services.
+.63	Social services staff shall document on the needs assessment form the total need for a specific service, which shall then be reduced by any service available from an alternative resource.  The remaining need for IHSS is the adjusted need.
+.64	Social Services staff shall obtain a signed statement from the provider(s) of record or any other person(s) who agrees to provide any IHSS/PCSP compensable service voluntarily.  The statement [Form SOC 450 (10/98)] shall indicate that the provider(s) knows of the right to compensated services, but voluntarily chooses not to accept any payment, or reduced payment, for the provision of services.  (See MPP Section 30-757.176 for information regarding the voluntary services certification form).
+.7	The Determination of Services Which Shall be Purchased by IHSS
+.71	Services shall be authorized to meet all of the adjusted need for IHSS up to the appropriate service maximum identified in Section 30- 765.
+.72	These services shall not be authorized concurrently with the SSI/SSP nonmedical out-of-home care living arrangement.
+.8	Notice of Action
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-98-01	Effective    
+	Page 90
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-763 (Cont.)
+30-763	SERVICE AUTHORIZATION (Continued)
+.81	Whenever an IHSS needs assessment is completed the recipient shall be sent a notice of action in accordance with the requirements of MPP 10-116 and 30-759.7.  In addition to the information required in 10- 116, the notice shall include:
+.811	a description of each task for which need is assessed.
+.812	the number of hours authorized for the completion of the task.
+.813	identification of hours for tasks increased or decreased and the difference from previous hours authorized.
+.9	Miller vs. Woods and  for the Disabled vs. Woods.
+	HANDBOOK BEGINS HERE
+.91	Background
+On  the Court of Appeal, Fourth Appellate District, issued a decision in the consolidated case of Miller vs. Woods and Community Service Center for the Disabled vs. Woods.  The court declared invalid MPP 30-463.233c (now 30-763.233c) which provided that no need for protective supervision may be assessed when a housemate is in the home.
+	HANDBOOK ENDS HERE	
+.92	Case Review Procedures
+.921	The county shall identify no later than  all open IHSS cases with recipients living with a housemate where a need for protective supervision as defined in 30-757.17 may exist.
+.922	The county shall determine through recipient contact whether a need for protective supervision exists unless the case record provides conclusive evidence which indicates that no need exists.
+.93	Authorization and Notification
+.931	The county shall complete a new Needs Assessment form to authorize protective supervision.  The authorization shall be effective as of .
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-98-01	Effective   
+	Page 91
+	SOCIAL SERVICES STANDARDS
+30-763 (Cont.)	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	Regulations
+30-763	SERVICE AUTHORIZATION (Continued)
+.932	The county shall send a Notice of Action to all affected recipients which shall state:  "Hours for protective supervision are authorized based on the Miller vs. Woods and Community Service Center for the Disabled vs. Woods court action."
+.94	Recordkeeping
+.941	The county shall maintain a listing of those recipients who were previously not authorized to receive protective supervision because of the presence of a housemate.
+	HANDBOOK BEGINS HERE
+.942	DSS will provide each county with a computer generated listing which identifies any recipient whose address matches the address of an Individual Provider.  The listing should be used as an aid and cross-check in the case review process; the listing is not a substitute for the case review.
+.943	For those recipients with an Individual Provider, the listing in Section 30-763.941 will be generated through use of a special reason code indicating increased hours due to the Miller vs. Woods court decision.
+	HANDBOOK ENDS HERE	
+NOTE:  Authority cited:  Sections 10553 and 10554, Welfare and Institutions Code; and Assembly Bill 1773, Chapter 939, Statutes of 1992.  Reference:  Sections 12300, 12309, and 14132.95, Welfare and Institutions Code; the State Plan Amendment, approved pursuant to Section 14132.95(b), Welfare and Institutions Code; and Miller v. Woods/Community Services for the Disabled v. Woods, (1983) 148 Cal.App.3d. 862; Marshall v. McMahon (1993) 17 Cal.App.4th 1841, and Calderon v. Anderson (1996) 45 Cal.App.4th 607.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-24-01	Effective 7/1/24
+	Page 92
+	SOCIAL SERVICES STANDARDS
+Regulations	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	30-764 (Cont.)
+30-764	INDIVIDUAL PROVIDER COMPENSATION	30-764
+.1	Computation of Payment
+.11	Social service staff shall determine the amount of the IHSS payment required to purchase services to meet the IHSS adjusted need as specified in 763.41 above.
+.12	The IHSS payment shall be determined by multiplying the monthly adjusted need for IHSS hours by the base payment rate used by the county, except as provided in .14 below.
+.13	The hours and amount of compensation available for personal attendant providers shall be determined by county social services staff.  The payment shall be the minimum necessary to obtain adequate service to meet the authorized service needs of the recipient.
+.2	Rate of Compensation
+.21	The base rate of compensation used by the county shall not be less than the legal minimum wage in effect at the time the work is performed, except when personal attendants are employed.
+.22	In advance pay cases, the base rate paid by the recipient to the provider shall not be less than the base rate used by the county for the authorized IHSS payment.
+.23	The recipient shall develop a work schedule which is consistent with the authorized service hours at the county's base rate.  If the recipient finds that a work schedule cannot be established without requiring payment in excess of the county's base rate, the recipient shall bring such information to the county's attention.  The county will determine if payment in excess of the base rate is necessary.  Any additional costs resulting from the recipient's actions in work scheduling or increasing the rate paid per work unit shall be borne by the recipient unless prior county approval has been obtained.
+.24	No adjustments in the IHSS payment shall be made for meals and lodging provided to the provider by the recipient except as specified in Section 30-763.  However, any income received by the recipient through this means is countable income for eligibility purposes as specified in Section 30-775 and shall be reported as such by the recipient.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-93-03	Effective    
+	Page 93
+	SOCIAL SERVICES STANDARDS
+30-764 (Cont.)	SERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES	Regulations
+30-764	INDIVIDUAL PROVIDER COMPENSATION	30-764
+.3	Employer Responsibilities
+.31	As employers recipients have certain responsibilities for standards of compensation, work scheduling and working conditions as they apply to IHSS individual providers.  The county will assure that all recipients understand their basic responsibilities as employers.
+.32	Non live-in employees shall be compensated at the base rate for the first forty hours worked during a work week.  Each hour, or fraction thereof, worked in excess of forty hours during a work week shall be compensated at one and one-half times the base rate.
+	CALIFORNIA-DSS-MANUAL-SS
+MANUAL LETTER NO. SS-93-03	Effective    
+	Page 94

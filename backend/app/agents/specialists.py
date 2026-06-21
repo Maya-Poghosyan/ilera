@@ -39,6 +39,7 @@ class IHSSAgent(SpecialistAgent):
                 )
             ],
             sources=self._sources("IHSS eligibility requirements"),
+            citations=self._citations("IHSS eligibility requirements"),
         )
 
 
@@ -74,6 +75,7 @@ class MediCalAgent(SpecialistAgent):
                 )
             ],
             sources=self._sources("Medi-Cal income eligibility"),
+            citations=self._citations("Medi-Cal income eligibility"),
         )
 
 
@@ -105,6 +107,7 @@ class PaidFamilyLeaveAgent(SpecialistAgent):
                 )
             ],
             sources=self._sources("Paid Family Leave eligibility"),
+            citations=self._citations("Paid Family Leave eligibility"),
         )
 
 
@@ -139,6 +142,87 @@ class VAAgent(SpecialistAgent):
                 else []
             ),
             sources=self._sources("VA caregiver eligibility"),
+            citations=self._citations("VA caregiver eligibility"),
+        )
+
+
+class MedicareAgent(SpecialistAgent):
+    program = "Medicare"
+    doc_key = "medicare"
+
+    def _heuristic_assess(self, profile: CaseProfile) -> EligibilityResult:
+        cr = profile.care_recipient
+        age = cr.age or 0
+        on_medicare = cr.insurance == "medicare" or age >= 65
+        if on_medicare:
+            status, confidence = "likely", 0.8
+        elif age and age >= 60:
+            status, confidence = "possible", 0.45
+        else:
+            status, confidence = "needs_info", 0.35
+        return EligibilityResult(
+            program=self.program,
+            confidence=confidence,
+            status=status,
+            rationale=(
+                "Medicare covers people 65+ or those receiving SSDI for 24+ months; "
+                "caregiver-relevant pieces include hospice respite and care coordination (PACE/GUIDE)."
+            ),
+            roadblocks=[] if on_medicare else ["Confirm Medicare entitlement (age 65+ or 24 months of SSDI)"],
+            required_documents=["Medicare card or application", "Proof of age or disability"],
+            next_steps=[
+                "Review Medicare hospice respite and care-coordination options",
+                "Check eligibility for PACE or the GUIDE dementia program",
+            ],
+            missing_info=[] if (cr.age is not None) else ["Care recipient age", "Medicare enrollment status"],
+            followups=[
+                FollowupQuestion(
+                    program=self.program,
+                    id="medicare_enrolled",
+                    prompt="Is the care recipient currently enrolled in Medicare (Part A/B)?",
+                    type="boolean",
+                    why="Medicare enrollment unlocks hospice respite and care-coordination benefits.",
+                )
+            ],
+            sources=self._sources("Medicare eligibility hospice respite"),
+            citations=self._citations("Medicare eligibility hospice respite"),
+        )
+
+
+class TaxAgent(SpecialistAgent):
+    program = "Caregiver Tax Relief"
+    doc_key = "tax"
+
+    def _heuristic_assess(self, profile: CaseProfile) -> EligibilityResult:
+        provides_home = profile.caregiver.relationship != ""
+        return EligibilityResult(
+            program=self.program,
+            confidence=0.5 if provides_home else 0.4,
+            status="possible",
+            rationale=(
+                "Family caregivers may qualify for the Credit for Other Dependents, the "
+                "Child & Dependent Care Credit, and medical-expense deductions; IHSS/Medicaid "
+                "waiver payments to a live-in provider may be excludable under IRS Notice 2014-7."
+            ),
+            roadblocks=[],
+            required_documents=["Prior-year tax return", "Records of medical & care expenses paid"],
+            next_steps=[
+                "Check whether the care recipient qualifies as a dependent",
+                "Track deductible medical/care expenses",
+                "If a live-in IHSS provider, review Notice 2014-7 income exclusion",
+            ],
+            missing_info=["Whether caregiver provides >half of recipient's support"],
+            followups=[
+                FollowupQuestion(
+                    program=self.program,
+                    id="tax_dependent_support",
+                    prompt="Do you provide more than half of the care recipient's financial support?",
+                    type="boolean",
+                    why="Providing over half of support is a key test for claiming them as a dependent.",
+                )
+            ],
+            sources=self._sources("dependent care credit medical expense deduction caregiver"),
+            citations=self._citations("dependent care credit medical expense deduction caregiver"),
         )
 
 
@@ -147,4 +231,6 @@ ALL_SPECIALISTS: list[type[SpecialistAgent]] = [
     MediCalAgent,
     PaidFamilyLeaveAgent,
     VAAgent,
+    MedicareAgent,
+    TaxAgent,
 ]

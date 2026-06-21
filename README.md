@@ -103,7 +103,16 @@ chat (iMessage, WhatsApp, Telegram, RCS). Set `POKE_API_KEY` in `backend/.env`.
   RedisVL `SearchIndex`, and back the CaseProfile with the Redis Agent Memory Server.
 - **LLM:** set `OPENAI_API_KEY` (real embeddings) and/or `ANTHROPIC_API_KEY`; replace
   heuristic `assess()` bodies in `app/agents/specialists.py` with grounded LLM calls.
-- **Band:** connect `app/agents/band_space.py` to a real Band shared space.
+- **Band:** wired as a true multi-agent system — **each program group is its own Band agent**
+  (IHSS, Medi-Cal, Medicare, PFL, VA, Tax), grounded only in its program's docs, plus a
+  routing coordinator. Create a Remote Agent on app.band.ai per group, copy
+  `backend/band_agents.example.json` → `backend/band_agents.json`, and fill in each agent's
+  UUID + API key. Then `pip install -r requirements-band.txt` and run the worker:
+  `python -m app.integrations.band` (it launches every configured agent). Specialists expose
+  program-scoped `assesseligibility` + `lookupprogramdocs` tools; the router exposes the
+  cross-program `assesseligibility` + `searchprogramdocs`. With no registry file it falls back
+  to a single coordinator from `BAND_API_KEY` + `BAND_AGENT_ID`. `app/agents/band_space.py`
+  still handles in-process coordination for the synchronous HTTP flow.
 - **Poke:** `POKE_API_KEY` is now wired — reminders are delivered. See the Poke section above.
 - **Browserbase:** wire IHSS portal automation.
 - **Forms:** drop fillable government PDFs into `backend/data/` and fill out the field-map JSONs.
