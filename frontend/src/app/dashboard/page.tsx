@@ -66,9 +66,9 @@ export default function CalendarPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button className="hover:font-bold">+ Appointment</Button>
-          <Button className="hover:font-bold">+ Visit</Button>
-          <Button className="hover:font-bold">+ Deadline</Button>
+          <Button className="px-10 hover:font-bold">+ Appointment</Button>
+          <Button className="px-10 hover:font-bold">+ Visit</Button>
+          <Button className="px-10 hover:font-bold">+ Deadline</Button>
         </div>
       </div>
 

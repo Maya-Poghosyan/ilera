@@ -5,7 +5,6 @@ import {
   Compass,
   HeartHandshake,
   Scale,
-  ShieldCheck,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -46,10 +45,6 @@ export default function Home() {
       </header>
 
       <section className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center gap-6 px-6 py-24 text-center">
-        <span className="inline-flex items-center gap-2 rounded-full border border-border bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
-          <ShieldCheck className="size-3.5" />
-          Agentic assistance for caregivers
-        </span>
         <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
           Benefits navigation that{" "}
           <span className="text-primary">works for caregivers</span>
