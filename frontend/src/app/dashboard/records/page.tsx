@@ -327,29 +327,27 @@ export default function RecordsPage() {
           {timekeeping.map((t) => (
             <Card key={t.id}>
               <CardHeader className="flex flex-row items-center justify-between py-3">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-sm font-semibold">{formatDate(t.date)}</CardTitle>
-                  <span className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium">
-                    {SERVICE_LABELS[t.service_type] ?? t.service_type}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium tabular-nums">{t.hours} hrs</span>
+                <CardTitle className="text-base font-semibold">{formatDate(t.date)}</CardTitle>
+                <button
+                  onClick={() => handleDeleteTimekeeping(t.id)}
+                  className="text-muted-foreground hover:text-destructive"
+                  aria-label="Delete entry"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </CardHeader>
+              <CardContent className="space-y-2 py-0 pb-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-medium tabular-nums">{t.hours} hrs</span>
                   {t.start_time && t.end_time && (
-                    <span className="text-[11px] text-muted-foreground tabular-nums">
+                    <span className="text-sm text-muted-foreground tabular-nums">
                       {t.start_time}\u2013{t.end_time}
                     </span>
                   )}
-                  <button
-                    onClick={() => handleDeleteTimekeeping(t.id)}
-                    className="text-muted-foreground hover:text-destructive"
-                    aria-label="Delete entry"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
+                  <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-medium">
+                    {SERVICE_LABELS[t.service_type] ?? t.service_type}
+                  </span>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-1 py-0 pb-3">
                 <p className="text-sm text-muted-foreground">
                   {t.tasks.length > 0 ? t.tasks.join(", ") : "No activities recorded"}
                 </p>
@@ -409,10 +407,7 @@ export default function RecordsPage() {
           {journal.map((j) => (
             <Card key={j.id} className={j.fall_flagged ? "border-amber-300" : ""}>
               <CardHeader className="flex flex-row items-center justify-between py-3">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-sm">{formatDate(j.date)}</CardTitle>
-
-                </div>
+                <CardTitle className="text-base font-semibold">{formatDate(j.date)}</CardTitle>
                 <button
                   onClick={() => handleDeleteJournal(j.id)}
                   className="text-muted-foreground hover:text-destructive"
