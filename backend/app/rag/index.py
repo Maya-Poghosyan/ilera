@@ -8,15 +8,20 @@ Two backends with the same interface:
 import glob
 import json
 import os
+import re
 from dataclasses import dataclass, field
 
 from ..config import get_settings
 from .embeddings import dim, embed, embed_one
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "program_docs")
-CHUNK_CHARS = 800
+_DATA = os.path.join(os.path.dirname(__file__), "..", "..", "data")
+KNOWLEDGE_DIR = os.path.join(_DATA, "knowledge")
+DATA_DIR = os.path.join(_DATA, "program_docs")  # legacy sample docs (fallback)
+CHUNK_CHARS = 1400
+CHUNK_OVERLAP = 200
 INDEX_NAME = "ilera_docs"
 KEY_PREFIX = "ilera:doc"
+_PAGE_RE = re.compile(r"\[page (\d+)\]")
 
 
 @dataclass
@@ -25,6 +30,10 @@ class Chunk:
     program: str
     text: str
     source: str
+    title: str = ""
+    source_url: str = ""
+    document_id: str = ""
+    page: str = ""
     vector: list[float] = field(default_factory=list)
 
 
@@ -34,9 +43,58 @@ class Retrieved:
     program: str
     source: str
     score: float
+    title: str = ""
+    source_url: str = ""
+    document_id: str = ""
+    page: str = ""
 
 
-def load_chunks() -> list[Chunk]:
+def _chunk_text(text: str) -> list[tuple[str, str]]:
+    """Split into overlapping windows, tracking the most recent [page N] marker."""
+    out: list[tuple[str, str]] = []
+    step = max(1, CHUNK_CHARS - CHUNK_OVERLAP)
+    for i in range(0, len(text), step):
+        piece = text[i : i + CHUNK_CHARS].strip()
+        if not piece:
+            continue
+        pages = _PAGE_RE.findall(text[:i + CHUNK_CHARS])
+        page = pages[-1] if pages else ""
+        cleaned = _PAGE_RE.sub("", piece).strip()
+        if cleaned:
+            out.append((cleaned, page))
+    return out
+
+
+def _load_corpus_chunks() -> list[Chunk]:
+    manifest_path = os.path.join(KNOWLEDGE_DIR, "manifest.json")
+    if not os.path.exists(manifest_path):
+        return []
+    with open(manifest_path, encoding="utf-8") as fh:
+        manifest = json.load(fh)
+    chunks: list[Chunk] = []
+    for doc in manifest.get("docs", []):
+        path = os.path.join(KNOWLEDGE_DIR, doc["text_path"])
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        for n, (piece, page) in enumerate(_chunk_text(text)):
+            chunks.append(
+                Chunk(
+                    id=f"{doc['document_id']}:{n}",
+                    program=doc["program"],
+                    text=piece,
+                    source=doc["document_id"],
+                    title=doc.get("title", ""),
+                    source_url=doc.get("source_url", ""),
+                    document_id=doc["document_id"],
+                    page=str(page),
+                )
+            )
+    return chunks
+
+
+def _load_legacy_chunks() -> list[Chunk]:
     chunks: list[Chunk] = []
     for path in glob.glob(os.path.join(DATA_DIR, "*.txt")):
         program = os.path.splitext(os.path.basename(path))[0]
@@ -46,14 +104,15 @@ def load_chunks() -> list[Chunk]:
             piece = text[i : i + CHUNK_CHARS].strip()
             if piece:
                 chunks.append(
-                    Chunk(
-                        id=f"{program}:{i}",
-                        program=program,
-                        text=piece,
-                        source=os.path.basename(path),
-                    )
+                    Chunk(id=f"{program}:{i}", program=program, text=piece,
+                          source=os.path.basename(path))
                 )
     return chunks
+
+
+def load_chunks() -> list[Chunk]:
+    """Real knowledge corpus when present, else the bundled sample docs."""
+    return _load_corpus_chunks() or _load_legacy_chunks()
 
 
 def _cosine(a: list[float], b: list[float]) -> float:
@@ -85,12 +144,18 @@ class RagIndex:
         self._chunks = chunks
         return len(chunks)
 
+    def ensure(self) -> int:
+        return self.build() if not self._chunks else len(self._chunks)
+
     def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
         if not self._chunks:
             return []
         qv = embed_one(query)
         results = [
-            Retrieved(text=c.text, program=c.program, source=c.source, score=_cosine(qv, c.vector))
+            Retrieved(
+                text=c.text, program=c.program, source=c.source, score=_cosine(qv, c.vector),
+                title=c.title, source_url=c.source_url, document_id=c.document_id, page=c.page,
+            )
             for c in self._chunks
             if not program or c.program == program
         ]
@@ -114,6 +179,10 @@ class RedisVLIndex:
                 "fields": [
                     {"name": "program", "type": "tag"},
                     {"name": "source", "type": "text"},
+                    {"name": "title", "type": "text"},
+                    {"name": "source_url", "type": "text"},
+                    {"name": "document_id", "type": "tag"},
+                    {"name": "page", "type": "text"},
                     {"name": "text", "type": "text"},
                     {
                         "name": "vector",
@@ -135,6 +204,16 @@ class RedisVLIndex:
     def size(self) -> int:
         return self._size
 
+    def ensure(self) -> int:
+        try:
+            n = int(self._index.info().get("num_docs", 0))
+        except Exception:
+            n = 0
+        if n:
+            self._size = n
+            return n
+        return self.build()
+
     def build(self) -> int:
         from redisvl.redis.utils import array_to_buffer
 
@@ -147,6 +226,10 @@ class RedisVLIndex:
                     "id": c.id,
                     "program": c.program,
                     "source": c.source,
+                    "title": c.title,
+                    "source_url": c.source_url,
+                    "document_id": c.document_id,
+                    "page": c.page,
                     "text": c.text,
                     "vector": array_to_buffer(v, dtype="float32"),
                 }
@@ -164,7 +247,7 @@ class RedisVLIndex:
         vq = VectorQuery(
             vector=qv,
             vector_field_name="vector",
-            return_fields=["program", "source", "text"],
+            return_fields=["program", "source", "title", "source_url", "document_id", "page", "text"],
             num_results=k,
             dtype="float32",
         )
@@ -181,6 +264,10 @@ class RedisVLIndex:
                     program=r.get("program", ""),
                     source=r.get("source", ""),
                     score=1.0 - dist,
+                    title=r.get("title", ""),
+                    source_url=r.get("source_url", ""),
+                    document_id=r.get("document_id", ""),
+                    page=r.get("page", ""),
                 )
             )
         return out
@@ -211,16 +298,32 @@ class RedisVectorSetIndex:
     def size(self) -> int:
         return self._size
 
+    def ensure(self) -> int:
+        n = int(self._r.execute_command("VCARD", self.SET_KEY)) if self._r.exists(self.SET_KEY) else 0
+        if n:
+            self._size = n
+            return n
+        return self.build()
+
     def build(self) -> int:
         chunks = load_chunks()
         self._r.delete(self.SET_KEY)
         if chunks:
             vectors = embed([c.text for c in chunks])
-            for c, v in zip(chunks, vectors):
-                attrs = json.dumps({"program": c.program, "source": c.source, "text": c.text})
-                self._r.execute_command(
+            pipe = self._r.pipeline(transaction=False)
+            for n, (c, v) in enumerate(zip(chunks, vectors)):
+                attrs = json.dumps({
+                    "program": c.program, "source": c.source, "text": c.text,
+                    "title": c.title, "source_url": c.source_url,
+                    "document_id": c.document_id, "page": c.page,
+                })
+                pipe.execute_command(
                     "VADD", self.SET_KEY, "VALUES", len(v), *v, c.id, "SETATTR", attrs
                 )
+                if n % 500 == 499:
+                    pipe.execute()
+                    pipe = self._r.pipeline(transaction=False)
+            pipe.execute()
         self._size = len(chunks)
         return self._size
 
@@ -242,6 +345,10 @@ class RedisVectorSetIndex:
                     program=attrs.get("program", ""),
                     source=attrs.get("source", ""),
                     score=score,
+                    title=attrs.get("title", ""),
+                    source_url=attrs.get("source_url", ""),
+                    document_id=attrs.get("document_id", ""),
+                    page=attrs.get("page", ""),
                 )
             )
         return out
@@ -267,6 +374,13 @@ class RedisKNNIndex:
     def size(self) -> int:
         return self._size
 
+    def ensure(self) -> int:
+        n = int(self._r.scard(self._ids_key) or 0)
+        if n:
+            self._size = n
+            return n
+        return self.build()
+
     def build(self) -> int:
         chunks = load_chunks()
         old = self._r.smembers(self._ids_key)
@@ -282,6 +396,10 @@ class RedisKNNIndex:
                     mapping={
                         "program": c.program,
                         "source": c.source,
+                        "title": c.title,
+                        "source_url": c.source_url,
+                        "document_id": c.document_id,
+                        "page": c.page,
                         "text": c.text,
                         "vector": json.dumps(v),
                     },
@@ -308,6 +426,10 @@ class RedisKNNIndex:
                     program=data.get("program", ""),
                     source=data.get("source", ""),
                     score=_cosine(qv, vec),
+                    title=data.get("title", ""),
+                    source_url=data.get("source_url", ""),
+                    document_id=data.get("document_id", ""),
+                    page=data.get("page", ""),
                 )
             )
         results.sort(key=lambda r: r.score, reverse=True)
@@ -325,6 +447,26 @@ def get_index():
     if settings.has_redis:
         # Prefer native server-side vector KNN (RediSearch or Redis 8 Vector Sets);
         # fall back to a Redis-backed brute-force index if neither module is present.
+        for cls in (RedisVLIndex, RedisVectorSetIndex, RedisKNNIndex):
+            try:
+                idx = cls(settings.redis_url)
+                idx.ensure()
+                _index = idx
+                return _index
+            except Exception:
+                continue
+    idx = RagIndex()
+    idx.ensure()
+    _index = idx
+    return _index
+
+
+def rebuild_index():
+    """Force a full re-ingest of the corpus into the active backend."""
+    global _index
+    _index = None
+    settings = get_settings()
+    if settings.has_redis:
         for cls in (RedisVLIndex, RedisVectorSetIndex, RedisKNNIndex):
             try:
                 idx = cls(settings.redis_url)

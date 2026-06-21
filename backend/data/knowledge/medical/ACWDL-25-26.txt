@@ -1,0 +1,215 @@
+[page 1]
+California Department of Health Care Services                                                                   
+Medi-Cal Eligibility Division  
+1501 Capitol Avenue | Sacramento, CA | 95899-7413 
+MS 4607 | Phone (916) 552-9200 | www.dhcs.ca.gov 
+State of California 
+Gavin Newsom, Governor 
+ 
+California Health and Human Services Agency 
+ 
+  
+ 
+DATE:  December 1, 2025 
+ 
+ 
+ 
+ 
+TO:   ALL COUNTY WELFARE DIRECTORS        Letter No.: 25-26 
+  ALL COUNTY WELFARE ADMINISTRATIVE OFFICERS 
+  ALL COUNTY MEDI-CAL PROGRAM SPECIALISTS/LIAISONS 
+  ALL COUNTY HEALTH EXECUTIVES 
+  ALL COUNTY MENTAL HEALTH DIRECTORS 
+ 
+SUBJECT: 2026 MEDICARE PREMIUMS AND SOCIAL SECURITY TITLE II COST 
+OF LIVING ADJUSTMENTS  
+(Reference: ACWDL 23-25, 20-18, 17-03) 
+ 
+Purpose: 
+ 
+Effective January 1, 2026, this All County Welfare Directors Letter (ACWDL) revises the 
+Medicare premium amounts to be used in determining eligibility and the cost of 
+Medicare premiums and the Social Security Title II benefit amount adjustments. The 
+Statewide Automated Welfare System (SAWS) will make programming changes for the 
+2026 Medicare premium amounts and Social Security Title II adjustments in December 
+2025 for the January 2026 benefit month.  
+ 
+Medicare Part B Disregard Reminder 
+ 
+Effective December 1, 2020, counties must disregard income equal to the amount of the 
+individual’s Medicare Part B premium when determining eligibility for the ABD FPL 
+program, regardless of the state’s payment of the premium. Previous policy required 
+counties to apply an income deduction for the Medicare Part B premiums only if the 
+individual was paying for the premium. An individual does not need to pay for the 
+premium when enrolled in or applying for the ABD FPL program. This income disregard 
+is applied to the budget for as long as the individual’s countable income remains within 
+the ABD FPL program limits. Individuals in the Medically Needy program must still pay 
+for the premium before receiving the health insurance premium deduction. For more 
+information, please refer to ACWDL 20-18.
+
+[page 2]
+Letter No.: 25-26 
+Page 2 
+December 1, 2025 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Medicare Part A and B Premiums 
+ 
+Medicare Part A 
+ 2025 2026 
+Premium $518.00 $565.00 
+Reduced premium $285.00 $311.00 
+Inpatient care deduction   
+Days 1 – 60  $1676.00 $1,736.00 
+Days 61 – 90 $419.00 $434.00 
+Days 91 – 150 $838.00 $868.00 
+Skilled Nursing Facility deductible    
+Days 1 – 20 N/A N/A 
+Days 21 – 100  $209.50 $217.00 
+ 
+ 
+Medicare Part B 
+ 2025 2026 
+Premium $185.00 $202.90 
+Annual Deductible $257.00 $283.00
+
+[page 3]
+Letter No.: 25-26 
+Page 3 
+December 1, 2025 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+The Social Security Administration (SSA) has advised the Department of Health Care 
+Services (DHCS) that there is 2.8 percent cost of living adjustment (COLA) for Social 
+Security benefits in 2026. Because of this COLA, some Medicare beneficiaries, who 
+were “held harmless” against Medicare Part B premium increases in prior years, will see 
+an increase in their 2026 monthly Medicare Part B premium. The Medicare premium 
+increase will be based on the amount of the individual’s COLA increase. 
+ 
+2026 Social Security Title II Benefit Amount 
+ 
+Medicare Part B Premium is Not Paid by Applicant/Beneficiary 
+ 
+Individuals who are only eligible to Medi-Cal and who do not have to pay a Medicare 
+premium, or individuals who are entitled to Buy-In (where the State pays the Medicare 
+Part B premium), the 2025 SSA gross benefit amount should be multiplied by 2.8 
+percent or 1.028 to compute the 2026 SSA benefit amount. 
+ 
+To calculate the new benefit amount after the 2026 COLA, multiply the 2025 SSA gross 
+benefit amount by the 2026 COLA 1.028 and round the remaining cents down to the 
+next lower whole dollar to obtain the 2026 SSA gross benefit amount. This computation 
+produces the Title II benefit amount to be used in calculating the Medi-Cal shared 
+monthly cost. 
+ 
+Example: 
+ 
+2025 gross Title II benefit check amount: $1,450.00 
+Multiply by COLA:     x 1.028 
+Total: $1,490.60 
+Round down total to next lower whole dollar: $1,490.00 
+2026 gross Title II benefit amount: $1,490.00 
+ 
+ 
+ 
+Medicare Part B Premium is paid by the Applicant/Beneficiary 
+  
+For individuals who have the Medicare Part B premium deducted from their Title II 
+benefit check, follow the two-step rounding down process to accurately determine the 
+new benefit amount.
+
+[page 4]
+Letter No.: 25-26 
+Page 4 
+December 1, 2025 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Two-Step Rounding Process: 
+ 
+• Step 1: 
+ 
+Add the 2025 Medicare Part B premium to the net 2024 Title II benefit check to 
+obtain the 2025 SSA gross benefit amount. Multiply this 2025 SSA gross amount by 
+the 2026 COLA 2.8 and round the remaining cents down to the next lower $0.10 
+increment to obtain the 2026 SSA gross benefit amount. 
+ 
+• Step 2: 
+ 
+Subtract the 2026 Medicare Part B premium ($202.90 in this example) from the 2026 
+SSA gross benefit amount and round down to the next lower whole dollar. The 
+remainder will be the January 2026 SSA net benefit amount used to calculate the 
+Shared Monthly Cost. 
+ 
+Example: 
+ 
+Step 1: 
+2025 net Title II benefit check amount: $1,496.00 
+Plus 2025 Medicare Part B premium: + $185.00 
+2025 gross Title II benefit amount: $1,681.00 
+Multiply by COLA:      x 1.028 
+Total: $1,728.06 
+Round down total to next lower increment of $0.10: $1,728.00 
+2026 gross Title II benefit amount: $1,728.00 
+Step 2: 
+2026 gross Title II benefit amount: $1,728.00 
+Subtract 2026 Medicare Part B premium: -$202.90 
+Total: $1,525.10 
+Round down to the next lower whole dollar: $1,525.00 
+2026 net Title II benefit amount: $1,525.00
+
+[page 5]
+Letter No.: 25-26 
+Page 5 
+December 1, 2025 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+The link below provides more information on the Medicare Part A, B, and D premiums 
+and the Part B premiums for individuals with immunosuppressive drug coverage: 
+ 
+2026 Medicare Parts A & B Premiums and Deductions 
+ 
+Processing the 2026 SSA COLA for Non-MAGI Eligibility Groups 
+ 
+The 2026 SSA COLA will be disregarded from the eligibility determination for the Aged, 
+Blind, and Disabled Federal Poverty Level (ABD FPL), and Medicare Savings Programs 
+(MSPs) until the 2026 FPL rates take effect on April 1, 2026 (see WIC § 14005.40(f)). 
+All medically needy cases with Title II income must have the Shared Monthly Cost 
+adjusted to reflect the COLA, effective January 1, 2026. DHCS would also like to remind 
+counties to assess Medi-Cal members for Pickle, Disabled Adult Child (DAC), and 
+Disabled Widower (DW) programs, as they are on the Mega Mandatory list per ACWDL 
+17-03. 
+ 
+If you have any questions regarding the information provided in this letter, please 
+contact the Non-MAGI unit at NonMAGIInbox@dhcs.ca.gov. County questions 
+regarding policy guidance should be sent to MCED-Policy@dhcs.ca.gov. 
+ 
+ 
+Original Signed By 
+ 
+ 
+ 
+Theresa Hasbrouck 
+Branch Chief 
+Policy Development Branch  
+Medi-Cal Eligibility Division

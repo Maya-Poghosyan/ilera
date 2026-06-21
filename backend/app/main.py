@@ -10,7 +10,7 @@ from .forms.filler import resolve_fields
 from .integrations import poke
 from .models import CaseProfile, EligibilityResult, FollowupQuestion
 from .rag.embeddings import provider as embedding_provider
-from .rag.index import get_index
+from .rag.index import get_index, rebuild_index
 from .store import get_profile, save_profile
 
 settings = get_settings()
@@ -91,10 +91,25 @@ def rag_search(q: RagQuery) -> dict:
     hits = get_index().search(q.query, k=q.k)
     return {
         "results": [
-            {"text": h.text, "program": h.program, "source": h.source, "score": round(h.score, 4)}
+            {
+                "text": h.text,
+                "program": h.program,
+                "source": h.source,
+                "title": h.title,
+                "source_url": h.source_url,
+                "document_id": h.document_id,
+                "page": h.page,
+                "score": round(h.score, 4),
+            }
             for h in hits
         ]
     }
+
+
+@app.post("/api/rag/rebuild")
+def rag_rebuild() -> dict:
+    index = rebuild_index()
+    return {"backend": index.backend, "indexed": index.size}
 
 
 @app.get("/api/forms/{program}/{case_id}")

@@ -1,0 +1,2539 @@
+[page 1]
+Program Overview and Policy 
+Chapter 1 
+ 
+Table of Contents 
+(Rev. 7; Issued: 01-16-2025)  
+ 
+Transmittals for Chapter 1 
+ 
+1.0 Introduction 
+1.1 Definitions 
+1.2 Background 
+1.3 Medicare Eligibility and Enrollment 
+1.3.1 Premium-free Part A 
+1.3.2 Premium-Part A 
+1.3.3 Medicare Part B 
+1.3.4 The Part B Immunosuppressive Drug Benefit 
+1.3.5 Medicare Enrollment 
+1.3.5.1 – Medicare Enrollment Table 
+1.3.6 – Medicare Part A and B Re-enrollment 
+ 
+1.4 Requirements for Enrolling Individuals Under Buy-in Agreements 
+1.4.1 – General Requirements 
+1.4.2 – Medicare Enrollment Under a State Buy-Agreement 
+1.4.3 – Limitations on States Liability for Retroactive Part B Premiums 
+1.4.4 – Medicare Eligibility Redeterminations 
+ 
+1.5 Effect of Buy-in on an Individual 
+1.6.1 Cash 1.6 Buy-in Coverage Group One: Cash Assistance and Deemed Recipients of Cash 
+Assistance 
+ 
+Assistance and Deemed Recipients of Cash Assistance 
+1.6.1.1 – Supplemental Security Income (SSI) Program Recipients 
+1.6.1.2 – Full-benefit Medicaid Eligibility for SSI Recipients 
+1.6.1.3 – Part B Buy-in for SSI Recipients 
+1.6.1.4 – Qualified Medicare Beneficiary Group Eligibility for SSI 
+Recipients
+
+[page 2]
+1.6.1.5 – State Supplement Programs (SSPs) Recipients 
+1.6.1.6 – Deemed Recipients of Cash Assistance 
+1.6.2 Buy-in Coverage Group Two: Cash Assistance Recipients and Deemed 
+Recipients of Cash Assistance Plus Three Medicare Savings Program Groups 
+1.6.2.1 – Medicare Savings Program Eligibility and Enrollment 
+1.6.2.2 – Verification of Certain Income and Resources for the Medicare 
+Savings Programs 
+1.6.2.3 – Medicare Savings Programs Determinations Based on Part D 
+Low-Income Subsidy (LIS) Leads Data 
+1.6.2.4 – Qualified Medicare Beneficiary Group 
+1.6.2.5 – Effective Date of Qualified Medicare Beneficiary Group 
+Coverage 
+1.6.2.6 – Automatic Enrollment of SSI Recipients into the Qualified 
+Medicare Beneficiary Group 
+1.6.2.7– Specified Low-Income Medicare Beneficiary Group 
+1.6.2.8– Qualifying Individual Group 
+1.6.3 Buy-in Coverage Group Three: All Medicaid Eligibility Groups 
+ 
+1.7 – State Payment of Part A Premiums for Qualified Medicare  
+ 
+1.8 Conversion From Part A Group Payer to Part A Buy-in Status 
+ 
+1.9 Federal Financial Participation (FFP) for Medicare Costs 
+1.10 Streamlined Enrollment Under a Buy-in Agreement 
+1.11 – Qualified Medicare Beneficiary Group Enrollment for Individuals Who Need to 
+Pay a Premium to Enroll in Part A 
+ 
+1.12 Policy Regarding Which Entity Initiates Buy-in 
+1.12.1 Part B Buy-in for Cash-Related Recipients (SSI/SSPs) 
+1.13 Definition of Part B Buy-in Coverage Period 
+1.13.1 – Beginning of Part B Buy-in Coverage 
+1.13.2 – End of Part B Buy-in Coverage 
+ 
+1.14 Definition of Part A Buy-in Coverage Period 
+1.14.1 Beginning of Part A Buy-in Coverage 
+1.14.2 End of Part A Buy-in Coverage 
+ 
+1.15 Implications and Options for Beneficiaries When State Buy-in Coverage Ends
+
+[page 3]
+1.15.1 Voluntary Withdrawal (Termination) From Medicare 
+1.15.2 SSA Options for Financial Relief from Retroactive Premium Billing 
+ 
+Appendix 1.A Dual Eligibility Categories and Assistance with Medicare Part A and Part B Costs 
+Appendix 1.B Dual Eligibility Category Descriptions 
+Appendix 1.C Medicaid Effective Dates and Buy-in Start and Stop Dates 
+Appendix 1.D Policies Related to Buy-in in the 50 States, the District of Columbia, and 
+Specified U.S. Territories
+
+[page 4]
+1.0 Introduction 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025)   
+ 
+Since the inception of the Medicare program in 1966, section 1843 of the Social Security Act 
+(“the Act”) has afforded states the option to enter into an agreement with the federal government 
+under which the state commits to enrolling certain individuals dually eligible for Medicare and 
+Medicaid (dually eligible individuals) in Medicare Part B with the state paying the Part B 
+premiums on their behalf. Under section 1818(g) of the Act, starting January 1, 1990, states 
+could amend these agreements to pay the Part A premiums for certain dually eligible individuals 
+who must pay a premium to enroll in Medicare Part A. Section 1903(a)(1) and (b) of the Act 
+authorizes Federal Financial Participation (FFP) for the payment of Part A and/or Part B 
+premiums and cost-sharing for certain dually eligible individuals.   
+The Centers for Medicare & Medicaid Services (CMS), through authority delegated by the 
+Department of Health and Human Services (HHS), administers this process of state payment of 
+Medicare premiums, historically referred to as “state buy-in.”  
+This chapter sets forth consolidated policy guidance regarding the state buy-in program for the 
+50 states and the District of Columbia. Forthcoming program instructions will apply to the U.S. 
+territories identified in 42 CFR 407.42 and 407.43. 
+NOTE: This manual contains links to the Social Security Administration (SSA) Program 
+Operations Manual System (POMS) as of January 1, 2024.1 
+1.1 Definitions 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+Buy-in Agreement means an agreement authorized or modified by sections 1843 or 1818(g) of 
+the Act, under which a state secures Part B or premium Part A coverage for “eligible 
+individuals” (see definition below) who are members of the buy-in group specified in the 
+agreement, by enrolling them and paying the premiums on their behalf. See 42 CFR 407.40(b). 
+Starting January 1, 2023, a state’s Medicaid state plan (“state plan”) pages, including any 
+modifications under a state’s Medicaid state plan amendments (SPAs), related to buy-in policy 
+constitute the “buy-in agreement” between the state and CMS for purposes of sections 1843 and 
+ 
+1 The Social Security Administration’s Program Operating Manual System (“SSA POMS”) is the main reference for 
+SSA employees to conduct daily business, including actions related to the state payment of Medicare premiums. As 
+a courtesy to states, CMS provides links to the SSA POMS as of the time the manual was published. Changes may 
+occur after release. To access the SSA POMS, go to https://secure.ssa.gov/apps10/poms.nsf/Home?readform .
+
+[page 5]
+1818(g) of the Act and supersedes the free-standing buy-in agreements that all states and U.S. 
+territories originally signed with CMS. See 42 CFR 407.40(b).2 
+Buy-in Group (also known as a “buy-in coverage group”) means a coverage group described in 
+section 1843 of the Act that is identified by the state and is composed of multiple Medicaid 
+eligibility groups specified in the buy-in agreement. 42 CFR 407.40(b).  
+Eligible Individual (for Part B) means an individual who is entitled to Medicare Part A or who 
+is age 65 or over, is a resident of the United States and is either a U.S. citizen, or an alien 
+lawfully admitted for permanent residence who has resided in the U.S. continuously during the 
+five years immediately preceding the month the individual applies for enrollment under Part B, 
+and has not been convicted of crimes specified in 42 CFR 407.10(b). See section 1836 of the 
+Act; 42 CFR 407.10. 
+Entitled to Medicare Part A refers to individuals who receive Part A, either without payment of 
+a premium (premium-free Part A) under 42 CFR 406.5(a) or by paying a premium (premium Part 
+A) under 42 CFR 406.5(b).  
+General Enrollment Period (GEP) for Part B means the annual period (January 1 through 
+March 31) for an individual to apply for Part B if the individual did not apply during their Initial 
+Enrollment Period (IEP). See 42 CFR 407.15.  
+General Enrollment Period (GEP) for Premium Part A means the annual period (January 1 
+through March 31) for an individual to apply for Premium Part A if the individual did not apply 
+during their IEP. See 42 CFR 406.21(c).  
+Group Payer Arrangement is a method which certain third parties (e.g., states) use to pay the 
+Parts A and/or Part B premiums for a class of beneficiaries. See 42 CFR 406.32(g) and 408.80; 
+SSA POMS HI 01001.230 at https://secure.ssa.gov/poms.nsf/lnx/0601001230.3 States that do not 
+include Part A in their buy-in agreements must pay the Part A premiums for Qualified Medicare 
+Beneficiaries (QMBs) using the group payer arrangement.  
+Initial Enrollment Period (IEP) means the seven-month period that begins three months before 
+the month an individual first becomes eligible to enroll in premium Part A or Part B and ends 
+three months after that first month of eligibility. See 42 CFR 406.21(b) and 407.14.  
+Member of a Buy-in Coverage Group means an individual who is a member of the buy-in 
+coverage group that the state has elected to include in its buy-in agreement. States may only 
+ 
+2 To execute agreements under section 1843 of the Act, the Secretary and states initially executed free- standing 
+written agreements that defined the then-scope of a state’s buy-in agreement and bound the state to follow federal 
+regulations and guidance under section 1843 of the Act.  
+ 
+3 States may not use the group payer arrangement to pay the Part B premiums on behalf of individuals whose 
+premiums are deducted from monthly Social Security benefits or whose premiums are paid under a state buy- in 
+agreement. See 42 CFR 408.82(b)(2).
+
+[page 6]
+cover under state buy-in an eligible individual who is a member of the buy-in group. See 42 CFR 
+406.20, 407.40, 407.42, and 407.43. 
+Premium Increase for Late Enrollment (also known as “Late Enrollment Penalty”) means the 
+additional amount that may be charged to an individual who enrolls in premium Part A or Part B 
+after expiration of the individual’s IEP or who reenrolls after previous coverage. For Part B, the 
+premium is increased ten percent for each cumulative period of 12 full months during which an 
+individual could have been, but was not enrolled in Part B. See 42 CFR 408.22. For premium 
+Part A, effective for premiums due for July 1986 and after, the premium increase is limited to ten 
+percent and is payable for twice the number of full 12-month periods determined under the 
+regulations. See 42 CFR 406.32(d). 
+Premium Part A means the hospital insurance benefits provided under Medicare Part A for 
+certain individuals who do not qualify for Part A without monthly premiums under 42 CFR 
+406.5(a) and can only enroll in Part A by paying a premium. See 42 CFR 406.5(b) and 406.20. 
+Special Enrollment Period (SEP) means a period outside of the IEP and GEP during which an 
+individual can enroll in premium Part A or Part B. There are several SEPs, including an SEP for 
+an individual who is or was covered by an employer group health plan under 42 CFR 406.24 and 
+407.20, an individual who volunteered outside of the U.S. under 42 CFR 406.25 and 407.21, and 
+certain individuals who were enrolled in TRICARE coverage under section 1837(l) of the Act. 
+Additionally, starting January 1, 2023, there are five SEPs for exceptional circumstances, 
+including: for individuals impacted by an emergency or disaster; for individuals affected by a 
+health plan or employer misrepresentation; for formerly incarcerated individuals; for individuals 
+who lose Medicaid coverage;4 or for other exceptional circumstances. See 42 CFR 406.27 and 
+407.23; SSA POMS HI 00805.382 at https://secure.ssa.gov/poms.nsf/lnx/0600805382. 
+  
+ 
+4 The loss of Medicaid SEP starts the month the state notifies the individual they have lost all Medicaid coverage 
+and ends six months after the Medicaid termination. For more information about this SEP, see SSA POMS HI 
+00805.385 at https://secure.ssa.gov/poms.nsf/lnx/0600805385.
+
+[page 7]
+1.2 Background 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+Medicare provides health insurance coverage to individuals age 65 and older and certain persons 
+under age 65 with disabilities or End-Stage Renal Disease (ESRD). Medicare Part A provides 
+coverage generally of inpatient care, and most beneficiaries are entitled to these benefits without 
+paying an additional premium based on eligibility for Social Security or Railroad Retirement 
+Board (RRB) benefits. Some individuals are eligible to obtain entitlement to Part A benefits by 
+enrolling in premium Part A. Medicare Part B, which is optional and requires payment of a 
+premium, covers most other types of health coverage, including limited prescription drug 
+coverage. Medicare Part D, also optional, requires a premium, and covers outpatient prescription 
+drugs. Medicare Parts A, B, and D all require payment of cost-sharing (e.g., deductibles, 
+coinsurance, and copayments). 
+Under the state buy-in program, states, the District of Columbia, and U.S. territories can enter 
+into buy-in agreements that make it easier to enroll certain Medicaid beneficiaries into Medicare 
+Part B and pay the premiums on their behalf (“Part B buy-in”). See section 1843 of the Act; 42 
+CFR 407.40, et seq. All states, the District of Columbia, and three U.S. territories (the 
+Commonwealth of Northern Mariana Islands, Guam, and the U.S. Virgin Islands), have elected 
+to enter into a Part B buy-in agreement with CMS. 
+Since January 1, 1990, states have had the option to expand their buy-in agreements to enroll 
+QMBs in premium Part A and pay the premiums on their behalf (“Part A buy-in”). See sections 
+1.7 and 1.11 for more information about paying Part A premiums for QMBs. 
+For an individual who is determined eligible for but not yet enrolled in Medicare, state buy-in 
+serves to enroll the individual in Medicare Part A and/or B and directs the federal government to 
+bill the state for their premiums. For an individual who is already enrolled in Medicare, state 
+buy-in means the federal government will start billing the state for the individual’s Medicare 
+premiums and stop billing the individual for these costs through deductions from their monthly 
+Social Security benefits (Old Age, Survivors, and Disability Insurance (OASDI) program)5 or 
+through bills CMS directly mails certain beneficiaries.6 
+The impact of state buy-in is significant for many beneficiaries. Low-income individuals who 
+receive assistance with Medicare premiums save critical funds to use for other life necessities, 
+ 
+5 OASDI benefits include Old Age Insurance Benefit Payments (also known as Social Security retirement benefits) 
+and Social Security Disability Insurance (SSDI). 
+  
+6 CMS sends the beneficiary a Medicare Premium Bill (CMS-500) (see https://www.cms.gov/Medicare/CMS-
+Forms/CMS-Forms/Downloads/CMS500.pdf) f or Medicare Parts A and/or B if the beneficiary’s premium liability 
+exceeds the amount of the beneficiary’s Social Security benefit or Office of Personnel Management (OPM) or 
+Railroad Retirement Board (RRB) annuity or the beneficiary is not receiving any of these benefits. Most 
+beneficiaries pay the standard Part B premium amount ($174.90 in 2024). States also pay the standard Part B 
+premium amount on behalf of individuals enrolled in buy-in. See SSA POMS HI 01001.004 at 
+https://secure.ssa.gov/apps10/poms.nsf/lnx/0601001004.
+
+[page 8]
+including food and housing. Upon state buy-in, individuals who were paying the Medicare 
+premiums through deductions from their Social Security or RRB benefits see a notable increase 
+in their monthly payments, and individuals eligible but not enrolled in Medicare are able to 
+enroll in the program and access Medicare services. Buy-in agreements also enable individuals to 
+enroll in Medicare at any time of the year, without regard for Medicare enrollment periods and 
+late enrollment penalties.  
+Buy-in agreements simplify the process for states to assist their low-income residents with 
+Medicare expenses. Maximizing the number of Medicaid beneficiaries who are also enrolled in 
+Medicare is advantageous to the individuals and can also result in cost savings for states. 
+Medicare pays primary to Medicaid for Medicare Part A (inpatient hospital and skilled nursing 
+facility services) and Medicare Part B (outpatient medical care). In addition, Medicaid 
+beneficiaries who are enrolled in both Medicare Parts A and B may join Medicare-Medicaid 
+integrated care plans, which can improve coordination of care for dually eligible beneficiaries. 
+The state’s regular Federal Medical Assistance Percentage (FMAP) rate applies to state 
+expenditures for Medicare Parts A and B premiums and cost-sharing for certain Medicaid 
+eligibility categories (see section 1.9).  
+1.3 Medicare Eligibility and Enrollment  
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+CMS regulations require states to enroll members of a buy-in group in buy-in if they meet the 
+requirements for Medicare Parts A and/or B (an “eligible individual” as defined in section 1.1). 
+See 42 CFR 406.26(a) and 407.40(c). 
+ 
+This section summarizes Medicare eligibility requirements and enrollment processes to help 
+states understand which Medicaid beneficiaries may qualify for Medicare and become dually 
+eligible. 
+1.3.1 Premium-free Part A 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+Certain individuals qualify for premium-free Part A if they have enough Social Security work 
+credits to qualify for monthly OASDI benefits.7 Most Medicare beneficiaries get premium-free 
+Part A. 
+An individual age 65 or over meets the requirements for premium-free Part A if the individual: 
+• Already gets Old Age Insurance Benefit Payments (Social Security retirement benefits) 
+ 
+7 An individual accrues Social Security work credits when the individual pays Medicare payroll taxes while 
+working. See 20 CFR part 404, subpart B.
+
+[page 9]
+or an Age and Service Annuity from the RRB (RRB retirement benefits);  
+• Is eligible to get Social Security or RRB retirement benefits but has not filed for them 
+yet; or  
+• Is a government employee who paid the Medicare payroll tax while working for the 
+required amount of time. 
+An individual under age 65 meets the requirements for premium-free Part A if the individual has 
+received Social Security Disability Insurance (SSDI) or a disability annuity from RRB (RRB 
+disability benefits) for 24 months; or 
+An individual of any age who has ESRD meets the requirements for premium-free Part A if the 
+individual: 
+• Has the requisite work credits; or  
+• Is a spouse or dependent child8 of an individual who has the requisite work credits.  
+All individuals who qualify for Medicare on the basis of ESRD and individuals who qualify for 
+Medicare based on the receipt of SSDI receive premium-free Part A.  
+NOTE: An individual who has ALS (Amyotrophic Lateral Sclerosis, also called Lou Gehrig’s 
+disease) qualifies for premium-free Part A the month the individual’s SSDI benefits begin. 
+ 
+For more information about eligibility for premium-free Part A, see section 10 of the Medicare 
+General Information, Eligibility and Entitlement Manual at https://www.cms.gov/regulations-
+and-guidance/guidance/manuals/downloads/ge101c02.pdf. 
+ 
+1.3.2 Premium Part A 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+   
+Individuals who lack the requisite Social Security work credits to qualify for OASDI can obtain 
+premium Part A. See 42 CFR 406.5(b). CMS directly bills such individuals for Part A premiums. 
+See 42 CFR 406.32(e). 
+ 
+Individuals age 65 or older qualify for premium Part A under section 1818 of the Act and 42 
+CFR 406.20(b) if they are U.S. residents: 
+ 
+• Receiving benefits under Part B or are in the process of enrolling in it; 
+ 
+8 For information about qualifying for ESRD Medicare as a dependent child, see SSA POMS HI 00801.201 at 
+https://secure.ssa.gov/poms.nsf/lnx/0600801201.
+
+[page 10]
+• Not otherwise entitled to Part A; and 
+• Either:  
+o U.S. citizens; or  
+o Lawful permanent residents who have resided in the U.S. continuously during the 
+five years immediately preceding the month they applied for enrollment in 
+Medicare.9  
+In addition, individuals with disabilities under age 65 who return to work may qualify for 
+premium Part A (premium Part A for the Working Disabled) if they meet all of the following 
+criteria: 
+• Were entitled to premium-free Part A on the basis of entitlement to SSDI; 
+• Have lost premium-free Part A (premium-free Part A continues 8 and 1/2 years after a 
+return to work, including a 9-month trial work period, as described in SSA POMS DI 
+55001.001B.2.b at https://secure.ssa.gov/poms.nsf/lnx/0455001001);  
+Are not otherwise entitled to Part A; and  
+• Continue to have a qualifying disability. (See section 1818A of the Act; 42 CFR 
+406.20(c).) 
+Individuals who enroll in premium Part A for the Working Disabled can also enroll in Part B, 
+but they are ineligible to enroll in Part B alone. See SSA POMS HI 00801.170 at 
+https://secure.ssa.gov/poms.nsf/lnx/0600801170. 
+NOTE: Individuals with disabilities who return to work may, if determined eligible and the 
+state provides the coverage at issue, qualify for full-benefit Medicaid, including mandatory 
+Medicaid coverage for working individuals under 1619(b) of the Act and optional Medicaid 
+buy-in groups for working individuals described in sections 1902(a)(10)(A)(ii)(XIII) (XV), 
+and (XVI) of the Act. Working individuals with disabilities who are otherwise ineligible for 
+Medicaid benefits may qualify for the Qualified Disabled and Working Individual (QDWI) 
+Medicare Savings Program group through which Medicaid covers their Part A premiums.10 
+ 
+9 The five years of continuous residence may begin prior to the date that the lawful admission for permanent resident 
+is granted. See SSA POMS HI 00805.005 at https://secure.ssa.gov/apps10/poms.nsf/lnx/0600805005 and SSA 
+POMS GN 00303.800 at https://secure.ssa.gov/apps10/poms.nsf/lnx/0200303800. 
+ 
+10 The QMB group is not available to individuals who enroll in premium Part A for working disabled individuals. 
+See section 1905(p)(1)(A) of the Act; 42 CFR 400.200 and 435.123. For more information about the QMB group, 
+see section 1.6.2.4.
+
+[page 11]
+For more information about the QDWI eligibility group, see section 1.6.2.      
+Individuals may qualify to pay a reduced monthly Part A premium under certain 
+circumstances.11 See 42 CFR 406.32(c). 
+ 
+For more information about eligibility for Premium Part A, section 10 of the Medicare General 
+Information, Eligibility and Entitlement Manual at https://www.cms.gov/regulations-and-
+guidance/guidance/manuals/downloads/ge101c02.pdf. 
+ 
+1.3.3 Medicare Part B 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+Unlike Part A, there is always a premium for Part B.12An individual who receives OASDI, RRB, 
+or Office of Personnel Management (OPM) government retirement benefits must pay the Part B 
+premium through a deduction from their monthly benefits. The exception to mandatory 
+deduction is if a state pays the individual’s premiums under a buy-in agreement. See section 
+1840(h) of the Act.  
+CMS directly bills individuals for their Medicare premiums if they do not receive OASDI, RRB 
+or OPM benefits. SSA manually bills individuals whose OASDI is less than the premium amount 
+owed,13 for Part B premiums. See section 1840(e) of the Act; 42 CFR 408.60. 
+Individuals who are entitled to Part A are also eligible to enroll in Medicare Part B. See section 
+1836 of the Act. Individuals who lack the requisite OASDI work history for premium-free Part A 
+can enroll in Part B alone (or can enroll in both Part B and premium Part A) if they are age 65 or 
+older and meet the citizenship and residency requirements for Part B. See 42 CFR 407.10(a)(2). 
+In other words, they must be: 
+• Age 65 or older; 
+ 
+11 Individuals may qualify for a reduced premium if they have obtained 30 work credits; are married for at least one 
+year to a worker with at least 30 work credits; were married for at least one year to a worker who attained 30 work 
+credits prior to their death; are divorced from a worker after 10 years of marriage and the worker attained 30 work 
+credits at the time the divorce was final; or are divorced from a worker after 10 years of marriage and the worker 
+died and had 30 work credits at the time the divorce was final. See 42 CFR 406.32(c). 
+ 
+12 Note that Medicare Advantage plans can reduce the standard Medicare Part B premium as an additional benefit 
+for plan enrollees. The reduction must be less than the standard Part B premium amount and cannot be paid to the 
+beneficiary or used to reduce a late enrollment penalty. If an individual receives a Part B premium deduction from a 
+Medicare Advantage plan and is enrolled in Part B buy-in, CMS will notify the state of the amount of the premium 
+reduction through the regular exchange of buy-in data.  
+ 
+13 If the amount of the Part B premium exceeds the individual’s OASDI payment, SSA applies the full of amount of 
+the benefit payment to the premium, and SSA directly bills the beneficiary for the remaining balance owed. See SSA 
+POMS HI 01001.041 at https://secure.ssa.gov/poms.nsf/lnx/0601001041.
+
+[page 12]
+• U.S. residents; and  
+• Either:  
+o U.S. citizens; or 
+o Lawful permanent residents who have resided in the U.S. continuously during the five 
+years immediately preceding the month of application for enrollment in Medicare.14 
+ 
+1.3.4 The Part B Immunosuppressive Drug Benefit      
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+Starting January 1, 2023, certain individuals who lose Medicare coverage based on ESRD 36 
+months after a successful kidney transplant are eligible for a limited Part B Immunosuppressive 
+Drug (Part B-ID) benefit that covers immunosuppressive drug therapy under Part B, as required 
+by section 402 of the Consolidated Appropriations Act, 2021 (CAA, 2021).  
+The Part B-ID benefit solely covers immunosuppressive drugs and no other Medicare items, 
+services, or prescription drugs. 
+Individuals are charged a monthly premium for Part B-ID ($110.40 in 2025), and most are 
+directly billed by CMS. Current premium amounts can be found in the “What’s the 
+Immunosuppressive Drug Benefit” section of the ESRD Medicare webpage at: 
+https://www.medicare.gov/basics/end-stage-renal-
+disease#:~:text=Beginning%20January%201%2C%202023%2C%20Medicare,substitute%20for
+%20full%20health%20coverage.  
+States pay the Part B-ID premium as well as cost-sharing (Part B-ID benefit deductible and 
+coinsurance) for individuals determined eligible for the QMB eligibility group. See section 
+1.6.2.4. States pay the Part B-ID premium for individuals determined eligible for the Specified 
+Low Income Medicare Beneficiary (SLMB) or QI (Qualifying Individuals) eligibility groups See 
+sections 1.6.2.7 and 1.6.2.8.   
+On or after January 1, 2023, individuals are eligible for Part B-ID if they:  
+• Lose Medicare entitlement on the basis of ESRD 36 months after a successful kidney 
+transplant;  
+• Are not otherwise enrolled in Medicare or certain other forms of health coverage; and 
+• Complete an attestation through SSA certifying that they do not have or expect to obtain 
+certain other forms of health coverage, including employer coverage, Medicaid that 
+ 
+14 The five years of continuous residence may begin prior to the date that the lawful admission for permanent 
+resident is granted. See SSA POMS HI 00805.005 at https://secure.ssa.gov/poms.nsf/lnx/0600805005 
+and SSA POMS GN 00303.800 at https://secure.ssa.gov/apps10/poms.nsf/lnx/0200303800.
+
+[page 13]
+includes immunosuppressive drugs, and Marketplace coverage. 
+ 
+Individuals can enroll in Part B-ID by calling SSA at 1-877-465-0355 or completing the CMS 
+Form 10798 and mailing it to SSA. Medicare enrollment periods do not apply to Part B-ID so 
+individuals can enroll in the benefit at any time. 
+ 
+For more information about the Part B-ID benefit, see section 40.9 of the Medicare General 
+Information, Eligibility and Entitlement Manual at https://www.cms.gov/regulations-and-
+guidance/guidance/manuals/downloads/ge101c02.pdf; SSA POMS HI 00805.400 at 
+https://secure.ssa.gov/apps10/poms.nsf/lnx/0600805400. 
+ 
+1.3.5 Medicare Enrollment 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+In the absence of a buy-in agreement, individuals may only sign up for premium Part A or Part B 
+during a prescribed Medicare enrollment period (i.e., their IEP, the GEP or an SEP for which 
+they are eligible). Individuals can first sign up for premium Part A or Part B during their IEP. If 
+they miss the IEP, they can enroll during the annual GEP but may pay a premium increase for 
+late enrollment. For an explanation of the premium increase for Part B and premium Part A, see 
+section 1.1. Individuals who qualify for an SEP can enroll in Medicare without having to wait for 
+the GEP and are usually not subject to a late enrollment penalty (LEP).   
+ 
+Medicare enrollment periods do not apply to premium-free Part A, or the Part B-ID benefit 
+described in section 1.3.4. Some individuals are automatically enrolled in Medicare, while others 
+have to file for it, as described in section 1.3.5.1.
+
+[page 14]
+1.3.5.1 Medicare Enrollment Table  
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+Automatic Enrollment Individual Enrollment15 
+Premium-free Part A: Individuals automatically 
+get premium-free Part A if they are:  
+• Age 65 and over and receive Social Security 
+or RRB retirement benefits; or 
+• Under age 65 who receive Social Security 
+or RRB disability benefits for 24 months. 
+These individuals will also automatically get Part B 
+if they live in the U.S., the Northern Mariana 
+Islands, the U.S. Virgin Islands, Guam, or American 
+Samoa. Individuals can choose to subsequently 
+decline Part B. 
+Part B: During their IEP for Part B, CMS mails the 
+individual a welcome packet that contains 
+background information and a Medicare card with 
+the Part A and B effective dates. The mailing 
+informs the beneficiary that: 
+They do not pay a premium for Part A, which will 
+start on the coverage date on the card; and 
+They do owe a premium for Part B but can decline 
+Part B coverage by signing the back of the card and 
+returning the card before the Part B effective date. 
+Premium-free Part A: Individuals can file for 
+Medicare premium-free Part A at SSA if they are: 
+• Age 65 and over and have not yet filed for 
+Social Security or RRB benefits;  
+• An individual who qualifies for Medicare on 
+the basis of ESRD; or 
+• A government employee age 65 and over who 
+has paid the Medicare payroll tax for the 
+required number of quarters. 
+Individuals who file for Part A are enrolled in Part B 
+unless they decline it.  
+Premium Part A: Individuals who qualify for 
+premium Part A (i.e. those who do not qualify for  
+premium-free Part A) must apply for Medicare at 
+SSA. They can enroll in Part B only or premium Part 
+A and Part B.  
+NOTE: An individual can enroll in Medicare Part B 
+without enrolling in premium Part A. Conversely, an 
+individual cannot enroll in premium Part A unless the 
+individual is receiving Part B benefits or files an 
+application to enroll.  
+Delayed Premium Part A and Part B: Individuals 
+who did not enroll in premium Part A or Part B during 
+their IEP can enroll during the GEP or during an 
+applicable SEP.  
+Part B-ID: Individuals apply for Part B-ID through 
+SSA. Medicare enrollment periods do not apply to 
+Part B-ID. 
+ 
+ 
+ 
+15 An individual can sign up for Medicare Part A and Part B through SSA’s toll-free number 1-800-772-1213, TTY 
+1-800-325-0778, by making an appointment at their local Social Security office, and with some exceptions, on the 
+ssa.gov website. An individual can sign up for Part B-ID by calling SSA’s toll-free number at 1-877-465-0355 and 
+providing an oral attestation, or by mailing to SSA a completed Enrollment for Part B Immunosuppressive Drug 
+Coverage Form CMS-10798, which is available at https://www.cms.gov/files/document/cms-10798.pdf.
+
+[page 15]
+1.3.6 Medicare Part A and Part B Re-enrollment 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+An eligible individual who owes premiums from a past period of premium Part A or Part B 
+coverage is permitted to re-enroll in Medicare. Although payment of past-due premiums is not a 
+pre-requisite for re-enrollment, the individual is still liable for these amounts. See SSA POMS HI 
+01001.345 at https://secure.ssa.gov/apps10/poms.nsf/lnx/0601001345. Individuals who reenroll 
+can ask SSA about methods of payment and pursue options for financial relief that are described 
+in section 1.15.2.  
+ 
+1.4 Requirements for Enrolling Individuals Under Buy-in Agreements 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+1.4.1 General Requirements  
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+States must pay the Part A or B premiums for any individual who is both eligible to enroll in Part 
+B and is determined eligible for a Medicaid eligibility group in the buy-in agreement. See 
+sections 1843(a) and 1818(g) of the Act; 42 CFR 406.26 (a)(3) and 407.40(c)(1). A state cannot 
+apply a “cost-effectiveness test” to choose individuals for buy-in (i.e., restrict buy-in to those 
+who have incurred high medical expenses). 
+An individual’s enrollment under a buy-in agreement is involuntary. A beneficiary who is 
+eligible for a Medicaid eligibility group that is covered under their state’s buy-in agreement 
+cannot voluntarily terminate state buy-in coverage. See sections 1843(a) and 1818(g) of the Act; 
+42 CFR 406.26(a)(3) and 407.40(c)(1). 
+States may not pay Medicare premiums using the state buy-in process for non-citizens who are 
+ineligible for Medicaid benefits (e.g., individuals who qualify for health coverage funded solely 
+by the state).    
+States must follow federal requirements defining an individual’s buy-in coverage period, 
+including effective (start) and termination (stop) dates, even if buy-in processing is delayed.  
+States with buy-in agreements must exchange buy-in enrollment data with CMS on a daily basis 
+under 42 CFR 407.40(c)(4). See chapter 2 for information regarding state and CMS processes to 
+start and end buy-in.  
+1.4.2 Medicare Enrollment Under a State Buy-Agreement 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+States directly enroll individuals covered under their buy-in agreement into Medicare premium 
+Part A and Medicare Part B at any time of the year, without regard for Medicare enrollment
+
+[page 16]
+periods or late enrollment penalties. See 42 CFR 406.26(a)(2) and (b)(2) and 407.40(c)(1). If an 
+individual covered under the buy-in agreement is already enrolled in either Medicare Part A or 
+Part B, the state should directly enroll the individual in buy-in and refrain from referring the 
+individual to SSA to apply for Medicare. See section 1.10 for more information.S 
+ 
+1.4.3 Limitations on State Liability for Retroactive Part B Premiums 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+In some instances, SSA determines full-benefit Medicaid beneficiaries16 eligible for Medicare 
+for a retroactive period.17 If a state learns that SSA established retroactive Medicare Part A 
+entitlement for a full-benefit Medicaid beneficiary, the state must review the individual’s 
+eligibility for Part B buy-in over the retroactive period.  
+ 
+Starting January 1, 2024, state liability for retroactive Medicare Part B premiums for such 
+individuals is limited to a period no greater than 36 months prior to the date of the Medicare 
+enrollment determination. See 42 CFR 407.47(f). States can request a good cause exception from 
+CMS for retroactive periods of less than 36 months if the state could not benefit from Medicare 
+(e.g., based on the state’s Medicaid recoupment policy) and limiting state liability would not 
+result in harm to the beneficiary. States or beneficiaries can also request a good cause exception 
+for retroactive periods of more than 36 months if the 36-month limit would result in harm to the 
+beneficiary. See section 1.13.1 for more information on limitations on retroactive Part B buy-in 
+liability for full-benefit Medicaid beneficiaries.  
+ 
+1.4.4 Medicaid Eligibility Redeterminations  
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+  
+Eligibility for or enrollment in Medicare constitutes “a change in circumstances” that may affect 
+a Medicaid beneficiary’s eligibility, either by making them eligible for an additional eligibility 
+group (such as a Medicare Savings Program group) or rendering them ineligible for their existing 
+eligibility group (such as the “adult group” described at 42 CFR 435.119).18 When a state 
+ 
+16 ‘‘Full-benefit’’ Medicaid coverage, in the context of individuals who are considered dually eligible, generally 
+refers to the package of services, beyond coverage for Medicare premiums and cost sharing, that certain individuals 
+are entitled to under 42 CFR 440.210 and 440.330.   
+17 Retroactive Medicare awards often occur when an individual under age 65 files a claim for disability benefits and 
+receives a favorable SSDI award multiple years after the initial application. Because individuals entitled to SSDI  
+benefits become entitled to premium-free Medicare Part A after 24 months, the individual becomes retroactively 
+entitled to Medicare Part A if the individual’s start date for SSDI benefits is older than 24 months. If an individual 
+already has Medicaid when they are retroactively enrolled in Medicare Part A, the state can be liable for retroactive 
+Part B premiums per the state buy-in agreement. Many (but not all) Medicaid beneficiaries who are retroactively 
+enrolled in Medicare are SSI recipients.  
+18 For more information, see “Medicaid and Children’s Health Insurance Program (CHIP) Renewal Requirements,”  
+CMS Information Bulletin, December 4, 2020, at https://www.medicaid.gov/federal-policy-
+guidance/downloads/cib120420.pdf. B y June 3, 2027, states must comply with new 42 CFR 435.919 (revised and 
+redesignated certain requirements in 42 CFR 435.916) related to promptly acting on changes in circumstances and
+
+[page 17]
+anticipates or receives information that a current Medicaid beneficiary is newly eligible for 
+Medicare, the state must promptly redetermine the individual’s eligibility as required any time a 
+Medicaid beneficiary experiences a change in circumstances that may impact Medicaid 
+eligibility. See 42 CFR 435.916(d). If the state confirms that an adult group beneficiary is 
+eligible for Medicare, the state may not terminate the individual’s eligibility for the group until 
+the state has first determined whether the individual is eligible for any other eligibility group. See 
+42 CFR 435.916(f)(1).  
+When the state has considered eligibility on all bases, the state must either move the beneficiary 
+to the appropriate eligibility group if Medicaid eligibility continues or provide the individual 
+advance notice and hearing rights in accordance with 42 CFR 435.917 and 42 CFR part 431, 
+subpart E prior to terminating coverage. Note: the state must provide the beneficiary advance 
+notice and hearing rights if the state determines the individual ineligible for the adult group due 
+to Medicare eligibility and only alternatively eligible for an MSP group.  
+Additionally, the state must maintain the beneficiary’s scope of medical assistance at least until it 
+has provided the appropriate notice; e.g., if a state determines an adult group beneficiary who 
+becomes eligible for Medicare ineligible for any other full-benefit Medicaid eligibility group or 
+only eligible for an MSP group, the state must continue providing adult group coverage to the 
+individual at least until the state has notified them of its determination and informed them of 
+their fair hearing rights. See 42 CFR 431.230.  
+If the state determines the individual eligible for a Medicaid eligibility group included in the 
+state’s buy-in group, the state must start paying their Part A and/or B premiums. If a state that 
+includes all Medicaid eligibility groups in its Part B buy-in coverage group has not completed 
+the eligibility redetermination for an adult group beneficiary before the first month they qualify 
+for Medicare, the state must enroll the individual in Part B buy-in for all months in which the 
+individual is enrolled in the adult group following Medicare entitlement.  
+1.5 Effect of Buy-in on an Individual 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025)  
+ 
+If a Medicaid-eligible individual who is enrolled in an eligibility group included in a state’s 
+buy-in agreement is eligible for Medicare but not currently enrolled in it, state buy-in 
+enrolls the individual in Medicare, providing access to Medicare-covered items and services. 
+ 
+NOTE: If an individual did not enroll in premium Part A or Part B during their IEP, or 
+previously withdrew from the programs, Medicare entitlement will be established or re-
+established effective with the first month that the individual becomes eligible for state buy-in. 
+ 
+scope of redeterminations based on changes in circumstances. See April 2, 2024, Streamlining the Medicaid, 
+Children’s Health Insurance Program, and Basic Health Program Application, Eligibility Determination, Enrollment, 
+and Renewal Processes Final Rule (89 FR) 22789) at https://www.federalregister.gov/documents/2024/04/02/2024-
+06566/medicaid-program-streamlining-the-medicaid-childrens-health-insurance-program-and-basic-health.
+
+[page 18]
+If an individual is already enrolled in Medicare, state buy-in means the state will assume 
+payments for the beneficiary’s Medicare Part A and/or B premiums or Part B-ID premiums. 
+  
+• If SSA deducts Medicare premiums from a beneficiary’s Social Security benefit 
+(OASDI), the deductions will stop, resulting in the beneficiary receiving a higher 
+monthly payment. 
+• If CMS directly bills the beneficiary for Medicare premiums, such billing will end. 
+Once buy-in coverage is effective, the beneficiary shall receive a refund from SSA for any 
+premiums (including any late enrollment penalties) that were deducted from the benefit amount 
+or for premiums directly paid by the beneficiary to CMS, for any month the beneficiary is 
+enrolled in state buy-in. Sometimes a state accretes a beneficiary to the state’s buy-in account in 
+error for months in which the individual was not eligible for a Medicaid eligibility group 
+included in the buy-in agreement. In these instances, the beneficiary is entitled to keep any 
+premium refunds received. The state must treat the individual as if they are eligible and may not 
+attempt to recoup these amounts from the beneficiary.19 
+ 
+NOTE: The refund of Medicare premiums is not countable income under supplemental security 
+income (SSI) methodologies. See SSA POMS SI 00815.050.B.2 at 
+https://secure.ssa.gov/poms.nsf/lnx/0500815050 and 
+SI 00815.400.A at https://secure.ssa.gov/poms.nsf/lnx/0500815400.  
+ 
+As a result, Medicaid agencies cannot consider the refund as income when determining 
+eligibility for individuals whose Medicaid eligibility is based on SSI methodologies.  
+ 
+1.6 Part B Buy-in Coverage Groups in the 50 States and the District of 
+Columbia - General 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+Federal law allows the 50 states and the District of Columbia to select one of three Part B buy-in 
+ 
+19 Recovery of an “overpayment” made to beneficiaries is considered to be a retroactive termination of Medicaid 
+eligibility. Retroactive termination of eligibility is prohibited by regulations at 42 CFR 431.211 to 431.214, which 
+require states to provide at least ten days advance notice of a termination of eligibility in most situations; in a few 
+discrete situations, termination on the date of action is allowed. Retroactive terminations of eligibility would also 
+violate a beneficiary’s due process rights under the U.S. Constitution and associated case law. 
+States are required to provide Medicaid to eligible state residents under 42 CFR 435.403(a) and must continue to 
+furnish Medicaid to all eligible individuals until they are found to be ineligible pursuant to 42 CFR 435.930(b). 
+When a state receives information that suggests a beneficiary is not eligible for Medicaid, the state must promptly 
+conduct a redetermination of eligibility for that beneficiary. See 42 CFR 435.916(d)(1). This includes providing the 
+beneficiary with an opportunity to demonstrate that the information the state received is not accurate or that the 
+individual otherwise remains eligible for coverage. See 42 CFR 435.952(d). If the redetermination results in a 
+finding of ineligibility for the beneficiary, the state may terminate eligibility provided that the beneficiary is afforded 
+advance notice and hearing rights in accordance with 42 CFR part 435, subpart J and 42 CFR part 431, subpart E.
+
+[page 19]
+coverage groups. See section 1843 of the Act; 42 CFR 407.42.20  
+The buy-in coverage groups are listed below, in order of narrowest to broadest. 
+• Group One: Cash Assistance Recipients and Deemed Recipients of Cash Assistance 
+(Section 1.6.1) 
+• Group Two: Cash Assistance Recipients and Deemed Recipients of Cash Assistance Plus 
+Three Medicare Savings Program (MSP) Groups (Section 1.6.2); and 
+• Group Three: All Medicaid Eligibility Groups (Section 1.6.3) 
+ 
+As of January 1, 2024, all states and the District of Columbia, and certain territories have buy-in 
+agreements that include Part B buy-in for either (a) the cash assistance recipients and deemed 
+recipients of cash assistance plus three MSP groups or (b) all Medicaid eligibility groups. 
+Appendix 1.D classifies the Part B buy-in coverage groups in the 50 states, the District of 
+Columbia, and specified U.S. territories.  
+Individuals may be eligible for one or more Medicaid eligibility groups in the buy-in agreement.  
+NOTE: Part B buy-in coverage groups must include SSI/State Supplement Programs (SSPs) 
+recipients and deemed recipients of SSI/SSPs who qualify for Medicaid based on receipt (or 
+deemed receipt) of such cash assistance.  
+1.6.1 Buy-in Coverage Group One: Cash Assistance and Deemed Recipients of 
+Cash Assistance  
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+   
+ 
+This buy-in group includes only individuals who are covered under the state plan as categorically 
+needy and are cash assistance recipients or are deemed to be cash assistance recipients for the 
+purposes of the Medicaid eligibility determination. This group includes Medicaid beneficiaries 
+who are:21  
+• SSI recipients; 
+• State Supplement Payment (SSP) recipients; and  
+ 
+20 When states could first enter into buy-in agreements in July 1966, they could choose between two Part B buy-in 
+groups: 1) individuals receiving federally aided cash assistance; or 2) all Medicaid beneficiaries. After numerous 
+changes, federal law allows states to select one of the three buy-in groups outlined in this section. 
+ 
+21 SSA notifies Medicaid agencies of individuals who are determined eligible for SSI (and SSPs, in some cases) and 
+may qualify for Medicare through the SSA systems such as the State Data Exchange (SDX). See section 2.4 for 
+more information about SSA data sharing with states.
+
+[page 20]
+• Deemed recipients of SSI/SSP and the former Aid to Dependent Children and Families 
+(AFDC) Program.  
+ 
+1.6.1.1 Supplemental Security Income (SSI) Program Recipients 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+SSI is a federal cash assistance program that serves low-income individuals who are age 65 or 
+older or have blindness or a disability. SSI recipients typically qualify for other state and federal 
+programs, including Medicaid and Medicare.  
+1.6.1.2 Full-benefit Medicaid Eligibility for SSI Recipients 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+In most states, the receipt of SSI is a mandatory basis for Medicaid eligibility. See section 
+1902(a)(10)(A)(i)(II)(aa) of the Act; 42 CFR 435.120 (“Individuals receiving SSI group” (also 
+known as the “mandatory SSI group”)). As of January 1, 2024, 33 states and the District of 
+Columbia that cover the mandatory SSI group have an agreement with SSA under which SSA 
+determines eligibility for the mandatory SSI group, and the Medicaid agency automatically 
+enrolls in Medicaid those individuals who SSA has determined to be eligible for SSI. These 
+agreements are authorized under section 1634 of the Act, and states that have entered into such 
+agreements with SSA are commonly referred to as “1634 states.”  
+Nine states that cover the mandatory SSI group apply the SSI income and resource 
+methodologies and disability criteria in determining Medicaid eligibility but require SSI 
+recipients to file a Medicaid application with the state Medicaid agency to establish their 
+Medicaid eligibility (“SSI criteria states”). 
+Eight states do not cover the mandatory SSI group. Instead, these states have elected the option 
+to apply financial methodologies more restrictive than SSI in determining Medicaid eligibility 
+for individuals age 65 or older, or who have blindness or disability, subject to certain conditions. 
+See section 1902(f) of the Act; 42 CFR 435.121 (Individuals in states using more restrictive 
+requirements for Medicaid than the SSI requirements.) These states are referred to as “209(b)” 
+states, after the provision of the Social Security Act Amendments of 1972, Pub. L. No. 92- 603, 
+section 209(b), which enacted what became codified at 1902(f) of the Act.  
+1.6.1.3 Part B Buy-in for SSI Recipients 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+In addition to having Medicaid, many SSI recipients are entitled to Medicare Part A and/or 
+enrolled in Part B. In 1634 states, once SSA has determined an individual eligible for the 
+mandatory SSI group and Part B, CMS will initiate, on behalf of the state, Part B buy-in for 
+individuals. For the purposes of Part B buy-in, CMS refers to 1634 states as SSI “auto-accrete” 
+states. In SSI criteria and 209(b) states, CMS does not auto-enroll SSI recipients in Part B buy-in
+
+[page 21]
+since they must separately apply for Medicaid. Instead, once SSA determines an individual 
+eligible for SSI and Part B, CMS sends an “alert” to the state to initiate Part B buy-in for the 
+individual if they are eligible for Medicaid. For the purposes of Part B buy-in, CMS refers to SSI 
+criteria and 209(b) states as “alert states.”  
+Appendix 1.D classifies states by whether they are an auto-accrete or alert state (including SSI 
+criteria and 209(b)) as of January 1, 2024. See section 2.5.1 for more information about buy-in 
+enrollment processes in auto-accrete and alert states. 
+1.6.1.4 Qualified Medicare Beneficiary Group Eligibility for SSI Recipients 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+In addition to qualifying for Medicaid and Part B buy-in, SSI recipients are always financially 
+eligible for the QMB eligibility group, which covers Medicare Parts A and B premiums and cost-
+sharing. Effective October 1, 2024, CMS regulations at 42 CFR 435.909(b) require states to 
+automatically enroll in the QMB eligibility group most individuals determined eligible for 
+Medicare and the mandatory SSI group or mandatory 209(b) group (“SSI-based Medicaid”).  
+See section 1.6.2.6 for a description of these requirements.  
+1.6.1.5 State Supplement Programs (SSPs) Recipients 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+Most states operate their own cash assistance programs—known as optional SSPs—for people 
+who are 65 years old and older, or who have blindness or disability. Payments from these 
+programs are not counted as income under the SSI program. In many cases, these benefits 
+supplement the SSI benefits an individual receives.22 In other cases, individuals receive only an 
+SSP payment if they would otherwise meet the requirements for SSI but for having too much 
+income. States have the option to extend categorical Medicaid eligibility to individuals who are 
+not eligible for SSI, but who receive an SSP benefit. 
+Similar to the authority provided by section 1634 of the Act for states to enter agreements with 
+SSA for SSA to determine Medicaid eligibility of SSI applicants, section 1616 of the Act 
+authorizes states to enter agreements with SSA in which SSA determines SSP program eligibility 
+(“1616 agreements”). In such states, an application for SSI is also an application for SSPs. Other 
+states perform determinations for SSPs themselves. See SSA POMS SI 01401.001 at 
+https://secure.ssa.gov/apps10/poms.nsf/lnx/0501401001. 
+1.6.1.6 Deemed Recipients of Cash Assistance  
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+22 States in which the grant-in-aid cash benefit rate in December 1973 exceeded the SSI Federal Benefit Rate of 
+January 1974 are required to pay a supplement to beneficiaries to make up the difference. Individuals who continue 
+to receive these mandatory state supplements are mandatorily eligible for Medicaid. See 42 CFR 435.130. There are 
+no new applicants for this eligibility group.
+
+[page 22]
+Buy-in can be applicable to two categories of deemed recipients of cash assistance: deemed 
+SSI/SSP recipients and deemed AFDC recipients. 
+Over time, federal law has mandated that certain individuals who were at one point receiving 
+cash assistance but who lost it due to increases in Social Security benefits (OASDI) be treated, 
+for purposes of Medicaid eligibility, as if they continue to receive cash assistance, i.e., these 
+individuals are “deemed” to be receiving SSI/SSPs. Federal law and regulations make these 
+individuals mandatorily eligible for Medicaid.23 States must include these individuals in state 
+buy-in agreements. 
+ 
+Aid to Families with Dependent Children (AFDC) is a cash assistance program that was replaced 
+by Temporary Assistance for Needy Families (TANF) in 1996.24 No Medicaid state plan 
+eligibility groups are linked to TANF; a few Medicaid eligibility categories, however, are linked 
+to eligibility standards of the former AFDC program and offer eligibility to certain individuals 
+who are “deemed” to meet such standards, as the program existed in 1996. Deemed AFDC 
+recipients include individuals who receive adoption assistance, foster care, or guardianship care 
+under Title IV-E of the Act, in accordance with 42 CFR 435.145, and low-income families 
+described in section 1931(b)(1)(A) of the Act. Effective January 1, 2023, states have the option 
+to designate all deemed recipients of AFDC as cash assistance recipients with eligibility groups 
+related to SSI/SSP, or to only cover individuals who receive or are deemed to receive SSI/SSP as 
+cash assistance recipients in their Part B buy-in coverage group. See 42 CFR 407.42(b). 
+ 
+1.6.2 Buy-in Coverage Group Two: Cash Assistance Recipients and Deemed 
+Recipients of Cash Assistance Plus Three Medicare Savings Program Groups  
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+A second option for states to select for inclusion in their buy-in agreements is cash assistance 
+recipients, deemed recipients of cash assistance and the three primary Medicare Savings Program 
+(MSP) Medicaid eligibility groups. Preceding sections 1.6.1 through 1.6.1.3 describe the cash 
+assistance and deemed cash recipients who are included in buy-in agreements for states selecting 
+this coverage group. This section details the MSP groups that are included in this buy-in 
+coverage group option. 
+ 
+ 
+23 The following categories are deemed recipients of SSI/SSPs: certain individuals who would have been eligible for 
+cash assistance in 1972 but who lost it because of an increase in their OASDI benefits (42 CFR 435. 134 and 
+435.112); certain individuals (sometimes known as “Pickle” individuals) who used to qualify for both SSDI and SSI 
+but who no longer qualify for SSI because their income exceeds the SSI income limit (42 CFR 435.135); certain 
+working individuals with disabilities who have become income-ineligible for SSI (section 1619(b) of the Act and 42 
+CFR 435.120(c)); certain disabled widow/ers (42 CFR 435.137 and 435.138); and certain adult children with 
+disabilities (section 1634(c) of the Act).  
+24 The Personal Responsibility and Work Opportunity Reconciliation Act of 1996 (Pub. L. 104- 193).
+
+[page 23]
+In accordance with section 1902(a)(10)(E) of the Act, MSP eligibility groups are part of states’ 
+Medicaid programs and assist low-income individuals with their Medicare costs. The MSPs are 
+Medicaid eligibility groups through which Medicaid covers Medicare Part A and/or B premiums 
+and, for most enrollees, cost-sharing.  
+Starting January 1, 2023, section 402(f) of the CAA, 2021 expanded the primary MSPs to pay 
+some or all of the costs of the new immunosuppressive drug coverage for certain low-income 
+individuals who are enrolled in such drug coverage. 
+The MSPs include three primary Medicaid eligibility groups: 
+• Qualified Medicare Beneficiary (QMB) group 
+• Specified Low-Income Medicare Beneficiary (SLMB) group 
+• Qualifying Individual (QI) group. 
+Individuals may be eligible for an MSP alone (also known as “partial-benefit dually eligible 
+individual”) or may be simultaneously eligible for an MSP (QMB or SLMB) and a full-benefit 
+Medicaid eligibility group under the state plan (also known as “full-benefit dually eligible 
+individual”).  
+ 
+As noted in section 1.6, all state buy-in agreements in the 50 states and the District of Columbia 
+include the payment of Part B premiums for QMBs, SLMBs, and QIs. 
+NOTE: A fourth, and much smaller MSP eligibility group is the Qualifying Disabled Working 
+Individuals (QDWI) group. Eligibility for the QDWI group, as described in sections 
+1902(a)(10)(E)(ii) and 1905(s) of the Act and 42 CFR 435.126, is limited to individuals under 
+age 65 with disabilities who:  
+• are eligible to enroll in premium Part A once premium-free Part A expires following a 
+return to work (see section 1.3.2 for more information on premium Part A eligibility); 
+• have income that does not exceed 200 percent of the FPL;  
+• have resources that do not exceed twice the relevant SSI resource standard (i.e., for a 
+single individual or couple); and 
+• are otherwise ineligible for Medicaid benefits.  
+Individuals with disabilities who return to work may qualify for full-benefit Medicaid coverage 
+(e.g. mandatory coverage for working individuals under 1619(b) of the Act or optional Medicaid 
+buy-in eligibility groups for working individuals with disabilities described in sections 
+1902(a)(10)(A)(ii)(XIII), (XV), and (XVI) of the Act), which makes them ineligible for the 
+QDWI eligibility group. See sections 1.6.1.6 and 1.6.3 for information about Part B buy-in
+
+[page 24]
+coverage for working individuals with disabilities who qualify for full-benefit Medicaid 
+coverage.   
+States pay Part A premiums (but not Part B premiums) for QDWIs. States cannot include the 
+Part A premium payments for QDWIs in their buy-in agreements. States pay the Part A 
+premiums for QDWIs through the group payer process.  
+Sections 1.6.2.4 through 1.6.2.8 contain additional information about the QMB, SLMB, and QI 
+groups. 
+For detailed information on dually eligible individual categories, including the degree to which 
+individuals in each category receive assistance with Medicare Parts A and B premiums and cost-
+sharing, see appendix 1.A. 
+For more information about the buy-in start date for these categories, see sections 1.13 and 1.14, 
+and appendix 1.C. 
+1.6.2.1 Medicare Savings Program Eligibility and Enrollment  
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+Individuals typically apply for MSPs directly at their state Medicaid agencies. States must also: 
+•  
+• Deem most individuals who receive SSI and have Medicare and full-benefit Medicaid 
+eligible for the QMB eligibility group as described in section 1.6.2.6; and  
+• Initiate an MSP application upon receipt of data from Part D Low-Income Subsidy (LIS) 
+program applications (‘‘LIS leads data’’) from SSA as described in section 1.6.2.3. 
+ 
+Income and resources criteria: Federal statutes and rules set forth the applicable income and 
+resource standards (“limits”) for each MSP group. See section 1902(a)(10)(E) of the Act; 42 
+CFR 435.123 through 126. In determining countable income and resources for MSP eligibility, 
+states must use income and resource methodologies no more restrictive than the methodologies 
+for the SSI program. See section 1905(p) of the Act; 42 CFR 435.601(b)(2). However, under 
+section 1902(r)(2) of the Act, states have the flexibility to adopt income and resource 
+methodologies less restrictive than the SSI program’s to effectively increase the QMB, SLMB 
+and QI income and resource limits above the federal baseline and to remove the resource test 
+altogether. 25   
+ 
+25 For more information on state flexibilities, see “Opportunities to Increase Enrollment in Medicare Savings 
+Programs” CMS Information Bulletin, November 1, 2021, at https://www.medicaid.gov/federal-policy-
+guidance/downloads/cib11012021.pdf. See also, “Improving Participation in the Medicare Savings Programs,” 
+Chapter 3 in June 2020 Report to Congress on Medicaid and CHIP, Medicaid and CHIP Payment and Access 
+Commission (MACPAC) at https://www.macpac.gov/publication/chapter-3-i mproving-participation-in-the-
+medicare-savings-programs/.
+
+[page 25]
+States that use section 1902(r)(2) authority to fully align their MSP income and resource 
+methodologies with the LIS program methodologies can determine an individual’s eligibility for 
+the MSPs using LIS leads data, without requesting any financial information from the 
+individual.26  
+Family of the size involved: The Social Security Act27 sets forth income limits for the MSPs 
+relative to the FPL “applicable to a family of the size involved.” CMS has permitted states to 
+apply their own reasonable definition of the phrase “family of the size involved.”28  
+By April 1, 2026, states must apply a definition of “family of the size involved” in determining 
+eligibility for the MSP groups that includes at least the individuals included in the definition of 
+“family size” for the Part D LIS program described in 42 CFR 423.772. To effectuate this 
+change, states must submit a State Plan Amendment (SPA).  
+See 42 CFR 435.601(e). The Part D LIS definition includes the applicant, the spouse who is 
+living in the same household, if any, and the number of individuals who are related to the 
+applicant or applicants, who are living in the same household and who are dependent on the 
+applicant or the applicant’s spouse for at least one half of their financial support.  
+COLA adjustments: States must adjust their eligibility standards to reflect the annual poverty 
+level guidelines established at least annually by HHS upon their publication in the Federal 
+Register. Additionally, states cannot count income attributable to a Social Security cost of living 
+adjustment (COLA) as income for MSP eligibility purposes for individuals until the month 
+following the month HHS publishes the new poverty level figures. See section 1905(p)(2)(D) of 
+the Act; 42 CFR 435.123 through 435.126. 
+Verification of Income and Resources:  
+States must verify financial eligibility for the MSPs in accordance with sections 1137 and 
+1902(a)(46)(A) of the Act and 42 CFR 435.940 through 435.942 and 435.380. For resources held 
+in financial institutions, states may either elect to accept self-attestation of resources or to use an 
+Asset Verification System (AVS) for the MSPs. If a state does not accept self-attestation of 
+resources that can be verified through AVS, the state cannot require individuals to provide proof 
+ 
+26 See final rule titled ‘‘Streamlining Medicaid: Medicare Savings Program Eligibility Determination and 
+Enrollment” published in the September 21, 2023 Federal Register (88 FR 65320, 652 39) at 
+https://www.govinfo.gov/content/pkg/FR-2023-09-21/pdf/2023-20382.pdf (“the September 21, 2023 MSP final 
+rule”). States would only need to verify citizenship or immigration status obtain assignment of rights to medical 
+support and third-party payers as described in section 1.6.2.3.  
+27 See sections 1905(p)(2)(A) and (B) (the QMB group), 1902(a)(10)(E)(iii) and (iv) (the SLMB and QI groups 
+respectively), and 1905(s)(2) (the QDWI group) of the Act. 
+28 See Memorandum from Director, Center for Medicaid and State Operations, to Regional Administrator, re: 
+Medicaid Eligibility—Policy Governing Family Size in Determining Eligibility for Qualified Medicaid 
+Beneficiaries and Specified Low-Income Beneficiaries. October 2, 1997, at 
+https://www.medicaid.gov/sites/default/files/2019-12/medicaid-eligibilty-memo.pdf.
+
+[page 26]
+of such resources without first attempting to verify them through AVS.29   
+ 
+Distinct requirements apply to the verification of certain income and resources for all MSPs 
+applications (section 1.6.2.2) and to MSP applications the state receives from SSA through the 
+LIS leads process (section 1.6.2.3).     
+ 
+Screen on all bases: State Medicaid agencies must generally determine an individual’s 
+eligibility for all Medicaid eligibility groups for which they may qualify. For Medicare 
+beneficiaries, these include full-benefit Medicaid eligibility groups and the MSPs. Accordingly, 
+states’ eligibility system hierarchy should be programmed to reflect both MSP eligibility 
+determinations as well as full-benefit Medicaid eligibility groups. Note that some states may 
+have MSP-only applications that do not request the information necessary for categorical 
+Medicaid determinations. Consistent with 42 CFR 435.911(c), by April 1, 2026, states must 
+adhere to specific sequencing of eligibility determinations for individuals whose MSP 
+applications originate with SSA transmittal of LIS leads data as described in CMS regulations at 
+42 CFR 435.911(e)(9) and section 1.6.2.3. 
+1.6.2.2 Verification of Certain Income and Resources for the Medicare 
+Savings Programs 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+No later than April 1, 2026, states are required to implement enrollment simplification policies 
+related to verification of certain income and resources that the MSPs count but LIS does not (i.e., 
+interest and dividend income; non-liquid resources, and the cash value of certain whole life 
+insurance policies). States must also simplify verification of burial funds, which the MSPs count 
+differently than does LIS.  
+ 
+NOTE: The requirements below apply to all MSP applications, regardless of whether the 
+individual initiates the application by directly applying to the state Medicaid agency or the state 
+receives the application from SSA through the LIS leads process. Also, if CMS conducts audits 
+related to state MSP eligibility determinations, CMS will not identify an error if the state follows 
+these requirements.  
+Interest and dividend income and non-liquid resources: States must accept self-attestation of 
+the value of any: 1) dividend and interest income earned by the applicant or the applicant’s 
+spouse and 2) non-liquid resources owned by the applicant or the applicant’s spouse. 42 CFR 
+435.952(e)(1) and (e)(2). States may not request documentation of the attested value prior to 
+determining MSP eligibility unless the state agency has information that is not reasonably 
+compatible with an applicant’s attestation. In that case, the agency must seek additional 
+ 
+29 See “Financial Eligibility Verification requirements and Flexibilities,” CMS Informational Bulletin, November 
+20, 2024, at https://www.medicaid.gov/federal-policy-guidance/downloads/cib11202024.pdf.
+
+[page 27]
+information from the individual, which may include a reasonable explanation of the discrepancy 
+or documentation. See 42 CFR 435.952(c)(2). 
+States have the option to conduct post-enrollment verification of interest and dividend income 
+and/or non-liquid resources after the individual has been determined eligible for an MSP, as 
+described below. 
+Burial funds: States must allow individuals to self-attest that up to $1,500 of their resources, and 
+up to $1,500 of their spouse’s resources, are set aside as burial funds in a separate account 
+(regardless of whether they are revocable or irrevocable accounts). See 42 CFR 435.952(e)(3). 
+States may not request documentation of the attested amount prior to determining MSP 
+eligibility unless the state agency has information that is not reasonably compatible with an 
+applicant’s attestation. In that case, the agency must seek additional information from the 
+individual, which may include a reasonable explanation of the discrepancy or documentation. 
+See 42 CFR 435.952(c)(2).  
+States have the option to conduct post-enrollment verification of burial funds after the individual 
+has been determined eligible for an MSP, as described below.  
+Life insurance policies: If the total face value of all of an individual’s life insurance policies 
+does not exceed $1,500, the cash surrender value of the individual’s policies is not counted in 
+determining MSP eligibility. 
+If an individual attests to having a life insurance policy with a face value below $1,500, states 
+must accept the attested face value for purposes of making an initial eligibility determination for 
+MSP coverage, unless the state has information that is not reasonably compatible with the 
+attested information. In that case, the agency must seek additional information from the 
+individual, which may include a reasonable explanation of the discrepancy or documentation. 
+See 42 CFR 435.952(c)(2).  
+If an individual attests to a face value of a life insurance policy that is above $1,500, the state 
+may also accept their attestation of the cash surrender value of the life insurance policy. If the 
+agency has information about the cash surrender value of a life insurance policy that is not 
+reasonably compatible with the applicant’s attestation, the agency must seek additional 
+information from the individual, which may include a reasonable explanation of the discrepancy 
+or documentation. See 42 CFR 435.952(c)(2).  
+If the state accepted an individual’s self-attestation of the face value or cash surrender value of a 
+life insurance policy, the state also has the option to conduct post-enrollment verification as 
+described in this section below. 
+If the state requires documentation of the cash surrender value of a life insurance policy -- either 
+prior to enrollment or during post-enrollment verification -- the state must assist the individual 
+with obtaining this information and documentation. This requires requesting that the individual 
+provide the name of the insurance company and policy number and authorize the state to obtain
+
+[page 28]
+documentation of the cash surrender value on the individual’s behalf. The state agency may also 
+request, but may not require, additional information from the applicant, such as the name of an 
+agent.  
+If the individual does not provide basic information about the policy and an authorization, the 
+state may require that the individual provide documentation of the cash surrender value within at 
+least 15 calendar days. See 42 CFR 435.952(e)(4). 
+Post eligibility verification: States that accept an individual’s attestation for the income and 
+resource categories described above have the option to conduct post-enrollment verification. If 
+the agency requests information post-enrollment, it must allow the individual at least 90 days 
+from the date of the request to provide any necessary information requested and must allow the 
+individual to submit such documentation through the internet, by telephone, in person or through 
+other commonly available electronic means. 42 CFR 435.952(e)(1)(iii); (e)(2)(iii) and (e)(3)(iii) 
+and (e)(4)(iii); and 435.907(a).  
+States may not administratively recoup payments already made on behalf of individuals if post-
+enrollment verification processes establish that the individual is ineligible for the MSPs. If a state 
+suspects that an individual committed fraud or abuse in order to obtain or maintain MSP 
+eligibility, the state should follow the processes described at 42 CFR part 455, subpart A of the 
+regulations. 
+1.6.2.3 Medicare Savings Programs Determinations Based on Part D Low-
+Income Subsidy (LIS) Leads Data 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+Since January 1, 2010, federal law has required SSA to transmit to states data from LIS 
+applications processed by SSA (“LIS leads”) and has required states to treat the data as an 
+application for the MSPs. See sections 1144(c)(3) and 1935(a)(4) of the Act. For additional 
+information about LIS leads data, see section 2.4.2.5. 
+States must treat the date the individual files the LIS application with SSA as the date of 
+application for purposes of establishing the effective date of eligibility for MSP benefits. When 
+calculating the 45 day timeliness standard as described under 42 CFR 435.912(c), states may 
+either use the date that the state receives the LIS leads data from SSA or the date of the LIS 
+application as the start of the calculation.30 CMS regulations at 42 CFR 435.911(e) require states 
+to take specific actions on MSP applications based on the receipt of LIS leads data.  
+ 
+30 See September 21, 2023 MSP final rule (88 FR 65320, 6532) at https://www.govinfo.gov/content/pkg/FR-2023-
+09-21/pdf/2023-20382.pdf; February 18, 2010 State Medicaid Director Letter (SMDL #10–0 03), ‘‘Medicare 
+Improvements for Patients and Providers Act of 2008 (MIPPA),’’https://www.medicaid.gov/federal -
+policyguidance/downloads/smd10003.pdf.
+
+[page 29]
+Also, if CMS conducts audits related to state MSP eligibility determinations, CMS will not 
+identify an error if the state follows these requirements. 
+No later than April 1, 2026, the states must have procedures in place to meet all of the following 
+requirements:  
+1. Treat the LIS leads data as an application for MSPs without requiring submission of 
+another application.  
+NOTE: On rare occasions, a state may receive an LIS leads file for an individual who did not 
+complete the entire LIS application (https://www.ssa.gov/forms/ssa-1020b-ocr-sm-inst.pdf), 
+because they answered “yes” on question 3, indicating they have resources that exceed the 
+LIS resource limit. If a state receives such a LIS leads file, it means the individual also 
+answered “yes” on the question 15, requesting that the state nevertheless screen them for the 
+MSPs. States must therefore treat the receipt of such LIS leads data as an application for 
+MSPs. The leads data will not contain income and resources information, so the state must 
+reach out to the individual to obtain missing information that is necessary for the MSP 
+determination (see #4).     
+2.  Accept LIS leads data without further verification and not require additional verification 
+or documentation unless (1) the income or resources in the leads data are over the applicable 
+MSP income and resource limits data and, therefore, do not support a finding that the 
+individual is eligible for an MSP (see #6 below); or (2) the agency is aware of information 
+that is not reasonably compatible with the leads data. See 42 CFR 435.911(e)(4). 
+NOTE: The LIS leads data record layout 
+(https://www.ssa.gov/dataexchange/documents/LIS%20record.pdf) describes each LIS 
+income and resource data element, including whether the amount reflected incorporates 
+standard SSI exclusions. If the income or resource data element does not include the standard 
+SSI exclusions, the state must apply all applicable exclusions prior to completing the 
+eligibility determination. In addition, if the state’s approved Medicaid state plan disregards 
+certain amounts or types of income or resources under section 1902(r)(2) of the Act for the 
+MSP groups, the state must apply all applicable disregards prior to completing the eligibility 
+determination.   
+The LIS leads data elements for unearned income and resources (except burial funds) show 
+combined total amounts for the applicant and spouse if living together. Under SSI 
+methodologies, the income and resources of an individual and their spouse (if their spouse is 
+not eligible for SSI as defined in 20 CFR 416.2260(d) (“ineligible spouse”)) are countable. 
+As such, states should deem the combined amounts of unearned income and resources in the 
+LIS leads data to the applicant instead of requesting additional information unless certain 
+conditions exist.  If the LIS leads data indicate that EITHER:  
+ 
+• the individual has a spouse who is eligible for SSI (an “eligible spouse”);  
+OR
+
+[page 30]
+• the state applies less restrictive methodologies than SSI under section 1902(r)(2) of 
+the Act for all or a portion of an applicant’s spouse’s unearned income or resources;  
+ 
+AND the LIS data indicate that EITHER:   
+ 
+• the individual would be ineligible for the QMB group but eligible for the SLMB or 
+QI group, in which case the state should request ownership information. If the 
+applicant does not provide the ownership information and the state has the 
+information needed to determine eligibility for the SLMB or QI groups, the state must 
+approve eligibility for the SLMB or QI groups;  
+OR 
+• the individual would be ineligible for an MSP, in which case the state would reach 
+out to the individual as required by 42 CFR 435.911(e)(8) (see #6).  
+3. Not request information or documentation from the individual that SSA has already 
+provided through the LIS leads data unless the agency has information that is not reasonably 
+compatible with the leads data.  
+ 
+4. Seek additional information that is necessary for an MSP eligibility determination but that 
+the LIS leads data does not contain. Prior to completing the MSP eligibility determination 
+states must request additional information from the individual to: 
+a. Obtain information for certain income and/or resources if the state has not aligned its 
+methodologies for them with LIS through the election of 1902(r)(2) disregards in its 
+Medicaid State Plan. (As compared to methodologies used by SSI, LIS does not count 
+in-kind support and maintenance, interest and dividend income, non-liquid resources, 
+and the cash value of life insurance. While SSI methodologies disregard up to $1,500 
+of burial funds only if they are set aside in a separate account, LIS disregards up to 
+$1,500 of burial funds even if they are comingled with other funds).   
+ 
+b. Verify the individual’s U.S. citizenship or satisfactory immigration status. In 
+accordance with 42 CFR 435.406(a) and section 1137(d) of the Act, the state must 
+request the individual complete a declaration of U.S. citizenship or satisfactory 
+immigration status. If the individual returns a signed declaration to the state, 
+requirements to verify the declaration are as follows:    
+   
+• US citizens: When a Medicare beneficiary returns a declaration of U.S. 
+citizenship, the state is not required to undertake further steps to verify 
+citizenship status. See section 1903(x) of the Act and 42 CFR 
+435.406(a)(1)(iii). Since LIS requires Part A or Part B enrollment, the vast 
+majority of LIS applicants are Medicare beneficiaries. In the rare instance the 
+LIS data shows an individual is not a Medicare beneficiary, the state would 
+need to verify U.S. citizenship status.
+
+[page 31]
+• Noncitizens: States must verify the applicant’s declaration of satisfactory 
+immigration status per 42 CFR 435.956 unless:  
+ 
+•  the state has previously verified this information, and it’s included in the 
+individual's case record;  
+• the individual has not reported a change, and  
+• the agency has not received information indicating a potential change. 
+ 
+c. Obtain assignment of rights to medical support and third-party payers since the LIS 
+application does not contain this information. States with automatic assignment laws 
+do not need to obtain an executed assignment of rights and can instead inform the 
+individual of the terms and consequences of the state law. See 42 CFR 433.146; 
+https://www.hhs.gov/guidance/sites/default/files/hhs-guidance-documents/training-
+and-handbook_256.pdf.  
+ 
+5. Determine the eligibility of the individual for MSP promptly and without undue delay, 
+consistent with timeliness standards established under 42 CFR 435.912.  
+ 
+6. If the income and resource information in the LIS leads data shows the individual is above 
+the MSP income and resource limits, the state may not complete an eligibility determination 
+without further steps. The state must:  
+a. Determine what additional information the state needs to make an MSP eligibility 
+determination and notify the individual, providing a minimum of 30 days to furnish 
+any needed information.31 
+b. Verify the individual’s eligibility for MSP in accordance with the agency’s 
+verification plan developed in accordance with 42 CFR 435.945(j).  
+ 
+7. In addition to and separate from any requests for additional information necessary for a 
+determination of MSP eligibility (and unless CMS approves otherwise), provide the 
+individual with information about the availability of additional Medicaid benefits on other 
+bases, and an opportunity to furnish such additional information as may be needed to 
+determine the individual’s Medicaid eligibility.32  
+ 
+1.6.2.4 Qualified Medicare Beneficiary Group 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+31 The notice must tell the individual that they may be eligible for assistance with their Medicare premium and/or cost 
+sharing charges, but that the state needs additional information to determine such eligibility.  
+32 The notice must provide the scope of such benefits and responsibilities of the individual applying for such 
+benefits.
+
+[page 32]
+Under the QMB Medicaid eligibility group, states cover the Medicare Parts A and B premiums 
+and cost-sharing (i.e., deductibles, coinsurance, co-payments,33 and at state option, Part C 
+premiums) for individuals who: 
+• Meet one of the following conditions:  
+o Are entitled to Medicare Part A (including premium-free Part A and premium Part 
+A for certain individuals age 65 and over who need to pay a premium to enroll in 
+Part A);34 
+o For those without Part A, depending on the state have: 
+ Part B only; or 
+ Part B and conditional Part A 
+• Have income that does not exceed 100 percent of the FPL; and 
+• Have resources that do not exceed three times the maximum resource level under the SSI 
+program, adjusted for inflation per section 1905(p)(1) of the Act.35 
+Starting January 1, 2023, section 402(f) of the CAA, 2021 expanded the QMB eligibility group 
+to cover the premiums and cost-sharing for Part B-ID immunosuppressive drug coverage (QMB 
+Part B-ID) for individuals who: 
+• Are enrolled in Part B-ID and  
+ 
+33 Note that Medicare providers cannot charge QMBs for Medicare deductibles, coinsurance, and copays – even if 
+the individual agrees to pay them. See https://www.cms.gov/Outreach-and-Education/Medicare-Learning-Network-
+MLN/MLNMattersArticles/downloads/se1128.pdf.   
+ 
+34 Under section 1905(p)(1)(A) of the Act and 42 CFR 435.123, QMBs must either be entitled to premium- free Part 
+A, entitled to premium Part A for individuals age 65 and over, or, on or after January 1, 2023, enrolled in Part B -ID. 
+Individuals are not eligible for the QMB group if they are entitled to Part A based on 42 CFR 406.20(c) (Premium 
+Part A for individuals with disabilities who have lost SSDI and subsequently premium- free Part A after returning to 
+work).  
+ 
+35 Effective January 1, 2010, section 1905(p)(1) of the Act provides that the resource limit is three times the SSI 
+limit adjusted annually by increases in the Consumer Price Index. Note that the full LIS program and the QMB, 
+SLMB and QI groups used the same resource standard through December 31, 2023. Beginning January 1, 2024, 
+section 11404 of the Inflation Reduction Act of 2022 (Pub. L. 117–169) increased the income limit for the full LIS 
+program to income below 150 percent of the FPL and increased the resource limit to the resource limit that 
+previously had been applied to the partial LIS program. See 42 CFR 423.773(b)(1) and (b)(2). Note also that several 
+states have effectively increased income limits and/or increased or eliminated resource limits for their MSPs.
+
+[page 33]
+• Meet the QMB income and resource limits described above. 
+See sections 1902(a)(10)(E)(i) and 1905(p) of the Act; 42 CFR 435.123. Current minimum 
+federal income and asset limits for the QMB eligibility group are available at 
+https://www.medicaid.gov/medicaid/eligibility/seniors-medicare-and-medicaid-
+enrollees/index.html. As described in section 1.6.2.1, states can modify their financial eligibility 
+methodologies to effectively increase the income or resource standard above the federal floor.  
+NOTE: The majority of individuals who qualify for QMB also qualify for a separate Medicaid 
+eligibility group that entitles them to the full range of services provided under the state plan, in 
+addition to Medicare cost-sharing assistance.36 These individuals are referred to as QMB plus. 
+Individuals who do not also qualify for full-benefit Medicaid are referred to as QMBSonly. 
+1.6.2.5 Effective Date of Qualified Medicare Beneficiary Group Coverage  
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+Under section 1902(e)(8) of the Act, QMB enrollment is effective the month following “the 
+month in which the [QMB] determination first occurs.” States have flexibility in applying this 
+provision. States can choose to define the month in which the QMB determination first occurs 
+for the QMB coverage group as either: (1) the month that the applicant meets all requirements 
+for QMB or (2) the month in which the eligibility determination is made (if those months are 
+different).  
+For example, if an individual applies for Medicaid on January 1, and on February 15 the state 
+determines the individual met all of the requirements of QMB in January, the state may either 
+begin QMB coverage on February 1 (i.e., if state elects option one above) or March 1 (i.e., if the 
+state elects option two above).  
+For QMB-plus individuals determined eligible at application, the separate full-benefit Medicaid 
+coverage may be effective up to three months before the month of application, if the individual 
+received Medicaid covered services and would have been eligible at the time the services were 
+received, even though the same retroactive eligibility period does not apply to their QMB 
+benefits. See 42 CFR 435.915(a). 
+ 
+For information about the QMB effective date applicable to individuals who lack premium-free 
+Part A and reside in a group payer state, as required by CMS regulations at 42 CFR 406.21(c)(5), 
+see section 1.11.  
+ 
+1.6.2.6 Automatic Enrollment of SSI Recipients into the Qualified Medicare 
+Beneficiary Group  
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+36 In 2022, 79 percent of QMBs qualified for full-benefit Medicaid in addition to QMB (“QMB-plus”), while 21 
+percent of QMBs qualified for QMB alone (“QMB-only”).
+
+[page 34]
+Regulations at 42 CFR 435.909(b) require states take the following steps to automatically enroll 
+SSI recipients in the QMB group. No later than October 1, 2024:  
+ 
+• All states: Deem individuals determined eligible for the mandatory SSI or mandatory 
+209(b) state group (“SSI-based Medicaid”) eligible for the QMB group if they are 
+entitled to premium-free Part A. Start Part B buy-in coverage the first month they are 
+entitled to premium-free Part A and receiving SSI-based Medicaid and start QMB group 
+coverage the first day of the following month. 
+Example: if an individual is first enrolled in SSI-based Medicaid and entitled to 
+premium-free Part A in January 2025, the state would start paying the individual’s 
+Part B premiums under the buy-in agreement and deem the individual eligible for 
+the QMB group in January 2025. The individual’s QMB group coverage 
+(including Medicare cost-sharing coverage) would start February 1, 2025.  
+• Part A buy-in states: Deem individuals who have SSI-based Medicaid as eligible for the 
+QMB group if they lack premium-free Part A and are enrolled in Part B only. Start 
+Part B buy-in coverage the first month they are enrolled in Part B and receiving SSI-
+based Medicaid and start QMB coverage (including Part A buy-in and Medicare cost-
+sharing coverage) the first day of the following month.  
+Example: if an individual is first enrolled in both SSI-based Medicaid and Part B 
+only in January 2025, the state would start paying the individual’s Part B 
+premiums under the buy-in agreement and deem the individual eligible for the 
+QMB group in January 2025. The individual’s QMB group coverage (including 
+Part A buy-in and Medicare cost-sharing coverage) would start February 1, 2025 
+See sections 1.10 and 1.11 for more information about QMB enrollment for individuals 
+who lack premium-free Part A and reside in Part A buy-in states. 
+Option for group payer states to automatically enroll certain SSI recipients into QMB: As 
+described in section 1.11, individuals in group payer states who lack premium-free Part A 
+generally must enroll in premium Part A or conditional premium Part A at SSA during a 
+Medicare enrollment period prior to applying for QMB at their Medicaid agency. The regulation 
+at 42 CFR 435.909(b)(2) provides an exception to this requirement for individuals who: 
+ 
+• have SSI-based Medicaid; 
+• lack premium-free Part A; AND 
+• are enrolled in Part B only. 
+The regulation permits group payer states to deem these individuals (who have SSI-based 
+Medicaid, lack premium-free Part A, and are enrolled in Part B only) as eligible for the QMB 
+group the first month they are both enrolled in Part B and eligible for a Medicare enrollment
+
+[page 35]
+period. To request this option to bypass the need for premium or conditional premium Part A 
+enrollment at SSA, email ModernizetheMSPs@cms.hhs.gov.   
+ 
+Ex Parte Renewals in 1634 states: During an ex parte renewal for an individual eligible under 
+both the mandatory SSI and QMB groups, to renew their eligibility in both groups, states need 
+only verify that the individual still: 
+a. receives SSI (i.e., the state has not received data from SSA indicating a loss of SSI 
+status) and  
+b. is entitled to Medicare Part A (i.e., the state has not received data from SSA/CMS 
+indicating a loss of Part A)  
+ 
+ 
+1.6.2.7 Specified Low-Income Medicare Beneficiary Group 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+Under the SLMB Medicaid eligibility group, state Medicaid programs pay the Medicare Part B 
+premiums for individuals who:  
+• Are entitled to Medicare Part A (including individuals age 65 and over who are only 
+entitled to premium Part A); 
+• Have income that exceeds 100 percent but is less than 120 percent of the FPL; and 
+• Have resources that do not exceed three times the maximum resource level under the SSI 
+program, adjusted for inflation per section 1905(p)(1) of the Act. 
+Starting January 1, 2023, section 402(f) of the CAA, 2021 expanded the SLMB eligibility group 
+to cover the premiums for Part B-ID immunosuppressive drug coverage (SLMB Part B-ID) for 
+individuals who: 
+• Are enrolled in Part B-ID and  
+• Meet the SLMB income and resource limits described above. 
+ See sections 1902(a)(10)(E)(iii) and 1905(p)(3)(A)(ii) of the Act; 42 CFR 435.124. 
+Current federal income and asset limits for SLMB are available at 
+https://www.medicaid.gov/medicaid/eligibility/medicaid-enrollees. As described in section 
+1.6.2.1, states can modify their financial eligibility methodologies and requirements above the 
+federal floor. 
+Unlike QMBs, the state is precluded from paying the Medicare Part A premiums for SLMBs. 
+Some individuals who qualify for SLMB also qualify for a separate Medicaid eligibility group 
+that entitles them to the full range of services provided under the state plan, in addition to
+
+[page 36]
+assistance with the Medicare Part B premium.37  
+SLMBs who also qualify for full-scope Medicaid are referred to as SLMB-plus and those who do 
+not are SLMB-only. 
+Coverage for an individual determined eligible under the SLMB group may be effective up to 
+three months before the month of application if the individual received Medicaid covered 
+services and would have been eligible at the time services were received. See 42 CFR 
+435.915(a). 
+ 
+1.6.2.8 Qualifying Individuals Group 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+  
+Under the QI Medicaid eligibility group, state Medicaid programs pay the Medicare Part B 
+premiums for individuals who: 
+• Are entitled to Medicare Part A (including individuals age 65 and over who are only 
+entitled to premium Part A); 
+• Have income that is at least 120 percent, but less than 135 percent, of the FPL;  
+• Have resources that do not exceed three times the maximum resource level under the SSI 
+program, adjusted for inflation per section 1905(p)(1) of the Act; and 
+• Are not otherwise eligible for another Medicaid eligibility group under the state plan. 
+Starting January 1, 2023, section 402(f) of the CAA, 2021 expanded the QI eligibility group to 
+cover the premiums for Part B-ID immunosuppressive drug coverage (QI Part B-ID) for 
+individuals who: 
+• Are enrolled in Part B-ID and  
+• Meet the QI income and resource limits described above. 
+See sections 1902(a)(10)(E)(iv) and 1905(p)(3)(A)(ii) of the Act; 42 CFR 435.425. 
+Current federal income and asset limits for QIs are available at 
+https://www.medicaid.gov/medicaid/eligibility/seniors-medicare-and-medicaid-
+enrollees/index.html. As described in section 1.6.2.1, states can modify their financial eligibility 
+methodologies and requirements above the federal floor. 
+As with SLMBs, the state is precluded from paying the Medicare Part A premiums for QIs. 
+ 
+37 In 2022, 26 percent of SLMBs qualified for “SLMB-plus”, while 74 percent of SLMBs qualified for SLMB-only.
+
+[page 37]
+Similarly, QI determinations may be retroactive for a maximum of three months prior to the 
+month of application, but retroactivity may not extend back to a prior calendar year. Unlike 
+QMB and SLMB, individuals cannot qualify for QI if they are eligible for a separate eligibility 
+group covered under the state plan. Thus, there is no QI-plus category. 
+State Medicaid programs enroll QIs only to the extent that their state Medicaid program has 
+available funding. The federal government makes annual allotments to states to fund the Part B 
+premiums. See section 1933(g) of the Act.  
+1.6.3 Buy-in Coverage Group Three: All Medicaid Eligibility Groups  
+ (Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+In their buy-in agreements, states can elect to pay Medicare Part B premiums for a buy-in 
+coverage group that includes all individuals eligible for Medicaid under the state plan. This 
+“catch-all” group includes the cash assistance groups and three MSP groups above, plus all other 
+individuals who are eligible for Medicaid, including, but not limited to, the poverty-level group 
+for individuals age 65 and older (sections 1902(a)(10)(A)(ii)(X); 1902(m)(1) of the Act); the 
+medically needy (section 1902(a)(10)(C) of the Act; 42 CFR 435.301); and institutionalized 
+individuals eligible under a special income level (section 1902(a)(10)(A)(ii)(V) of the Act; 42 
+CFR 435.236).  
+This buy-in coverage group also includes individuals eligible for an optional Medicaid buy-in 
+group for working individuals with disabilities described in sections 1902(a)(10)(A)(ii)(XVIII), 
+(XVI) and (XIII) of the Act provided they remain entitled to premium-free Part A. For 
+individuals under age 65, premium-free Part A continues at least 8 and ½ years following their 
+return to work including a 9-month trial work period. If the individual exhausts their entitlement 
+to premium-free Part A, they no longer qualify for Part B and therefore Part B buy-in coverage 
+(except in the rare case they enroll in premium Part A for working disabled individuals, for 
+which they must pay the Part A premium themselves). See section 1.3.2 for information on 
+Medicare coverage for individuals with disabilities under age 65 who return to work.     
+This buy-in coverage group does not include individuals who are eligible through section 1115 
+demonstrations but who do not otherwise qualify for Medicaid benefits included in the state plan. 
+See section 1843(h)(1)(A) of the Act.38 
+ 
+Generally, the effective date of coverage for Medicaid is up to three months before the month of 
+application if all eligibility criteria are met, with exception of the QMB group as described 
+above. See 42 CFR 435.915. The state is precluded from paying the Medicare Part A premiums 
+for SLMBs and QIs. 
+ 
+38 Section 1843(h)(1)(A) of the Act specifies that buy-in agreements cover “individuals who are eligible to receive 
+medical assistance under the plan of such State approved under title XIX.”
+
+[page 38]
+1.7 State Payment of Part A Premiums for Qualified Medicare Beneficiaries 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025)   
+ 
+All states must pay the Part A premiums for QMB-eligible individuals who do not have 
+premium-free Part A. However, states can choose one of two methods to pay the Part A premium 
+for QMBs. States can expand their buy-in agreement with CMS under section 1818(g) of the Act 
+to include enrollment and payment of Part A premiums for QMBs who owe a premium for Part 
+A, or they can pay premiums through a group payer arrangement. 
+States that include payment of Part A premiums for QMBs in their buy-in agreements are called 
+‘‘Part A buy-in states.’’ As of January 1, 2025, 37 states and the District of Columbia have 
+chosen this option. In Part A buy-in states, individuals determined eligible for the QMB group 
+can enroll in premium Part A at any time of the year and without regard to late enrollment 
+penalties.  
+States that do not include Part A in their buy-in agreements and instead pay the Part A premiums 
+for QMBs using a group payer arrangement are known as Part A ‘‘group payer states.” As of 
+January 1, 2024, there are fourteen group payer states.39 The group payer arrangement allows 
+certain parties (for example, states) to pay Part A premiums for a class of beneficiaries. See 42 
+CFR 406.32(g); SSA POMS HI 01001.230 at https://secure.ssa.gov/poms.nsf/lnx/0601001230.  
+Group payer states can only enroll individuals in premium Part A during an applicable Medicare 
+enrollment period. Group payer states are also required to pay late enrollment penalties, if 
+applicable, for those individuals who did not enroll in Medicare Part A timely when they first 
+became eligible to do so (i.e., during their Medicare IEP). 
+See section 1.3.2 for more information about eligibility for premium Part A, section 1.6.2.4 for 
+more information about QMB, and sections 1.10 and 1.11 for information about enrollment in 
+the QMB group for individuals who need to pay a premium to enroll in Part A.  
+See the table in appendix 1.D, which identifies Part A buy-in states and group payer states as of 
+January 1, 2024. 
+NOTE: While states can choose to pay Part A premiums for individuals in the QMB group 
+through their buy-in agreements or a group payer arrangement, states must pay the Part A 
+premium for individuals in the smaller QDWI group through the group payer arrangement.  
+1.8 Conversion from Part A Group Payer to Part A Buy-in Status 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+ 
+39 California law requires the state to submit a SPA to become a Part A buy -in state on or after January 1, 2025. See 
+CA S.B. 311, amending CA Welf. & Inst. Code 14005.11 at https://legiscan.com/CA/text/SB311/2023 . Upon 
+implementation, the number of group payer states will drop to 13.
+
+[page 39]
+A group payer state may elect to become a Part A buy-in state at any time. See 42 CFR 
+406.26(a). To effectuate this change, states must file a SPA to update their state buy-in pages in 
+section 3.2 of the state plan under ‘‘Coordination of Medicaid with Medicare and Other 
+Insurance of their state Medicaid Plan.’’ Interested states should contact the Medicare-Medicaid 
+Coordination Office at ModernizetheMSPs@cms.hhs.gov, which will then coordinate with the 
+state’s Center for Medicare and CHIP Services (CMCS) SPA Coordinator and the Division of 
+Premium Billing and Collections in CMS’ Office of Financial Management (see contact 
+information in chapter 6). 
+Enrollments under a new buy-in agreement can begin no earlier than the third month after the 
+month in which the agreement is executed (i.e., formal notification is signed by the state and 
+accepted by CMS). See 42 CFR 406.26(b). 
+1.9 Federal Financial Participation (FFP) for Medicare Costs  
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+States can receive FFP for individuals who are cash assistance recipients and deemed recipients 
+of cash assistance and individuals who eligible for the relevant MSPs. See 42 CFR 431.625. 
+Specifically, states can seek FFP for the state payment of: 
+• Medicare Part B premiums, deductibles, coinsurance, and copays for cash assistance 
+recipients (SSI/SSPs) and deemed recipients of cash assistance; 
+• Part A or B premiums, deductibles, coinsurance, and copays for QMBs; and 
+• Part B premiums for SLMBs and QIs.  
+The state’s regular FMAP rate applies to these expenditures, except the Part B premiums for QIs, 
+which the federal government fully funds through annual allotments made to states. See section 
+1933(g) of the Act.  
+For eligible individuals who are enrolled in any other category of Medicaid, FFP is not available 
+for the state payment of Part B premiums. However, paying the premiums for these individuals 
+under buy-in helps states maximize federal funding for health care services.  
+First, states cannot obtain FFP for state Medicaid expenditures that could have been paid for 
+under Medicare Part B if the individual had been enrolled in Part B. See 1903(b)(1) of the Act; 
+42 CFR 431.625(d)(3). In addition, under CMS policy, states cannot require Medicaid applicants 
+and beneficiaries to apply for Medicare as a condition of eligibility unless the state pays any 
+Medicare cost-sharing or premiums the individual incurs.40 If the state does not pay the Part B 
+ 
+40 See final rule titled ‘‘Medicare Program: Implementing Certain Provisions of the Consolidated Appropriations 
+Act, 2021 and Other Revisions to Medicare Enrollment and Eligibility Rules” published in the November 3, 2022 
+Federal Register (88 FR 66454, 66468) at https://www.govinfo.gov/content/pkg/FR-2022-11-03/pdf/2022-
+23407.pdf.
+
+[page 40]
+premiums for a Medicaid beneficiary and the individual does not enroll in Part B, CMS does not 
+consider Medicare Part B to be a liable third party under 42 CFR part 433, subpart D and, 
+therefore, the state must cover the items and services in accordance with its state Medicaid 
+plan.41  
+State agencies report gross expenditures (total computable) and apply the applicable FMAP on 
+the Quarterly Expenditure Report for Medical Assistance Payments (Form CMS-64).42 
+States should direct any questions about Form CMS-64 to the analyst within the CMCS Financial 
+Management Group (FMG), Division of Financial Operations (DFO) for their state. 
+1.10 Streamlined Enrollment Under a Buy-in Agreement 
+ (Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+Buy-in agreements permit states to enroll eligible individuals covered under the agreement in 
+Medicare Part A or B, with the state paying their premiums, at any time of the year (without 
+regard to enrollment periods). CMS does not bill states for any applicable late enrollment 
+penalties due to late enrollment. See sections 1843 and 1818(g) of the Act. 
+States must directly enroll a Medicaid beneficiary included in the state’s Part B buy-in coverage 
+group if SSA has determined the individual eligible for Medicare (i.e., the individual is entitled 
+to Part A and/or enrolled in Part B).  
+For example, if a member of a Part B buy-in coverage group is entitled to premium-free Part A 
+but is not enrolled in Part B, the state should directly enroll the individual in Part B buy-in 
+without referring them to the SSA FO to file for Part B.  
+ 
+Similarly, if a QMB-eligible individual is already enrolled in Part B, a Part A buy-in state should 
+directly enroll that individual in QMB and Part A buy-in (without requiring the individual to first 
+file for Part A at the SSA FO). For additional information about enrolling QMB-eligible 
+individuals without premium-free Part A in the QMB group, see section 1.11. 
+ 
+1.11 Qualified Medicare Beneficiary Enrollment for Individuals Who Need to 
+Pay a Premium to Enroll in Part A   
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+As described in section 1.7, all states must pay the Part A premium for individuals who are 
+enrolled in the QMB eligibility group. Part A buy-in states cover the Part A premiums for QMBs 
+ 
+41 See Coordination of Benefits and Third Party Liability (COB/TPL) in Medicaid handbook, chapter 1, section D.1 
+at https://www.medicaid.gov/sites/default/files/2020-08/COB-TPL-Handbook.pdf. 
+42 The expenditures for allowable Medicare Part A premiums are claimed on line 17.A of the Form CMS -64.9 or 
+CMS-64.9P (whichever applies). The expenditures for allowable Medicare Part B premiums are claimed on line 
+17.B of the Form CMS-64.9 or CMS-64.9P.
+
+[page 41]
+under their buy-in agreements. Group payer states do not include Part A premium payments for 
+QMBs in their buy-in agreement and instead use the group payer arrangement to pay Part A 
+premiums for QMBs.  
+As described in section 1.6.2.4, to qualify for the QMB group under section 1905(p)(1) of the 
+Act, an individual must be entitled to Part A (see definition of “entitlement to Part A” in section 
+1.1). Further, section 1905(a) of the Act specifies that payments of Medicare cost-sharing for 
+QMBs (including Part A premiums) are ‘‘medical assistance’’ for purposes of FFP, if made in 
+the month following the month in which the individual becomes a QMB.  
+Because a literal read of the law would produce a result that essentially nullifies the impact of the 
+QMB benefit and buy-in statutory provisions, CMS has a long-standing policy under which 
+states can receive FFP for paying an individual’s Part A premium the first month of entitlement, 
+thereby triggering both Part A entitlement and QMB coverage.  
+For individuals who reside in Part A buy-in states, the process for enrolling in QMB is more 
+streamlined as compared to individuals who reside in group payer states.  
+Part A buy-in states: Part A buy-in states can determine an individual eligible for the QMB 
+group if they are enrolled in Part B only and not yet entitled to Part A. Enrollment in Part B is 
+sufficient to meet the requirement that the individual be entitled to Part A for the purposes of the 
+state’s QMB eligibility determination.  
+Individuals can enroll in Part A at any time of the year without regard for Medicare enrollment 
+periods or late enrollment penalties if the state pays their Part A premium under its buy-in 
+agreement.43 
+Group payer states: Group payer states can approve eligibility for individuals under the QMB 
+group after SSA has enrolled them in premium Part A or conditional premium Part A (the 
+‘‘conditional enrollment process”). The conditional enrollment process enables low-income 
+individuals to apply at SSA for premium Part A on the condition that they will only be enrolled 
+in Part A if the state determines they are eligible for the QMB group.  
+If an individual conditionally files for Part A, then applies for the QMB group with their state 
+Medicaid program, the individual can effectively become simultaneously enrolled in Part A and 
+the QMB group if the individual meets all other QMB eligibility requirements.  
+The conditional enrollment acts as a placeholder in SSA’s system. Premium Part A entitlement is 
+only effective with the individual’s enrollment in QMB. The Medicare Part A start date will 
+ 
+43 Note that if a Part A buy-in state resident lacks both Parts A and Part B, the state cannot determine the individual 
+eligible for QMB and enroll them in Part A buy-in until SSA enrolls them in premium Part A or conditional 
+premium Part A. Such individuals can conditionally enroll in premium Part A at any time of the year (without regard 
+for Medicare enrollment periods or late enrollment penalties, if applicable). See SSA POMS HI 00801. 140 at 
+https://secure.ssa.gov/apps10/poms.nsf/lnx/0600801140.
+
+[page 42]
+reflect the QMB start date that the state reports to CMS. If the state does not determine the 
+individual eligible for QMB, SSA will not establish premium Part A entitlement.  
+When processing the conditional Part A enrollment, SSA will refer the individual to the 
+appropriate state Medicaid office to apply for the QMB group and may give the individual a 
+screen shot of the application to bring to the state as proof of the conditional enrollment. The 
+state can also query SSA’s State Verification and Exchange System (SVES) to verify the 
+conditional Part A enrollment. See SSA POMS HI 00801.140 at 
+https://secure.ssa.gov/apps10/poms.nsf/lnx/0600801140 for more information about the 
+conditional enrollment process. 
+Although the conditional enrollment process provides a way for individuals to enroll in the QMB 
+eligibility group without paying their own Part A premiums upfront, it requires individuals to 
+complete a two-step process to enroll in QMB, which can be difficult to complete.  
+Group payer states can elect to bypass the conditional enrollment process for individuals who 
+have SSI-based Medicaid, are enrolled in Part B only, and are eligible for a Medicare enrollment 
+period, as described in 42 CFR 435.909(b)(2). For more information about this option, see 
+section 1.6.2.6.  
+Individuals in group payer states who do not enroll in premium Part A or conditional premium 
+Part A during their IEP can only file for premium Part A during the annual GEP (January 1 
+through March 31) or an applicable SEP. 
+No later than April 1, 2026, 42 CFR 406.21(c)(5) requires states to start QMB coverage as early 
+as the month Part A entitlement begins (i.e., month after enrollment) for individuals who enroll 
+in premium Part A or conditional premium Part A during a Medicare enrollment period. QMB 
+coverage for such individuals starts the month premium Part A entitlement begins (if the state 
+determines the individual has met the eligibility requirements for the QMB group in the same 
+month that Part A enrollment occurs), or a month later than the month of Part A entitlement (if 
+the individual is determined eligible for the QMB group the month Part A entitlement begins or 
+later). 
+1.12 Policy Regarding Which Entity Initiates Buy-in 
+ (Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+Depending upon the circumstances, CMS or the state will generally initiate buy-in enrollment 
+(“accretion”). This section describes which entity initiates the accretion. 
+NOTE: In certain circumstances, however, SSA should take steps to initiate Part B buy-in 
+through the Public Welfare Accretion process for Medicaid beneficiaries who file a Medicare 
+application and who are in an eligibility group that is included in the state buy-in agreement. 
+This most commonly occurs when a full-benefit Medicaid beneficiary newly qualifies for 
+Medicare and applies for Medicare Part B before SSA has established Medicare entitlement and
+
+[page 43]
+before the state or territory has established Part B buy-in. See SSA POMS HI 00815.030 at 
+https://secure.ssa.gov/poms.nsf/lnx/0600815030. The Public Welfare accretion process allows 
+SSA field offices to establish Medicare Part B through state buy-in, making the state responsible 
+for paying the Medicare Part B premiums, instead of the individual.  
+ 
+For more information about PW accretions, see section 2.8; SSA POMS HI 00815.030 at 
+https://secure.ssa.gov/poms.nsf/lnx/0600815030.  
+ 
+1.12.1 Part B Buy-in for Cash-Related Recipients (SSI/SSPs) 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+SSA regularly communicates with states regarding who is entitled to SSI and/or federally 
+administered SSPs through SSA data systems, such as the State Data Exchange (SDX). See 
+section 2.4.2 for a list of SSA systems for states. In addition, SSA sends information to CMS 
+about SSI/SSPs recipients who qualify for Medicare which, in turn, assists states in enrolling 
+cash recipients in Part B buy-in. See section 2.5.1.1 for more information. 
+The state is responsible for accreting individuals the state has found eligible for Medicaid in the 
+SSI criteria category to the state’s buy-in rolls. 
+In auto-accrete states and states with 1616 agreements, CMS automatically initiates state 
+payment of Part B premiums for individuals (“auto-accretes” them into Part B buy-in) only after 
+SSA notifies CMS that the individual is entitled to SSI and eligible for Medicare. In states with 
+1616 agreements, CMS will auto-accrete individuals who receive SSI only, or SSI in 
+combination with SSPs, or SSPs-only. 
+NOTE: Although CMS generally initiates auto-accretions for these individuals, the state is 
+responsible for taking action to ensure all eligible individuals are enrolled in Part B buy-in. 
+In alert states (SSI criteria and 209(b) states), CMS sends states “SSI alert notification” records 
+for SSI individuals who are also eligible for Medicare. Alert states are responsible for accreting 
+SSI/SSP recipients the state has found eligible for Medicaid to the state’s buy-in rolls.  
+States must always initiate:  
+• Part A or B buy-in for QMBs; 
+• Part A buy-in for QDWIs; 
+• Part B buy-in for deemed recipients of cash assistance; 
+• Part B buy-in for SLMB and QI; and 
+• Part B buy-in for other full-benefit Medicaid recipients.
+
+[page 44]
+1.13 Definition of Part B Buy-in Coverage Period  
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+1.13.1 Beginning of Part B Buy-in Coverage  
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+For an individual enrolled in the “required eligibility groups” (i.e., cash assistance recipients or 
+deemed recipients of cash assistance) or the three MSPs, Part B buy-in begins the later of: 
+• The first month in which the individual meets the requirements both for eligibility in the 
+buy-in group (i.e., the effective date of the individual’s full-benefit Medicaid or MSP 
+coverage) and eligibility for Medicare Part B; or 
+• The first month in which the individual meets the requirements both for eligibility in the 
+buy-in group (i.e., the effective date of the individual’s full-benefit Medicaid or MSP 
+coverage) and eligibility in the buy-in group (i.e., the effective date of the individual’s 
+full-benefit Medicaid or MSP coverage) and eligibility for Medicare Part B; or 
+• The effective date of the buy-in agreement or modification that includes the buy-in group 
+to which the individual belongs (defined as the third month after the document’s 
+execution). 
+See 42 CFR 407.47(b) and (c). 
+For an individual enrolled in one of the “other Medicaid eligibility groups” (when the buy-in 
+coverage group includes all Medicaid eligibility groups), Part B buy-in begins the later of: 
+• The second month after the individual meets the requirements both for eligibility in the 
+buy-in group (i.e., the effective date of the individual’s Medicaid coverage) and 
+eligibility for Medicare Part B; or 
+• The effective date of the buy-in agreement or modification that includes the buy-in group 
+to which the individual belongs (defined as the third month after the document’s 
+execution). 
+See 42 CFR  407.47(d). 
+As described in sections 1.6.2.4 and 1.6.2.7, many individuals who qualify for the QMB 
+eligibility group and some individuals who qualify for the SLMB eligibility group also 
+separately qualify for a full-benefit Medicaid eligibility group (i.e., QMB-plus, and SLMB-plus). 
+While an individual’s separate Medicaid eligibility or SLMB eligibility can be retroactive up to 3 
+months before the application, QMB eligibility is effective no earlier than the month following 
+the month of the determination of such eligibility. See 42 CFR 435.915 and sections 1902(e)(8) 
+and 1905(a) of the Act. Therefore, if a state determines that an individual is eligible for the QMB
+
+[page 45]
+eligibility group and a separate Medicaid eligibility group, the Part B buy-in coverage period 
+may start based on the non-QMB Medicaid eligibility group under which the individual is 
+determined eligible before the coverage period corresponding to the QMB eligibility group 
+begins.  
+To illustrate, for a QMB-plus individual, the start of Part B buy-in coverage is often earlier than 
+the QMB effective date.  
+For example, if a Medicare-eligible individual— 
+ • Applies for Medicaid on January 1 of a particular calendar year;  
+• Is determined in January to be eligible under the eligibility group described in section 
+1902(a)(10)(A)(ii)(X) of the Act (relating to individuals who have incomes up to the FPL and are 
+either 65 years old or older or with disabilities, which is considered an ‘‘other Medicaid 
+eligibility group’’) retroactive to October 1 of the previous calendar year;  
+• Is determined in January to meet all eligibility requirements for the QMB eligibility group; and 
+ • The individual’s state has elected to include all Medicaid beneficiaries eligible for Medicare in 
+its Part B buy-in agreement, then, in this example, Part B buy-in starts on November 1 of the 
+previous calendar year (i.e., the buy-in start date for ‘‘other Medicaid eligibility groups,’’ which 
+is the second month the individual is eligible for the Medicaid eligibility group and Medicare). 
+Part A buy-in will begin February 1 of the current year.44  
+NOTE: In some instances, SSA determines Medicaid beneficiaries eligible for premium-free 
+Part A for a retroactive period.45 The individual is also retroactively eligible to enroll in Part B 
+over this period. If a state learns that SSA established retroactive Medicare Part A entitlement for 
+a member of a buy-in coverage group, the state must review the individual’s eligibility for Part B 
+buy-in over the retroactive period.  
+ 
+Beginning January 1, 2024, state liability for retroactive Medicare Part B premiums for full-
+benefit Medicaid beneficiaries under a buy-in agreement is limited to a period no greater than 36 
+ 
+44 While the individual’s QMB eligibility under the state plan will not become effective until February of the 
+particular calendar year, Part B buy-in starts on November 1 of the previous calendar year, because the individual 
+was eligible in a Medicaid eligibility group that was included in the state’s buy -in coverage group effective in 
+October of the previous calendar year (that is, the buy-in start date for ‘‘other Medicaid eligibility groups,’’ which is 
+the second month the individual is eligible for a buy-in coverage group and Medicare). 
+45 This generally occurs when an individual under age 65 who files a claim for disability benefits at SSA receives a 
+favorable Social Security Disability Insurance (SSDI) award multiple years after the initial application, and SSA 
+determines the individual eligible for SSDI benefits at or up to 12 months prior to the point of application. 
+Individuals entitled to SSDI become entitled to premium-free Medicare Part A after 24 months of entitlement to 
+SSDI, but in certain cases, an individual’s start date for SSDI benefits is retroactive more than 24 months. In that 
+case, the determination of SSDI eligibility for a retroactive period for the individual means that the individual’s 
+premium-free Part A entitlement is retroactive as well.
+
+[page 46]
+months prior to the date of the Medicare enrollment determination, as discussed in section 1.4.3. 
+See 42 CFR 407.47(f)(1).  
+ 
+States can request a good cause exception for retroactive periods of less than 36 months if the 
+state could not benefit from Medicare (e.g., based on the state’s Medicaid recoupment policy) 
+AND limiting state liability would not result in harm to the beneficiary. The state or beneficiaries 
+can also request a good cause exception for retroactive periods of more than 36 months if a 36-
+month limit would result in harm to the beneficiary.  
+ 
+In evaluating the good cause exception request, CMS’ primary consideration would be whether 
+the beneficiary has unpaid medical bills and needs Medicare coverage during the retroactive 
+period for unpaid medical bills.46  
+ 
+States can email DPBCStateBuy-in@cms.hhs.gov to request a good cause exception. Individuals 
+can seek an exception by contacting 1-800-MEDICARE.  
+ 
+ 
+1.13.2 End of Part B Buy-in Coverage 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+Part B buy-in coverage ends with the earliest of the events specified below: 
+• Loss of membership in the buy-in group – The last day of the month in which the 
+individual is enrolled in one or more Medicaid categories under the buy-in group. 
+• Death – Coverage ends on the last day of the month in which the individual dies. 
+• Loss of enrollment in Medicare Part A – If an individual is under age 65 and is no 
+longer enrolled in Medicare Part A (i.e., no longer qualifies for SSA disability benefits), 
+Part B buy-in ends on the last day of the last month for which the individual is enrolled in 
+Part A. 
+• Termination or modification of the buy-in agreement – If the state’s buy-in agreement 
+is terminated or modified to restrict coverage to a narrower buy-in group, coverage for an 
+individual ends on the last day of the last month for which the agreement is in effect or 
+covers the broader group. 
+CMS may modify the effective date of the deletion requested by the state based on CMS system 
+processing rules that limit the retroactivity of Part B deletions to two months prior to the 
+“processing month.” See 42 CFR 407.48(c)(2). To learn more about CMS processing limits 
+ 
+46 See the Medicare Eligibility and Enrollment final rule (88 FR 66454, 66487) at 
+https://www.govinfo.gov/content/pkg/FR-2022-11-03/pdf/2022-23407.pdf.
+
+[page 47]
+intended to prevent excessive hardship for beneficiaries, see section 2.6.1.3. 
+If a beneficiary enrolled in a Medicaid eligibility category included in the state’s buy-in group 
+experiences a change in circumstance that may impact eligibility, the state must conduct a 
+redetermination based on the change in circumstance. See 42 CFR 435.916(f). See section 1.4.4 
+for information about state requirements for Medicaid redeterminations and buy-in coverage 
+when an individual enrolled in state buy-in experiences a change in circumstances. For more 
+information about the end of state buy-in, see SSA POMS HI 00815.021 at 
+https://secure.ssa.gov/poms.nsf/lnx/0600815021. 
+1.14 Definition of Part A Buy-in Coverage Period 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+1.14.1 Beginning of Part A Buy-in Coverage 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+Part A buy-in begins the later of: 
+• The effective date of the buy-in agreement or modification that covers QMBs (defined as 
+the third month after the document’s execution); or 
+• The month the individual is enrolled in premium Part A and QMB.  
+See 42 CFR 406.26(b).   
+See sections 1.10 and 1.11  for information about QMB enrollment for individuals who must pay 
+a premium to enroll in Part A. 
+ 
+1.14.2 End of Part A Buy-in Coverage 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025)  
+ 
+Part A buy-in coverage ends with the earliest of the events specified below: 
+• Loss of QMB status – The last day of the month in which the individual is enrolled in 
+the QMB group. 
+• Death – Coverage ends on the last day of the month in which the individual dies. 
+• Enrollment in premium-free Part A – If an individual enrolls in premium-free Part A, 
+Part A buy-in coverage ends on the last day of the last month the individual is enrolled in 
+premium Part A, at which point the beneficiary will be entitled to premium-free Part A. 
+• Termination of the Part A buy-in agreement – If the state terminates its Part A buy-in
+
+[page 48]
+agreement (i.e., removes the payment of Part A premiums for QMB from the buy-in 
+agreement), coverage through the buy-in agreement will end. However, payment of the 
+Part A premiums for QMB individuals must continue under the group payer arrangement. 
+CMS may modify the effective date of the deletion requested by the state based on the CMS 
+regulation limits the Part A deletion date to the month CMS receives the deletion. See 42 CFR 
+406.26(c). CMS terminates (deletes) Part A buy-in coverage effective at the end of the month in 
+which the state's deletion request is received (up until the last business day of the month), even if 
+the individual lost eligibility in an earlier month. To learn more about CMS processing of Part A 
+deletion requests for individuals who lose QMB status, see section 2.6.1.4.
+
+[page 49]
+1.15 Implications for Beneficiaries When State Buy-in Coverage Ends 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025)  
+ 
+ 
+When a state stops paying the Part A or Part B premium for an individual, Medicare enrollment 
+continues without interruption, with the beneficiary assuming responsibility for paying the 
+premiums. See 42 CFR 406.26(d) and 407.50(a). 
+• Premiums paid under a state buy-in agreement: The beneficiary is deemed to have 
+enrolled during the IEP and is liable for the standard base premium amount even if they 
+had been paying a late enrollment penalty prior to enrollment in buy-in. 
+• P remiums paid under state group payer arrangement : The beneficiary becomes liable for 
+the premium amount the state paid (i.e., the Medicare Part A premium may be subject to 
+a late enrollment penalty if the state had been paying one). 
+If the beneficiary receives Social Security (OASDI), RRB or OPM benefits, the respective 
+issuing entity deducts the Part B premium amount from their monthly benefit payment. If the 
+beneficiary does not receive Social Security, RRB or OPM benefits, CMS will directly bill them 
+for Medicare Part A and/or B premiums.47  
+ 
+For more information about the implications when buy-in ends, see SSA POMS HI 00815.021 at 
+https://secure.ssa.gov/poms.nsf/lnx/0600815021.  
+ 
+For information about beneficiary options for financial relief from retroactive Part B premium 
+when buy-in ends, see section 1.15.2.   
+ 
+1.15.1 Voluntary Withdrawal (Termination) From Medicare 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+Once the state ends buy-in coverage (or state payment of Part A premiums for QMBs in group 
+payer states), SSA will mail the beneficiary a notice of state buy-in termination (“buy-out 
+notice”). 
+ 
+The buy-out notice describes the option to withdraw from Medicare Part A and/or Part B. If the 
+beneficiary files Form CMS-1763 (Request For Termination of Premium Part A, Part B or Part B 
+Immunosuppressive Drug Coverage)48 within 30 days of the buy-out notice date, Part A and/or 
+ 
+47 Part B premiums are billed quarterly, whereas Part A alone and Part A and Part B combined are billed monthly. A 
+grace period for premium payment extends until the end of the third month of unpaid premiums; after 90 days the 
+direct billing notice will include a termination date of coverage. See SSA POMS HI 01001.030 at 
+https://secure.ssa.gov/poms.nsf/lnx/0601001030. 
+48 Form CMS-1763 is available at https://www.cms.gov/medicare/cms-forms/cms-forms/downloads/cms1763.pdf.
+
+[page 50]
+Part B will generally terminate the month buy-in has ended.  
+NOTE: The notice may be dated after buy-in has already terminated. 
+• If the beneficiary files Form CMS-1763 during the six months following the loss of buy-
+in, Medicare coverage ends at the end of the month in which the beneficiary filed the 
+notice. 
+• If a beneficiary waits more than six months after buy-in coverage ends to file Form CMS-
+1763, Medicare coverage ends at the end of the month after the month in which the 
+beneficiary notifies SSA or CMS that they wish to withdraw. 
+1.15.2 SSA Options for Financial Relief from Retroactive Premium Billing 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025)  
+ 
+SSA may initially deduct from OASDI benefit payments premium amounts of up to three months 
+(current month plus two retroactive months) when Part B buy-in coverage ends.49 
+Beneficiaries can pursue either or both of the options below to obtain financial relief from 
+retroactive Part B (or Part A) premium billing.  
+• Premium Waiver - Beneficiaries who believe they cannot afford to pay the retroactive 
+premiums can request a premium waiver by submitting a Request for Waiver of 
+Overpayment Recovery, available at https://www.ssa.gov/forms/ssa-632-bk.pdf to their 
+local SSA office. If SSA grants the waiver request and has already deducted retroactive 
+Medicare premiums from the beneficiary’s benefit payment or the individual has made 
+the direct premium payment to CMS, SSA will refund the waived amount to the 
+beneficiary. See SSA POMS HI 00830.015 at 
+https://secure.ssa.gov/apps10/poms.nsf/lnx/0600830015 for more information about 
+retroactive premium waivers.  
+• I nstallment Payments for Retroactive Premiums  - Beneficiaries may request an 
+installment plan for retroactive premiums from their local SSA office or by contacting 
+SSA’s national 800 number (1-800-772-1213 or TTY 1-800-325-0778). To qualify, 
+individuals must attest they cannot afford to pay the retroactive premiums in one lump 
+sum. Installment payments must be at least $15 per month. If SSA approves an 
+installment plan and has already deducted retroactive Medicare premiums from the 
+beneficiary’s benefit payment or the individual has made the direct premium payment to 
+CMS, SSA will refund to the beneficiary the retroactive premiums less the installment 
+payments owed. For more information about installment payments, see SSA POMS HI 
+ 
+49 See section 2.6.1.3, SSA POMS HI 00815.042 at http://policynet.ba.ssa.gov/poms.nsf/lnx/0600815042 , SSA 
+POMS HI 01005.001 at https://secure.ssa.gov/apps10/poms.nsf/lnx/0601005001, and SSA POMS HI 01005.015 at 
+https://secure.ssa.gov/apps10/poms.nsf/lnx/0601005015.
+
+[page 51]
+00805.180 at https://secure.ssa.gov/poms.nsf/lnx/0600805180 and SSA POMS HI 
+00830.060 at https://secure.ssa.gov/apps10/poms.nsf/lnx/0600830060.
+
+[page 52]
+Appendix 1.A Dual Eligibility Categories and Assistance with Medicare Part A and Part B Costs 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+Category Monthly 
+Income* 
+Resources* Covers 
+Part A 
+premium 
+(when 
+applicable) 
+Covers 
+Part B 
+premium 
+Covers 
+Part B-
+ID 
+premium 
+Covers 
+Parts A 
+and B 
+cost- 
+sharing 
+Covers 
+Part B-
+ID cost 
+sharing 
+Full-
+benefit 
+Medicaid 
+coverage** 
+QMB-
+only 
+FPL ≤ 100%  <3 times the SSI 
+resource limit, 
+adjusted for 
+inflation* 
+X X  X*** 
+ 
+  
+QMB- 
+plus** 
+FPL ≤ 
+100%  
+<3 times the SSI 
+resource limit, 
+adjusted for 
+inflation*  
+X X  X***  X 
+QMB- 
+Part B-
+ID  
+FPL ≤ 
+100% 
+<3 times the SSI 
+resource limit, 
+adjusted for 
+inflation*  
+  X  X  
+SLMB-
+only 
+  >
+100% FPL <
+120% 
+<3 times the SSI 
+resource limit, 
+adjusted for 
+inflation*  
+ X     
+SLMB- 
+plus** 
+> 100% FPL
+< 120% 
+<3 times the SSI 
+resource limit, 
+adjusted for 
+inflation* 
+ X  Depends 
+on state 
+plan***** 
+ X 
+SLMB-
+Part B-
+ID 
+> 100% FPL
+< 120% 
+<3 times the SSI 
+resource limit, 
+adjusted for 
+inflation* 
+  X
+
+[page 53]
+Category Monthly 
+Income* 
+Resources* Covers 
+Part A 
+premium 
+(when 
+applicable) 
+Covers 
+Part B 
+premium 
+Covers 
+Part B-
+ID 
+premium 
+Covers 
+Parts A 
+and B 
+cost- 
+sharing 
+Covers 
+Part B-
+ID cost 
+sharing 
+Full-
+benefit 
+Medicaid 
+coverage** 
+QI ≥ 120% FPL 
+< 135% 
+<3 times the SSI 
+resource limit, 
+adjusted for 
+inflation*  
+ X     
+QI-Part 
+B-ID 
+≥ 120% FPL 
+< 135% 
+<3 times the SSI 
+resource limit, 
+adjusted for 
+inflation* 
+  X    
+QDWI ≤200% 
+FPL 
+<2 times the SSI 
+resource limit 
+X      
+Full-
+benefit 
+Medicaid 
+** 
+Determined by 
+state 
+Determined by 
+state 
+ Depends on 
+state Buy-in 
+Agreement**** 
+ Depends on 
+state 
+plan***** 
+ X 
+* CMS releases the income and resource limits for all states and the District of Columbia annually. Higher income limits apply for Alaska and Hawaii. The resource limit 
+calculation for QMBs, SLMBs, and QIs is three times the SSI resource limit, adjusted for inflation per section 1905(p)(1) of the Act. In determining countable income and 
+resources for MSP eligibility, states must use income and resource methodologies no more restrictive than SSI’s. However, under the authority of section 1902(r)(2) of the Act, 
+states have the flexibility to adopt more liberal income and resource methodologies than used by SSI to effectively increase the QMB, SLMB and QI income and/or resource 
+limits above the federal limits. Some states have used section 1902(r)(2) authority to effectively eliminate any resource criteria for the MSP groups. 
+ 
+** “Full-benefit” Medicaid coverage, in the context of individuals who are considered dually eligible, generally refers to coverage for a range of items and services, beyond 
+coverage for Medicare premiums and cost-sharing, that certain individuals are entitled to under 42 CFR 440.210 and 440.330. Individuals who are QMB-plus/SLMB-plus 
+receive full-benefit Medicaid in addition to Medicare cost-sharing and premiums coverage. Individuals who receive full-benefit Medicaid only are entitled to Medicare Part A 
+and/or enrolled in Part B, and qualify for full-benefit Medicaid benefits, but not the QMB or SLMB eligibility groups.S 
+ 
+*** While individuals enrolled in QMB-only and QMB-plus do not pay Medicare deductibles, coinsurance, or copays, they may have a small Medicaid copay for services that 
+Medicare and Medicaid cover.
+
+[page 54]
+**** States pay the Part B premiums if they include all Medicaid categories in their Part B buy-in coverage group. 
+ 
+***** Beneficiary pays no more than the Medicaid copay amount (if applicable) for state plan services covered by both Medicare and Medicaid if the provider participates in 
+Medicaid. Also, all Medicare providers (regardless of Medicaid participation) must accept the Medicare-allowed amount (“Medicare assignment”) as payment in full for Part B 
+services furnished to dual eligible beneficiaries.
+
+[page 55]
+Appendix 1.B Dual Eligibility Category Descriptions 
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+Qualified Medicare Beneficiaries (QMBs) without other Medicaid (QMB-Only – also 
+known as QMB “partial-benefit”) are enrolled in Medicare Part A (or if uninsured for Part A, 
+have filed for premium Part A on a conditional basis), have income up to 100 percent of the 
+federal poverty level (FPL) and resources that do not exceed three times the limit for 
+supplementary security income (SSI) eligibility with adjustments for inflation, and are not 
+otherwise eligible for full-benefit Medicaid coverage. Medicaid pays their Medicare Part A 
+premiums, if any, and Medicare Part B premiums. Medicare providers may not bill QMBs for 
+Medicare Parts A and B cost-sharing amounts, including deductibles, coinsurance, and copays.50 
+Providers can bill Medicaid programs for these amounts, but states have the option to reduce or 
+eliminate the state’s Medicare cost-sharing payments by adopting policies that limit payment to 
+the lesser of (a) the Medicare cost-sharing amount, or (b) the difference between the Medicare 
+payment and the Medicaid rate for the service.  
+Individuals in the limited Part B-ID benefit may also qualify for the QMB eligibility group with 
+coverage limited to the Part B-ID premium and/or cost-sharing, a status known as QMB-Part B-
+ID.   
+QMBs with full-benefit Medicaid (QMB-Plus – also known as QMB “full-benefit”) meet the 
+QMB-related eligibility requirements described above and the eligibility requirements for a 
+separate categorical Medicaid eligibility group covered under the state plan. In addition to the 
+coverage for Medicare premiums and cost-sharing described above, QMB-plus individuals 
+receive the full range of Medicaid benefits applicable to the separate eligibility group for which 
+they qualify. Medicaid pays their Medicare Part A premiums, if any, and Medicare Part B 
+premiums. Medicare providers may not bill QMBs for Medicare Parts A and B cost-sharing 
+amounts, including deductibles, coinsurance, and copays.51 Providers can bill Medicaid 
+programs for these amounts, but states have the option to reduce or eliminate the state’s 
+Medicare cost-sharing payments by adopting policies that limit payment to the lesser of (a) the 
+Medicare cost- sharing amount, or (b) the difference between the Medicare payment and the 
+Medicaid rate for the service. QMBs with full-benefit Medicaid pay no more than the Medicaid 
+copay (if applicable) for services covered in the state plan (i.e., services furnished by a Medicaid 
+provider and that Medicaid covers, but Medicare does not). These individuals pay Medicare cost-
+sharing for Medicare-covered care not included in the state plan unless the state chooses to pay 
+these costs. 
+Specified Low-Income Medicare Beneficiaries (SLMBs) without other Medicaid (SLMB-
+ 
+50 However, states may charge QMBs a nominal Medicaid copay for services that Medicare and Medicaid  cover in 
+accordance with section 1916(a) of the Act. 
+51 However, states may charge QMBs a nominal Medicaid copay for services that Medicare and Medicaid cover in 
+accordance with section 1916(a) of the Act.
+
+[page 56]
+Only – also known as SLMB “partial-benefit”) are enrolled in Part A and have income 
+between 100 and 120 percent of the FPL, and resources that do not exceed three times the limit 
+for supplementary security income (SSI) eligibility with adjustments for inflation. Medicaid pays 
+only the Medicare Part B premiums for this group.  
+Individuals enrolled in the limited Part B-ID benefit are also eligible for the SLMB-Only group, 
+if they meet the SLMB income and resource requirements described in the preceding paragraph.  
+For these individuals, Medicaid pays the Part B-ID premium.  
+SLMBs with full-benefit Medicaid (SLMB-Plus – also known as SLMB “full-benefit”) meet 
+the SLMB-related eligibility requirements described above, and the eligibility requirements for a 
+separate categorical Medicaid eligibility group covered under the state plan. In addition to 
+coverage for Medicare Part B premiums, these individuals receive full-benefit Medicaid 
+coverage (i.e., the package of benefits provided to the separate Medicaid eligibility group for 
+which they qualify). For Medicaid-covered services (i.e., services furnished by a Medicaid 
+provider and that either: (1) Medicare and Medicaid, or (2) Medicaid, but not Medicare, cover), a 
+SLMB-Plus beneficiary pays no more than a nominal Medicaid copay (if applicable).52  
+Qualifying Individuals (QIs) are enrolled in Part A and have income of at least 120 but less 
+than 135 percent of the FPL, resources that do not exceed three times the limit for SSI eligibility 
+with adjustments for inflation and are not eligible for any other eligibility group under the state 
+plan. QIs receive coverage for their Medicare Part B premiums, to the extent their state Medicaid 
+programs have available slots. The federal government makes annual allotments to states to fund 
+the Part B premiums. 
+Individuals enrolled in the limited Part B-ID benefit are also eligible for the QI group, if they 
+meet the QI requirements described in the preceding paragraph.  For these individuals, Medicaid 
+pays the Part B-ID premium.  
+Qualified Disabled and Working Individuals (QDWIs – also known as QDWI “partial-
+benefit”) became eligible for premium-free Part A by virtue of qualifying for Social Security 
+Disability Insurance (SSDI) benefits, but lost those benefits, and subsequently premium-free 
+Medicare Part A, after returning to work. QDWIs have income that does not exceed 200 percent 
+of the FPL, resources that do not exceed two times the SSI resource standard and are not 
+otherwise eligible for Medicaid. Medicaid pays the Medicare Part A premiums only. 
+Full-benefit Medicaid: These individuals are entitled to Medicare Part A and/or enrolled in Part 
+B, and qualify for full Medicaid benefits, but not the QMB or SLMB groups. Individuals in this 
+category are sometimes referred to as “other full duals.” Full-benefit Medicaid coverage refers to 
+the package of services, beyond coverage for Medicare premiums and cost-sharing, that certain 
+individuals are entitled to under 42 CFR 440.210 and 440.330. For Medicaid-covered services 
+(i.e., services furnished by a Medicaid provider and that either: (1) Medicare and Medicaid, or 
+ 
+52 States may apply cost-sharing, such as copayments, deductibles, and/or premiums, to certain Medicaid 
+beneficiaries in accordance with 42 CFR 447.52 to 447.56.
+
+[page 57]
+(2) Medicaid, but not Medicare, cover), a full-benefit Medicaid beneficiary pays no more than 
+the Medicaid coinsurance53 (if applicable). For Medicare-only covered services (i.e., services 
+covered by Medicare, but not Medicaid), these individuals pay the Medicare cost-sharing unless 
+the state chooses to cover Medicare cost-sharing for all Medicare- covered services for this 
+eligibility group.   
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+53 States may apply Medicaid cost-sharing, such as copayments, deductibles, and/or premiums, to certain Medicaid 
+beneficiaries in accordance with 42 CFR 447.52 through 447.56.
+
+[page 58]
+Appendix 1.C Medicaid Effective Dates and Buy-in Start and Stop 
+Dates 
+(Rev. 6; Issued:04-26-24; Effective:04-26-24; Implementation:04-26-24) 
+ 
+ 
+ 
+Cash 
+assistance 
+(SSI/SSPs) 
+and 
+Deemed 
+Recipients 
+of Cash 
+Assistance 
+Eligibility 
+Groups 
+QMB 
+Eligibility 
+Group 
+SLMB 
+Eligibility 
+Group 
+QI 
+Eligibility 
+Group 
+Other 
+Full-
+Benefit 
+Medicaid 
+Eligibility  
+Groups  
+Medicaid eligibility effective 
+up to 3 months before the 
+month of application. 
+42 CFR 435.915(a) 
+ 
+ 
+   
+  
+ 
+ 
+ 
+ 
+Medicaid eligibility effective 
+the month after the month of 
+the QMB eligibility 
+determination. 
+Section 1902(e)(8) of the Act 
+  
+ 
+   
+Part B Buy-in coverage starts 
+the month an individual 
+qualifies for Medicare and is 
+eligible for a Medicaid group 
+in the buy-in agreement.*, ** 
+42 CFR 407.47(a)-(c) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Part B Buy-in coverage starts 
+the second month after an 
+individual qualifies for 
+Medicare and is eligible for a 
+Medicaid group in the buy-in 
+agreement.*, ** 
+42 CFR 407.47(d) 
+     
+ 
+Part A buy-in coverage starts 
+the month QMB coverage 
+starts.* 
+42 CFR 406.26(b) 
+  
+ 
+In group 
+payer states 
+only:
+
+[page 59]
+As early as 
+the month 
+after actual/ 
+conditional 
+Part A 
+application 
+occurred 
+during the 
+GEP or an 
+applicable 
+SEP. 
+Part B buy-in disenrollment 
+due to loss of eligibility for 
+any Medicaid group in buy-in 
+agreement effective the month 
+after Medicaid coverage  
+ends. ***  
+42 CFR 407.48(c) 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Part A buy-in disenrollment 
+based on loss of QMB 
+eligibility is effective the 
+month after QMB ends.**** 
+42 CFR 406.26 (c)(2) 
+  
+ 
+   
+ 
+*This date applies if a buy-in agreement is already in effect; currently, all states include MSPs in their Part B buy-in 
+agreements. Thirty-six states and the District of Columbia have Part A buy-in agreements. 
+ 
+** Note: Starting January 1, 2024, if a full-benefit Medicaid beneficiary is retroactively enrolled in Medicare, state 
+liability for retroactive Part B premiums for such individuals is limited to a period no greater than 36 months prior to 
+the date of the Medicare enrollment determination. See 42 CFR 407.47(f); section 1.4.3. 
+ 
+*** CMS may modify the effective date of the Part B deletion requested by the state. CMS limits the retroactivity of 
+Part B deletions to two months prior to the “processing month.” See section 2.6.1.3. 
+ 
+**** CMS may modify the effective date of the Part A deletion requested by the state. CMS limits the Part A 
+deletion date to the month CMS processes the deletion. See section 2.6.1.4.
+
+[page 60]
+Appendix 1.D Policies Related to Buy-in in the 50 States, the District of 
+Columbia, and Specified U.S. Territories  
+(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) 
+ 
+State/Territory54 SSI Status 
+Accrete or 
+Alert 
+Part A  
+Buy-in 
+Part A 
+Group 
+Payer
+55 
+Part B 
+Buy-in 
+coverage 
+group56 
+Alabama Accrete  X All Medicaid 
+groups 
+Alaska Alert (SSI-criteria) X  All Medicaid 
+groups 
+Arizona Accrete  X All Medicaid 
+groups 
+Arkansas Accrete X  All Medicaid 
+groups 
+California Accrete X  All Medicaid 
+groups 
+Colorado Accrete  X All Medicaid 
+groups 
+Commonwealth of 
+Northern Mariana Islands 
+N/A N/A N/A All Medicaid 
+groups 
+Connecticut Alert (209b) X  Cash 
+assistance/MSPs 
+Delaware Accrete X  All Medicaid 
+groups 
+District of Columbia Accrete X  All Medicaid 
+groups 
+Florida Accrete X  All Medicaid 
+groups 
+Georgia Accrete X  All Medicaid 
+groups 
+Guam Alert N/A N/A All Medicaid 
+groups 
+Hawaii Alert (209b) X  All Medicaid 
+groups 
+Idaho Alert (SSI-criteria) X  
+Cash 
+assistance/MSPs 
+ 
+ 
+54 Policies in this table are current as of January 1, 2024. As of this date, the 50 states, the District of Columbia, and specified 
+U.S. territories (the Commonwealth of Northern Mariana Islands, Guam, the U.S. Virgin Islands) have entered into buy-in 
+agreements with CMS.  
+55 States can choose to pay Part A premiums for QMBs through their buy-in agreements or a group payer arrangement. Federal 
+law requires states to pay the Part A premiums for QDWIs through the group payer arrangement.  
+ 
+56 As of January 1, 2024, the 50 states and the District of Columbia have chosen 1 of 2 Part B buy-in coverage groups: (1) Cash 
+Assistance Recipients and Deemed Cash Assistance Recipients Plus Three MSPs (“Cash Assistance/MSPs”) or (2) All Medicaid 
+eligibility groups ("All Medicaid Groups”). The Commonwealth of Northern Mariana Islands, Guam, the U.S. Virgin Islands do 
+not cover the MSPs but cover all Medicaid groups.
+
+[page 61]
+State/Territory54 SSI Status 
+Accrete or 
+Alert 
+Part A  
+Buy-in 
+Part A 
+Group 
+Payer
+55 
+Part B 
+Buy-in 
+coverage 
+group56 
+Illinois Alert (209b)  X Cash 
+assistance/MSPs 
+Indiana Accrete X  All Medicaid 
+groups 
+Iowa Accrete X  All Medicaid 
+groups 
+Kansas Alert (SSI-criteria)  X All Medicaid 
+groups 
+Kentucky Accrete  X Cash 
+assistance/MSPs 
+Louisiana Accrete X  Cash 
+assistance/MSPs 
+Maine Accrete X  Cash 
+assistance/MSPs 
+Maryland Accrete57 X  All Medicaid 
+groups 
+Massachusetts Accrete X  Cash 
+assistance/MSPs 
+Michigan Accrete X  All Medicaid 
+groups 
+Minnesota Alert (209b) X  Cash 
+assistance/MSPs 
+Mississippi Accrete X  All Medicaid 
+groups 
+Missouri Alert (209b)  X Cash 
+assistance/MSPs 
+Montana Accrete X  Cash 
+assistance/MSPs 
+Nebraska Alert (SSI-criteria)  X Cash 
+assistance/MSPs 
+Nevada Alert (SSI-criteria) X  All Medicaid 
+groups 
+New Hampshire Alert (209b) X  Cash 
+assistance/MSPs 
+New Jersey Accrete  X All Medicaid 
+groups 
+New Mexico Accrete  X All Medicaid 
+groups 
+New York Accrete X  Cash 
+assistance/MSPs 
+North Carolina Accrete X  All Medicaid 
+groups 
+North Dakota Alert (209b) X  Cash 
+assistance/MSPs 
+ 
+57 Although Maryland has a 1634 agreement, CMS does not auto-accrete SSI recipients who are Medicare-eligible in 
+Part B buy-in. Instead, Maryland initiates Part B buy-in enrollment for Medicare-eligible SSI recipients.
+
+[page 62]
+State/Territory54 SSI Status 
+Accrete or 
+Alert 
+Part A  
+Buy-in 
+Part A 
+Group 
+Payer
+55 
+Part B 
+Buy-in 
+coverage 
+group56 
+Ohio Accrete X  All Medicaid 
+groups 
+Oklahoma Alert (SSI-criteria) X  Cash 
+assistance/MSPs 
+Oregon Alert (SSI-criteria) X  All Medicaid 
+groups 
+Pennsylvania Accrete X  Cash 
+assistance/MSPs 
+Rhode Island Accrete X  Cash 
+assistance/MSPs 
+South Carolina Accrete  X All Medicaid 
+groups 
+South Dakota Accrete X  Cash 
+assistance/MSPs 
+Tennessee Accrete X  Cash 
+assistance/MSPs 
+Texas Accrete X  Cash 
+assistance/MSPs 
+Utah Alert (SSI-criteria)  X All Medicaid 
+groups 
+Vermont Accrete X  Cash 
+assistance/MSPs 
+Virginia Alert (209b)  X All Medicaid 
+groups 
+U.S. Virgin Islands N/A N/A N/A All Medicaid 
+groups 
+Washington Accrete X  All Medicaid 
+groups 
+West Virginia Accrete X  Cash 
+assistance/MSPs 
+Wisconsin Accrete X  Cash 
+assistance/MSPs 
+Wyoming Accrete X  All Medicaid 
+groups
+
+[page 63]
+Transmittals Issued for this Chapter 
+ 
+Rev # Issue Date Subject Impl Date CR# 
+R7SPMP 01/16/2025 Updates to several sections in Chapter 1 of the State 
+Payment of Medicare Premiums Manual. 
+01/16/2025 N/A 
+R6SPMP 04/26/2024 Revisions to Manual for the State Payment of 
+Medicare Premiums 
+04/26/2024 N/A 
+R5SPMP 02/09/2024 Revisions to the Manual for the State Payment of 
+Medicare Premiums 
+02/09/2024 N/A 
+R4SPMP 08/21/2020 New State Payment of Medicare Premiums, 
+(SPMP) 
+09/08/2020 N/A
