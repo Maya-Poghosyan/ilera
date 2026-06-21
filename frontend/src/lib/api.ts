@@ -1,5 +1,5 @@
 import type { Answers, IntakeSchema } from "./intake-schema";
-import type { AppStatus, ApplicationEntry, CaseProfile, EligibilityResponse, FormSchema, Reminder, ReminderCreate, ReminderUpdate, ReminderTemplates, StartApplicationResult } from "./types";
+import type { AppStatus, ApplicationEntry, CaseProfile, EligibilityResponse, FormSchema, JournalCreate, JournalEntry, RecordsSummary, Reminder, ReminderCreate, ReminderUpdate, ReminderTemplates, RenewalInfo, RenewalUpdate, StartApplicationResult, TimekeepingCreate, TimekeepingEntry } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -113,6 +113,55 @@ export function listSuggestedEvents(): Promise<SuggestedEventAPI[]> {
 
 export function deleteSuggestedEvent(id: string): Promise<{ deleted: boolean }> {
   return request<{ deleted: boolean }>(`/api/suggested-events/${id}`, { method: "DELETE" });
+}
+
+// ---------------------------------------------------------------------------
+// Records & Renewal
+// ---------------------------------------------------------------------------
+
+export function listTimekeeping(caseId: string): Promise<TimekeepingEntry[]> {
+  return request<TimekeepingEntry[]>(`/api/records/timekeeping/${caseId}`);
+}
+
+export function createTimekeeping(body: TimekeepingCreate): Promise<TimekeepingEntry> {
+  return request<TimekeepingEntry>("/api/records/timekeeping", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function deleteTimekeepingEntry(id: string, caseId: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/api/records/timekeeping/${id}?case_id=${caseId}`, { method: "DELETE" });
+}
+
+export function listJournal(caseId: string): Promise<JournalEntry[]> {
+  return request<JournalEntry[]>(`/api/records/journal/${caseId}`);
+}
+
+export function createJournal(body: JournalCreate): Promise<JournalEntry> {
+  return request<JournalEntry>("/api/records/journal", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function deleteJournalEntry(id: string, caseId: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/api/records/journal/${id}?case_id=${caseId}`, { method: "DELETE" });
+}
+
+export function getRenewal(caseId: string): Promise<RenewalInfo> {
+  return request<RenewalInfo>(`/api/records/renewal/${caseId}`);
+}
+
+export function updateRenewal(caseId: string, body: RenewalUpdate): Promise<RenewalInfo> {
+  return request<RenewalInfo>(`/api/records/renewal/${caseId}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export function getRecordsSummary(caseId: string): Promise<RecordsSummary> {
+  return request<RecordsSummary>(`/api/records/${caseId}`);
 }
 
 // ---------------------------------------------------------------------------

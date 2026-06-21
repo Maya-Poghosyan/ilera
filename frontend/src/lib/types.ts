@@ -111,6 +111,71 @@ export type ReminderTemplates = Record<string, {
 }>;
 
 // ---------------------------------------------------------------------------
+// Records & Renewal
+// ---------------------------------------------------------------------------
+
+export type ServiceType = "personal_care" | "domestic" | "paramedical" | "accompaniment";
+
+export interface TimekeepingEntry {
+  id: string;
+  case_id: string;
+  date: string;
+  hours: number;
+  start_time: string | null;
+  end_time: string | null;
+  service_type: ServiceType;
+  tasks: string[];
+  notes: string;
+  created_at: string;
+}
+
+export interface TimekeepingCreate {
+  case_id: string;
+  date: string;
+  hours: number;
+  start_time?: string;
+  end_time?: string;
+  service_type?: ServiceType;
+  tasks: string[];
+  notes?: string;
+}
+
+export interface JournalEntry {
+  id: string;
+  case_id: string;
+  date: string;
+  text: string;
+  fall_flagged: boolean;
+  created_at: string;
+}
+
+export interface JournalCreate {
+  case_id: string;
+  date: string;
+  text: string;
+}
+
+export interface RenewalInfo {
+  case_id: string;
+  program: string;
+  due_date: string | null;
+  status: string;
+}
+
+export interface RenewalUpdate {
+  program?: string;
+  due_date?: string;
+  status?: string;
+}
+
+export interface RecordsSummary {
+  timekeeping: TimekeepingEntry[];
+  journal: JournalEntry[];
+  renewal: RenewalInfo;
+  fall_flag: boolean;
+}
+
+// ---------------------------------------------------------------------------
 // Forms
 // ---------------------------------------------------------------------------
 
