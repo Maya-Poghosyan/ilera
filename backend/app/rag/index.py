@@ -6,6 +6,7 @@ Two backends with the same interface:
 """
 
 import glob
+import json
 import os
 from dataclasses import dataclass, field
 
@@ -185,6 +186,73 @@ class RedisVLIndex:
         return out
 
 
+class RedisKNNIndex:
+    """Vectors + metadata stored in Redis hashes; cosine ranking in Python.
+
+    Works on any Redis (no Search module required). Used when REDIS_URL is set but the
+    RediSearch/vector module is unavailable (e.g. a plain Redis Cloud Essentials DB).
+    """
+
+    backend = "redis-knn"
+
+    def __init__(self, redis_url: str) -> None:
+        import redis
+
+        self._r = redis.from_url(redis_url, decode_responses=True, socket_timeout=8)
+        self._ids_key = f"{KEY_PREFIX}:ids"
+        self._size = 0
+
+    @property
+    def size(self) -> int:
+        return self._size
+
+    def build(self) -> int:
+        chunks = load_chunks()
+        old = self._r.smembers(self._ids_key)
+        pipe = self._r.pipeline()
+        for cid in old:
+            pipe.delete(f"{KEY_PREFIX}:{cid}")
+        pipe.delete(self._ids_key)
+        if chunks:
+            vectors = embed([c.text for c in chunks])
+            for c, v in zip(chunks, vectors):
+                pipe.hset(
+                    f"{KEY_PREFIX}:{c.id}",
+                    mapping={
+                        "program": c.program,
+                        "source": c.source,
+                        "text": c.text,
+                        "vector": json.dumps(v),
+                    },
+                )
+                pipe.sadd(self._ids_key, c.id)
+        pipe.execute()
+        self._size = len(chunks)
+        return self._size
+
+    def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
+        ids = self._r.smembers(self._ids_key)
+        if not ids:
+            return []
+        qv = embed_one(query)
+        results: list[Retrieved] = []
+        for cid in ids:
+            data = self._r.hgetall(f"{KEY_PREFIX}:{cid}")
+            if not data or (program and data.get("program") != program):
+                continue
+            vec = json.loads(data["vector"])
+            results.append(
+                Retrieved(
+                    text=data.get("text", ""),
+                    program=data.get("program", ""),
+                    source=data.get("source", ""),
+                    score=_cosine(qv, vec),
+                )
+            )
+        results.sort(key=lambda r: r.score, reverse=True)
+        return results[:k]
+
+
 _index = None
 
 
@@ -194,13 +262,16 @@ def get_index():
         return _index
     settings = get_settings()
     if settings.has_redis:
-        try:
-            idx = RedisVLIndex(settings.redis_url)
-            idx.build()
-            _index = idx
-            return _index
-        except Exception:
-            pass  # fall back to in-memory if Redis/RediSearch unavailable
+        # Prefer native RediSearch vector KNN; fall back to Redis-backed brute force
+        # if the Search module isn't installed on the DB.
+        for cls in (RedisVLIndex, RedisKNNIndex):
+            try:
+                idx = cls(settings.redis_url)
+                idx.build()
+                _index = idx
+                return _index
+            except Exception:
+                continue
     idx = RagIndex()
     idx.build()
     _index = idx
