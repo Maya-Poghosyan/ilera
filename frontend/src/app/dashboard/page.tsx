@@ -14,7 +14,6 @@ import {
   deleteReminder,
   listReminders,
   runReminderNow,
-  scanForEvents,
   updateReminder,
 } from "@/lib/api";
 import type {
@@ -106,9 +105,7 @@ export default function CalendarPage() {
   const cells = buildCells();
 
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [pokeSuggested, setPokeSuggested] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [scanning, setScanning] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // Reminder form
@@ -216,57 +213,6 @@ export default function CalendarPage() {
     }
   };
 
-  const handleScan = async () => {
-    setScanning(true);
-    try {
-      const result = await scanForEvents();
-      const now = new Date().toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
-      const pokeData = result.poke as Record<string, unknown> | undefined;
-      let detected: CalEvent[] = [];
-
-      if (pokeData && Array.isArray(pokeData)) {
-        detected = (pokeData as Array<Record<string, string>>).map((e) => ({
-          day: 0,
-          title: e.title ?? "Untitled event",
-          time: e.date ?? "Date TBD",
-          kind: (e.kind as EventKind) ?? "Appointment",
-          suggested: true,
-          description: `Detected on ${now}`,
-        }));
-      } else {
-        const text =
-          typeof pokeData === "object" && pokeData !== null
-            ? JSON.stringify(pokeData)
-            : String(pokeData ?? "");
-        if (text) {
-          detected = [
-            {
-              day: 0,
-              title: "Poke scan result",
-              time: "See details",
-              kind: "Appointment",
-              suggested: true,
-              description: `Detected on ${now}`,
-            },
-          ];
-        }
-      }
-      setPokeSuggested((prev) => [...detected, ...prev]);
-      showToast(`Scan complete \u2014 ${detected.length} suggestion(s) found`);
-    } catch (e) {
-      showToast(e instanceof Error ? e.message : "Scan failed");
-    } finally {
-      setScanning(false);
-    }
-  };
-
   const enableDailyCareLog = async () => {
     await createReminder({
       kind: "daily_care_log",
@@ -292,10 +238,8 @@ export default function CalendarPage() {
     });
   };
 
-  // Merge static sample suggestions with Poke-scanned suggestions
-  const allSuggested = [...STATIC_SUGGESTED, ...pokeSuggested];
   // Combine all events for the calendar grid
-  const allEvents = [...events, ...allSuggested.filter((e) => e.day > 0)];
+  const allEvents = [...events, ...STATIC_SUGGESTED];
 
   return (
     <div className="space-y-6">
@@ -332,15 +276,7 @@ export default function CalendarPage() {
               + Care Log
             </Button>
           )}
-          <Button
-            variant="outline"
-            className="px-10 hover:font-bold"
-            onClick={handleScan}
-            disabled={scanning}
-          >
-            <Sparkles className="size-4" />
-            {scanning ? "Scanning\u2026" : "Scan Messages"}
-          </Button>
+
         </div>
       </div>
 
@@ -456,8 +392,8 @@ export default function CalendarPage() {
         </Card>
       )}
 
-      {/* Suggested Events panel — above calendar (Poke-powered + static samples) */}
-      {allSuggested.length > 0 && (
+      {/* Suggested Events panel */}
+      {STATIC_SUGGESTED.length > 0 && (
         <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="size-4" />
@@ -467,7 +403,7 @@ export default function CalendarPage() {
             Detected from recent emails and documents. Accept to add to your calendar.
           </p>
           <div className="space-y-2">
-            {allSuggested.map((e, idx) => (
+            {STATIC_SUGGESTED.map((e, idx) => (
               <div
                 key={`suggested-${idx}`}
                 className="flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-white px-3 py-2.5"
