@@ -1,12 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { CalendarDays, Check, ChevronLeft, ChevronRight, Sparkles, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import {
   createReminder,
   deleteReminder,
@@ -23,14 +25,54 @@ import type {
 } from "@/lib/types";
 
 // ---------------------------------------------------------------------------
-// Static calendar events (sample data)
+// Calendar grid helpers
 // ---------------------------------------------------------------------------
 
-const STATIC_EVENTS = [
-  { title: "Dr. Patel \u2014 cardiology follow-up", date: "Mon, Jun 23 \u00b7 10:00 AM", kind: "Appointment" },
-  { title: "County social worker visit", date: "Wed, Jun 25 \u00b7 2:00 PM", kind: "Visit" },
-  { title: "IHSS timesheet due", date: "Fri, Jun 27", kind: "Deadline" },
+type EventKind = "Appointment" | "Visit" | "Deadline";
+
+type CalEvent = {
+  day: number;
+  title: string;
+  time?: string;
+  kind: EventKind;
+  suggested?: boolean;
+  source?: string;
+};
+
+const YEAR = 2026;
+const MONTH = 5; // June (0-indexed)
+const TODAY = 21;
+
+const events: CalEvent[] = [
+  { day: 23, title: "Dr. Patel \u2014 cardiology follow-up", time: "10:00 AM", kind: "Appointment" },
+  { day: 25, title: "County social worker visit", time: "2:00 PM", kind: "Visit" },
+  { day: 27, title: "IHSS timesheet due", kind: "Deadline" },
 ];
+
+const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const monthName = new Date(YEAR, MONTH, 1).toLocaleString("en-US", { month: "long" });
+
+type Cell = { day: number; inMonth: boolean };
+
+function buildCells(): Cell[] {
+  const firstWeekday = new Date(YEAR, MONTH, 1).getDay();
+  const daysInMonth = new Date(YEAR, MONTH + 1, 0).getDate();
+  const prevDays = new Date(YEAR, MONTH, 0).getDate();
+
+  const cells: Cell[] = [];
+  for (let i = firstWeekday - 1; i >= 0; i--) {
+    cells.push({ day: prevDays - i, inMonth: false });
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push({ day: d, inMonth: true });
+  }
+  let next = 1;
+  while (cells.length < 42) {
+    cells.push({ day: next++, inMonth: false });
+  }
+  return cells;
+}
 
 // ---------------------------------------------------------------------------
 // Labels
@@ -52,24 +94,14 @@ const FREQ_LABELS: Record<ScheduleFreq, string> = {
 const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 // ---------------------------------------------------------------------------
-// Suggested event type (from Poke scan)
-// ---------------------------------------------------------------------------
-
-interface SuggestedEvent {
-  title: string;
-  date: string;
-  source: string;
-  kind: string;
-  detected_at: string;
-}
-
-// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 export default function CalendarPage() {
+  const cells = buildCells();
+
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [suggestedEvents, setSuggestedEvents] = useState<SuggestedEvent[]>([]);
+  const [suggestedEvents, setSuggestedEvents] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -94,7 +126,7 @@ export default function CalendarPage() {
       const data = await listReminders();
       setReminders(data);
     } catch {
-      // API may not be running — show empty state
+      // API may not be running
     } finally {
       setLoading(false);
     }
@@ -191,38 +223,38 @@ export default function CalendarPage() {
         minute: "2-digit",
       });
 
-      // Parse Poke response — could be structured JSON or text
       const pokeData = result.poke as Record<string, unknown> | undefined;
-      let events: SuggestedEvent[] = [];
+      let detected: CalEvent[] = [];
 
       if (pokeData && Array.isArray(pokeData)) {
-        events = (pokeData as Array<Record<string, string>>).map((e) => ({
+        detected = (pokeData as Array<Record<string, string>>).map((e) => ({
+          day: 0,
           title: e.title ?? "Untitled event",
-          date: e.date ?? "Date TBD",
-          source: e.source ?? "",
-          kind: e.kind ?? "Other",
-          detected_at: now,
+          time: e.date ?? "Date TBD",
+          kind: (e.kind as EventKind) ?? "Appointment",
+          suggested: true,
+          source: `Detected on ${now}`,
         }));
       } else {
-        // Poke returned a non-array response; surface it as a single suggestion
         const text =
           typeof pokeData === "object" && pokeData !== null
             ? JSON.stringify(pokeData)
             : String(pokeData ?? "");
         if (text) {
-          events = [
+          detected = [
             {
+              day: 0,
               title: "Poke scan result",
-              date: "See details",
-              source: text.slice(0, 200),
-              kind: "Other",
-              detected_at: now,
+              time: "See details",
+              kind: "Appointment",
+              suggested: true,
+              source: `Detected on ${now}`,
             },
           ];
         }
       }
-      setSuggestedEvents((prev) => [...events, ...prev]);
-      showToast(`Scan complete \u2014 ${events.length} suggestion(s) found`);
+      setSuggestedEvents((prev) => [...detected, ...prev]);
+      showToast(`Scan complete \u2014 ${detected.length} suggestion(s) found`);
     } catch (e) {
       showToast(e instanceof Error ? e.message : "Scan failed");
     } finally {
@@ -255,6 +287,9 @@ export default function CalendarPage() {
     });
   };
 
+  // Combine static + suggested events for the grid
+  const allEvents = [...events, ...suggestedEvents.filter((e) => e.day > 0)];
+
   return (
     <div className="space-y-6">
       {/* Toast */}
@@ -265,20 +300,19 @@ export default function CalendarPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="space-y-3">
         <div>
-          <h1 className="text-2xl font-bold">Care Calendar</h1>
+          <h1 className="text-4xl font-bold">Care Calendar</h1>
           <p className="text-sm text-muted-foreground">
-            Poke scans email &amp; messages for medical events and delivers reminders.
+            Agents can scan email to auto-create events and text reminders.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">+ Appointment</Button>
-          <Button variant="outline" size="sm">+ Visit</Button>
-          <Button variant="outline" size="sm">+ Deadline</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button className="px-10 hover:font-bold">+ Appointment</Button>
+          <Button className="px-10 hover:font-bold">+ Visit</Button>
+          <Button className="px-10 hover:font-bold">+ Deadline</Button>
           <Button
-            variant="outline"
-            size="sm"
+            className="px-10 hover:font-bold"
             onClick={() => {
               resetForm();
               setShowReminderForm(true);
@@ -287,17 +321,18 @@ export default function CalendarPage() {
             + Reminder
           </Button>
           {!hasCareLog && (
-            <Button variant="outline" size="sm" onClick={enableDailyCareLog}>
+            <Button className="px-10 hover:font-bold" onClick={enableDailyCareLog}>
               + Care Log
             </Button>
           )}
           <Button
             variant="outline"
-            size="sm"
+            className="px-10 hover:font-bold"
             onClick={handleScan}
             disabled={scanning}
           >
-            {scanning ? "Scanning..." : "Scan Messages"}
+            <Sparkles className="size-4" />
+            {scanning ? "Scanning\u2026" : "Scan Messages"}
           </Button>
         </div>
       </div>
@@ -331,7 +366,7 @@ export default function CalendarPage() {
                 <Input
                   id="msg"
                   value={formMessage}
-                  onChange={(e) => setFormMessage(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormMessage(e.target.value)}
                   placeholder="Reminder text sent to caregiver"
                 />
               </div>
@@ -365,7 +400,7 @@ export default function CalendarPage() {
                   id="time"
                   type="time"
                   value={formTime}
-                  onChange={(e) => setFormTime(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormTime(e.target.value)}
                   className="w-32"
                 />
               </div>
@@ -395,7 +430,7 @@ export default function CalendarPage() {
                     id="date"
                     type="date"
                     value={formDate}
-                    onChange={(e) => setFormDate(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormDate(e.target.value)}
                     className="w-40"
                   />
                 </div>
@@ -414,53 +449,140 @@ export default function CalendarPage() {
         </Card>
       )}
 
-      {/* Suggested events from Poke scan */}
-      {suggestedEvents.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Suggested Events</h2>
-          {suggestedEvents.map((e, i) => (
-            <Card key={`suggested-${i}`} className="border-dashed">
-              <CardHeader className="flex flex-row items-center justify-between py-4">
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-base">{e.title}</CardTitle>
-                  <Badge variant="secondary">{e.kind}</Badge>
-                  <Badge variant="outline">Suggested</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-1 py-0 pb-4">
-                <p className="text-sm text-muted-foreground">{e.date}</p>
-                {e.source && (
-                  <p className="text-xs text-muted-foreground italic">
-                    &quot;{e.source}&quot;
-                  </p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Detected on {e.detected_at}
-                </p>
-              </CardContent>
-            </Card>
+      {/* Month-view calendar grid */}
+      <div className="overflow-hidden rounded-xl border border-brand-subtle bg-white shadow-xs">
+        <div className="flex items-center justify-between border-b border-brand-subtle bg-brand-subtle/40 px-4 py-3">
+          <h2 className="text-lg font-semibold">
+            {monthName} {YEAR}
+          </h2>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="icon-sm" aria-label="Previous month">
+              <ChevronLeft />
+            </Button>
+            <Button variant="outline" size="sm">Today</Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Next month">
+              <ChevronRight />
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-7 border-b border-brand-subtle bg-brand-subtle/50">
+          {weekdays.map((w) => (
+            <div
+              key={w}
+              className="px-2 py-2 text-center text-xs font-medium text-primary"
+            >
+              {w}
+            </div>
           ))}
         </div>
-      )}
 
-      {/* Static calendar events */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold">Upcoming Events</h2>
-        {STATIC_EVENTS.map((e) => (
-          <Card key={e.title}>
-            <CardHeader className="flex flex-row items-center justify-between py-4">
-              <CardTitle className="text-base">{e.title}</CardTitle>
-              <span className="text-xs text-muted-foreground">{e.kind}</span>
-            </CardHeader>
-            <CardContent className="py-0 pb-4 text-sm text-muted-foreground">{e.date}</CardContent>
-          </Card>
-        ))}
+        <div className="grid grid-cols-7">
+          {cells.map((cell, i) => {
+            const isToday = cell.inMonth && cell.day === TODAY;
+            const dayEvents = cell.inMonth
+              ? allEvents.filter((e) => e.day === cell.day)
+              : [];
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "min-h-28 border-b border-r border-brand-subtle/60 p-1.5 last:border-r-0",
+                  (i + 1) % 7 === 0 && "border-r-0",
+                  i >= 35 && "border-b-0",
+                  !cell.inMonth && "bg-brand-subtle/20",
+                )}
+              >
+                <div className="mb-1 flex justify-end">
+                  <span
+                    className={cn(
+                      "flex size-6 items-center justify-center rounded-full text-xs",
+                      isToday
+                        ? "bg-primary font-semibold text-primary-foreground"
+                        : cell.inMonth
+                          ? "text-foreground"
+                          : "text-muted-foreground/50",
+                    )}
+                  >
+                    {cell.day}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {dayEvents.map((e) => (
+                    <div
+                      key={e.title}
+                      className={cn(
+                        "truncate rounded-md px-1.5 py-1 text-[11px] font-medium leading-tight",
+                        e.suggested
+                          ? "border border-dashed border-primary/40 bg-brand-subtle/50 text-primary/70"
+                          : "bg-brand-subtle text-primary",
+                      )}
+                      title={e.time ? `${e.title} \u00b7 ${e.time}` : e.title}
+                    >
+                      {e.suggested && <Sparkles className="mb-0.5 inline size-2.5" />}{" "}
+                      {e.time && <span className="tabular-nums">{e.time} </span>}
+                      {e.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Suggested Events panel (Poke-powered) */}
+      {suggestedEvents.length > 0 && (
+        <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-primary">
+            <Sparkles className="size-4" />
+            <h3 className="text-sm font-semibold">Suggested Events</h3>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Detected from recent emails and messages via Poke. Accept to add to your calendar.
+          </p>
+          <div className="space-y-2">
+            {suggestedEvents.map((e, idx) => (
+              <div
+                key={`suggested-${idx}`}
+                className="flex items-center justify-between rounded-lg border border-dashed border-primary/30 bg-white px-3 py-2"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-foreground">{e.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {e.time ? `${e.time} \u00b7 ` : ""}{e.kind}
+                  </p>
+                  {e.source && (
+                    <p className="text-xs text-muted-foreground italic">{e.source}</p>
+                  )}
+                </div>
+                <div className="ml-3 flex items-center gap-1">
+                  <button
+                    className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-primary hover:bg-primary hover:text-white transition-colors"
+                    aria-label="Accept"
+                  >
+                    <Check className="size-3.5" />
+                  </button>
+                  <button
+                    className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-muted-foreground hover:bg-red-100 hover:text-red-600 transition-colors"
+                    aria-label="Dismiss"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Active reminders */}
       {!loading && reminders.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Active Reminders</h2>
+          <div className="flex items-center gap-2 text-primary">
+            <CalendarDays className="size-4" />
+            <h3 className="text-sm font-semibold">Active Reminders</h3>
+          </div>
           {reminders.map((r) => (
             <Card key={r.id}>
               <CardHeader className="flex flex-row items-center justify-between py-4">
