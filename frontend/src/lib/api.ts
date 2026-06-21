@@ -1,3 +1,4 @@
+import type { Answers, IntakeSchema } from "./intake-schema";
 import type { AppStatus, ApplicationEntry, CaseProfile, EligibilityResponse, FormSchema, Reminder, ReminderCreate, ReminderUpdate, ReminderTemplates, StartApplicationResult } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -17,6 +18,17 @@ export function submitIntake(profile: Partial<CaseProfile>): Promise<CaseProfile
   return request<CaseProfile>("/api/intake", {
     method: "POST",
     body: JSON.stringify({ profile }),
+  });
+}
+
+export function getIntakeSchema(): Promise<IntakeSchema> {
+  return request<IntakeSchema>("/api/intake/schema");
+}
+
+export function submitIntakeAnswers(answers: Answers): Promise<CaseProfile> {
+  return request<CaseProfile>("/api/intake", {
+    method: "POST",
+    body: JSON.stringify({ answers }),
   });
 }
 

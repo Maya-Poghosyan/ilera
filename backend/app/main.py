@@ -3,7 +3,7 @@ import logging
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,6 +26,7 @@ from .applications import (
 from .config import get_settings
 from .forms.filler import fill_pdf, list_schemas, resolve_fields
 from .integrations import poke
+from .intake import INTAKE_SCHEMA, map_answers_to_profile
 from .mcp_server import mcp as mcp_server
 from .models import CaseProfile, EligibilityResult, FollowupQuestion, InteractionNote
 from .rag.embeddings import provider as embedding_provider
@@ -138,8 +139,16 @@ def health() -> dict:
     }
 
 
+@app.get("/api/intake/schema")
+def intake_schema() -> dict:
+    """The schema-driven intake: Welcome, Screens 1–9 (Q1–Q42), and Conditional
+    Mini-Modules A–F, with field_ids, types, options, and show_when conditions."""
+    return INTAKE_SCHEMA
+
+
 class IntakeRequest(BaseModel):
     profile: CaseProfile | None = None
+    answers: dict[str, Any] | None = None
 
 
 @app.post("/api/intake", response_model=CaseProfile)
@@ -147,6 +156,8 @@ def submit_intake(req: IntakeRequest) -> CaseProfile:
     profile = req.profile or CaseProfile(id=str(uuid.uuid4()))
     if not profile.id:
         profile.id = str(uuid.uuid4())
+    if req.answers is not None:
+        map_answers_to_profile(req.answers, profile)
     save_profile(profile)
     return profile
 
