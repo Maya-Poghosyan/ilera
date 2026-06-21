@@ -36,6 +36,7 @@ import os
 
 from pydantic import BaseModel, Field
 
+from ..agents.interactions import analyze_interactions
 from ..agents.routing import run_routing
 from ..agents.specialists import ALL_SPECIALISTS
 from ..config import get_settings
@@ -48,22 +49,37 @@ logger = logging.getLogger(__name__)
 _SPECIALISTS = {cls().doc_key: cls() for cls in ALL_SPECIALISTS}
 _PROGRAM_NAMES = {k: a.program for k, a in _SPECIALISTS.items()}
 
+_SPECIALIST_NAMES = {
+    "ihss": "ilera-ihss", "medical": "ilera-medi-cal", "medicare": "ilera-medicare",
+    "pfl": "ilera-pfl", "va": "ilera-va", "tax": "ilera-tax",
+}
+
 _ROUTING_PROMPT = (
-    "You are Ilera's Routing Agent, the coordinator for U.S. caregiver benefits. When another "
-    "agent describes a caregiver's situation, call assesseligibility to run all of Ilera's "
-    "specialists and return ranked, source-cited findings, or consult an individual program "
-    "specialist agent in the room. Use searchprogramdocs to quote official rules. Ground every "
-    "claim in the returned citations (title, page, source URL); never invent program rules."
+    "You are Ilera's Routing Agent, the coordinator for U.S. caregiver benefits. You work with "
+    "program specialist agents in your Band organization: ilera-ihss, ilera-medi-cal, "
+    "ilera-medicare, ilera-pfl, ilera-va, ilera-tax.\n\n"
+    "When another agent describes a caregiver's situation:\n"
+    "1. Call assesseligibility to run all specialists and get ranked, source-cited findings plus "
+    "cross-program interaction notes.\n"
+    "2. To dig deeper on one program, CONSULT that specialist directly: use band_lookup_peers to "
+    "find it, band_add_participant to bring it into the room, and band_send_message to ask your "
+    "question — then incorporate its reply.\n"
+    "3. Call analyzeinteractions to explain how the programs interact (prerequisites, payer order, "
+    "tax treatment, application sequence), grounded in the inter-eligibility advising documents.\n"
+    "Ground every claim in citations (title, page, source URL); never invent program rules."
 )
 
 
 def _specialist_prompt(program: str) -> str:
     return (
-        f"You are Ilera's {program} specialist agent. You ONLY assess eligibility for {program} "
-        f"and answer questions about it, grounded strictly in {program}'s official documentation. "
-        "Call assesseligibility to evaluate a caregiver's situation for your program, and "
-        "lookupprogramdocs to quote the official rules. Always cite the source (title, page, URL). "
-        "If a question is outside your program, say so and defer to the routing agent."
+        f"You are Ilera's {program} specialist agent, part of a Band team coordinated by the "
+        "routing agent. You ONLY assess eligibility for "
+        f"{program} and answer questions about it, grounded strictly in {program}'s official "
+        "documentation. When the routing agent (or another agent) messages you in a room, answer "
+        "their question: call assesseligibility to evaluate the caregiver's situation for your "
+        "program, and lookupprogramdocs to quote the official rules, then reply with "
+        "band_send_message. Always cite the source (title, page, URL). If a question is outside "
+        f"{program}, say so and defer to the routing agent."
     )
 
 
@@ -101,6 +117,10 @@ class LookupProgramDocsInput(BaseModel):
     query: str = Field(description="What to look up within this program's rules")
 
 
+class AnalyzeInteractionsInput(AssessEligibilityInput):
+    """Explain how the caregiver's benefit programs interact — prerequisites, payer order, income/tax treatment, and the best application sequence — grounded in the official inter-eligibility advising documents with citations."""
+
+
 def _profile_from_input(inp: AssessEligibilityInput) -> CaseProfile:
     insurance = inp.insurance if inp.insurance in {
         "medi-cal", "medicare", "private", "none", "unknown"
@@ -121,6 +141,17 @@ def _profile_from_input(inp: AssessEligibilityInput) -> CaseProfile:
         household=Household(size=inp.household_size, income_monthly=inp.household_income_monthly),
         goals=inp.goals,
     )
+
+
+def _interaction_dict(n) -> dict:
+    return {
+        "note": n.note,
+        "programs": n.programs,
+        "action": n.action,
+        "citations": [
+            {"title": c.title, "page": c.page, "source_url": c.source_url} for c in n.citations
+        ],
+    }
 
 
 def _result_dict(r: EligibilityResult) -> dict:
@@ -144,7 +175,15 @@ def _assess_all_sync(inp: AssessEligibilityInput) -> dict:
         "programs": [_result_dict(r) for r in routing.results],
         "follow_up_questions": [q.prompt for q in routing.followups],
         "strategy_notes": routing.strategy_notes,
+        "interactions": [_interaction_dict(n) for n in routing.interaction_notes],
     }
+
+
+def _interactions_sync(inp: AnalyzeInteractionsInput) -> dict:
+    profile = _profile_from_input(inp)
+    results = [a.assess(profile) for a in _SPECIALISTS.values()]
+    notes = analyze_interactions(profile, results)
+    return {"interactions": [_interaction_dict(n) for n in notes]}
 
 
 def _search_docs_sync(inp: SearchProgramDocsInput) -> dict:
@@ -179,13 +218,19 @@ def _passages(hits) -> list[dict]:
 # Agent construction
 # ---------------------------------------------------------------------------
 def _adapter(system_prompt: str, tools):
+    from band import AdapterFeatures, Capability
     from band.adapters.anthropic import AnthropicAdapter
 
+    # Enable contact + memory capabilities so agents can discover peers, add each other
+    # to rooms, and consult one another. The chat tools (lookup_peers, add_participant,
+    # create_chatroom, send_message) are always available.
+    features = AdapterFeatures(capabilities=frozenset({Capability.CONTACTS, Capability.MEMORY}))
     return AnthropicAdapter(
         model=get_settings().anthropic_model,
         system_prompt=system_prompt,
         provider_key=get_settings().anthropic_api_key,
         additional_tools=tools,
+        features=features,
     )
 
 
@@ -205,6 +250,7 @@ def _make_agent(adapter, creds: dict):
 def build_routing_agent(creds: dict):
     tools = [
         (AssessEligibilityInput, _wrap(_assess_all_sync)),
+        (AnalyzeInteractionsInput, _wrap(_interactions_sync)),
         (SearchProgramDocsInput, _wrap(_search_docs_sync)),
     ]
     return _make_agent(_adapter(_ROUTING_PROMPT, tools), creds)

@@ -56,6 +56,15 @@ class Citation(BaseModel):
     program: str = ""
 
 
+class InteractionNote(BaseModel):
+    """A cross-program eligibility interaction, grounded in inter-eligibility advising docs."""
+
+    note: str = ""
+    programs: list[str] = Field(default_factory=list)
+    action: str = ""  # recommended sequencing / next step, if any
+    citations: list[Citation] = Field(default_factory=list)
+
+
 class EligibilityResult(BaseModel):
     program: str
     confidence: float = 0.0  # 0..1

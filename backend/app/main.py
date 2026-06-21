@@ -8,7 +8,7 @@ from .agents.routing import run_routing
 from .config import get_settings
 from .forms.filler import resolve_fields
 from .integrations import poke
-from .models import CaseProfile, EligibilityResult, FollowupQuestion
+from .models import CaseProfile, EligibilityResult, FollowupQuestion, InteractionNote
 from .rag.embeddings import provider as embedding_provider
 from .rag.index import get_index, rebuild_index
 from .store import get_profile, save_profile
@@ -65,6 +65,7 @@ class EligibilityResponse(BaseModel):
     results: list[EligibilityResult]
     followups: list[FollowupQuestion]
     strategy_notes: list[str]
+    interaction_notes: list[InteractionNote]
 
 
 @app.post("/api/eligibility/{case_id}", response_model=EligibilityResponse)
@@ -79,6 +80,7 @@ def determine_eligibility(case_id: str) -> EligibilityResponse:
         results=routing.results,
         followups=routing.followups,
         strategy_notes=routing.strategy_notes,
+        interaction_notes=routing.interaction_notes,
     )
 
 
