@@ -340,10 +340,9 @@ export default function ApplicationsPage() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {apps.map((app) => {
-          const pct = Math.round(app.confidence * 100);
           return (
-            <Card key={app.program} size="sm" className="gap-3">
-              <CardHeader className="gap-2">
+            <Card key={app.program} size="sm" className="gap-0 overflow-hidden">
+              <CardHeader className="gap-2 bg-muted">
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle className="text-base">{app.program}</CardTitle>
                   <div className="flex items-center gap-2">
@@ -354,21 +353,10 @@ export default function ApplicationsPage() {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-semibold tabular-nums text-muted-foreground">
-                    {pct}%
-                  </span>
-                </div>
+                <p className="text-xs text-muted-foreground">{app.rationale}</p>
               </CardHeader>
 
-              <CardContent className="space-y-2.5 text-xs">
-                <p className="text-muted-foreground">{app.rationale}</p>
+              <CardContent className="space-y-2.5 text-xs pt-3">
 
                 {app.roadblocks.length > 0 && (
                   <Detail label="Roadblocks" items={app.roadblocks} />

@@ -7,8 +7,8 @@ import { CalendarDays, ClipboardList, FileText, ListChecks, type LucideIcon } fr
 import { cn } from "@/lib/utils";
 
 const nav: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: "/dashboard", label: "Care Calendar", icon: CalendarDays },
   { href: "/dashboard/applications", label: "Applications", icon: ClipboardList },
+  { href: "/dashboard", label: "Care Calendar", icon: CalendarDays },
   { href: "/dashboard/records", label: "Records & Renewal", icon: ListChecks },
   { href: "/dashboard/documents", label: "Documents", icon: FileText },
 ];
