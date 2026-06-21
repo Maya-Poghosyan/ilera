@@ -36,7 +36,7 @@ type CalEvent = {
   time?: string;
   kind: EventKind;
   suggested?: boolean;
-  source?: string;
+  description?: string;
 };
 
 const YEAR = 2026;
@@ -47,6 +47,11 @@ const events: CalEvent[] = [
   { day: 23, title: "Dr. Patel \u2014 cardiology follow-up", time: "10:00 AM", kind: "Appointment" },
   { day: 25, title: "County social worker visit", time: "2:00 PM", kind: "Visit" },
   { day: 27, title: "IHSS timesheet due", kind: "Deadline" },
+];
+
+const STATIC_SUGGESTED: CalEvent[] = [
+  { day: 24, title: "Pharmacy refill pickup", time: "9:00 AM", kind: "Appointment", suggested: true, description: "Found in email from CVS \u2014 prescription #4021 ready for pickup at Main St location." },
+  { day: 28, title: "IHSS pay stub review", kind: "Deadline", suggested: true, description: "IHSS direct deposit scheduled for Jun 28. Review hours logged against pay stub." },
 ];
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -101,7 +106,7 @@ export default function CalendarPage() {
   const cells = buildCells();
 
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [suggestedEvents, setSuggestedEvents] = useState<CalEvent[]>([]);
+  const [pokeSuggested, setPokeSuggested] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -233,7 +238,7 @@ export default function CalendarPage() {
           time: e.date ?? "Date TBD",
           kind: (e.kind as EventKind) ?? "Appointment",
           suggested: true,
-          source: `Detected on ${now}`,
+          description: `Detected on ${now}`,
         }));
       } else {
         const text =
@@ -248,12 +253,12 @@ export default function CalendarPage() {
               time: "See details",
               kind: "Appointment",
               suggested: true,
-              source: `Detected on ${now}`,
+              description: `Detected on ${now}`,
             },
           ];
         }
       }
-      setSuggestedEvents((prev) => [...detected, ...prev]);
+      setPokeSuggested((prev) => [...detected, ...prev]);
       showToast(`Scan complete \u2014 ${detected.length} suggestion(s) found`);
     } catch (e) {
       showToast(e instanceof Error ? e.message : "Scan failed");
@@ -287,8 +292,10 @@ export default function CalendarPage() {
     });
   };
 
-  // Combine static + suggested events for the grid
-  const allEvents = [...events, ...suggestedEvents.filter((e) => e.day > 0)];
+  // Merge static sample suggestions with Poke-scanned suggestions
+  const allSuggested = [...STATIC_SUGGESTED, ...pokeSuggested];
+  // Combine all events for the calendar grid
+  const allEvents = [...events, ...allSuggested.filter((e) => e.day > 0)];
 
   return (
     <div className="space-y-6">
@@ -449,6 +456,53 @@ export default function CalendarPage() {
         </Card>
       )}
 
+      {/* Suggested Events panel — above calendar (Poke-powered + static samples) */}
+      {allSuggested.length > 0 && (
+        <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-primary">
+            <Sparkles className="size-4" />
+            <h3 className="text-sm font-semibold">Suggested Events</h3>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Detected from recent emails and documents. Accept to add to your calendar.
+          </p>
+          <div className="space-y-2">
+            {allSuggested.map((e, idx) => (
+              <div
+                key={`suggested-${idx}`}
+                className="flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-white px-3 py-2.5"
+              >
+                <div className="min-w-0 flex-1 space-y-1">
+                  <p className="text-sm font-medium text-foreground">{e.title}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {e.day > 0 ? `${monthName} ${e.day}` : ""}{e.time ? ` \u00b7 ${e.time}` : ""} \u00b7 {e.kind}
+                  </p>
+                  {e.description && (
+                    <p className="text-xs leading-relaxed text-muted-foreground/80">
+                      {e.description}
+                    </p>
+                  )}
+                </div>
+                <div className="ml-3 flex shrink-0 items-center gap-1 pt-0.5">
+                  <button
+                    className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-primary hover:bg-primary hover:text-white transition-colors"
+                    aria-label="Accept"
+                  >
+                    <Check className="size-3.5" />
+                  </button>
+                  <button
+                    className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-muted-foreground hover:bg-red-100 hover:text-red-600 transition-colors"
+                    aria-label="Dismiss"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Month-view calendar grid */}
       <div className="overflow-hidden rounded-xl border border-brand-subtle bg-white shadow-xs">
         <div className="flex items-center justify-between border-b border-brand-subtle bg-brand-subtle/40 px-4 py-3">
@@ -487,7 +541,7 @@ export default function CalendarPage() {
               <div
                 key={i}
                 className={cn(
-                  "min-h-28 border-b border-r border-brand-subtle/60 p-1.5 last:border-r-0",
+                  "flex min-h-28 flex-col border-b border-r border-brand-subtle/60 p-1.5 last:border-r-0",
                   (i + 1) % 7 === 0 && "border-r-0",
                   i >= 35 && "border-b-0",
                   !cell.inMonth && "bg-brand-subtle/20",
@@ -507,12 +561,12 @@ export default function CalendarPage() {
                     {cell.day}
                   </span>
                 </div>
-                <div className="space-y-1">
+                <div className="flex flex-1 flex-col gap-1">
                   {dayEvents.map((e) => (
                     <div
                       key={e.title}
                       className={cn(
-                        "truncate rounded-md px-1.5 py-1 text-[11px] font-medium leading-tight",
+                        "flex-1 rounded-md px-1.5 py-1 text-[11px] font-medium leading-tight",
                         e.suggested
                           ? "border border-dashed border-primary/40 bg-brand-subtle/50 text-primary/70"
                           : "bg-brand-subtle text-primary",
@@ -530,51 +584,6 @@ export default function CalendarPage() {
           })}
         </div>
       </div>
-
-      {/* Suggested Events panel (Poke-powered) */}
-      {suggestedEvents.length > 0 && (
-        <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
-          <div className="flex items-center gap-2 text-primary">
-            <Sparkles className="size-4" />
-            <h3 className="text-sm font-semibold">Suggested Events</h3>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Detected from recent emails and messages via Poke. Accept to add to your calendar.
-          </p>
-          <div className="space-y-2">
-            {suggestedEvents.map((e, idx) => (
-              <div
-                key={`suggested-${idx}`}
-                className="flex items-center justify-between rounded-lg border border-dashed border-primary/30 bg-white px-3 py-2"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground">{e.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {e.time ? `${e.time} \u00b7 ` : ""}{e.kind}
-                  </p>
-                  {e.source && (
-                    <p className="text-xs text-muted-foreground italic">{e.source}</p>
-                  )}
-                </div>
-                <div className="ml-3 flex items-center gap-1">
-                  <button
-                    className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-primary hover:bg-primary hover:text-white transition-colors"
-                    aria-label="Accept"
-                  >
-                    <Check className="size-3.5" />
-                  </button>
-                  <button
-                    className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-muted-foreground hover:bg-red-100 hover:text-red-600 transition-colors"
-                    aria-label="Dismiss"
-                  >
-                    <X className="size-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Active reminders */}
       {!loading && reminders.length > 0 && (
