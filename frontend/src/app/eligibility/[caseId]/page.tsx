@@ -53,7 +53,7 @@ export default function EligibilityPage() {
     return (
       <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-foreground" />
-        <h1 className="text-xl font-semibold text-green-600">Determining eligibility…</h1>
+        <h1 className="text-xl font-semibold text-primary">Determining eligibility…</h1>
         <p
           key={messageIndex}
           className="min-h-10 max-w-sm text-sm text-foreground animate-in fade-in duration-700"
