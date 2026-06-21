@@ -12,3 +12,4 @@ numpy==2.2.1
 anthropic==0.42.0
 fastembed==0.5.1
 python-docx==1.1.2
+band-sdk==1.0.0

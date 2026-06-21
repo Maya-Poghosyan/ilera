@@ -49,7 +49,16 @@ class Settings(BaseSettings):
 
     @property
     def has_band(self) -> bool:
-        return bool(self.band_api_key and self.band_agent_id)
+        """True if Band is configured via env vars or a registry file."""
+        if self.band_api_key and self.band_agent_id:
+            return True
+        import os
+        path = self.band_agents_file
+        if path and not os.path.isabs(path):
+            path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.abspath(__file__))), path
+            )
+        return bool(path and os.path.exists(path))
 
 
 @lru_cache
