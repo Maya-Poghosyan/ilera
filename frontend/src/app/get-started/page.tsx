@@ -33,7 +33,7 @@ export default function GetStartedPage() {
         </div>
       </header>
 
-      <section className="mx-auto flex max-w-lg flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
+      <section className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
         {/* Progress indicators */}
         <div className="flex items-center gap-3">
           <StepDot active={step === "account"} done={step !== "account"} label="1" />
