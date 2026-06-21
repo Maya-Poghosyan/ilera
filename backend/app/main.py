@@ -2,11 +2,12 @@ import uuid
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 from .agents.routing import run_routing
 from .config import get_settings
-from .forms.filler import resolve_fields
+from .forms.filler import fill_pdf, list_schemas, resolve_fields
 from .integrations import poke
 from .models import CaseProfile, EligibilityResult, FollowupQuestion
 from .rag.embeddings import provider as embedding_provider
@@ -97,12 +98,37 @@ def rag_search(q: RagQuery) -> dict:
     }
 
 
-@app.get("/api/forms/{program}/{case_id}")
-def form_fields(program: str, case_id: str) -> dict:
+@app.get("/api/forms")
+def list_forms() -> dict:
+    """List all available forms with metadata."""
+    return {"forms": list_schemas()}
+
+
+@app.get("/api/forms/{form_id}/{case_id}")
+def form_fields(form_id: str, case_id: str) -> dict:
+    """Resolve field values for a form against a CaseProfile."""
     profile = get_profile(case_id)
     if profile is None:
         raise HTTPException(status_code=404, detail="case not found")
-    return resolve_fields(program, profile)
+    return resolve_fields(form_id, profile)
+
+
+@app.get("/api/forms/{form_id}/{case_id}/download")
+def download_filled_form(form_id: str, case_id: str) -> Response:
+    """Stream a filled PDF for the given form and case."""
+    profile = get_profile(case_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="case not found")
+    try:
+        pdf_bytes = fill_pdf(form_id, profile)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    filename = f"{form_id}_{case_id}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 class ReminderRequest(BaseModel):

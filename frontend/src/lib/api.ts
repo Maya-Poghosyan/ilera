@@ -1,4 +1,4 @@
-import type { CaseProfile, EligibilityResponse } from "./types";
+import type { CaseProfile, EligibilityResponse, FormSchema } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -26,4 +26,20 @@ export function determineEligibility(caseId: string): Promise<EligibilityRespons
 
 export function getCase(caseId: string): Promise<CaseProfile> {
   return request<CaseProfile>(`/api/case/${caseId}`);
+}
+
+export function listForms(): Promise<{ forms: FormSchema[] }> {
+  return request<{ forms: FormSchema[] }>("/api/forms");
+}
+
+export function getFormFields(formId: string, caseId: string) {
+  return request<{
+    resolved: Record<string, unknown>;
+    missing: string[];
+    needs_user_input: Array<{ field: string; label: string; type: string }>;
+  }>(`/api/forms/${formId}/${caseId}`);
+}
+
+export function getFormDownloadUrl(formId: string, caseId: string): string {
+  return `${BASE}/api/forms/${formId}/${caseId}/download`;
 }

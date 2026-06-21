@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "form_id": "SOC-2298",
+    "title": "Live-In Self-Certification",
+    "program": "IHSS-Provider",
+    "agency": "CDSS",
+    "pdf_path": "CDSS/IHSS-Provider/SOC-2298.pdf",
+    "total_fields": 10,
+    "notes": "Scaffold - field mappings not yet authored"
+  },
+  "fields": {}
+}
