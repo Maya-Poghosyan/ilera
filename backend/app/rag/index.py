@@ -186,11 +186,72 @@ class RedisVLIndex:
         return out
 
 
+class RedisVectorSetIndex:
+    """Native Redis 8 Vector Sets (VADD/VSIM) — server-side vector KNN.
+
+    Used when the DB has the `vectorset` module (Redis >= 8) but not RediSearch.
+    Each chunk is one vector-set element; program/source/text live in its JSON attributes,
+    and program filtering uses VSIM's FILTER expression.
+    """
+
+    backend = "redis-vectorset"
+    SET_KEY = f"{KEY_PREFIX}:vset"
+
+    def __init__(self, redis_url: str) -> None:
+        import redis
+
+        self._r = redis.from_url(redis_url, decode_responses=True, socket_timeout=8)
+        # Fail fast if the vectorset module is missing so get_index() can fall back.
+        names = {m[1] for m in self._r.execute_command("MODULE", "LIST")}
+        if "vectorset" not in names:
+            raise RuntimeError("vectorset module not available")
+        self._size = 0
+
+    @property
+    def size(self) -> int:
+        return self._size
+
+    def build(self) -> int:
+        chunks = load_chunks()
+        self._r.delete(self.SET_KEY)
+        if chunks:
+            vectors = embed([c.text for c in chunks])
+            for c, v in zip(chunks, vectors):
+                attrs = json.dumps({"program": c.program, "source": c.source, "text": c.text})
+                self._r.execute_command(
+                    "VADD", self.SET_KEY, "VALUES", len(v), *v, c.id, "SETATTR", attrs
+                )
+        self._size = len(chunks)
+        return self._size
+
+    def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
+        if not self._r.exists(self.SET_KEY):
+            return []
+        qv = embed_one(query)
+        args = ["VSIM", self.SET_KEY, "VALUES", len(qv), *qv, "WITHSCORES", "COUNT", k]
+        if program:
+            args += ["FILTER", f'.program=="{program}"']
+        rows = self._r.execute_command(*args)
+        out: list[Retrieved] = []
+        for i in range(0, len(rows), 2):
+            element, score = rows[i], float(rows[i + 1])
+            attrs = json.loads(self._r.execute_command("VGETATTR", self.SET_KEY, element) or "{}")
+            out.append(
+                Retrieved(
+                    text=attrs.get("text", ""),
+                    program=attrs.get("program", ""),
+                    source=attrs.get("source", ""),
+                    score=score,
+                )
+            )
+        return out
+
+
 class RedisKNNIndex:
     """Vectors + metadata stored in Redis hashes; cosine ranking in Python.
 
-    Works on any Redis (no Search module required). Used when REDIS_URL is set but the
-    RediSearch/vector module is unavailable (e.g. a plain Redis Cloud Essentials DB).
+    Works on any Redis (no special module required). Last-resort Redis backend when neither
+    RediSearch nor Vector Sets are available.
     """
 
     backend = "redis-knn"
@@ -262,9 +323,9 @@ def get_index():
         return _index
     settings = get_settings()
     if settings.has_redis:
-        # Prefer native RediSearch vector KNN; fall back to Redis-backed brute force
-        # if the Search module isn't installed on the DB.
-        for cls in (RedisVLIndex, RedisKNNIndex):
+        # Prefer native server-side vector KNN (RediSearch or Redis 8 Vector Sets);
+        # fall back to a Redis-backed brute-force index if neither module is present.
+        for cls in (RedisVLIndex, RedisVectorSetIndex, RedisKNNIndex):
             try:
                 idx = cls(settings.redis_url)
                 idx.build()
