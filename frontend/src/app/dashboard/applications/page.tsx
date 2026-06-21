@@ -21,7 +21,7 @@ import type {
 } from "@/lib/types";
 
 const eligibilityColor: Record<EligibilityStatus, string> = {
-  likely: "border-transparent bg-primary text-primary-foreground",
+  likely: "border-transparent bg-emerald-500 text-white",
   possible: "border-transparent bg-amber-500 text-white",
   unlikely: "border-transparent bg-rose-500 text-white",
   needs_info: "border-transparent bg-sky-600 text-white",
@@ -341,22 +341,20 @@ export default function ApplicationsPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {apps.map((app) => {
           return (
-            <Card key={app.program} size="sm" className="gap-0 overflow-hidden">
-              <CardHeader className="gap-2 bg-muted">
+            <Card key={app.program} className="gap-3">
+              <CardHeader className="gap-2">
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle className="text-base">{app.program}</CardTitle>
-                  <div className="flex items-center gap-2">
-                    {app.eligibility_status && (
-                      <Badge className={eligibilityColor[app.eligibility_status]}>
-                        {app.eligibility_status.replace("_", " ")}
-                      </Badge>
-                    )}
-                  </div>
+                  {app.eligibility_status && (
+                    <Badge className={eligibilityColor[app.eligibility_status]}>
+                      {app.eligibility_status.replace("_", " ")}
+                    </Badge>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground">{app.rationale}</p>
               </CardHeader>
 
-              <CardContent className="space-y-2.5 text-xs pt-3">
+              <CardContent className="space-y-2.5 text-xs">
 
                 {app.roadblocks.length > 0 && (
                   <Detail label="Roadblocks" items={app.roadblocks} />
