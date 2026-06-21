@@ -129,7 +129,7 @@ export default function RecordsPage() {
   if (!caseId && !loading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Records &amp; Renewal</h1>
+        <h1 className="text-4xl font-bold">Records &amp; Renewal</h1>
         <Card>
           <CardContent className="py-6">
             <p className="text-sm text-muted-foreground">
@@ -145,7 +145,7 @@ export default function RecordsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Records &amp; Renewal</h1>
+        <h1 className="text-4xl font-bold">Records &amp; Renewal</h1>
         <div className="flex items-center gap-2">
           {editingRenewal ? (
             <>
@@ -172,6 +172,13 @@ export default function RecordsPage() {
         </div>
       </div>
 
+      <p className="text-2xl font-semibold">
+        Renewal for {renewal?.due_date
+          ? `${new Date(renewal.due_date + "T00:00:00").getFullYear() - 1}–${new Date(renewal.due_date + "T00:00:00").getFullYear()}`
+          : `${new Date().getFullYear()}–${new Date().getFullYear() + 1}`
+        } due {renewal?.due_date ? formatDate(renewal.due_date) + ", " + new Date(renewal.due_date + "T00:00:00").getFullYear() : "1 year from submission"}
+      </p>
+
       {fallEntries.length > 0 && (
         <Card className="border-amber-300 bg-amber-50">
           <CardContent className="flex items-start gap-3 py-4 text-sm">
@@ -191,7 +198,7 @@ export default function RecordsPage() {
         {/* Timekeeping */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold">Timekeeping</h2>
+            <h2 className="text-xl font-semibold">Timekeeping</h2>
             <Button size="sm" variant="outline" onClick={() => setShowTkForm(true)}>
               + Entry
             </Button>
@@ -272,7 +279,7 @@ export default function RecordsPage() {
         {/* Care journal */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold">Care journal</h2>
+            <h2 className="text-xl font-semibold">Care journal</h2>
             <Button size="sm" variant="outline" onClick={() => setShowJnForm(true)}>
               + Entry
             </Button>
