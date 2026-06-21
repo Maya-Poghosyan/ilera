@@ -44,3 +44,37 @@ def daily_care_log_prompt(recipient_name: str = "your loved one") -> str:
         "Reply with hours spent and anything notable (meals, meds, mood, incidents) "
         "and I'll log it for benefits renewal."
     )
+
+
+def scan_for_events() -> dict:
+    """Ask Poke to scan the user's recent messages/emails for medical or
+    caregiving-related events.  Returns the raw Poke response (the caller
+    decides how to surface the suggestions).
+    """
+    settings = get_settings()
+    if not settings.poke_api_key:
+        raise RuntimeError("POKE_API_KEY not configured")
+    resp = httpx.post(
+        API_URL,
+        headers={
+            "Authorization": f"Bearer {settings.poke_api_key}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "message": (
+                "Scan my recent emails and messages for anything medical or "
+                "caregiving-related — appointments, prescription refills, "
+                "insurance renewals, lab results, care-plan updates. "
+                "For each item found, return a JSON array of objects with keys: "
+                "title, date (ISO-8601 if available, otherwise descriptive), "
+                "source (email subject or message preview), and kind "
+                "(Appointment, Deadline, Refill, Lab, or Other)."
+            ),
+        },
+        timeout=30.0,
+    )
+    resp.raise_for_status()
+    try:
+        return resp.json()
+    except ValueError:
+        return {"status": resp.status_code, "text": resp.text}

@@ -1,4 +1,9 @@
+import asyncio
+import logging
 import uuid
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,10 +16,81 @@ from .integrations import poke
 from .models import CaseProfile, EligibilityResult, FollowupQuestion
 from .rag.embeddings import provider as embedding_provider
 from .rag.index import get_index
+from .reminders import (
+    TEMPLATES,
+    Reminder,
+    ReminderKind,
+    ReminderSchedule,
+    advance_next_run,
+    compute_next_run,
+    delete_reminder,
+    get_reminder,
+    list_reminders,
+    save_reminder,
+)
 from .store import get_profile, save_profile
 
+logger = logging.getLogger("ilera.scheduler")
+
 settings = get_settings()
-app = FastAPI(title=settings.app_name)
+
+# ---------------------------------------------------------------------------
+# Scheduler — lightweight asyncio background loop
+# ---------------------------------------------------------------------------
+
+_SCHEDULER_INTERVAL = 30  # seconds between ticks
+
+
+async def _scheduler_loop() -> None:
+    """Check for due reminders every interval and fire them via Poke."""
+    while True:
+        try:
+            await asyncio.sleep(_SCHEDULER_INTERVAL)
+            now = datetime.now(timezone.utc)
+            for reminder in list_reminders():
+                if not reminder.active or not reminder.next_run:
+                    continue
+                fire_at = datetime.fromisoformat(reminder.next_run)
+                if fire_at > now:
+                    continue
+                # Determine message
+                msg = reminder.message
+                if reminder.kind == ReminderKind.daily_care_log and not msg:
+                    msg = poke.daily_care_log_prompt()
+                if not msg:
+                    continue
+                # Send via Poke (no-op if key missing)
+                if poke.available():
+                    try:
+                        poke.send_message(msg)
+                        logger.info("Sent reminder %s", reminder.id)
+                    except Exception:
+                        logger.exception("Failed to send reminder %s", reminder.id)
+                        continue
+                else:
+                    logger.debug("Poke not configured — skipping reminder %s", reminder.id)
+                # Advance
+                reminder.last_sent_at = now.isoformat()
+                advance_next_run(reminder)
+                save_reminder(reminder)
+        except asyncio.CancelledError:
+            break
+        except Exception:
+            logger.exception("Scheduler tick error")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(_scheduler_loop())
+    yield
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        pass
+
+
+app = FastAPI(title=settings.app_name, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -105,12 +181,17 @@ def form_fields(program: str, case_id: str) -> dict:
     return resolve_fields(program, profile)
 
 
-class ReminderRequest(BaseModel):
+# ---------------------------------------------------------------------------
+# Reminder CRUD + send
+# ---------------------------------------------------------------------------
+
+
+class SendMessageRequest(BaseModel):
     message: str
 
 
 @app.post("/api/reminders/send")
-def send_reminder(req: ReminderRequest) -> dict:
+def send_reminder_now(req: SendMessageRequest) -> dict:
     if not poke.available():
         raise HTTPException(status_code=400, detail="POKE_API_KEY not configured")
     try:
@@ -118,3 +199,116 @@ def send_reminder(req: ReminderRequest) -> dict:
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Poke send failed: {exc}") from exc
     return {"sent": True, "poke": result}
+
+
+class ReminderCreate(BaseModel):
+    case_id: Optional[str] = None
+    kind: ReminderKind = ReminderKind.custom
+    message: str = ""
+    schedule: ReminderSchedule = ReminderSchedule()
+    active: bool = True
+
+
+class ReminderUpdate(BaseModel):
+    message: Optional[str] = None
+    schedule: Optional[ReminderSchedule] = None
+    active: Optional[bool] = None
+    kind: Optional[ReminderKind] = None
+
+
+@app.get("/api/reminders")
+def api_list_reminders() -> list[Reminder]:
+    return list_reminders()
+
+
+@app.post("/api/reminders", status_code=201)
+def api_create_reminder(body: ReminderCreate) -> Reminder:
+    reminder = Reminder(
+        case_id=body.case_id,
+        kind=body.kind,
+        message=body.message,
+        schedule=body.schedule,
+        active=body.active,
+    )
+    reminder.next_run = compute_next_run(reminder.schedule)
+    save_reminder(reminder)
+    return reminder
+
+
+@app.get("/api/reminders/templates")
+def api_templates() -> dict:
+    return TEMPLATES
+
+
+@app.get("/api/reminders/{reminder_id}")
+def api_get_reminder(reminder_id: str) -> Reminder:
+    r = get_reminder(reminder_id)
+    if r is None:
+        raise HTTPException(status_code=404, detail="reminder not found")
+    return r
+
+
+@app.patch("/api/reminders/{reminder_id}")
+def api_patch_reminder(reminder_id: str, body: ReminderUpdate) -> Reminder:
+    r = get_reminder(reminder_id)
+    if r is None:
+        raise HTTPException(status_code=404, detail="reminder not found")
+    if body.message is not None:
+        r.message = body.message
+    if body.schedule is not None:
+        r.schedule = body.schedule
+        r.next_run = compute_next_run(r.schedule)
+    if body.active is not None:
+        r.active = body.active
+        if r.active and r.next_run is None:
+            r.next_run = compute_next_run(r.schedule)
+    if body.kind is not None:
+        r.kind = body.kind
+    save_reminder(r)
+    return r
+
+
+@app.delete("/api/reminders/{reminder_id}")
+def api_delete_reminder(reminder_id: str) -> dict:
+    if not delete_reminder(reminder_id):
+        raise HTTPException(status_code=404, detail="reminder not found")
+    return {"deleted": True}
+
+
+@app.post("/api/reminders/{reminder_id}/run-now")
+def api_run_now(reminder_id: str) -> dict:
+    """Immediately fire a reminder via Poke (for demos / testing)."""
+    r = get_reminder(reminder_id)
+    if r is None:
+        raise HTTPException(status_code=404, detail="reminder not found")
+    msg = r.message
+    if r.kind == ReminderKind.daily_care_log and not msg:
+        msg = poke.daily_care_log_prompt()
+    if not msg:
+        raise HTTPException(status_code=400, detail="reminder has no message")
+    if not poke.available():
+        raise HTTPException(status_code=400, detail="POKE_API_KEY not configured")
+    try:
+        result = poke.send_message(msg)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Poke send failed: {exc}") from exc
+    r.last_sent_at = datetime.now(timezone.utc).isoformat()
+    save_reminder(r)
+    return {"sent": True, "poke": result}
+
+
+# ---------------------------------------------------------------------------
+# Poke message/email scanning → suggested events
+# ---------------------------------------------------------------------------
+
+
+@app.post("/api/poke/scan")
+def poke_scan_events() -> dict:
+    """Ask Poke to scan the user's messages/emails for medical events."""
+    if not poke.available():
+        raise HTTPException(status_code=400, detail="POKE_API_KEY not configured")
+    try:
+        result = poke.scan_for_events()
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Poke scan failed: {exc}") from exc
+    return {"scanned": True, "poke": result}

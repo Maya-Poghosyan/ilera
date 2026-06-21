@@ -76,6 +76,26 @@ Then open http://localhost:3000 → **Start intake** → eligibility results →
 | POST | `/api/eligibility/{id}` | run routing + specialists, return ranked results |
 | POST | `/api/rag/search` | semantic search over program docs |
 | GET | `/api/forms/{program}/{id}` | resolved PDF fields + what's still missing |
+| GET | `/api/reminders` | list all scheduled reminders |
+| POST | `/api/reminders` | create a new reminder |
+| GET | `/api/reminders/templates` | built-in reminder templates (care-log, IHSS, Medi-Cal, PFL, appointment) |
+| GET | `/api/reminders/{id}` | get a single reminder |
+| PATCH | `/api/reminders/{id}` | update a reminder |
+| DELETE | `/api/reminders/{id}` | delete a reminder |
+| POST | `/api/reminders/{id}/run-now` | immediately fire a reminder via Poke |
+| POST | `/api/reminders/send` | send an ad-hoc message via Poke |
+
+## Poke integration
+
+Ilera uses [Poke](https://poke.com) to deliver caregiver reminders into the user's
+chat (iMessage, WhatsApp, Telegram, RCS). Set `POKE_API_KEY` in `backend/.env`.
+
+**Features:**
+- Schedule recurring (daily/weekly) or one-off reminders via the dashboard Reminders page.
+- Built-in templates: daily care-log check-in, IHSS timesheet, Medi-Cal renewal, PFL weekly cert, appointment.
+- One-click "Enable Daily Care Log" that sends an end-of-day prompt asking about hours, meals, meds, mood.
+- Lightweight asyncio scheduler fires due reminders every 30 seconds.
+- All endpoints and the scheduler gracefully no-op if `POKE_API_KEY` is not set.
 
 ## Next steps (wiring real services)
 
@@ -84,7 +104,8 @@ Then open http://localhost:3000 → **Start intake** → eligibility results →
 - **LLM:** set `OPENAI_API_KEY` (real embeddings) and/or `ANTHROPIC_API_KEY`; replace
   heuristic `assess()` bodies in `app/agents/specialists.py` with grounded LLM calls.
 - **Band:** connect `app/agents/band_space.py` to a real Band shared space.
-- **Poke / Browserbase:** wire SMS reminders, email→calendar, and IHSS portal automation.
+- **Poke:** `POKE_API_KEY` is now wired — reminders are delivered. See the Poke section above.
+- **Browserbase:** wire IHSS portal automation.
 - **Forms:** drop fillable government PDFs into `backend/data/` and fill out the field-map JSONs.
 - Run `npx skills add redis/agent-skills` so AI writes Redis code the Redis-expert way.
 ```

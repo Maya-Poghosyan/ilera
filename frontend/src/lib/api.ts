@@ -1,4 +1,4 @@
-import type { CaseProfile, EligibilityResponse } from "./types";
+import type { CaseProfile, EligibilityResponse, Reminder, ReminderCreate, ReminderUpdate, ReminderTemplates } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -26,4 +26,57 @@ export function determineEligibility(caseId: string): Promise<EligibilityRespons
 
 export function getCase(caseId: string): Promise<CaseProfile> {
   return request<CaseProfile>(`/api/case/${caseId}`);
+}
+
+// ---------------------------------------------------------------------------
+// Reminders
+// ---------------------------------------------------------------------------
+
+export function listReminders(): Promise<Reminder[]> {
+  return request<Reminder[]>("/api/reminders");
+}
+
+export function createReminder(body: ReminderCreate): Promise<Reminder> {
+  return request<Reminder>("/api/reminders", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function getReminder(id: string): Promise<Reminder> {
+  return request<Reminder>(`/api/reminders/${id}`);
+}
+
+export function updateReminder(id: string, body: ReminderUpdate): Promise<Reminder> {
+  return request<Reminder>(`/api/reminders/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export function deleteReminder(id: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/api/reminders/${id}`, { method: "DELETE" });
+}
+
+export function runReminderNow(id: string): Promise<{ sent: boolean; poke: unknown }> {
+  return request<{ sent: boolean; poke: unknown }>(`/api/reminders/${id}/run-now`, { method: "POST" });
+}
+
+export function sendTestMessage(message: string): Promise<{ sent: boolean; poke: unknown }> {
+  return request<{ sent: boolean; poke: unknown }>("/api/reminders/send", {
+    method: "POST",
+    body: JSON.stringify({ message }),
+  });
+}
+
+export function getReminderTemplates(): Promise<ReminderTemplates> {
+  return request<ReminderTemplates>("/api/reminders/templates");
+}
+
+// ---------------------------------------------------------------------------
+// Poke scanning
+// ---------------------------------------------------------------------------
+
+export function scanForEvents(): Promise<{ scanned: boolean; poke: unknown }> {
+  return request<{ scanned: boolean; poke: unknown }>("/api/poke/scan", { method: "POST" });
 }
