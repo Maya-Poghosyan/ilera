@@ -14,6 +14,7 @@ from .agents.routing import run_routing
 from .config import get_settings
 from .forms.filler import fill_pdf, list_schemas, resolve_fields
 from .integrations import poke
+from .mcp_server import mcp as mcp_server
 from .models import CaseProfile, EligibilityResult, FollowupQuestion, InteractionNote
 from .rag.embeddings import provider as embedding_provider
 from .rag.index import get_index, rebuild_index
@@ -30,6 +31,11 @@ from .reminders import (
     save_reminder,
 )
 from .store import get_profile, save_profile
+from .suggested_events import (
+    SuggestedEvent,
+    delete_suggested_event,
+    list_suggested_events,
+)
 
 logger = logging.getLogger("ilera.scheduler")
 
@@ -100,6 +106,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount MCP server for Poke integration (SSE transport at /mcp)
+app.mount("/mcp", mcp_server.sse_app())
 
 
 @app.get("/health")
@@ -356,3 +365,20 @@ def poke_scan_events() -> dict:
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Poke scan failed: {exc}") from exc
     return {"scanned": True, "poke": result}
+
+
+# ---------------------------------------------------------------------------
+# Suggested events (created by Poke via MCP or manually)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/suggested-events")
+def api_list_suggested_events() -> list[SuggestedEvent]:
+    return list_suggested_events()
+
+
+@app.delete("/api/suggested-events/{event_id}")
+def api_delete_suggested_event(event_id: str) -> dict:
+    if not delete_suggested_event(event_id):
+        raise HTTPException(status_code=404, detail="suggested event not found")
+    return {"deleted": True}
