@@ -1,8 +1,8 @@
-"""Embeddings with a deterministic local fallback.
+"""Embeddings with three tiers, in priority order:
 
-When an OpenAI key is set we use the real embedding model. Otherwise we fall back to a
-hashed bag-of-words vector so RAG works end-to-end during development without keys.
-The fallback is NOT semantically strong; set OPENAI_API_KEY for real retrieval.
+1. OpenAI (if OPENAI_API_KEY set) — strongest, hosted.
+2. fastembed (local ONNX model, no API key) — good semantic quality, default.
+3. Hashed bag-of-words — last-resort fallback if fastembed can't load.
 """
 
 import hashlib
@@ -11,6 +11,7 @@ import re
 from ..config import get_settings
 
 FALLBACK_DIM = 256
+_fastembed_model = None
 
 
 def _tokenize(text: str) -> list[str]:
@@ -26,15 +27,39 @@ def _fallback_embed(text: str) -> list[float]:
     return [v / norm for v in vec]
 
 
+def _get_fastembed():
+    global _fastembed_model
+    if _fastembed_model is None:
+        from fastembed import TextEmbedding
+
+        _fastembed_model = TextEmbedding(model_name=get_settings().fastembed_model)
+    return _fastembed_model
+
+
+def provider() -> str:
+    s = get_settings()
+    if s.openai_api_key:
+        return "openai"
+    try:
+        _get_fastembed()
+        return "fastembed"
+    except Exception:
+        return "hash"
+
+
 def embed(texts: list[str]) -> list[list[float]]:
-    settings = get_settings()
-    if settings.openai_api_key:
+    s = get_settings()
+    if s.openai_api_key:
         from openai import OpenAI
 
-        client = OpenAI(api_key=settings.openai_api_key)
-        resp = client.embeddings.create(model=settings.embedding_model, input=texts)
+        client = OpenAI(api_key=s.openai_api_key)
+        resp = client.embeddings.create(model=s.embedding_model, input=texts)
         return [d.embedding for d in resp.data]
-    return [_fallback_embed(t) for t in texts]
+    try:
+        model = _get_fastembed()
+        return [v.tolist() for v in model.embed(texts)]
+    except Exception:
+        return [_fallback_embed(t) for t in texts]
 
 
 def embed_one(text: str) -> list[float]:
@@ -42,8 +67,9 @@ def embed_one(text: str) -> list[float]:
 
 
 def dim() -> int:
-    settings = get_settings()
-    if settings.openai_api_key:
-        # text-embedding-3-small default dimensionality
+    p = provider()
+    if p == "openai":
         return 1536
+    if p == "fastembed":
+        return 384  # BAAI/bge-small-en-v1.5
     return FALLBACK_DIM

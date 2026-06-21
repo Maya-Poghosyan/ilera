@@ -7,7 +7,9 @@ from pydantic import BaseModel
 from .agents.routing import run_routing
 from .config import get_settings
 from .forms.filler import resolve_fields
+from .integrations import poke
 from .models import CaseProfile, EligibilityResult, FollowupQuestion
+from .rag.embeddings import provider as embedding_provider
 from .rag.index import get_index
 from .store import get_profile, save_profile
 
@@ -25,11 +27,15 @@ app.add_middleware(
 
 @app.get("/health")
 def health() -> dict:
+    index = get_index()
     return {
         "status": "ok",
         "redis": settings.has_redis,
         "llm": settings.has_llm,
-        "rag_chunks": get_index().size,
+        "poke": poke.available(),
+        "embeddings": embedding_provider(),
+        "rag_backend": index.backend,
+        "rag_chunks": index.size,
     }
 
 
@@ -97,3 +103,18 @@ def form_fields(program: str, case_id: str) -> dict:
     if profile is None:
         raise HTTPException(status_code=404, detail="case not found")
     return resolve_fields(program, profile)
+
+
+class ReminderRequest(BaseModel):
+    message: str
+
+
+@app.post("/api/reminders/send")
+def send_reminder(req: ReminderRequest) -> dict:
+    if not poke.available():
+        raise HTTPException(status_code=400, detail="POKE_API_KEY not configured")
+    try:
+        result = poke.send_message(req.message)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Poke send failed: {exc}") from exc
+    return {"sent": True, "poke": result}

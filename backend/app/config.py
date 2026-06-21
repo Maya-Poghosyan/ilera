@@ -18,8 +18,12 @@ class Settings(BaseSettings):
     # LLM
     llm_provider: str = "anthropic"  # "anthropic" | "openai"
     anthropic_api_key: str = ""
+    anthropic_model: str = "claude-sonnet-4-5-20250929"
     openai_api_key: str = ""
+    openai_model: str = "gpt-4o-mini"
     embedding_model: str = "text-embedding-3-small"
+    # Local embedding model used when no OpenAI key is set (fastembed / ONNX, no API needed).
+    fastembed_model: str = "BAAI/bge-small-en-v1.5"
 
     # Multi-agent (Band)
     band_api_key: str = ""

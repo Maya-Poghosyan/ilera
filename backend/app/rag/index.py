@@ -1,8 +1,8 @@
 """RAG index over official program documentation.
 
-Uses Redis (via raw redis-py vector ops kept simple) when configured, otherwise an
-in-memory cosine index so retrieval works without infrastructure. For production-grade
-indexing, replace the in-memory path with RedisVL's SearchIndex + HNSW schema.
+Two backends with the same interface:
+- RedisVLIndex: vectors stored in Redis, KNN via RediSearch (used when REDIS_URL is set).
+- RagIndex: in-memory cosine fallback (no infrastructure needed).
 """
 
 import glob
@@ -10,10 +10,12 @@ import os
 from dataclasses import dataclass, field
 
 from ..config import get_settings
-from .embeddings import embed, embed_one
+from .embeddings import dim, embed, embed_one
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "program_docs")
 CHUNK_CHARS = 800
+INDEX_NAME = "ilera_docs"
+KEY_PREFIX = "ilera:doc"
 
 
 @dataclass
@@ -33,56 +35,24 @@ class Retrieved:
     score: float
 
 
-class RagIndex:
-    """Minimal vector index. Swap for RedisVL SearchIndex when scaling up."""
-
-    def __init__(self) -> None:
-        self._chunks: list[Chunk] = []
-
-    @property
-    def size(self) -> int:
-        return len(self._chunks)
-
-    def _load_docs(self) -> list[Chunk]:
-        chunks: list[Chunk] = []
-        for path in glob.glob(os.path.join(DATA_DIR, "*.txt")):
-            program = os.path.splitext(os.path.basename(path))[0]
-            with open(path, encoding="utf-8") as fh:
-                text = fh.read()
-            for i in range(0, len(text), CHUNK_CHARS):
-                piece = text[i : i + CHUNK_CHARS].strip()
-                if piece:
-                    chunks.append(
-                        Chunk(
-                            id=f"{program}:{i}",
-                            program=program,
-                            text=piece,
-                            source=os.path.basename(path),
-                        )
+def load_chunks() -> list[Chunk]:
+    chunks: list[Chunk] = []
+    for path in glob.glob(os.path.join(DATA_DIR, "*.txt")):
+        program = os.path.splitext(os.path.basename(path))[0]
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        for i in range(0, len(text), CHUNK_CHARS):
+            piece = text[i : i + CHUNK_CHARS].strip()
+            if piece:
+                chunks.append(
+                    Chunk(
+                        id=f"{program}:{i}",
+                        program=program,
+                        text=piece,
+                        source=os.path.basename(path),
                     )
-        return chunks
-
-    def build(self) -> int:
-        chunks = self._load_docs()
-        if chunks:
-            vectors = embed([c.text for c in chunks])
-            for c, v in zip(chunks, vectors):
-                c.vector = v
-        self._chunks = chunks
-        return len(chunks)
-
-    def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
-        if not self._chunks:
-            return []
-        qv = embed_one(query)
-        results: list[Retrieved] = []
-        for c in self._chunks:
-            if program and c.program != program:
-                continue
-            score = _cosine(qv, c.vector)
-            results.append(Retrieved(text=c.text, program=c.program, source=c.source, score=score))
-        results.sort(key=lambda r: r.score, reverse=True)
-        return results[:k]
+                )
+    return chunks
 
 
 def _cosine(a: list[float], b: list[float]) -> float:
@@ -94,12 +64,144 @@ def _cosine(a: list[float], b: list[float]) -> float:
     return dot / (na * nb)
 
 
-_index: RagIndex | None = None
+class RagIndex:
+    """In-memory vector index."""
+
+    backend = "memory"
+
+    def __init__(self) -> None:
+        self._chunks: list[Chunk] = []
+
+    @property
+    def size(self) -> int:
+        return len(self._chunks)
+
+    def build(self) -> int:
+        chunks = load_chunks()
+        if chunks:
+            for c, v in zip(chunks, embed([c.text for c in chunks])):
+                c.vector = v
+        self._chunks = chunks
+        return len(chunks)
+
+    def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
+        if not self._chunks:
+            return []
+        qv = embed_one(query)
+        results = [
+            Retrieved(text=c.text, program=c.program, source=c.source, score=_cosine(qv, c.vector))
+            for c in self._chunks
+            if not program or c.program == program
+        ]
+        results.sort(key=lambda r: r.score, reverse=True)
+        return results[:k]
 
 
-def get_index() -> RagIndex:
+class RedisVLIndex:
+    """Vectors stored in Redis; KNN via RediSearch (the 'Best Use of Redis' path)."""
+
+    backend = "redis"
+
+    def __init__(self, redis_url: str) -> None:
+        from redisvl.index import SearchIndex
+        from redisvl.schema import IndexSchema
+
+        self._dim = dim()
+        schema = IndexSchema.from_dict(
+            {
+                "index": {"name": INDEX_NAME, "prefix": KEY_PREFIX, "storage_type": "hash"},
+                "fields": [
+                    {"name": "program", "type": "tag"},
+                    {"name": "source", "type": "text"},
+                    {"name": "text", "type": "text"},
+                    {
+                        "name": "vector",
+                        "type": "vector",
+                        "attrs": {
+                            "dims": self._dim,
+                            "distance_metric": "cosine",
+                            "algorithm": "hnsw",
+                            "datatype": "float32",
+                        },
+                    },
+                ],
+            }
+        )
+        self._index = SearchIndex(schema, redis_url=redis_url)
+        self._size = 0
+
+    @property
+    def size(self) -> int:
+        return self._size
+
+    def build(self) -> int:
+        from redisvl.redis.utils import array_to_buffer
+
+        chunks = load_chunks()
+        self._index.create(overwrite=True, drop=True)
+        if chunks:
+            vectors = embed([c.text for c in chunks])
+            data = [
+                {
+                    "id": c.id,
+                    "program": c.program,
+                    "source": c.source,
+                    "text": c.text,
+                    "vector": array_to_buffer(v, dtype="float32"),
+                }
+                for c, v in zip(chunks, vectors)
+            ]
+            self._index.load(data, id_field="id")
+        self._size = len(chunks)
+        return self._size
+
+    def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
+        from redisvl.query import VectorQuery
+        from redisvl.query.filter import Tag
+
+        qv = embed_one(query)
+        vq = VectorQuery(
+            vector=qv,
+            vector_field_name="vector",
+            return_fields=["program", "source", "text"],
+            num_results=k,
+            dtype="float32",
+        )
+        if program:
+            vq.set_filter(Tag("program") == program)
+        rows = self._index.query(vq)
+        out: list[Retrieved] = []
+        for r in rows:
+            # redisvl returns cosine distance; convert to similarity.
+            dist = float(r.get("vector_distance", 0.0))
+            out.append(
+                Retrieved(
+                    text=r.get("text", ""),
+                    program=r.get("program", ""),
+                    source=r.get("source", ""),
+                    score=1.0 - dist,
+                )
+            )
+        return out
+
+
+_index = None
+
+
+def get_index():
     global _index
-    if _index is None:
-        _index = RagIndex()
-        _index.build()
+    if _index is not None:
+        return _index
+    settings = get_settings()
+    if settings.has_redis:
+        try:
+            idx = RedisVLIndex(settings.redis_url)
+            idx.build()
+            _index = idx
+            return _index
+        except Exception:
+            pass  # fall back to in-memory if Redis/RediSearch unavailable
+    idx = RagIndex()
+    idx.build()
+    _index = idx
     return _index

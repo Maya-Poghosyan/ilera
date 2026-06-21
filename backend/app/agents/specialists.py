@@ -1,7 +1,7 @@
 """Specialist agents for individual benefit programs.
 
-Heuristics are intentionally simple and transparent for the hackathon demo. Replace the
-bodies of `assess` with grounded LLM reasoning (using `self.retrieve(...)`) as you go.
+When an LLM key is configured, `SpecialistAgent.assess` uses grounded Claude reasoning
+(see base.py). These `_heuristic_assess` bodies are the transparent no-key fallback.
 """
 
 from ..models import CaseProfile, EligibilityResult, FollowupQuestion
@@ -12,7 +12,7 @@ class IHSSAgent(SpecialistAgent):
     program = "IHSS"
     doc_key = "ihss"
 
-    def assess(self, profile: CaseProfile) -> EligibilityResult:
+    def _heuristic_assess(self, profile: CaseProfile) -> EligibilityResult:
         cr = profile.care_recipient
         on_medical = cr.insurance == "medi-cal"
         confidence = 0.7 if on_medical else 0.35
@@ -46,7 +46,7 @@ class MediCalAgent(SpecialistAgent):
     program = "Medi-Cal"
     doc_key = "medical"
 
-    def assess(self, profile: CaseProfile) -> EligibilityResult:
+    def _heuristic_assess(self, profile: CaseProfile) -> EligibilityResult:
         hh = profile.household
         income = hh.income_monthly
         if income is None:
@@ -81,7 +81,7 @@ class PaidFamilyLeaveAgent(SpecialistAgent):
     program = "Paid Family Leave"
     doc_key = "pfl"
 
-    def assess(self, profile: CaseProfile) -> EligibilityResult:
+    def _heuristic_assess(self, profile: CaseProfile) -> EligibilityResult:
         cg = profile.caregiver
         employed = "employ" in cg.employment_status.lower() or cg.employment_status.lower() in {"full-time", "part-time", "w2"}
         confidence = 0.7 if employed else 0.3
@@ -112,7 +112,7 @@ class VAAgent(SpecialistAgent):
     program = "VA Caregiver Support"
     doc_key = "va"
 
-    def assess(self, profile: CaseProfile) -> EligibilityResult:
+    def _heuristic_assess(self, profile: CaseProfile) -> EligibilityResult:
         veteran = profile.care_recipient.veteran
         confidence = 0.65 if veteran else 0.05
         status = "possible" if veteran else "unlikely"
