@@ -58,14 +58,14 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="space-y-3">
         <div>
           <h1 className="text-2xl font-bold">Care Calendar</h1>
           <p className="text-sm text-muted-foreground">
-            Agents can scan email (via Poke) to auto-create events and text reminders.
+            Agents can scan email to auto-create events and text reminders.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm">+ Appointment</Button>
           <Button variant="outline" size="sm">+ Visit</Button>
           <Button variant="outline" size="sm">+ Deadline</Button>
