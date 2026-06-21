@@ -1,0 +1,15 @@
+{
+  "agency": "CDSS",
+  "program": "IHSS-Provider",
+  "form_id": "SOC-838",
+  "title": "Assignment of Authorized Hours to Providers",
+  "source_url": "https://www.cdss.ca.gov/Portals/9/Additional-Resources/Forms-and-Brochures/2020/Q-T/SOC838.pdf?ver=2024-02-23-160642-763",
+  "source_type": "pdf",
+  "policy": "HOST_CONDITIONAL",
+  "status": "downloaded",
+  "resolved_url": "https://www.cdss.ca.gov/Portals/9/Additional-Resources/Forms-and-Brochures/2020/Q-T/SOC838.pdf?ver=2024-02-23-160642-763",
+  "downloaded_at": "2026-06-21T16:05:38.055802+00:00",
+  "sha256": "84d46177de18e25b5da65ddba53112b93ef9c3877b8d612f67b88812195b83e1",
+  "bytes": 159174,
+  "local_path": "benefits_forms/CDSS/IHSS-Provider/SOC-838_2026-06-21_84d46177de.pdf"
+}
