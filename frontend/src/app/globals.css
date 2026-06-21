@@ -35,6 +35,10 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-subtle: var(--brand-subtle);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -49,72 +53,108 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /* Ilera design tokens — calm, trustworthy, healthcare-grade.
+     Palette: white backgrounds, light-gray surfaces, mature dark (forest) green accent. */
+
+  /* Brand greens */
+  --brand: #1e3d2f;          /* primary forest green */
+  --brand-hover: #24503b;    /* slightly lifted green */
+  --brand-foreground: #ffffff;
+  --brand-subtle: #eaf1ed;   /* faint green tint for surfaces/badges */
+
+  /* Neutrals */
+  --background: #ffffff;
+  --foreground: #1a211d;     /* near-black, slightly green */
+  --card: #ffffff;
+  --card-foreground: #1a211d;
+  --popover: #ffffff;
+  --popover-foreground: #1a211d;
+
+  /* Primary = brand green */
+  --primary: #1e3d2f;
+  --primary-foreground: #ffffff;
+  --primary-hover: #3a6b4f;  /* lighter green for hovers */
+
+  /* Light-gray surfaces */
+  --secondary: #eef1ef;
+  --secondary-foreground: #1a211d;
+  --muted: #f5f6f5;
+  --muted-foreground: #5f6b64;  /* muted text, AA on white */
+  --accent: #eaf1ed;            /* green-tinted accent surface */
+  --accent-foreground: #1e3d2f;
+
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --border: #e2e6e3;
+  --input: #e2e6e3;
+  --ring: #3a6b4f;
+
+  /* Charts — graduated greens */
+  --chart-1: #1e3d2f;
+  --chart-2: #3a6b4f;
+  --chart-3: #5b8d70;
+  --chart-4: #8bb39c;
+  --chart-5: #c2d6cb;
+
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Fonts (wired to the Geist variables set in layout.tsx) */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+
+  /* Sidebar — light-gray surface with green accents */
+  --sidebar: #f5f6f5;
+  --sidebar-foreground: #1a211d;
+  --sidebar-primary: #1e3d2f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eaf1ed;
+  --sidebar-accent-foreground: #1e3d2f;
+  --sidebar-border: #e2e6e3;
+  --sidebar-ring: #3a6b4f;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --brand: #4f8a6a;
+  --brand-hover: #5b9a78;
+  --brand-foreground: #0d1612;
+  --brand-subtle: #182b22;
+
+  --background: #0f1713;
+  --foreground: #eef2ef;
+  --card: #15201a;
+  --card-foreground: #eef2ef;
+  --popover: #15201a;
+  --popover-foreground: #eef2ef;
+
+  --primary: #6aa886;
+  --primary-foreground: #0d1612;
+  --primary-hover: #7cba98;
+
+  --secondary: #1b271f;
+  --secondary-foreground: #eef2ef;
+  --muted: #1b271f;
+  --muted-foreground: #9fb0a6;
+  --accent: #1f3329;
+  --accent-foreground: #cfe4d7;
+
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --ring: #4f8a6a;
+
+  --chart-1: #6aa886;
+  --chart-2: #4f8a6a;
+  --chart-3: #3a6b4f;
+  --chart-4: #2c5340;
+  --chart-5: #1e3d2f;
+
+  --sidebar: #15201a;
+  --sidebar-foreground: #eef2ef;
+  --sidebar-primary: #6aa886;
+  --sidebar-primary-foreground: #0d1612;
+  --sidebar-accent: #1f3329;
+  --sidebar-accent-foreground: #cfe4d7;
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: #4f8a6a;
 }
 
 @layer base {
@@ -123,8 +163,23 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
   html {
     @apply font-sans;
+  }
+  ::selection {
+    background-color: var(--brand-subtle);
+    color: var(--brand);
+  }
+}
+
+@layer components {
+  /* Ilera wordmark — dark green logotype */
+  .ilera-wordmark {
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--brand);
   }
 }

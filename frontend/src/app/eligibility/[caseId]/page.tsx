@@ -3,17 +3,19 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Logo } from "@/components/logo";
 import { determineEligibility } from "@/lib/api";
 import type { EligibilityResponse, EligibilityStatus } from "@/lib/types";
 
 const statusColor: Record<EligibilityStatus, string> = {
-  likely: "bg-green-100 text-green-800",
-  possible: "bg-yellow-100 text-yellow-800",
-  unlikely: "bg-red-100 text-red-700",
-  needs_info: "bg-blue-100 text-blue-800",
+  likely: "border-transparent bg-brand-subtle text-primary",
+  possible: "border-transparent bg-amber-100 text-amber-800",
+  unlikely: "border-transparent bg-rose-50 text-rose-700",
+  needs_info: "border-transparent bg-slate-100 text-slate-700",
 };
 
 export default function EligibilityPage() {
@@ -36,7 +38,7 @@ export default function EligibilityPage() {
   if (!data) {
     return (
       <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-foreground" />
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
         <h1 className="text-xl font-semibold">Determining eligibility…</h1>
         <p className="text-sm text-muted-foreground">
           The routing agent is activating specialist agents and grounding their answers in
@@ -47,9 +49,18 @@ export default function EligibilityPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-6 py-12">
+    <>
+      <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
+        <div className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between px-6">
+          <Logo />
+          <Button variant="outline" size="sm" render={<Link href="/intake" />}>
+            Edit intake
+          </Button>
+        </div>
+      </header>
+      <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-6 py-12">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold">Your benefits strategy</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Your benefits strategy</h1>
         <p className="text-sm text-muted-foreground">Ranked by eligibility confidence.</p>
       </div>
 
@@ -72,9 +83,9 @@ export default function EligibilityPage() {
         {data.results.map((r) => (
           <Card key={r.program}>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">{r.program}</CardTitle>
+              <CardTitle className="text-lg text-primary">{r.program}</CardTitle>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm font-medium tabular-nums text-muted-foreground">
                   {Math.round(r.confidence * 100)}%
                 </span>
                 <Badge className={statusColor[r.status]}>{r.status.replace("_", " ")}</Badge>
@@ -113,8 +124,12 @@ export default function EligibilityPage() {
         </Card>
       )}
 
-      <Button render={<Link href="/dashboard" />}>Continue to dashboard</Button>
-    </main>
+      <Button render={<Link href="/dashboard" />}>
+        Continue to dashboard
+        <ArrowRight />
+      </Button>
+      </main>
+    </>
   );
 }
 
