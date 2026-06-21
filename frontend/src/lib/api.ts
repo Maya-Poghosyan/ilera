@@ -82,6 +82,28 @@ export function scanForEvents(): Promise<{ scanned: boolean; poke: unknown }> {
 }
 
 // ---------------------------------------------------------------------------
+// Suggested events (from Poke MCP)
+// ---------------------------------------------------------------------------
+
+export type SuggestedEventAPI = {
+  id: string;
+  day: number;
+  title: string;
+  time?: string;
+  kind: string;
+  description?: string;
+  source: string;
+};
+
+export function listSuggestedEvents(): Promise<SuggestedEventAPI[]> {
+  return request<SuggestedEventAPI[]>("/api/suggested-events");
+}
+
+export function deleteSuggestedEvent(id: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/api/suggested-events/${id}`, { method: "DELETE" });
+}
+
+// ---------------------------------------------------------------------------
 // Forms
 // ---------------------------------------------------------------------------
 

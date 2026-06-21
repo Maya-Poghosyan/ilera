@@ -12,10 +12,13 @@ import { cn } from "@/lib/utils";
 import {
   createReminder,
   deleteReminder,
+  deleteSuggestedEvent,
   listReminders,
+  listSuggestedEvents,
   runReminderNow,
   updateReminder,
 } from "@/lib/api";
+import type { SuggestedEventAPI } from "@/lib/api";
 import type {
   Reminder,
   ReminderCreate,
@@ -30,6 +33,7 @@ import type {
 type EventKind = "Appointment" | "Visit" | "Deadline";
 
 type CalEvent = {
+  id?: string;
   day: number;
   title: string;
   time?: string;
@@ -52,6 +56,18 @@ const STATIC_SUGGESTED: CalEvent[] = [
   { day: 24, title: "Pharmacy refill pickup", time: "9:00 AM", kind: "Appointment", suggested: true, description: "Found in email from CVS \u2014 prescription #4021 ready for pickup at Main St location." },
   { day: 28, title: "IHSS pay stub review", kind: "Deadline", suggested: true, description: "IHSS direct deposit scheduled for Jun 28. Review hours logged against pay stub." },
 ];
+
+function apiEventToCalEvent(e: SuggestedEventAPI): CalEvent {
+  return {
+    id: e.id,
+    day: e.day,
+    title: e.title,
+    time: e.time,
+    kind: (e.kind as EventKind) || "Appointment",
+    suggested: true,
+    description: e.description,
+  };
+}
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -105,6 +121,7 @@ export default function CalendarPage() {
   const cells = buildCells();
 
   const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [apiSuggested, setApiSuggested] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -134,9 +151,19 @@ export default function CalendarPage() {
     }
   }, []);
 
+  const loadSuggestedEvents = useCallback(async () => {
+    try {
+      const data = await listSuggestedEvents();
+      setApiSuggested(data.map(apiEventToCalEvent));
+    } catch {
+      // API may not be running
+    }
+  }, []);
+
   useEffect(() => {
     loadReminders();
-  }, [loadReminders]);
+    loadSuggestedEvents();
+  }, [loadReminders, loadSuggestedEvents]);
 
   const resetForm = () => {
     setFormKind("custom");
@@ -239,7 +266,19 @@ export default function CalendarPage() {
   };
 
   // Combine all events for the calendar grid
-  const allEvents = [...events, ...STATIC_SUGGESTED];
+  const allSuggested = [...STATIC_SUGGESTED, ...apiSuggested];
+  const allEvents = [...events, ...allSuggested];
+
+  const handleDismissSuggested = async (e: CalEvent) => {
+    if (e.id) {
+      try {
+        await deleteSuggestedEvent(e.id);
+        await loadSuggestedEvents();
+      } catch {
+        // ignore
+      }
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -393,7 +432,7 @@ export default function CalendarPage() {
       )}
 
       {/* Suggested Events panel */}
-      {STATIC_SUGGESTED.length > 0 && (
+      {allSuggested.length > 0 && (
         <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="size-4" />
@@ -403,9 +442,9 @@ export default function CalendarPage() {
             Detected from recent emails and documents. Accept to add to your calendar.
           </p>
           <div className="space-y-2">
-            {STATIC_SUGGESTED.map((e, idx) => (
+            {allSuggested.map((e, idx) => (
               <div
-                key={`suggested-${idx}`}
+                key={e.id ?? `suggested-${idx}`}
                 className="flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-white px-3 py-2.5"
               >
                 <div className="min-w-0 flex-1 space-y-1">
@@ -429,6 +468,7 @@ export default function CalendarPage() {
                   <button
                     className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-muted-foreground hover:bg-red-100 hover:text-red-600 transition-colors"
                     aria-label="Dismiss"
+                    onClick={() => handleDismissSuggested(e)}
                   >
                     <X className="size-3.5" />
                   </button>
