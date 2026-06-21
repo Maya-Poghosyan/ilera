@@ -45,9 +45,8 @@ export default function Home() {
       </header>
 
       <section className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center gap-6 px-6 py-24 text-center">
-        <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Benefits navigation that{" "}
-          <span className="text-primary">works for caregivers</span>
+        <h1 className="text-balance text-4xl font-bold tracking-tight text-primary sm:text-5xl">
+          Benefits navigation that works for caregivers
         </h1>
         <p className="max-w-xl text-pretty text-lg text-muted-foreground">
           Unpaid caregivers spend hours navigating fragmented benefits programs. Ilera finds
