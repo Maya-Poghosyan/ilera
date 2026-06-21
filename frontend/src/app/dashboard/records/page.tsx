@@ -223,7 +223,7 @@ export default function RecordsPage() {
                 href="https://www.etimesheets.ihss.ca.gov"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-serif text-sm text-black underline hover:text-black/70"
+                className="inline-flex items-center gap-1 text-sm text-black underline hover:text-black/70" style={{ fontFamily: "Manrope, sans-serif" }}
               >
                 Submit timesheet to IHSS portal
                 <ExternalLink className="size-3.5" />
