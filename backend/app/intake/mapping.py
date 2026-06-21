@@ -88,7 +88,44 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
     cg = profile.caregiver
     hh = profile.household
 
-    # --- care recipient -----------------------------------------------------
+    # --- care recipient personal info ----------------------------------------
+    first = a.get("recipient.legal_first_name", "")
+    last = a.get("recipient.legal_last_name", "")
+    full_name = f"{first} {last}".strip()
+    if full_name:
+        cr.name = full_name
+    elif a.get("recipient.preferred_name"):
+        cr.name = str(a["recipient.preferred_name"])
+
+    dob = a.get("recipient.date_of_birth")
+    if dob:
+        cr.date_of_birth = str(dob)
+
+    gender = a.get("recipient.gender")
+    if gender and gender != "Prefer not to answer":
+        cr.gender = str(gender).lower()
+
+    phone = a.get("recipient.phone")
+    if phone:
+        cr.phone = str(phone)
+
+    email = a.get("recipient.email")
+    if email:
+        cr.email = str(email)
+
+    street = a.get("recipient.address.street")
+    if street:
+        cr.street_address = str(street)
+
+    city = a.get("recipient.address.city")
+    if city:
+        cr.city = str(city)
+
+    zip_code = a.get("recipient.address.zip")
+    if zip_code:
+        cr.zip_code = str(zip_code)
+
+    # --- care recipient medical/eligibility -----------------------------------
     age = _int(a.get("recipient.age"))
     if age is not None:
         cr.age = age
@@ -124,6 +161,20 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
         cr.care_needs = care_needs
 
     # --- caregiver ----------------------------------------------------------
+    cg_first = a.get("caregiver.legal_first_name", "")
+    cg_last = a.get("caregiver.legal_last_name", "")
+    cg_full = f"{cg_first} {cg_last}".strip()
+    if cg_full:
+        cg.name = cg_full
+
+    cg_phone = a.get("caregiver.phone")
+    if cg_phone:
+        cg.phone = str(cg_phone)
+
+    cg_address = a.get("caregiver.address")
+    if cg_address:
+        cg.address = str(cg_address)
+
     relationship = a.get("caregiver.relationship")
     if relationship:
         cg.relationship = str(relationship)

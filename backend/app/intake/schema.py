@@ -899,6 +899,92 @@ SCREENS: list[dict] = [
             ),
         ],
     },
+    {
+        "id": "screen_10",
+        "title": "Contact and personal information",
+        "intro_text": "We need a few details to pre-fill your benefit applications. This saves you from typing the same information into every form.",
+        "questions": [
+            q(
+                "recipient.legal_first_name",
+                "What is [recipient name]'s legal first name?",
+                "short_text",
+                True,
+            ),
+            q(
+                "recipient.legal_last_name",
+                "What is [recipient name]'s legal last name?",
+                "short_text",
+                True,
+            ),
+            q(
+                "recipient.date_of_birth",
+                "What is [recipient name]'s date of birth?",
+                "date",
+                True,
+            ),
+            q(
+                "recipient.gender",
+                "What is [recipient name]'s gender?",
+                "single_select",
+                False,
+                options=["Male", "Female", "Non-binary", "Prefer not to answer"],
+                allow_prefer_not_to_answer=True,
+            ),
+            q(
+                "recipient.phone",
+                "What is [recipient name]'s phone number?",
+                "short_text",
+                False,
+            ),
+            q(
+                "recipient.email",
+                "What is [recipient name]'s email address?",
+                "short_text",
+                False,
+            ),
+            q(
+                "recipient.address.street",
+                "What is [recipient name]'s street address?",
+                "short_text",
+                True,
+            ),
+            q(
+                "recipient.address.city",
+                "City",
+                "short_text",
+                True,
+            ),
+            q(
+                "caregiver.legal_first_name",
+                "What is the caregiver's legal first name?",
+                "short_text",
+                True,
+                show_when=IS_CAREGIVER,
+            ),
+            q(
+                "caregiver.legal_last_name",
+                "What is the caregiver's legal last name?",
+                "short_text",
+                True,
+                show_when=IS_CAREGIVER,
+            ),
+            q(
+                "caregiver.phone",
+                "What is the caregiver's phone number?",
+                "short_text",
+                False,
+                show_when=IS_CAREGIVER,
+            ),
+            q(
+                "caregiver.address",
+                "What is the caregiver's home address?",
+                "short_text",
+                False,
+                show_when=IS_CAREGIVER,
+                helper_text="Only needed if different from the care recipient's address.",
+            ),
+        ],
+    },
 ]
 
 
