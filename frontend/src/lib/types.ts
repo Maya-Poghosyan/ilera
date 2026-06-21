@@ -113,12 +113,18 @@ export type ReminderTemplates = Record<string, {
 // Records & Renewal
 // ---------------------------------------------------------------------------
 
+export type ServiceType = "personal_care" | "domestic" | "paramedical" | "accompaniment";
+
 export interface TimekeepingEntry {
   id: string;
   case_id: string;
   date: string;
   hours: number;
+  start_time: string | null;
+  end_time: string | null;
+  service_type: ServiceType;
   tasks: string[];
+  notes: string;
   created_at: string;
 }
 
@@ -126,7 +132,11 @@ export interface TimekeepingCreate {
   case_id: string;
   date: string;
   hours: number;
+  start_time?: string;
+  end_time?: string;
+  service_type?: ServiceType;
   tasks: string[];
+  notes?: string;
 }
 
 export interface JournalEntry {

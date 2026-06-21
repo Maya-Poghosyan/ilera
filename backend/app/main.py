@@ -381,7 +381,11 @@ class TimekeepingCreate(BaseModel):
     case_id: str
     date: str
     hours: float
+    start_time: Optional[str] = None
+    end_time: Optional[str] = None
+    service_type: str = "personal_care"
     tasks: list[str] = []
+    notes: str = ""
 
 
 class JournalCreate(BaseModel):
@@ -407,7 +411,11 @@ def api_create_timekeeping(body: TimekeepingCreate) -> TimekeepingEntry:
         case_id=body.case_id,
         date=body.date,
         hours=body.hours,
+        start_time=body.start_time,
+        end_time=body.end_time,
+        service_type=body.service_type,
         tasks=body.tasks,
+        notes=body.notes,
     )
     save_timekeeping(entry)
     return entry

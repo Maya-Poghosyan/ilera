@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { ExternalLink, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +18,14 @@ import {
   listTimekeeping,
   updateRenewal,
 } from "@/lib/api";
-import type { JournalEntry, RenewalInfo, TimekeepingEntry } from "@/lib/types";
+import type { JournalEntry, RenewalInfo, ServiceType, TimekeepingEntry } from "@/lib/types";
+
+const SERVICE_LABELS: Record<ServiceType, string> = {
+  personal_care: "Personal Care",
+  domestic: "Domestic",
+  paramedical: "Paramedical",
+  accompaniment: "Accompaniment",
+};
 
 export default function RecordsPage() {
   const [caseId, setCaseId] = useState<string | null>(null);
@@ -31,7 +38,11 @@ export default function RecordsPage() {
   const [showTkForm, setShowTkForm] = useState(false);
   const [tkDate, setTkDate] = useState("");
   const [tkHours, setTkHours] = useState("");
+  const [tkStartTime, setTkStartTime] = useState("");
+  const [tkEndTime, setTkEndTime] = useState("");
+  const [tkServiceType, setTkServiceType] = useState<ServiceType>("personal_care");
   const [tkTasks, setTkTasks] = useState("");
+  const [tkNotes, setTkNotes] = useState("");
 
   // Journal form
   const [showJnForm, setShowJnForm] = useState(false);
@@ -77,15 +88,23 @@ export default function RecordsPage() {
       case_id: caseId,
       date: tkDate,
       hours: parseFloat(tkHours),
+      start_time: tkStartTime || undefined,
+      end_time: tkEndTime || undefined,
+      service_type: tkServiceType,
       tasks: tkTasks
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean),
+      notes: tkNotes || undefined,
     });
     setShowTkForm(false);
     setTkDate("");
     setTkHours("");
+    setTkStartTime("");
+    setTkEndTime("");
+    setTkServiceType("personal_care");
     setTkTasks("");
+    setTkNotes("");
     await loadData(caseId);
   };
 
@@ -134,7 +153,7 @@ export default function RecordsPage() {
           <CardContent className="py-6">
             <p className="text-sm text-muted-foreground">
               Complete the intake wizard first to create a case profile, then return here to track
-              timekeeping, journal entries, and renewals.
+              timesheets, journal entries, and renewals.
             </p>
           </CardContent>
         </Card>
@@ -174,8 +193,8 @@ export default function RecordsPage() {
 
       <p className="text-2xl font-semibold">
         Renewal for {renewal?.due_date
-          ? `${new Date(renewal.due_date + "T00:00:00").getFullYear() - 1}–${new Date(renewal.due_date + "T00:00:00").getFullYear()}`
-          : `${new Date().getFullYear()}–${new Date().getFullYear() + 1}`
+          ? `${new Date(renewal.due_date + "T00:00:00").getFullYear() - 1}\u2013${new Date(renewal.due_date + "T00:00:00").getFullYear()}`
+          : `${new Date().getFullYear()}\u2013${new Date().getFullYear() + 1}`
         } due {renewal?.due_date ? formatDate(renewal.due_date) + ", " + new Date(renewal.due_date + "T00:00:00").getFullYear() : "1 year from submission"}
       </p>
 
@@ -195,10 +214,21 @@ export default function RecordsPage() {
       )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Timekeeping */}
+        {/* Timesheets */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Timekeeping</h2>
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold">Timesheets</h2>
+              <a
+                href="https://www.etimesheets.ihss.ca.gov"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm font-bold text-green-700 underline hover:text-green-900"
+              >
+                Submit timesheet to IHSS portal
+                <ExternalLink className="size-3.5" />
+              </a>
+            </div>
             <Button size="sm" variant="outline" onClick={() => setShowTkForm(true)}>
               + Entry
             </Button>
@@ -207,33 +237,81 @@ export default function RecordsPage() {
           {showTkForm && (
             <Card>
               <CardContent className="space-y-3 py-4">
-                <div className="space-y-1">
-                  <Label htmlFor="tk-date">Date</Label>
-                  <Input
-                    id="tk-date"
-                    type="date"
-                    value={tkDate}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkDate(e.target.value)}
-                  />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="tk-date">Date</Label>
+                    <Input
+                      id="tk-date"
+                      type="date"
+                      value={tkDate}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="tk-hours">Total Hours</Label>
+                    <Input
+                      id="tk-hours"
+                      type="number"
+                      step="0.25"
+                      min="0"
+                      max="24"
+                      value={tkHours}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkHours(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="tk-start">Start Time</Label>
+                    <Input
+                      id="tk-start"
+                      type="time"
+                      value={tkStartTime}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkStartTime(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="tk-end">End Time</Label>
+                    <Input
+                      id="tk-end"
+                      type="time"
+                      value={tkEndTime}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkEndTime(e.target.value)}
+                    />
+                  </div>
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="tk-hours">Hours</Label>
-                  <Input
-                    id="tk-hours"
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    value={tkHours}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkHours(e.target.value)}
-                  />
+                  <Label>Service Type</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(Object.keys(SERVICE_LABELS) as ServiceType[]).map((st) => (
+                      <Button
+                        key={st}
+                        type="button"
+                        variant={tkServiceType === st ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setTkServiceType(st)}
+                      >
+                        {SERVICE_LABELS[st]}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="tk-tasks">Tasks (comma-separated)</Label>
+                  <Label htmlFor="tk-tasks">Activities (comma-separated)</Label>
                   <Input
                     id="tk-tasks"
                     value={tkTasks}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkTasks(e.target.value)}
-                    placeholder="Bathing, meals, medication"
+                    placeholder="Bathing, dressing, meal prep, medication"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="tk-notes">Notes</Label>
+                  <Input
+                    id="tk-notes"
+                    value={tkNotes}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkNotes(e.target.value)}
+                    placeholder="Any additional details"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -249,9 +327,19 @@ export default function RecordsPage() {
           {timekeeping.map((t) => (
             <Card key={t.id}>
               <CardHeader className="flex flex-row items-center justify-between py-3">
-                <CardTitle className="text-sm">{formatDate(t.date)}</CardTitle>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{t.hours} hrs</span>
+                  <CardTitle className="text-sm font-semibold">{formatDate(t.date)}</CardTitle>
+                  <span className="rounded bg-muted px-1.5 py-0.5 text-[11px] font-medium">
+                    {SERVICE_LABELS[t.service_type] ?? t.service_type}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium tabular-nums">{t.hours} hrs</span>
+                  {t.start_time && t.end_time && (
+                    <span className="text-[11px] text-muted-foreground tabular-nums">
+                      {t.start_time}\u2013{t.end_time}
+                    </span>
+                  )}
                   <button
                     onClick={() => handleDeleteTimekeeping(t.id)}
                     className="text-muted-foreground hover:text-destructive"
@@ -261,19 +349,20 @@ export default function RecordsPage() {
                   </button>
                 </div>
               </CardHeader>
-              <CardContent className="py-0 pb-3 text-sm text-muted-foreground">
-                {t.tasks.join(", ") || "No tasks recorded"}
+              <CardContent className="space-y-1 py-0 pb-3">
+                <p className="text-sm text-muted-foreground">
+                  {t.tasks.length > 0 ? t.tasks.join(", ") : "No activities recorded"}
+                </p>
+                {t.notes && (
+                  <p className="text-xs italic text-muted-foreground/70">{t.notes}</p>
+                )}
               </CardContent>
             </Card>
           ))}
 
           {!loading && timekeeping.length === 0 && (
-            <p className="text-sm text-muted-foreground">No timekeeping entries yet.</p>
+            <p className="text-sm text-muted-foreground">No timesheet entries yet.</p>
           )}
-
-          <Button size="sm" disabled title="Coming soon — Browserbase automation">
-            Submit timesheet to IHSS portal (coming soon)
-          </Button>
         </section>
 
         {/* Care journal */}

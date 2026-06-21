@@ -34,7 +34,11 @@ class TimekeepingEntry(BaseModel):
     case_id: str
     date: str  # ISO date (YYYY-MM-DD)
     hours: float
+    start_time: Optional[str] = None  # HH:MM
+    end_time: Optional[str] = None  # HH:MM
+    service_type: str = "personal_care"  # personal_care | domestic | paramedical | accompaniment
     tasks: list[str] = Field(default_factory=list)
+    notes: str = ""
     created_at: str = Field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
