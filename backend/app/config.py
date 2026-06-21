@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     band_agent_id: str = ""
     band_rest_url: str = "https://app.band.ai"
     band_ws_url: str = "wss://app.band.ai/api/v1/socket/websocket"
+    # Optional JSON registry mapping program group -> {agent_id, api_key} so each
+    # specialist runs as its own Band agent. See band_agents.example.json.
+    band_agents_file: str = "band_agents.json"
 
     # Integrations
     poke_api_key: str = ""

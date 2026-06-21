@@ -1,45 +1,77 @@
-"""Band integration — runs Ilera's Routing Agent as a real Band participant.
+"""Band integration — runs each Ilera specialist as its own Band agent.
 
-The agent connects to the Band platform (https://docs.band.ai) over a websocket and
-exposes Ilera's RAG-grounded eligibility engine as custom tools, so other agents in a
-Band room can ask Ilera to assess a caregiver's benefits or look up official program
-rules and get back cited, source-linked answers.
+Every program group (IHSS, Medi-Cal, Medicare, PFL, VA, Tax) is registered as a separate
+agent on the Band platform (https://docs.band.ai) and connects over a websocket. Each
+specialist agent is grounded ONLY in its program's documentation and exposes program-scoped
+tools, so other agents in a Band room can consult, say, the IHSS specialist directly. A
+"routing" coordinator agent exposes cross-program tools.
 
-Run it as a worker:
+Credentials come from a JSON registry (default: backend/band_agents.json), mapping each
+program group to its Band agent_id + api_key:
 
-    python -m app.integrations.band
+    {
+      "routing":  {"agent_id": "...", "api_key": "..."},
+      "ihss":     {"agent_id": "...", "api_key": "..."},
+      "medical":  {"agent_id": "...", "api_key": "..."},
+      "medicare": {"agent_id": "...", "api_key": "..."},
+      "pfl":      {"agent_id": "...", "api_key": "..."},
+      "va":       {"agent_id": "...", "api_key": "..."},
+      "tax":      {"agent_id": "...", "api_key": "..."}
+    }
 
-It is entirely optional: the synchronous HTTP eligibility flow works without Band, and
-this module is only imported when BAND_API_KEY + BAND_AGENT_ID are configured.
+For backwards-compat, if no registry file exists but BAND_API_KEY + BAND_AGENT_ID are set,
+a single "routing" coordinator agent is run.
+
+Run the worker:  python -m app.integrations.band
+It is optional: the synchronous HTTP eligibility flow works without Band, and the `band`
+package is only imported when the worker actually starts.
 """
 
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
+import os
 
 from pydantic import BaseModel, Field
 
 from ..agents.routing import run_routing
+from ..agents.specialists import ALL_SPECIALISTS
 from ..config import get_settings
-from ..models import CareRecipient, Caregiver, CaseProfile, Household
+from ..models import CareRecipient, Caregiver, CaseProfile, EligibilityResult, Household
 from ..rag.index import get_index
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM_PROMPT = (
-    "You are Ilera's Routing Agent, an expert coordinator for U.S. caregiver benefits "
-    "(IHSS, Medi-Cal/HCBS, Medicare, Paid Family Leave, VA caregiver support, and caregiver "
-    "tax relief). When another agent describes a caregiver's situation, call the "
-    "assesseligibility tool to run Ilera's specialist agents and return ranked, source-cited "
-    "eligibility findings. Use the searchprogramdocs tool to quote specific official rules. "
-    "Always ground your answers in the returned citations (title, page, source URL); never "
-    "invent program rules."
+# doc_key -> (program display name, specialist instance)
+_SPECIALISTS = {cls().doc_key: cls() for cls in ALL_SPECIALISTS}
+_PROGRAM_NAMES = {k: a.program for k, a in _SPECIALISTS.items()}
+
+_ROUTING_PROMPT = (
+    "You are Ilera's Routing Agent, the coordinator for U.S. caregiver benefits. When another "
+    "agent describes a caregiver's situation, call assesseligibility to run all of Ilera's "
+    "specialists and return ranked, source-cited findings, or consult an individual program "
+    "specialist agent in the room. Use searchprogramdocs to quote official rules. Ground every "
+    "claim in the returned citations (title, page, source URL); never invent program rules."
 )
 
 
+def _specialist_prompt(program: str) -> str:
+    return (
+        f"You are Ilera's {program} specialist agent. You ONLY assess eligibility for {program} "
+        f"and answer questions about it, grounded strictly in {program}'s official documentation. "
+        "Call assesseligibility to evaluate a caregiver's situation for your program, and "
+        "lookupprogramdocs to quote the official rules. Always cite the source (title, page, URL). "
+        "If a question is outside your program, say so and defer to the routing agent."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Tool input models (the class docstring becomes the tool description shown to the LLM)
+# ---------------------------------------------------------------------------
 class AssessEligibilityInput(BaseModel):
-    """Assess which caregiver benefit programs a care recipient likely qualifies for. Returns ranked programs with status, rationale, next steps, and citations to official sources."""
+    """Assess caregiver benefit eligibility for a care recipient. Returns program(s) with status, rationale, next steps, and citations to official sources."""
 
     recipient_age: int | None = Field(default=None, description="Age of the care recipient")
     veteran: bool = Field(default=False, description="Is the care recipient a U.S. veteran?")
@@ -54,23 +86,31 @@ class AssessEligibilityInput(BaseModel):
 
 
 class SearchProgramDocsInput(BaseModel):
-    """Search Ilera's official program-documentation knowledge base and return matching passages with titles, page numbers, and source URLs."""
+    """Search Ilera's official program-documentation knowledge base; returns passages with titles, page numbers, and source URLs."""
 
     query: str = Field(description="What to look up, e.g. 'IHSS hours assessment'")
     program: str | None = Field(
         default=None,
-        description="Optional program filter: ihss | medical | medicare | pfl | va | tax | federal_routing",
+        description="Optional filter: ihss | medical | medicare | pfl | va | tax | federal_routing",
     )
 
 
+class LookupProgramDocsInput(BaseModel):
+    """Look up this program's official documentation; returns passages with titles, page numbers, and source URLs."""
+
+    query: str = Field(description="What to look up within this program's rules")
+
+
 def _profile_from_input(inp: AssessEligibilityInput) -> CaseProfile:
+    insurance = inp.insurance if inp.insurance in {
+        "medi-cal", "medicare", "private", "none", "unknown"
+    } else "unknown"
     return CaseProfile(
         id="band",
         care_recipient=CareRecipient(
             age=inp.recipient_age,
             veteran=inp.veteran,
-            insurance=inp.insurance if inp.insurance in
-            {"medi-cal", "medicare", "private", "none", "unknown"} else "unknown",
+            insurance=insurance,
             conditions=inp.conditions,
             care_needs=inp.care_needs,
         ),
@@ -83,23 +123,25 @@ def _profile_from_input(inp: AssessEligibilityInput) -> CaseProfile:
     )
 
 
-def _assess_eligibility_sync(inp: AssessEligibilityInput) -> dict:
+def _result_dict(r: EligibilityResult) -> dict:
+    return {
+        "program": r.program,
+        "status": r.status,
+        "confidence": round(r.confidence, 2),
+        "rationale": r.rationale,
+        "next_steps": r.next_steps,
+        "follow_up_questions": [q.prompt for q in r.followups],
+        "citations": [
+            {"title": c.title, "page": c.page, "source_url": c.source_url} for c in r.citations
+        ],
+    }
+
+
+# --- Routing (cross-program) handlers -------------------------------------
+def _assess_all_sync(inp: AssessEligibilityInput) -> dict:
     routing = run_routing(_profile_from_input(inp))
     return {
-        "programs": [
-            {
-                "program": r.program,
-                "status": r.status,
-                "confidence": round(r.confidence, 2),
-                "rationale": r.rationale,
-                "next_steps": r.next_steps,
-                "citations": [
-                    {"title": c.title, "page": c.page, "source_url": c.source_url}
-                    for c in r.citations
-                ],
-            }
-            for r in routing.results
-        ],
+        "programs": [_result_dict(r) for r in routing.results],
         "follow_up_questions": [q.prompt for q in routing.followups],
         "strategy_notes": routing.strategy_notes,
     }
@@ -107,66 +149,145 @@ def _assess_eligibility_sync(inp: AssessEligibilityInput) -> dict:
 
 def _search_docs_sync(inp: SearchProgramDocsInput) -> dict:
     hits = get_index().search(inp.query, k=5, program=inp.program)
-    return {
-        "passages": [
-            {
-                "program": h.program,
-                "title": h.title or h.source,
-                "page": h.page,
-                "source_url": h.source_url,
-                "text": h.text[:600],
-            }
-            for h in hits
-        ]
-    }
+    return {"passages": _passages(hits)}
 
 
-async def assess_eligibility(inp: AssessEligibilityInput) -> dict:
-    return await asyncio.to_thread(_assess_eligibility_sync, inp)
+# --- Specialist (single-program) handlers ---------------------------------
+def _assess_one_sync(doc_key: str, inp: AssessEligibilityInput) -> dict:
+    return _result_dict(_SPECIALISTS[doc_key].assess(_profile_from_input(inp)))
 
 
-async def search_program_docs(inp: SearchProgramDocsInput) -> dict:
-    return await asyncio.to_thread(_search_docs_sync, inp)
+def _lookup_sync(doc_key: str, inp: LookupProgramDocsInput) -> dict:
+    hits = get_index().search(inp.query, k=5, program=doc_key)
+    return {"passages": _passages(hits)}
 
 
-def build_agent():
-    """Construct the Band agent with Ilera's tools. Raises if Band isn't configured."""
-    from band import Agent
+def _passages(hits) -> list[dict]:
+    return [
+        {
+            "program": h.program,
+            "title": h.title or h.source,
+            "page": h.page,
+            "source_url": h.source_url,
+            "text": h.text[:600],
+        }
+        for h in hits
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Agent construction
+# ---------------------------------------------------------------------------
+def _adapter(system_prompt: str, tools):
     from band.adapters.anthropic import AnthropicAdapter
 
-    settings = get_settings()
-    if not settings.has_band:
-        raise RuntimeError("Band not configured (need BAND_API_KEY and BAND_AGENT_ID)")
-    if not settings.anthropic_api_key:
-        raise RuntimeError("Band agent needs ANTHROPIC_API_KEY for reasoning")
-
-    adapter = AnthropicAdapter(
-        model=settings.anthropic_model,
-        system_prompt=_SYSTEM_PROMPT,
-        provider_key=settings.anthropic_api_key,
-        additional_tools=[
-            (AssessEligibilityInput, assess_eligibility),
-            (SearchProgramDocsInput, search_program_docs),
-        ],
+    return AnthropicAdapter(
+        model=get_settings().anthropic_model,
+        system_prompt=system_prompt,
+        provider_key=get_settings().anthropic_api_key,
+        additional_tools=tools,
     )
+
+
+def _make_agent(adapter, creds: dict):
+    from band import Agent
+
+    s = get_settings()
     return Agent.create(
         adapter=adapter,
-        agent_id=settings.band_agent_id,
-        api_key=settings.band_api_key,
-        ws_url=settings.band_ws_url,
-        rest_url=settings.band_rest_url.rstrip("/"),
+        agent_id=creds["agent_id"],
+        api_key=creds["api_key"],
+        ws_url=s.band_ws_url,
+        rest_url=s.band_rest_url.rstrip("/"),
     )
+
+
+def build_routing_agent(creds: dict):
+    tools = [
+        (AssessEligibilityInput, _wrap(_assess_all_sync)),
+        (SearchProgramDocsInput, _wrap(_search_docs_sync)),
+    ]
+    return _make_agent(_adapter(_ROUTING_PROMPT, tools), creds)
+
+
+def build_specialist_agent(doc_key: str, creds: dict):
+    program = _PROGRAM_NAMES[doc_key]
+
+    async def assess(inp: AssessEligibilityInput) -> dict:
+        return await asyncio.to_thread(_assess_one_sync, doc_key, inp)
+
+    async def lookup(inp: LookupProgramDocsInput) -> dict:
+        return await asyncio.to_thread(_lookup_sync, doc_key, inp)
+
+    tools = [(AssessEligibilityInput, assess), (LookupProgramDocsInput, lookup)]
+    return _make_agent(_adapter(_specialist_prompt(program), tools), creds)
+
+
+def _wrap(sync_fn):
+    async def handler(inp):
+        return await asyncio.to_thread(sync_fn, inp)
+
+    return handler
+
+
+# ---------------------------------------------------------------------------
+# Registry loading
+# ---------------------------------------------------------------------------
+def load_registry() -> dict[str, dict]:
+    """Return {group_key: {agent_id, api_key}}. Reads the JSON file, else falls back
+    to a single 'routing' agent from BAND_API_KEY/BAND_AGENT_ID."""
+    s = get_settings()
+    path = s.band_agents_file
+    if path and not os.path.isabs(path):
+        # resolve relative to the backend/ directory (two levels up from this file)
+        path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), path)
+    registry: dict[str, dict] = {}
+    if path and os.path.exists(path):
+        with open(path, encoding="utf-8") as fh:
+            raw = json.load(fh)
+        for key, entry in raw.items():
+            if entry.get("agent_id") and entry.get("api_key"):
+                registry[key] = {"agent_id": entry["agent_id"], "api_key": entry["api_key"]}
+    if "routing" not in registry and s.has_band:
+        registry["routing"] = {"agent_id": s.band_agent_id, "api_key": s.band_api_key}
+    return registry
+
+
+def build_agents() -> list:
+    """Construct every configured Band agent (routing coordinator + per-program specialists)."""
+    if not get_settings().anthropic_api_key:
+        raise RuntimeError("Band agents need ANTHROPIC_API_KEY for reasoning")
+    registry = load_registry()
+    if not registry:
+        raise RuntimeError(
+            "No Band agents configured. Provide band_agents.json or BAND_API_KEY + BAND_AGENT_ID."
+        )
+    agents = []
+    for key, creds in registry.items():
+        if key in _SPECIALISTS:
+            agents.append((key, build_specialist_agent(key, creds)))
+        elif key == "routing":
+            agents.append((key, build_routing_agent(creds)))
+        else:
+            logger.warning("Unknown Band agent group %r in registry; skipping", key)
+    return agents
+
+
+# Back-compat: a single routing agent.
+def build_agent():
+    return build_routing_agent(load_registry()["routing"])
 
 
 async def _run() -> None:
-    agent = build_agent()
-    await agent.start()
-    logger.info("Ilera routing agent connected to Band as %r", agent.agent_name)
-    print(f"Ilera routing agent connected to Band as {agent.agent_name!r}. Listening ...")
+    agents = build_agents()
+    await asyncio.gather(*(a.start() for _, a in agents))
+    names = ", ".join(f"{k} ({a.agent_name!r})" for k, a in agents)
+    logger.info("Connected %d Band agent(s): %s", len(agents), names)
+    print(f"Connected {len(agents)} Band agent(s): {names}\nListening ...")
     try:
-        await agent.run_forever()
+        await asyncio.gather(*(a.run_forever() for _, a in agents))
     finally:
-        await agent.stop()
+        await asyncio.gather(*(a.stop() for _, a in agents), return_exceptions=True)
 
 
 def main() -> None:
