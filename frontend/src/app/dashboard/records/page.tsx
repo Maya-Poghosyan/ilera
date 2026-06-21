@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ExternalLink, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -326,37 +326,24 @@ export default function RecordsPage() {
 
           {timekeeping.map((t) => (
             <Card key={t.id}>
-              <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3">
-                <CardTitle className="text-base font-semibold">{formatDate(t.date)}</CardTitle>
-                <button
-                  onClick={() => handleDeleteTimekeeping(t.id)}
-                  className="text-muted-foreground hover:text-destructive"
-                  aria-label="Delete entry"
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
-              </CardHeader>
-              <CardContent className="space-y-1 pb-3 pt-0">
-                <p className="text-sm">
-                  <span className="text-muted-foreground">Hours:</span>{" "}
-                  <span className="font-medium tabular-nums">{t.hours}</span>
-                  {t.start_time && t.end_time && (
-                    <span className="text-muted-foreground"> ({t.start_time}\u2013{t.end_time})</span>
-                  )}
+              <CardContent className="px-4 py-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-base font-semibold">{formatDate(t.date)}</span>
+                  <button
+                    onClick={() => handleDeleteTimekeeping(t.id)}
+                    className="text-muted-foreground hover:text-destructive"
+                    aria-label="Delete entry"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  <span>Hours: <span className="font-medium">{t.hours}</span></span>
+                  {t.start_time && t.end_time && <span> ({t.start_time}\u2013{t.end_time})</span>}
+                  {" · "}{SERVICE_LABELS[t.service_type] ?? t.service_type}
+                  {" · "}{t.tasks.length > 0 ? t.tasks.join(", ") : "No activities"}
+                  {t.notes && <span> · {t.notes}</span>}
                 </p>
-                <p className="text-sm">
-                  <span className="text-muted-foreground">Service:</span>{" "}
-                  {SERVICE_LABELS[t.service_type] ?? t.service_type}
-                </p>
-                <p className="text-sm">
-                  <span className="text-muted-foreground">Activities:</span>{" "}
-                  {t.tasks.length > 0 ? t.tasks.join(", ") : "None recorded"}
-                </p>
-                {t.notes && (
-                  <p className="text-sm">
-                    <span className="text-muted-foreground">Notes:</span> {t.notes}
-                  </p>
-                )}
               </CardContent>
             </Card>
           ))}
@@ -409,17 +396,19 @@ export default function RecordsPage() {
 
           {journal.map((j) => (
             <Card key={j.id} className={j.fall_flagged ? "border-amber-300" : ""}>
-              <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3">
-                <CardTitle className="text-base font-semibold">{formatDate(j.date)}</CardTitle>
-                <button
-                  onClick={() => handleDeleteJournal(j.id)}
-                  className="text-muted-foreground hover:text-destructive"
-                  aria-label="Delete entry"
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
-              </CardHeader>
-              <CardContent className="pb-3 pt-0 text-sm text-muted-foreground">{j.text}</CardContent>
+              <CardContent className="px-4 py-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-base font-semibold">{formatDate(j.date)}</span>
+                  <button
+                    onClick={() => handleDeleteJournal(j.id)}
+                    className="text-muted-foreground hover:text-destructive"
+                    aria-label="Delete entry"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+                <p className="text-xs text-muted-foreground">{j.text}</p>
+              </CardContent>
             </Card>
           ))}
 
