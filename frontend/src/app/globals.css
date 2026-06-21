@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-heading);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -75,17 +75,17 @@
   --primary-foreground: #ffffff;
   --primary-hover: #3a6b4f;  /* lighter green for hovers */
 
-  /* Light-gray surfaces */
-  --secondary: #eef1ef;
+  /* Light tan / amber surfaces (warm neutrals) */
+  --secondary: #efe7d6;
   --secondary-foreground: #1a211d;
-  --muted: #f5f6f5;
-  --muted-foreground: #5f6b64;  /* muted text, AA on white */
+  --muted: #f6f1e7;
+  --muted-foreground: #6e6450;  /* warm muted text, AA on white */
   --accent: #eaf1ed;            /* green-tinted accent surface */
   --accent-foreground: #1e3d2f;
 
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #e2e6e3;
-  --input: #e2e6e3;
+  --border: #e7decb;
+  --input: #e7decb;
   --ring: #3a6b4f;
 
   /* Charts — graduated greens */
@@ -97,18 +97,20 @@
 
   --radius: 0.625rem;
 
-  /* Fonts (wired to the Geist variables set in layout.tsx) */
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+  /* Fonts — Manrope (body/UI) + Source Serif (headings/wordmark) */
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
+  --font-heading: var(--font-source-serif), ui-serif, Georgia, "Times New Roman",
+    serif;
 
-  /* Sidebar — light-gray surface with green accents */
-  --sidebar: #f5f6f5;
+  /* Sidebar — warm tan surface with green accents */
+  --sidebar: #f6f1e7;
   --sidebar-foreground: #1a211d;
   --sidebar-primary: #1e3d2f;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #eaf1ed;
   --sidebar-accent-foreground: #1e3d2f;
-  --sidebar-border: #e2e6e3;
+  --sidebar-border: #e7decb;
   --sidebar-ring: #3a6b4f;
 }
 
@@ -169,6 +171,11 @@
   html {
     @apply font-sans;
   }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
+  }
   ::selection {
     background-color: var(--brand-subtle);
     color: var(--brand);
@@ -176,9 +183,10 @@
 }
 
 @layer components {
-  /* Ilera wordmark — dark green logotype */
+  /* Ilera wordmark — dark green Source Serif logotype */
   .ilera-wordmark {
-    font-weight: 700;
+    font-family: var(--font-heading);
+    font-weight: 600;
     letter-spacing: -0.01em;
     color: var(--brand);
   }

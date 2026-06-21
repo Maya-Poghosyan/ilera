@@ -8,14 +8,25 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
+import { cn } from "@/lib/utils";
 import { determineEligibility } from "@/lib/api";
 import type { EligibilityResponse, EligibilityStatus } from "@/lib/types";
 
 const statusColor: Record<EligibilityStatus, string> = {
-  likely: "border-transparent bg-brand-subtle text-primary",
-  possible: "border-transparent bg-amber-100 text-amber-800",
-  unlikely: "border-transparent bg-rose-50 text-rose-700",
-  needs_info: "border-transparent bg-slate-100 text-slate-700",
+  likely: "border-transparent bg-primary text-primary-foreground",
+  possible: "border-transparent bg-amber-500 text-white",
+  unlikely: "border-transparent bg-rose-500 text-white",
+  needs_info: "border-transparent bg-sky-600 text-white",
+};
+
+const statusAccent: Record<
+  EligibilityStatus,
+  { bar: string; header: string; title: string }
+> = {
+  likely: { bar: "bg-primary", header: "bg-brand-subtle", title: "text-primary" },
+  possible: { bar: "bg-amber-500", header: "bg-amber-50", title: "text-amber-900" },
+  unlikely: { bar: "bg-rose-500", header: "bg-rose-50", title: "text-rose-900" },
+  needs_info: { bar: "bg-sky-600", header: "bg-sky-50", title: "text-sky-900" },
 };
 
 export default function EligibilityPage() {
@@ -51,14 +62,14 @@ export default function EligibilityPage() {
   return (
     <>
       <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between px-6">
+        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
           <Logo />
           <Button variant="outline" size="sm" render={<Link href="/intake" />}>
             Edit intake
           </Button>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-3xl flex-1 space-y-6 px-6 py-12">
+      <main className="mx-auto w-full max-w-5xl flex-1 space-y-6 px-6 py-12">
       <div className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">Your benefits strategy</h1>
         <p className="text-sm text-muted-foreground">Ranked by eligibility confidence.</p>
@@ -79,31 +90,52 @@ export default function EligibilityPage() {
         </Card>
       )}
 
-      <div className="space-y-4">
-        {data.results.map((r) => (
-          <Card key={r.program}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg text-primary">{r.program}</CardTitle>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium tabular-nums text-muted-foreground">
-                  {Math.round(r.confidence * 100)}%
-                </span>
-                <Badge className={statusColor[r.status]}>{r.status.replace("_", " ")}</Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <p className="text-muted-foreground">{r.rationale}</p>
-              {r.roadblocks.length > 0 && (
-                <Detail label="Roadblocks" items={r.roadblocks} />
-              )}
-              <Detail label="Required documents" items={r.required_documents} />
-              {r.next_steps.length > 0 && <Detail label="Next steps" items={r.next_steps} />}
-              {r.sources.length > 0 && (
-                <p className="text-xs text-muted-foreground">Sources: {r.sources.join(", ")}</p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {data.results.map((r) => {
+          const accent = statusAccent[r.status];
+          const pct = Math.round(r.confidence * 100);
+          return (
+            <Card key={r.program} size="sm" className="gap-0 overflow-hidden py-0">
+              <div className={cn("h-1 w-full", accent.bar)} />
+              <CardHeader className={cn("gap-2 py-3", accent.header)}>
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className={cn("text-base", accent.title)}>
+                    {r.program}
+                  </CardTitle>
+                  <Badge className={statusColor[r.status]}>
+                    {r.status.replace("_", " ")}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-background/70">
+                    <div
+                      className={cn("h-full rounded-full", accent.bar)}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-semibold tabular-nums text-foreground/70">
+                    {pct}%
+                  </span>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2.5 py-3 text-xs">
+                <p className="text-muted-foreground">{r.rationale}</p>
+                {r.roadblocks.length > 0 && (
+                  <Detail label="Roadblocks" items={r.roadblocks} />
+                )}
+                <Detail label="Required documents" items={r.required_documents} />
+                {r.next_steps.length > 0 && (
+                  <Detail label="Next steps" items={r.next_steps} />
+                )}
+                {r.sources.length > 0 && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Sources: {r.sources.join(", ")}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {data.followups.length > 0 && (
