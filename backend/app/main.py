@@ -228,6 +228,71 @@ class EligibilityResponse(BaseModel):
 _agent_executions: list[dict] = []
 
 
+async def _dispatch_to_band(profile: CaseProfile) -> None:
+    """Send the eligibility request to Band agents so executions register on the dashboard."""
+    try:
+        from .integrations.band import load_registry
+
+        from band.client.rest import (
+            AsyncRestClient,
+            ChatMessageRequest,
+            ChatMessageRequestMentionsItem,
+            ChatRoomRequest,
+            DEFAULT_REQUEST_OPTIONS,
+            ParticipantRequest,
+        )
+
+        registry = load_registry()
+        routing_creds = registry.get("routing")
+        if not routing_creds:
+            return
+        client = AsyncRestClient(
+            api_key=routing_creds["api_key"], base_url="https://app.band.ai"
+        )
+        # Create a chat room
+        chat = await client.agent_api_chats.create_agent_chat(
+            chat=ChatRoomRequest(), request_options=DEFAULT_REQUEST_OPTIONS
+        )
+        chat_id = chat.data.id
+        # Add specialist agents as participants
+        mentions = []
+        for key, creds in registry.items():
+            if key == "routing":
+                continue
+            try:
+                await client.agent_api_participants.add_agent_chat_participant(
+                    chat_id,
+                    participant=ParticipantRequest(
+                        participant_id=creds["agent_id"], role="member"
+                    ),
+                    request_options=DEFAULT_REQUEST_OPTIONS,
+                )
+                mentions.append(
+                    ChatMessageRequestMentionsItem(id=creds["agent_id"])
+                )
+            except Exception:
+                pass
+        # Compose message from profile
+        cr = profile.care_recipient
+        cg = profile.caregiver
+        msg = (
+            f"Assess eligibility for {cr.name or 'care recipient'}, "
+            f"age {cr.age or 'unknown'}, {cr.state}. "
+            f"Insurance: {cr.insurance}. "
+            f"Care needs: {', '.join(cr.care_needs) or 'unspecified'}. "
+            f"Veteran: {cr.veteran}. "
+            f"Caregiver: {cg.name or 'family member'} ({cg.relationship}). "
+            f"Household income: ${profile.household.income_monthly or 0}/mo."
+        )
+        await client.agent_api_messages.create_agent_chat_message(
+            chat_id,
+            message=ChatMessageRequest(content=msg, mentions=mentions),
+            request_options=DEFAULT_REQUEST_OPTIONS,
+        )
+    except Exception:
+        logger.debug("Band dispatch failed (non-critical)", exc_info=True)
+
+
 @app.post("/api/eligibility/{case_id}", response_model=EligibilityResponse)
 def determine_eligibility(case_id: str) -> EligibilityResponse:
     profile = get_profile(case_id)
@@ -246,6 +311,12 @@ def determine_eligibility(case_id: str) -> EligibilityResponse:
             "confidence": r.confidence,
             "timestamp": now,
         })
+    # Dispatch to Band in background (registers executions on the dashboard)
+    try:
+        loop = asyncio.get_running_loop()
+        loop.create_task(_dispatch_to_band(profile))
+    except RuntimeError:
+        pass
     return EligibilityResponse(
         results=routing.results,
         followups=routing.followups,
