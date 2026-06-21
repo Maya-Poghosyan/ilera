@@ -40,7 +40,7 @@ export default function Home() {
       <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
           <Logo />
-          <Button render={<Link href="/intake" />}>Start intake</Button>
+          <Button render={<Link href="/get-started" />}>Get started</Button>
         </div>
       </header>
 
@@ -53,8 +53,8 @@ export default function Home() {
           what you qualify for, optimizes your strategy, and completes the applications for you.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button size="lg" render={<Link href="/intake" />}>
-            Start intake
+          <Button size="lg" render={<Link href="/get-started" />}>
+            Get started
             <ArrowRight />
           </Button>
           <Button size="lg" variant="outline" render={<Link href="/dashboard" />}>

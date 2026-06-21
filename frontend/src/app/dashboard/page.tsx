@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { CalendarDays, Check, ChevronLeft, ChevronRight, ExternalLink, MessageCircle, Sparkles, X } from "lucide-react";
+import { CalendarDays, Check, ChevronLeft, ChevronRight, Sparkles, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -278,30 +278,6 @@ export default function CalendarPage() {
           )}
 
         </div>
-      </div>
-
-      {/* Connect Poke card */}
-      <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-2">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2 text-primary">
-            <MessageCircle className="size-4" />
-            <h3 className="text-sm font-semibold">Connect Poke</h3>
-          </div>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Poke delivers care-log check-ins, appointment reminders, and benefit renewal nudges
-          straight to your messages (iMessage, WhatsApp, Telegram, or RCS).
-        </p>
-        <a
-          href="https://poke.com/r/DsatCoA1all"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Button size="sm" className="mt-1 gap-1.5">
-            Set up Poke
-            <ExternalLink className="size-3" />
-          </Button>
-        </a>
       </div>
 
       {/* Reminder creation / edit form */}
