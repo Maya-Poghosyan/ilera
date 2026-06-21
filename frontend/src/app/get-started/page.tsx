@@ -158,7 +158,7 @@ export default function GetStartedPage() {
               </p>
             </CardHeader>
             <CardContent>
-              <Button className="w-full" render={<Link href="/intake" />}>
+              <Button className="w-full py-3 text-base" render={<Link href="/intake" />}>
                 Start benefits intake
                 <ArrowRight className="size-4" />
               </Button>
