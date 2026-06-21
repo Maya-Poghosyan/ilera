@@ -32,6 +32,7 @@ def health() -> dict:
         "status": "ok",
         "redis": settings.has_redis,
         "llm": settings.has_llm,
+        "band": settings.has_band,
         "poke": poke.available(),
         "embeddings": embedding_provider(),
         "rag_backend": index.backend,

@@ -1,0 +1,5 @@
+# Optional: only needed to run the Band multi-agent worker
+#   pip install -r requirements.txt -r requirements-band.txt
+#   python -m app.integrations.band
+# Note: band-sdk[anthropic] upgrades `anthropic` to >=0.111 (compatible with app/llm.py).
+band-sdk[anthropic]==1.0.0

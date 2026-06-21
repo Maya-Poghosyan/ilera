@@ -27,6 +27,9 @@ class Settings(BaseSettings):
 
     # Multi-agent (Band)
     band_api_key: str = ""
+    band_agent_id: str = ""
+    band_rest_url: str = "https://app.band.ai"
+    band_ws_url: str = "wss://app.band.ai/api/v1/socket/websocket"
 
     # Integrations
     poke_api_key: str = ""
@@ -40,6 +43,10 @@ class Settings(BaseSettings):
     @property
     def has_llm(self) -> bool:
         return bool(self.anthropic_api_key or self.openai_api_key)
+
+    @property
+    def has_band(self) -> bool:
+        return bool(self.band_api_key and self.band_agent_id)
 
 
 @lru_cache
