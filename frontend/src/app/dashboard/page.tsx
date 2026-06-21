@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ type CalEvent = {
   title: string;
   time?: string;
   kind: EventKind;
+  suggested?: boolean;
 };
 
 const YEAR = 2026;
@@ -22,11 +23,12 @@ const events: CalEvent[] = [
   { day: 27, title: "IHSS timesheet due", kind: "Deadline" },
 ];
 
-const kindStyle: Record<EventKind, string> = {
-  Appointment: "bg-brand-subtle text-primary",
-  Visit: "bg-amber-100 text-amber-800",
-  Deadline: "bg-rose-100 text-rose-700",
-};
+const suggestedEvents: CalEvent[] = [
+  { day: 24, title: "Pharmacy refill pickup", time: "9:00 AM", kind: "Appointment", suggested: true },
+  { day: 28, title: "IHSS pay stub review", kind: "Deadline", suggested: true },
+];
+
+const allEvents = [...events, ...suggestedEvents];
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -53,6 +55,49 @@ function buildCells(): Cell[] {
   return cells;
 }
 
+function SuggestedEventsPanel() {
+  return (
+    <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
+      <div className="flex items-center gap-2 text-primary">
+        <Sparkles className="size-4" />
+        <h3 className="text-sm font-semibold">Suggested Events</h3>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Detected from recent emails and documents. Accept to add to your calendar.
+      </p>
+      <div className="space-y-2">
+        {suggestedEvents.map((e) => (
+          <div
+            key={e.title}
+            className="flex items-center justify-between rounded-lg border border-dashed border-primary/30 bg-white px-3 py-2"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-foreground">{e.title}</p>
+              <p className="text-xs text-muted-foreground">
+                {monthName} {e.day}{e.time ? ` · ${e.time}` : ""} · {e.kind}
+              </p>
+            </div>
+            <div className="ml-3 flex items-center gap-1">
+              <button
+                className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-primary hover:bg-primary hover:text-white transition-colors"
+                aria-label="Accept"
+              >
+                <Check className="size-3.5" />
+              </button>
+              <button
+                className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-muted-foreground hover:bg-red-100 hover:text-red-600 transition-colors"
+                aria-label="Dismiss"
+              >
+                <X className="size-3.5" />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function CalendarPage() {
   const cells = buildCells();
 
@@ -72,8 +117,8 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
-        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+      <div className="overflow-hidden rounded-xl border border-brand-subtle bg-white shadow-xs">
+        <div className="flex items-center justify-between border-b border-brand-subtle bg-brand-subtle/40 px-4 py-3">
           <h2 className="text-lg font-semibold">
             {monthName} {YEAR}
           </h2>
@@ -88,11 +133,11 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-7 border-b border-border bg-muted/40">
+        <div className="grid grid-cols-7 border-b border-brand-subtle bg-brand-subtle/50">
           {weekdays.map((w) => (
             <div
               key={w}
-              className="px-2 py-2 text-center text-xs font-medium text-muted-foreground"
+              className="px-2 py-2 text-center text-xs font-medium text-primary"
             >
               {w}
             </div>
@@ -103,16 +148,16 @@ export default function CalendarPage() {
           {cells.map((cell, i) => {
             const isToday = cell.inMonth && cell.day === TODAY;
             const dayEvents = cell.inMonth
-              ? events.filter((e) => e.day === cell.day)
+              ? allEvents.filter((e) => e.day === cell.day)
               : [];
             return (
               <div
                 key={i}
                 className={cn(
-                  "min-h-28 border-b border-r border-border p-1.5 last:border-r-0",
+                  "min-h-28 border-b border-r border-brand-subtle/60 p-1.5 last:border-r-0",
                   (i + 1) % 7 === 0 && "border-r-0",
                   i >= 35 && "border-b-0",
-                  !cell.inMonth && "bg-muted/30",
+                  !cell.inMonth && "bg-brand-subtle/20",
                 )}
               >
                 <div className="mb-1 flex justify-end">
@@ -135,10 +180,13 @@ export default function CalendarPage() {
                       key={e.title}
                       className={cn(
                         "truncate rounded-md px-1.5 py-1 text-[11px] font-medium leading-tight",
-                        kindStyle[e.kind],
+                        e.suggested
+                          ? "border border-dashed border-primary/40 bg-brand-subtle/50 text-primary/70"
+                          : "bg-brand-subtle text-primary",
                       )}
                       title={e.time ? `${e.title} · ${e.time}` : e.title}
                     >
+                      {e.suggested && <Sparkles className="mb-0.5 inline size-2.5" />}{" "}
                       {e.time && <span className="tabular-nums">{e.time} </span>}
                       {e.title}
                     </div>
@@ -149,6 +197,8 @@ export default function CalendarPage() {
           })}
         </div>
       </div>
+
+      <SuggestedEventsPanel />
     </div>
   );
 }
