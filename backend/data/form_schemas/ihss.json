@@ -1,0 +1,7 @@
+{
+  "recipient_age": "care_recipient.age",
+  "recipient_state": "care_recipient.state",
+  "recipient_insurance": "care_recipient.insurance",
+  "caregiver_relationship": "caregiver.relationship",
+  "household_size": "household.size"
+}

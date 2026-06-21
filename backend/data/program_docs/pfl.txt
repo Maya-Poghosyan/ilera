@@ -1,0 +1,13 @@
+CALIFORNIA PAID FAMILY LEAVE (PFL) — PROGRAM OVERVIEW (sample placeholder)
+
+Replace this file with official EDD PFL documentation for production-quality RAG.
+
+Eligibility: PFL provides partial wage replacement to workers who take time off to care
+for a seriously ill family member (or to bond with a new child). Requirements:
+- Have paid into State Disability Insurance (SDI) through payroll deductions.
+- Have a qualifying reason (caring for a seriously ill family member).
+- Provide medical certification of the family member's condition.
+
+Benefit: Up to 8 weeks of partial wage replacement within a 12-month period.
+
+Application: File a PFL claim (DE 2501F) with the Employment Development Department (EDD).

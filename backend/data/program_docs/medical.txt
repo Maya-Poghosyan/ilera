@@ -1,0 +1,12 @@
+MEDI-CAL (CALIFORNIA MEDICAID) — PROGRAM OVERVIEW (sample placeholder)
+
+Replace this file with official Medi-Cal documentation for production-quality RAG.
+
+Eligibility: Medi-Cal provides free or low-cost health coverage to California residents
+who meet income (and sometimes asset) requirements. Eligibility is primarily based on
+Modified Adjusted Gross Income (MAGI) relative to the federal poverty level and household
+size. Some categories (aged, blind, disabled) use non-MAGI rules including asset limits.
+
+Application: Apply through Covered California or the county social services office.
+
+Required documents: proof of income, proof of identity, proof of California residency.

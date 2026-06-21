@@ -1,3 +1,90 @@
-# Ilera
+# Ilera — Agentic assistance for caregivers
 
-Agentic assistance for caregivers (UC Berkeley AI Hackathon). Scaffold incoming via PR.
+Ilera helps unpaid caregivers discover, optimize, and apply for state/federal benefits
+(IHSS, Medi-Cal, Paid Family Leave, VA, …) using a multi-agent system grounded in
+official program documentation, then supports them with a care calendar, timekeeping,
+and a document store.
+
+Built for the UC Berkeley AI Hackathon. Tracks: **Band** (multi-agent), **Redis**
+(RAG + agent memory + document store), **Poke / Browserbase** (agentic reminders +
+browser automation), **Devin** (built with Devin).
+
+## Architecture
+
+```
+Next.js frontend  ──REST──▶  FastAPI backend
+  intake wizard                 CaseProfile (Redis / in-memory)
+  eligibility cards               │
+  dashboard                       ├─ Routing Agent ──▶ specialist agents (IHSS, Medi-Cal, PFL, VA)
+                                  │       coordinate in a shared agent space (Band)
+                                  ├─ RAG over program docs (RedisVL)
+                                  └─ form fill + stitch (pypdf / fillpdf)
+                          integrations: Poke (SMS/email), Browserbase (portal automation)
+```
+
+The **`CaseProfile`** is the shared spine: every agent reads and writes it.
+
+## Repo layout
+
+```
+frontend/   Next.js 14 + TS + Tailwind + shadcn/ui
+backend/    FastAPI app
+  app/
+    agents/     routing + specialists + Band shared space
+    rag/        embeddings + vector index (RedisVL-ready, in-memory fallback)
+    forms/      PDF field-map fill + stitch
+    models.py   CaseProfile + EligibilityResult
+    main.py     API endpoints
+  data/
+    program_docs/   official program text for RAG (sample placeholders included)
+    form_schemas/   PDF field -> CaseProfile path maps
+```
+
+## Quickstart
+
+Everything boots **without any API keys** — RAG falls back to a local embedding and
+the CaseProfile store falls back to in-memory. Add keys to go production-grade.
+
+### Backend
+
+```bash
+cd backend
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env        # optional: add Redis / LLM / Band / Poke / Browserbase keys
+uvicorn app.main:app --reload --port 8000
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+cp .env.local.example .env.local
+npm run dev                 # http://localhost:3000
+```
+
+Then open http://localhost:3000 → **Start intake** → eligibility results → dashboard.
+
+## API
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/health` | status + whether Redis/LLM are configured + RAG chunk count |
+| POST | `/api/intake` | create/update a CaseProfile |
+| GET | `/api/case/{id}` | fetch a CaseProfile |
+| POST | `/api/eligibility/{id}` | run routing + specialists, return ranked results |
+| POST | `/api/rag/search` | semantic search over program docs |
+| GET | `/api/forms/{program}/{id}` | resolved PDF fields + what's still missing |
+
+## Next steps (wiring real services)
+
+- **Redis:** set `REDIS_URL`; replace the in-memory index in `app/rag/index.py` with a
+  RedisVL `SearchIndex`, and back the CaseProfile with the Redis Agent Memory Server.
+- **LLM:** set `OPENAI_API_KEY` (real embeddings) and/or `ANTHROPIC_API_KEY`; replace
+  heuristic `assess()` bodies in `app/agents/specialists.py` with grounded LLM calls.
+- **Band:** connect `app/agents/band_space.py` to a real Band shared space.
+- **Poke / Browserbase:** wire SMS reminders, email→calendar, and IHSS portal automation.
+- **Forms:** drop fillable government PDFs into `backend/data/` and fill out the field-map JSONs.
+- Run `npx skills add redis/agent-skills` so AI writes Redis code the Redis-expert way.
+```
