@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -33,6 +33,10 @@ class CaseProfile(BaseModel):
     caregiver: Caregiver = Field(default_factory=Caregiver)
     household: Household = Field(default_factory=Household)
     goals: list[str] = Field(default_factory=list)
+    # Raw structured intake answers keyed by the schema's field_id (e.g.
+    # "recipient.adl_needs"). This is the canonical record of what the user
+    # entered; the typed fields above are projected from it via intake.mapping.
+    answers: dict[str, Any] = Field(default_factory=dict)
     followups: dict[str, str] = Field(default_factory=dict)
     eligibility: dict[str, "EligibilityResult"] = Field(default_factory=dict)
 

@@ -1,79 +1,138 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { QuestionField } from "@/components/intake/question-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { submitIntake } from "@/lib/api";
-import type { CaseProfile, Insurance } from "@/lib/types";
+import { getIntakeSchema, submitIntakeAnswers } from "@/lib/api";
+import {
+  type Answers,
+  type AnswerValue,
+  type IntakeSchema,
+  type MiniModule,
+  type Question,
+  type Screen,
+  evalCondition,
+  recipientName,
+  validateQuestions,
+} from "@/lib/intake-schema";
 
-type Form = {
-  age: string;
-  state: string;
-  insurance: Insurance;
-  veteran: boolean;
-  care_needs: string;
-  relationship: string;
-  employment_status: string;
-  household_size: string;
-  income_monthly: string;
-  goals: string;
-};
-
-const empty: Form = {
-  age: "",
-  state: "CA",
-  insurance: "unknown",
-  veteran: false,
-  care_needs: "",
-  relationship: "",
-  employment_status: "",
-  household_size: "",
-  income_monthly: "",
-  goals: "",
-};
-
-const steps = ["Care recipient", "About you", "Household", "Goals"] as const;
+type Step =
+  | { kind: "screen"; screen: Screen }
+  | { kind: "module"; module: MiniModule };
 
 export default function IntakePage() {
   const router = useRouter();
-  const [step, setStep] = useState(0);
-  const [form, setForm] = useState<Form>(empty);
+  const [schema, setSchema] = useState<IntakeSchema | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [started, setStarted] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [answers, setAnswers] = useState<Answers>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  const set = (patch: Partial<Form>) => setForm((f) => ({ ...f, ...patch }));
-  const pct = ((step + 1) / steps.length) * 100;
+  useEffect(() => {
+    getIntakeSchema()
+      .then(setSchema)
+      .catch(() => setLoadError("Could not load the intake form. Is the backend running on :8000?"));
+  }, []);
+
+  // The active step list = all base screens + any triggered mini-modules (A–F).
+  // Recomputed from answers so modules appear/disappear as the user responds.
+  const steps: Step[] = useMemo(() => {
+    if (!schema) return [];
+    const base: Step[] = schema.screens.map((screen) => ({ kind: "screen" as const, screen }));
+    const modules: Step[] = schema.mini_modules
+      .filter((m) => evalCondition(m.trigger, answers))
+      .map((module) => ({ kind: "module" as const, module }));
+    return [...base, ...modules];
+  }, [schema, answers]);
+
+  if (loadError) {
+    return (
+      <main className="mx-auto max-w-xl px-6 py-20 text-center">
+        <p className="text-muted-foreground">{loadError}</p>
+      </main>
+    );
+  }
+
+  if (!schema) {
+    return (
+      <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-foreground" />
+        <p className="text-sm text-muted-foreground">Loading the intake form…</p>
+      </main>
+    );
+  }
+
+  const name = recipientName(answers, schema);
+
+  if (!started) {
+    return (
+      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-6 py-16">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl">{schema.welcome.header}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-sm text-muted-foreground">{schema.welcome.body}</p>
+            <Button onClick={() => setStarted(true)}>{schema.welcome.button}</Button>
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
+
+  const safeIndex = Math.min(stepIndex, steps.length - 1);
+  const step = steps[safeIndex];
+  const title = step.kind === "screen" ? step.screen.title : step.module.title;
+  const introText = step.kind === "screen" ? step.screen.intro_text : undefined;
+  const allQuestions: Question[] = step.kind === "screen" ? step.screen.questions : step.module.questions;
+  // Apply per-question show_when within the current step.
+  const visibleQuestions = allQuestions.filter((q) => evalCondition(q.show_when, answers));
+
+  const pct = ((safeIndex + 1) / steps.length) * 100;
+  const isLast = safeIndex === steps.length - 1;
+
+  function setAnswer(fieldId: string, value: AnswerValue) {
+    setAnswers((prev) => ({ ...prev, [fieldId]: value }));
+    setErrors((prev) => {
+      if (!prev[fieldId]) return prev;
+      const next = { ...prev };
+      delete next[fieldId];
+      return next;
+    });
+  }
+
+  function validateCurrent(): boolean {
+    const errs = validateQuestions(visibleQuestions, answers);
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  }
+
+  function next() {
+    if (!validateCurrent()) return;
+    if (isLast) {
+      void finish();
+      return;
+    }
+    setStepIndex((s) => Math.min(s + 1, steps.length - 1));
+    setErrors({});
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  }
+
+  function back() {
+    setStepIndex((s) => Math.max(s - 1, 0));
+    setErrors({});
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  }
 
   async function finish() {
     setSubmitting(true);
-    const profile: Partial<CaseProfile> = {
-      id: "",
-      care_recipient: {
-        age: form.age ? Number(form.age) : null,
-        state: form.state,
-        conditions: [],
-        veteran: form.veteran,
-        insurance: form.insurance,
-        current_benefits: [],
-        care_needs: form.care_needs ? form.care_needs.split(",").map((s) => s.trim()) : [],
-      },
-      caregiver: {
-        relationship: form.relationship,
-        employment_status: form.employment_status,
-        hours_per_week: null,
-      },
-      household: {
-        size: form.household_size ? Number(form.household_size) : null,
-        income_monthly: form.income_monthly ? Number(form.income_monthly) : null,
-        assets: null,
-      },
-      goals: form.goals ? form.goals.split(",").map((s) => s.trim()) : [],
-    };
     try {
-      const created = await submitIntake(profile);
+      const created = await submitIntakeAnswers(answers);
       router.push(`/eligibility/${created.id}`);
     } catch {
       setSubmitting(false);
@@ -86,134 +145,44 @@ export default function IntakePage() {
       <div className="space-y-2">
         <Progress value={pct} />
         <p className="text-sm text-muted-foreground">
-          Step {step + 1} of {steps.length}: {steps[step]}
+          Step {stepIndex + 1} of {steps.length}: {title}
+          {step.kind === "module" && (
+            <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
+              Follow-up for programs that may fit
+            </span>
+          )}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>{steps[step]}</CardTitle>
+          <CardTitle>{title}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {step === 0 && (
-            <>
-              <Field label="Care recipient age">
-                <Input type="number" value={form.age} onChange={(e) => set({ age: e.target.value })} />
-              </Field>
-              <Field label="State">
-                <Input value={form.state} onChange={(e) => set({ state: e.target.value })} />
-              </Field>
-              <Field label="Primary insurance" hint="Medi-Cal status strongly affects eligibility for IHSS.">
-                <select
-                  className="h-9 w-full rounded-md border bg-transparent px-3 text-sm"
-                  value={form.insurance}
-                  onChange={(e) => set({ insurance: e.target.value as Insurance })}
-                >
-                  <option value="unknown">Not sure</option>
-                  <option value="medi-cal">Medi-Cal</option>
-                  <option value="medicare">Medicare</option>
-                  <option value="private">Private</option>
-                  <option value="none">None</option>
-                </select>
-              </Field>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={form.veteran}
-                  onChange={(e) => set({ veteran: e.target.checked })}
-                />
-                Care recipient is a veteran
-              </label>
-              <Field label="Care needs (comma separated)">
-                <Input
-                  placeholder="bathing, mobility, medication"
-                  value={form.care_needs}
-                  onChange={(e) => set({ care_needs: e.target.value })}
-                />
-              </Field>
-            </>
+        <CardContent className="space-y-6">
+          {introText && (
+            <p className="text-sm text-muted-foreground">{introText.replaceAll("[recipient name]", name)}</p>
           )}
-
-          {step === 1 && (
-            <>
-              <Field label="Your relationship to the care recipient">
-                <Input
-                  placeholder="daughter, spouse, friend…"
-                  value={form.relationship}
-                  onChange={(e) => set({ relationship: e.target.value })}
-                />
-              </Field>
-              <Field label="Your employment status" hint="Affects Paid Family Leave eligibility.">
-                <Input
-                  placeholder="full-time, part-time, unemployed…"
-                  value={form.employment_status}
-                  onChange={(e) => set({ employment_status: e.target.value })}
-                />
-              </Field>
-            </>
-          )}
-
-          {step === 2 && (
-            <>
-              <Field label="Household size">
-                <Input
-                  type="number"
-                  value={form.household_size}
-                  onChange={(e) => set({ household_size: e.target.value })}
-                />
-              </Field>
-              <Field label="Monthly household income (USD)" hint="Used to estimate Medi-Cal eligibility.">
-                <Input
-                  type="number"
-                  value={form.income_monthly}
-                  onChange={(e) => set({ income_monthly: e.target.value })}
-                />
-              </Field>
-            </>
-          )}
-
-          {step === 3 && (
-            <Field label="What are you hoping to get help with? (comma separated)">
-              <Input
-                placeholder="get paid to provide care, lower medical costs"
-                value={form.goals}
-                onChange={(e) => set({ goals: e.target.value })}
-              />
-            </Field>
-          )}
+          {visibleQuestions.map((q) => (
+            <QuestionField
+              key={q.field_id}
+              question={q}
+              value={answers[q.field_id] ?? null}
+              name={name}
+              error={errors[q.field_id]}
+              onChange={(v) => setAnswer(q.field_id, v)}
+            />
+          ))}
         </CardContent>
       </Card>
 
       <div className="flex justify-between">
-        <Button variant="outline" disabled={step === 0} onClick={() => setStep((s) => s - 1)}>
+        <Button variant="outline" disabled={stepIndex === 0} onClick={back}>
           Back
         </Button>
-        {step < steps.length - 1 ? (
-          <Button onClick={() => setStep((s) => s + 1)}>Next</Button>
-        ) : (
-          <Button onClick={finish} disabled={submitting}>
-            {submitting ? "Submitting…" : "Determine eligibility"}
-          </Button>
-        )}
+        <Button onClick={next} disabled={submitting}>
+          {submitting ? "Submitting…" : isLast ? schema.submit_button : "Next"}
+        </Button>
       </div>
     </main>
-  );
-}
-
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      {children}
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
-    </div>
   );
 }

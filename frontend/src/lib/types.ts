@@ -28,6 +28,7 @@ export interface CaseProfile {
   caregiver: Caregiver;
   household: Household;
   goals: string[];
+  answers: Record<string, unknown>;
   followups: Record<string, string>;
   eligibility: Record<string, EligibilityResult>;
 }
