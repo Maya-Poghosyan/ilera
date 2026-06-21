@@ -147,7 +147,7 @@ export default function GetStartedPage() {
 
         {/* Step 3: Done — proceed to intake */}
         {step === "done" && (
-          <Card className="w-full px-8 py-6">
+          <Card className="w-full min-w-[28rem] px-8 py-6">
             <CardHeader className="text-center">
               <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Check className="size-6" />
