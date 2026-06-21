@@ -1,31 +1,16 @@
-import Link from "next/link";
-
-const nav = [
-  { href: "/dashboard", label: "Care Calendar" },
-  { href: "/dashboard/records", label: "Records & Renewal" },
-  { href: "/dashboard/documents", label: "Documents" },
-];
+import { Logo } from "@/components/logo";
+import { DashboardNav } from "@/components/dashboard-nav";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-full flex-1">
-      <aside className="w-60 shrink-0 border-r p-4">
-        <Link href="/" className="mb-6 block text-lg font-bold">
-          Ilera
-        </Link>
-        <nav className="space-y-1">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="block rounded-md px-3 py-2 text-sm hover:bg-muted"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+      <aside className="flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-4">
+        <div className="mb-6 px-1">
+          <Logo />
+        </div>
+        <DashboardNav />
       </aside>
-      <div className="flex-1 p-8">{children}</div>
+      <div className="flex-1 bg-muted/40 p-8">{children}</div>
     </div>
   );
 }
