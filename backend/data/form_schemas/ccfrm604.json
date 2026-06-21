@@ -10,53 +10,44 @@
   },
   "fields": {
     "p_name_1": {
-      "profile_path": null,
-      "label": "Primary Contact First Name",
-      "needs_user_input": true
+      "profile_path": "care_recipient.name",
+      "label": "Primary Contact First Name"
     },
     "p_name_3": {
-      "profile_path": null,
-      "label": "Primary Contact Last Name",
-      "needs_user_input": true
+      "profile_path": "care_recipient.name",
+      "label": "Primary Contact Last Name"
     },
     "person_fname_1": {
-      "profile_path": null,
-      "label": "Person 1 First Name",
-      "needs_user_input": true
+      "profile_path": "care_recipient.name",
+      "label": "Person 1 First Name"
     },
     "person_lname_1": {
-      "profile_path": null,
-      "label": "Person 1 Last Name",
-      "needs_user_input": true
+      "profile_path": "care_recipient.name",
+      "label": "Person 1 Last Name"
     },
     "pri_state_1": {
       "profile_path": "care_recipient.state",
       "label": "Person 1 State"
     },
     "dob_person_1": {
-      "profile_path": null,
-      "label": "Person 1 Date of Birth",
-      "needs_user_input": true
+      "profile_path": "care_recipient.date_of_birth",
+      "label": "Person 1 Date of Birth"
     },
     "pri_address_1": {
-      "profile_path": null,
-      "label": "Person 1 Home Address",
-      "needs_user_input": true
+      "profile_path": "care_recipient.street_address",
+      "label": "Person 1 Home Address"
     },
     "pri_city_1": {
-      "profile_path": null,
-      "label": "Person 1 City",
-      "needs_user_input": true
+      "profile_path": "care_recipient.city",
+      "label": "Person 1 City"
     },
     "primary_phone_1": {
-      "profile_path": null,
-      "label": "Person 1 Phone",
-      "needs_user_input": true
+      "profile_path": "care_recipient.phone",
+      "label": "Person 1 Phone"
     },
     "contact-3-1": {
-      "profile_path": null,
-      "label": "Primary Contact Email",
-      "needs_user_input": true
+      "profile_path": "care_recipient.email",
+      "label": "Primary Contact Email"
     }
   }
 }

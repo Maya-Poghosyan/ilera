@@ -1,8 +1,17 @@
 export type Insurance = "medi-cal" | "medicare" | "private" | "none" | "unknown";
 
 export interface CareRecipient {
+  name: string;
+  date_of_birth: string;
   age?: number | null;
+  gender: string;
   state: string;
+  street_address: string;
+  city: string;
+  zip_code: string;
+  phone: string;
+  email: string;
+  ssn: string;
   conditions: string[];
   veteran: boolean;
   insurance: Insurance;
@@ -11,9 +20,12 @@ export interface CareRecipient {
 }
 
 export interface Caregiver {
+  name: string;
   relationship: string;
   employment_status: string;
   hours_per_week?: number | null;
+  phone: string;
+  address: string;
 }
 
 export interface Household {

@@ -11,14 +11,12 @@
   },
   "fields": {
     "form1[0].#subform[0].FirstName-1[0]": {
-      "profile_path": null,
-      "label": "Beneficiary Last Name",
-      "needs_user_input": true
+      "profile_path": "care_recipient.name",
+      "label": "Beneficiary Last Name"
     },
     "form1[0].#subform[0].LastName-1[0]": {
-      "profile_path": null,
-      "label": "Beneficiary First Name",
-      "needs_user_input": true
+      "profile_path": "care_recipient.name",
+      "label": "Beneficiary First Name"
     },
     "form1[0].#subform[0].MiddleInitial-1[0]": {
       "profile_path": null,
@@ -26,28 +24,24 @@
       "needs_user_input": true
     },
     "form1[0].#subform[0].Address-1[0]": {
-      "profile_path": null,
-      "label": "Beneficiary Address",
-      "needs_user_input": true
+      "profile_path": "care_recipient.street_address",
+      "label": "Beneficiary Address"
     },
     "form1[0].#subform[0].City-1[0]": {
-      "profile_path": null,
-      "label": "Beneficiary City",
-      "needs_user_input": true
+      "profile_path": "care_recipient.city",
+      "label": "Beneficiary City"
     },
     "form1[0].#subform[0].State-1[0]": {
       "profile_path": "care_recipient.state",
       "label": "Beneficiary State"
     },
     "form1[0].#subform[0].ZipCode-1[0]": {
-      "profile_path": null,
-      "label": "Beneficiary Zip Code",
-      "needs_user_input": true
+      "profile_path": "care_recipient.zip_code",
+      "label": "Beneficiary Zip Code"
     },
     "form1[0].#subform[0].SSN-1[0]": {
-      "profile_path": null,
-      "label": "Beneficiary Phone Number",
-      "needs_user_input": true
+      "profile_path": "care_recipient.phone",
+      "label": "Beneficiary Phone Number"
     },
     "form1[0].#subform[0].PhoneNumb-1[0]": {
       "profile_path": null,
@@ -55,11 +49,10 @@
       "needs_user_input": true
     },
     "form1[0].#subform[0].RadioButtonList[0]": {
-      "profile_path": null,
+      "profile_path": "care_recipient.gender",
       "label": "Beneficiary Gender",
       "type": "radio",
-      "needs_user_input": true,
-      "options": {"male": "Hombre", "female": "Mujer"}
+      "value_map": {"male": "Hombre", "female": "Mujer"}
     },
     "form1[0].#subform[0].NewAddressBox-1[0]": {
       "profile_path": null,

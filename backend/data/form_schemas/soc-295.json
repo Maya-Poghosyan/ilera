@@ -11,9 +11,8 @@
   },
   "fields": {
     "SOC 295 5": {
-      "profile_path": null,
-      "label": "Name of Applicant",
-      "needs_user_input": true
+      "profile_path": "care_recipient.name",
+      "label": "Name of Applicant"
     },
     "SOC 295 6": {
       "profile_path": null,
@@ -30,38 +29,32 @@
       "label": "Case Number"
     },
     "SOC 295 7": {
-      "profile_path": null,
-      "label": "Street Address",
-      "needs_user_input": true
+      "profile_path": "care_recipient.street_address",
+      "label": "Street Address"
     },
     "SOC 295 8": {
-      "profile_path": null,
-      "label": "City",
-      "needs_user_input": true
+      "profile_path": "care_recipient.city",
+      "label": "City"
     },
     "SOC 295 9": {
       "profile_path": "care_recipient.state",
       "label": "State"
     },
     "SOC 295 10": {
-      "profile_path": null,
-      "label": "Zip Code",
-      "needs_user_input": true
+      "profile_path": "care_recipient.zip_code",
+      "label": "Zip Code"
     },
     "SOC 295 11": {
-      "profile_path": null,
-      "label": "Telephone",
-      "needs_user_input": true
+      "profile_path": "care_recipient.phone",
+      "label": "Telephone"
     },
     "SOC 295 12": {
-      "profile_path": null,
-      "label": "Email",
-      "needs_user_input": true
+      "profile_path": "care_recipient.email",
+      "label": "Email"
     },
     "SOC 295 13": {
-      "profile_path": null,
-      "label": "Date of Birth",
-      "needs_user_input": true
+      "profile_path": "care_recipient.date_of_birth",
+      "label": "Date of Birth"
     },
     "SOC 295 34": {
       "profile_path": "care_recipient.veteran",
@@ -179,26 +172,24 @@
       "needs_user_input": true
     },
     "SOC 295 1042": {
-      "profile_path": null,
-      "label": "Representative's Telephone Number",
-      "needs_user_input": true
+      "profile_path": "caregiver.phone",
+      "label": "Representative's Telephone Number"
     },
     "SOC 295 1043": {
-      "profile_path": null,
-      "label": "Representative's Address",
-      "needs_user_input": true
+      "profile_path": "caregiver.address",
+      "label": "Representative's Address"
     },
     "SOC 295 14": {
-      "profile_path": null,
+      "profile_path": "care_recipient.gender",
       "label": "Gender - Male",
       "type": "checkbox",
-      "needs_user_input": true
+      "check_when": "male"
     },
     "SOC 295 15": {
-      "profile_path": null,
+      "profile_path": "care_recipient.gender",
       "label": "Gender - Female",
       "type": "checkbox",
-      "needs_user_input": true
+      "check_when": "female"
     },
     "SOC 295 94": {
       "profile_path": null,

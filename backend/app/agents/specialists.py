@@ -17,6 +17,15 @@ class IHSSAgent(SpecialistAgent):
         on_medical = cr.insurance == "medi-cal"
         confidence = 0.7 if on_medical else 0.35
         status = "likely" if on_medical else "needs_info"
+        followups = []
+        if not cr.street_address:
+            followups.append(FollowupQuestion(
+                program=self.program,
+                id="ihss_living_situation",
+                prompt="Does the care recipient live in their own home (not a facility)?",
+                type="boolean",
+                why="IHSS only covers care delivered in the recipient's own home.",
+            ))
         return EligibilityResult(
             program=self.program,
             confidence=confidence,
@@ -29,15 +38,7 @@ class IHSSAgent(SpecialistAgent):
             required_documents=["SOC 295 (application)", "Medi-Cal verification", "Proof of residency"],
             next_steps=["Apply for IHSS via county social services", "Schedule in-home assessment"],
             missing_info=[] if on_medical else ["Medi-Cal enrollment status"],
-            followups=[
-                FollowupQuestion(
-                    program=self.program,
-                    id="ihss_living_situation",
-                    prompt="Does the care recipient live in their own home (not a facility)?",
-                    type="boolean",
-                    why="IHSS only covers care delivered in the recipient's own home.",
-                )
-            ],
+            followups=followups,
             sources=self._sources("IHSS eligibility requirements"),
             citations=self._citations("IHSS eligibility requirements"),
         )
@@ -56,6 +57,15 @@ class MediCalAgent(SpecialistAgent):
             status, confidence = "likely", 0.75
         else:
             status, confidence = "possible", 0.5
+        followups = []
+        if income is None:
+            followups.append(FollowupQuestion(
+                program=self.program,
+                id="medical_income",
+                prompt="What is your total monthly household income?",
+                type="short_text",
+                why="Income relative to household size determines Medi-Cal eligibility.",
+            ))
         return EligibilityResult(
             program=self.program,
             confidence=confidence,
@@ -65,15 +75,7 @@ class MediCalAgent(SpecialistAgent):
             required_documents=["Proof of income", "Proof of identity", "Proof of California residency"],
             next_steps=["Apply via Covered California / county", "Gather income documentation"],
             missing_info=[] if income is not None else ["Monthly household income", "Household size"],
-            followups=[
-                FollowupQuestion(
-                    program=self.program,
-                    id="medical_income",
-                    prompt="What is your total monthly household income?",
-                    type="short_text",
-                    why="Income relative to household size determines Medi-Cal eligibility.",
-                )
-            ],
+            followups=followups,
             sources=self._sources("Medi-Cal income eligibility"),
             citations=self._citations("Medi-Cal income eligibility"),
         )
@@ -88,6 +90,15 @@ class PaidFamilyLeaveAgent(SpecialistAgent):
         employed = "employ" in cg.employment_status.lower() or cg.employment_status.lower() in {"full-time", "part-time", "w2"}
         confidence = 0.7 if employed else 0.3
         status = "likely" if employed else "unlikely"
+        followups = []
+        if not employed:
+            followups.append(FollowupQuestion(
+                program=self.program,
+                id="pfl_sdi",
+                prompt="Have you paid into State Disability Insurance (SDI) in the last 18 months?",
+                type="boolean",
+                why="PFL eligibility requires recent SDI-covered earnings.",
+            ))
         return EligibilityResult(
             program=self.program,
             confidence=confidence,
@@ -97,15 +108,7 @@ class PaidFamilyLeaveAgent(SpecialistAgent):
             required_documents=["DE 2501F (claim form)", "Care recipient medical certification"],
             next_steps=["File a PFL claim with EDD", "Obtain medical certification"],
             missing_info=[] if employed else ["Caregiver employment / SDI contribution history"],
-            followups=[
-                FollowupQuestion(
-                    program=self.program,
-                    id="pfl_sdi",
-                    prompt="Have you paid into State Disability Insurance (SDI) in the last 18 months?",
-                    type="boolean",
-                    why="PFL eligibility requires recent SDI-covered earnings.",
-                )
-            ],
+            followups=followups,
             sources=self._sources("Paid Family Leave eligibility"),
             citations=self._citations("Paid Family Leave eligibility"),
         )
@@ -160,6 +163,15 @@ class MedicareAgent(SpecialistAgent):
             status, confidence = "possible", 0.45
         else:
             status, confidence = "needs_info", 0.35
+        followups = []
+        if not on_medicare and cr.age is None:
+            followups.append(FollowupQuestion(
+                program=self.program,
+                id="medicare_enrolled",
+                prompt="Is the care recipient currently enrolled in Medicare (Part A/B)?",
+                type="boolean",
+                why="Medicare enrollment unlocks hospice respite and care-coordination benefits.",
+            ))
         return EligibilityResult(
             program=self.program,
             confidence=confidence,
@@ -175,15 +187,7 @@ class MedicareAgent(SpecialistAgent):
                 "Check eligibility for PACE or the GUIDE dementia program",
             ],
             missing_info=[] if (cr.age is not None) else ["Care recipient age", "Medicare enrollment status"],
-            followups=[
-                FollowupQuestion(
-                    program=self.program,
-                    id="medicare_enrolled",
-                    prompt="Is the care recipient currently enrolled in Medicare (Part A/B)?",
-                    type="boolean",
-                    why="Medicare enrollment unlocks hospice respite and care-coordination benefits.",
-                )
-            ],
+            followups=followups,
             sources=self._sources("Medicare eligibility hospice respite"),
             citations=self._citations("Medicare eligibility hospice respite"),
         )
@@ -195,6 +199,15 @@ class TaxAgent(SpecialistAgent):
 
     def _heuristic_assess(self, profile: CaseProfile) -> EligibilityResult:
         provides_home = profile.caregiver.relationship != ""
+        followups = []
+        if not provides_home:
+            followups.append(FollowupQuestion(
+                program=self.program,
+                id="tax_dependent_support",
+                prompt="Do you provide more than half of the care recipient's financial support?",
+                type="boolean",
+                why="Providing over half of support is a key test for claiming them as a dependent.",
+            ))
         return EligibilityResult(
             program=self.program,
             confidence=0.5 if provides_home else 0.4,
@@ -212,15 +225,7 @@ class TaxAgent(SpecialistAgent):
                 "If a live-in IHSS provider, review Notice 2014-7 income exclusion",
             ],
             missing_info=["Whether caregiver provides >half of recipient's support"],
-            followups=[
-                FollowupQuestion(
-                    program=self.program,
-                    id="tax_dependent_support",
-                    prompt="Do you provide more than half of the care recipient's financial support?",
-                    type="boolean",
-                    why="Providing over half of support is a key test for claiming them as a dependent.",
-                )
-            ],
+            followups=followups,
             sources=self._sources("dependent care credit medical expense deduction caregiver"),
             citations=self._citations("dependent care credit medical expense deduction caregiver"),
         )

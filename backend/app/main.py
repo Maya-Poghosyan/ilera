@@ -116,12 +116,45 @@ async def _scheduler_loop() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     task = asyncio.create_task(_scheduler_loop())
+    band_task = None
+    if settings.has_band or _band_registry_exists():
+        band_task = asyncio.create_task(_band_loop())
     yield
     task.cancel()
+    if band_task:
+        band_task.cancel()
     try:
         await task
     except asyncio.CancelledError:
         pass
+    if band_task:
+        try:
+            await band_task
+        except asyncio.CancelledError:
+            pass
+
+
+def _band_registry_exists() -> bool:
+    import os
+    path = settings.band_agents_file
+    if path and not os.path.isabs(path):
+        path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), path
+        )
+    return bool(path and os.path.exists(path))
+
+
+async def _band_loop() -> None:
+    """Start Band agents in the background so they appear active on the dashboard."""
+    try:
+        from .integrations.band import build_agents
+        agents = build_agents()
+        await asyncio.gather(*(a.start() for _, a in agents))
+        names = ", ".join(f"{k}" for k, _ in agents)
+        logger.info("Band agents connected: %s", names)
+        await asyncio.gather(*(a.run_forever() for _, a in agents))
+    except Exception:
+        logger.warning("Band agents could not start (missing credentials or band package)")
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
@@ -191,6 +224,10 @@ class EligibilityResponse(BaseModel):
     interaction_notes: list[InteractionNote]
 
 
+# Track agent executions for the Band dashboard
+_agent_executions: list[dict] = []
+
+
 @app.post("/api/eligibility/{case_id}", response_model=EligibilityResponse)
 def determine_eligibility(case_id: str) -> EligibilityResponse:
     profile = get_profile(case_id)
@@ -199,12 +236,38 @@ def determine_eligibility(case_id: str) -> EligibilityResponse:
     routing = run_routing(profile)
     profile.eligibility = {r.program: r for r in routing.results}
     save_profile(profile)
+    # Log agent executions
+    now = datetime.now(timezone.utc).isoformat()
+    for r in routing.results:
+        _agent_executions.append({
+            "agent": r.program,
+            "case_id": case_id,
+            "status": r.status,
+            "confidence": r.confidence,
+            "timestamp": now,
+        })
     return EligibilityResponse(
         results=routing.results,
         followups=routing.followups,
         strategy_notes=routing.strategy_notes,
         interaction_notes=routing.interaction_notes,
     )
+
+
+@app.get("/api/agents/status")
+def agents_status() -> dict:
+    """Return which specialist agents have executed and when."""
+    from .agents.specialists import ALL_SPECIALISTS
+    agents = {}
+    for cls in ALL_SPECIALISTS:
+        agent = cls()
+        runs = [e for e in _agent_executions if e["agent"] == agent.program]
+        agents[agent.program] = {
+            "doc_key": agent.doc_key,
+            "total_runs": len(runs),
+            "last_run": runs[-1] if runs else None,
+        }
+    return {"agents": agents, "band_configured": settings.has_band}
 
 
 class RagQuery(BaseModel):
