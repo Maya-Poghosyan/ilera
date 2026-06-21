@@ -11,6 +11,7 @@ type CalEvent = {
   time?: string;
   kind: EventKind;
   suggested?: boolean;
+  description?: string;
 };
 
 const YEAR = 2026;
@@ -24,8 +25,8 @@ const events: CalEvent[] = [
 ];
 
 const suggestedEvents: CalEvent[] = [
-  { day: 24, title: "Pharmacy refill pickup", time: "9:00 AM", kind: "Appointment", suggested: true },
-  { day: 28, title: "IHSS pay stub review", kind: "Deadline", suggested: true },
+  { day: 24, title: "Pharmacy refill pickup", time: "9:00 AM", kind: "Appointment", suggested: true, description: "Found in email from CVS — prescription #4021 ready for pickup at Main St location." },
+  { day: 28, title: "IHSS pay stub review", kind: "Deadline", suggested: true, description: "IHSS direct deposit scheduled for Jun 28. Review hours logged against pay stub." },
 ];
 
 const allEvents = [...events, ...suggestedEvents];
@@ -69,15 +70,20 @@ function SuggestedEventsPanel() {
         {suggestedEvents.map((e) => (
           <div
             key={e.title}
-            className="flex items-center justify-between rounded-lg border border-dashed border-primary/30 bg-white px-3 py-2"
+            className="flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-white px-3 py-2.5"
           >
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium text-foreground">{e.title}</p>
+            <div className="min-w-0 flex-1 space-y-1">
+              <p className="text-sm font-medium text-foreground">{e.title}</p>
               <p className="text-xs text-muted-foreground">
                 {monthName} {e.day}{e.time ? ` · ${e.time}` : ""} · {e.kind}
               </p>
+              {e.description && (
+                <p className="text-xs leading-relaxed text-muted-foreground/80">
+                  {e.description}
+                </p>
+              )}
             </div>
-            <div className="ml-3 flex items-center gap-1">
+            <div className="ml-3 flex shrink-0 items-center gap-1 pt-0.5">
               <button
                 className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-primary hover:bg-primary hover:text-white transition-colors"
                 aria-label="Accept"
@@ -117,6 +123,8 @@ export default function CalendarPage() {
         </div>
       </div>
 
+      <SuggestedEventsPanel />
+
       <div className="overflow-hidden rounded-xl border border-brand-subtle bg-white shadow-xs">
         <div className="flex items-center justify-between border-b border-brand-subtle bg-brand-subtle/40 px-4 py-3">
           <h2 className="text-lg font-semibold">
@@ -154,7 +162,7 @@ export default function CalendarPage() {
               <div
                 key={i}
                 className={cn(
-                  "min-h-28 border-b border-r border-brand-subtle/60 p-1.5 last:border-r-0",
+                  "flex min-h-28 flex-col border-b border-r border-brand-subtle/60 p-1.5 last:border-r-0",
                   (i + 1) % 7 === 0 && "border-r-0",
                   i >= 35 && "border-b-0",
                   !cell.inMonth && "bg-brand-subtle/20",
@@ -174,12 +182,12 @@ export default function CalendarPage() {
                     {cell.day}
                   </span>
                 </div>
-                <div className="space-y-1">
+                <div className="flex flex-1 flex-col gap-1">
                   {dayEvents.map((e) => (
                     <div
                       key={e.title}
                       className={cn(
-                        "truncate rounded-md px-1.5 py-1 text-[11px] font-medium leading-tight",
+                        "flex-1 rounded-md px-1.5 py-1 text-[11px] font-medium leading-tight",
                         e.suggested
                           ? "border border-dashed border-primary/40 bg-brand-subtle/50 text-primary/70"
                           : "bg-brand-subtle text-primary",
@@ -198,7 +206,6 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <SuggestedEventsPanel />
     </div>
   );
 }
