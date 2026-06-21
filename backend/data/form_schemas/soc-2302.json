@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "form_id": "SOC-2302",
+    "title": "Provider Paid Sick Leave Request",
+    "program": "IHSS-Provider",
+    "agency": "CDSS",
+    "pdf_path": "CDSS/IHSS-Provider/SOC-2302.pdf",
+    "total_fields": 63,
+    "notes": "Scaffold - field mappings not yet authored"
+  },
+  "fields": {}
+}

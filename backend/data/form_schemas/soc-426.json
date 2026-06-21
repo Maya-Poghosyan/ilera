@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "form_id": "SOC-426",
+    "title": "Provider Enrollment Form",
+    "program": "IHSS-Provider",
+    "agency": "CDSS",
+    "pdf_path": "CDSS/IHSS-Provider/SOC-426.pdf",
+    "total_fields": 30,
+    "notes": "Scaffold - field mappings not yet authored"
+  },
+  "fields": {}
+}

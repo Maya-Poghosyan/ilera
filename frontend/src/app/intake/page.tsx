@@ -74,6 +74,7 @@ export default function IntakePage() {
     };
     try {
       const created = await submitIntake(profile);
+      localStorage.setItem("ilera_case_id", created.id);
       router.push(`/eligibility/${created.id}`);
     } catch {
       setSubmitting(false);

@@ -1,4 +1,4 @@
-import type { CaseProfile, EligibilityResponse, Reminder, ReminderCreate, ReminderUpdate, ReminderTemplates } from "./types";
+import type { CaseProfile, EligibilityResponse, FormSchema, Reminder, ReminderCreate, ReminderUpdate, ReminderTemplates } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
@@ -79,4 +79,24 @@ export function getReminderTemplates(): Promise<ReminderTemplates> {
 
 export function scanForEvents(): Promise<{ scanned: boolean; poke: unknown }> {
   return request<{ scanned: boolean; poke: unknown }>("/api/poke/scan", { method: "POST" });
+}
+
+// ---------------------------------------------------------------------------
+// Forms
+// ---------------------------------------------------------------------------
+
+export function listForms(): Promise<{ forms: FormSchema[] }> {
+  return request<{ forms: FormSchema[] }>("/api/forms");
+}
+
+export function getFormFields(formId: string, caseId: string) {
+  return request<{
+    resolved: Record<string, unknown>;
+    missing: string[];
+    needs_user_input: Array<{ field: string; label: string; type: string }>;
+  }>(`/api/forms/${formId}/${caseId}`);
+}
+
+export function getFormDownloadUrl(formId: string, caseId: string): string {
+  return `${BASE}/api/forms/${formId}/${caseId}/download`;
 }

@@ -1,0 +1,236 @@
+{
+  "_meta": {
+    "form_id": "VA-10-10CG",
+    "title": "Application for Comprehensive Assistance for Family Caregivers",
+    "program": "Caregiver",
+    "agency": "VA",
+    "pdf_path": "VA/Caregiver/VA-10-10CG.pdf",
+    "source_url": "https://www.va.gov/forms/10-10cg/",
+    "total_fields": 62,
+    "notes": "VA CHAMPVA OHI Certification form (10-7959C). XFA-style field names. Spanish tooltips. Checkboxes use Si/No export values."
+  },
+  "fields": {
+    "form1[0].#subform[0].FirstName-1[0]": {
+      "profile_path": null,
+      "label": "Beneficiary Last Name",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].LastName-1[0]": {
+      "profile_path": null,
+      "label": "Beneficiary First Name",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].MiddleInitial-1[0]": {
+      "profile_path": null,
+      "label": "Beneficiary Middle Initial",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].Address-1[0]": {
+      "profile_path": null,
+      "label": "Beneficiary Address",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].City-1[0]": {
+      "profile_path": null,
+      "label": "Beneficiary City",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].State-1[0]": {
+      "profile_path": "care_recipient.state",
+      "label": "Beneficiary State"
+    },
+    "form1[0].#subform[0].ZipCode-1[0]": {
+      "profile_path": null,
+      "label": "Beneficiary Zip Code",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].SSN-1[0]": {
+      "profile_path": null,
+      "label": "Beneficiary Phone Number",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].PhoneNumb-1[0]": {
+      "profile_path": null,
+      "label": "Beneficiary SSN",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].RadioButtonList[0]": {
+      "profile_path": null,
+      "label": "Beneficiary Gender",
+      "type": "radio",
+      "needs_user_input": true,
+      "options": {"male": "Hombre", "female": "Mujer"}
+    },
+    "form1[0].#subform[0].NewAddressBox-1[0]": {
+      "profile_path": null,
+      "label": "New Address Checkbox",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[0].RadioButtonList[1]": {
+      "profile_path": "care_recipient.insurance",
+      "label": "Has Medicare Part A",
+      "type": "radio",
+      "value_map": {
+        "medi-cal": "Si",
+        "medicare": "Si",
+        "private": "No",
+        "none": "No",
+        "unknown": "No"
+      }
+    },
+    "form1[0].#subform[0].#area[0].Date-PartD[0]": {
+      "profile_path": null,
+      "label": "Medicare Part A Effective Date",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[0].PartD_CarrierName[0]": {
+      "profile_path": null,
+      "label": "Medicare Part A Carrier Name",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[1].RadioButtonList[2]": {
+      "profile_path": null,
+      "label": "Has Medicare Part B",
+      "type": "radio",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[1].Date-PartD[1]": {
+      "profile_path": null,
+      "label": "Medicare Part B Effective Date",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[1].PartD_CarrierName[1]": {
+      "profile_path": null,
+      "label": "Medicare Part B Carrier Name",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[2].RadioButtonList[3]": {
+      "profile_path": null,
+      "label": "Has Medicare Part D",
+      "type": "radio",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[2].Date-PartD[2]": {
+      "profile_path": null,
+      "label": "Medicare Part D Effective Date",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[2].PartD_CarrierName[2]": {
+      "profile_path": null,
+      "label": "Medicare Part D Carrier Name",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].RadioButtonList[4]": {
+      "profile_path": null,
+      "label": "Has Medicaid",
+      "type": "radio",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[3].MedicareAdvantage[0]": {
+      "profile_path": null,
+      "label": "Has Medicare Advantage",
+      "type": "radio",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].PartA[0]": {
+      "profile_path": null,
+      "label": "Has Part A",
+      "type": "radio",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[5].NameofInsurance-1[0]": {
+      "profile_path": null,
+      "label": "Insurance #1 Name",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[5].Date-TermnNameInsurance-1[0]": {
+      "profile_path": null,
+      "label": "Insurance #1 Termination Date",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[5].Date-TermnNameInsurance-1[1]": {
+      "profile_path": null,
+      "label": "Insurance #1 Effective Date",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[5].Insurancethruemployer[0]": {
+      "profile_path": "caregiver.employment_status",
+      "label": "Insurance through employer #1",
+      "type": "radio",
+      "value_map": {
+        "employed": "Si",
+        "full-time": "Si",
+        "part-time": "Si",
+        "": "No",
+        "unemployed": "No",
+        "retired": "No"
+      }
+    },
+    "form1[0].#subform[0].#area[5].InsuranceCoverPrescript[0]": {
+      "profile_path": null,
+      "label": "Insurance #1 Covers Prescriptions",
+      "type": "radio",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[5].InsuranceprescriptExplain[0]": {
+      "profile_path": null,
+      "label": "Insurance #1 Prescription Explanation",
+      "type": "radio",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[5].Comments-Ins-1[0]": {
+      "profile_path": null,
+      "label": "Insurance #1 Comments",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[6].NameofInsurance-1[1]": {
+      "profile_path": null,
+      "label": "Insurance #2 Name",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[6].Date-TermnNameInsurance-2[0]": {
+      "profile_path": null,
+      "label": "Insurance #2 Termination Date",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[6].Date-TermnNameInsurance-2\\.1[0]": {
+      "profile_path": null,
+      "label": "Insurance #2 Effective Date",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[6].Insurancethruemployer-2[0]": {
+      "profile_path": null,
+      "label": "Insurance through employer #2",
+      "type": "radio",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[6].InsuranceprescriptExplain-2[0]": {
+      "profile_path": null,
+      "label": "Insurance #2 Covers Prescriptions",
+      "type": "radio",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[6].InsuranceprescriptExplain[1]": {
+      "profile_path": null,
+      "label": "Insurance #2 Prescription Explanation",
+      "type": "radio",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[6].Comments-Ins-1[1]": {
+      "profile_path": null,
+      "label": "Insurance #2 Comments",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[6].Signature[0]": {
+      "profile_path": null,
+      "label": "Signature",
+      "needs_user_input": true
+    },
+    "form1[0].#subform[0].#area[6].DateTimeField1[0]": {
+      "profile_path": null,
+      "label": "Date",
+      "needs_user_input": true
+    }
+  }
+}

@@ -1,0 +1,317 @@
+{
+  "_meta": {
+    "form_id": "SOC-295",
+    "title": "Application for In-Home Supportive Services",
+    "program": "IHSS",
+    "agency": "CDSS",
+    "pdf_path": "CDSS/IHSS/SOC-295.pdf",
+    "source_url": "https://www.cdss.ca.gov/cdssweb/entres/forms/english/soc295.pdf",
+    "total_fields": 157,
+    "notes": "Fields named 'SOC 295 N'. Checkboxes use /Yes export value."
+  },
+  "fields": {
+    "SOC 295 5": {
+      "profile_path": null,
+      "label": "Name of Applicant",
+      "needs_user_input": true
+    },
+    "SOC 295 6": {
+      "profile_path": null,
+      "label": "Social Security Number",
+      "needs_user_input": true
+    },
+    "SOC 295 3": {
+      "profile_path": null,
+      "label": "Date of Application",
+      "needs_user_input": true
+    },
+    "SOC 295 4": {
+      "profile_path": "id",
+      "label": "Case Number"
+    },
+    "SOC 295 7": {
+      "profile_path": null,
+      "label": "Street Address",
+      "needs_user_input": true
+    },
+    "SOC 295 8": {
+      "profile_path": null,
+      "label": "City",
+      "needs_user_input": true
+    },
+    "SOC 295 9": {
+      "profile_path": "care_recipient.state",
+      "label": "State"
+    },
+    "SOC 295 10": {
+      "profile_path": null,
+      "label": "Zip Code",
+      "needs_user_input": true
+    },
+    "SOC 295 11": {
+      "profile_path": null,
+      "label": "Telephone",
+      "needs_user_input": true
+    },
+    "SOC 295 12": {
+      "profile_path": null,
+      "label": "Email",
+      "needs_user_input": true
+    },
+    "SOC 295 13": {
+      "profile_path": null,
+      "label": "Date of Birth",
+      "needs_user_input": true
+    },
+    "SOC 295 34": {
+      "profile_path": "care_recipient.veteran",
+      "label": "Veteran - Yes",
+      "type": "checkbox",
+      "check_when": true
+    },
+    "SOC 295 35": {
+      "profile_path": "care_recipient.veteran",
+      "label": "Veteran - No",
+      "type": "checkbox",
+      "check_when": false
+    },
+    "SOC 295 44": {
+      "profile_path": "care_recipient.care_needs",
+      "label": "Services being requested",
+      "transform": "join_list"
+    },
+    "SOC 295 89": {
+      "profile_path": null,
+      "label": "Ethnic Origin",
+      "type": "choice",
+      "needs_user_input": true
+    },
+    "SOC 295 90": {
+      "profile_path": null,
+      "label": "Language - Read",
+      "type": "choice",
+      "needs_user_input": true
+    },
+    "SOC 295 91": {
+      "profile_path": null,
+      "label": "Language - Speak",
+      "type": "choice",
+      "needs_user_input": true
+    },
+    "SOC 295 50": {
+      "profile_path": null,
+      "label": "Name of Spouse",
+      "needs_user_input": true
+    },
+    "SOC 295 51": {
+      "profile_path": null,
+      "label": "Spouse's Birthdate",
+      "needs_user_input": true
+    },
+    "SOC 295 52": {
+      "profile_path": null,
+      "label": "Spouse's Social Security Number",
+      "needs_user_input": true
+    },
+    "SOC 295 1041": {
+      "profile_path": "caregiver.relationship",
+      "label": "Representative's Relationship to Applicant"
+    },
+    "SOC 295 39": {
+      "profile_path": null,
+      "label": "SSI/SSP - Yes",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 40": {
+      "profile_path": null,
+      "label": "SSI/SSP - No",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 38": {
+      "profile_path": null,
+      "label": "Veteran name and Claim Number",
+      "needs_user_input": true
+    },
+    "SOC 295 36": {
+      "profile_path": null,
+      "label": "Spouse/Child of Veteran - Yes",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 37": {
+      "profile_path": null,
+      "label": "Spouse/Child of Veteran - No",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 45": {
+      "profile_path": null,
+      "label": "Past IHSS - Yes",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 46": {
+      "profile_path": null,
+      "label": "Past IHSS - No",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 47": {
+      "profile_path": null,
+      "label": "Date/county where service was last received",
+      "needs_user_input": true
+    },
+    "SOC 295 48": {
+      "profile_path": "caregiver.hours_per_week",
+      "label": "Total Monthly Hours",
+      "transform": "hours_weekly_to_monthly"
+    },
+    "SOC 295 1038": {
+      "profile_path": null,
+      "label": "Date (Signature)",
+      "needs_user_input": true
+    },
+    "SOC 295 1040": {
+      "profile_path": null,
+      "label": "Date (Representative Signature)",
+      "needs_user_input": true
+    },
+    "SOC 295 1042": {
+      "profile_path": null,
+      "label": "Representative's Telephone Number",
+      "needs_user_input": true
+    },
+    "SOC 295 1043": {
+      "profile_path": null,
+      "label": "Representative's Address",
+      "needs_user_input": true
+    },
+    "SOC 295 14": {
+      "profile_path": null,
+      "label": "Gender - Male",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 15": {
+      "profile_path": null,
+      "label": "Gender - Female",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 94": {
+      "profile_path": null,
+      "label": "Blind - Yes",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 95": {
+      "profile_path": null,
+      "label": "Blind - No",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1014": {
+      "profile_path": null,
+      "label": "Visually Impaired - Yes",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1015": {
+      "profile_path": null,
+      "label": "Visually Impaired - No",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1049": {
+      "profile_path": "care_recipient.insurance",
+      "label": "Medi-Cal Aid Code"
+    },
+    "SOC 295 49": {
+      "profile_path": null,
+      "label": "Name Used (if different)",
+      "needs_user_input": true
+    },
+    "SOC 295 57": {
+      "profile_path": null,
+      "label": "Household Member 1 Name",
+      "needs_user_input": true
+    },
+    "SOC 295 58": {
+      "profile_path": null,
+      "label": "Household Member 1 Birthdate",
+      "needs_user_input": true
+    },
+    "SOC 295 59": {
+      "profile_path": null,
+      "label": "Household Member 1 SSN",
+      "needs_user_input": true
+    },
+    "SOC 295 64": {
+      "profile_path": null,
+      "label": "Household Member 2 Name",
+      "needs_user_input": true
+    },
+    "SOC 295 65": {
+      "profile_path": null,
+      "label": "Household Member 2 Birthdate",
+      "needs_user_input": true
+    },
+    "SOC 295 66": {
+      "profile_path": null,
+      "label": "Household Member 2 SSN",
+      "needs_user_input": true
+    },
+    "SOC 295 71": {
+      "profile_path": null,
+      "label": "Household Member 3 Name",
+      "needs_user_input": true
+    },
+    "SOC 295 72": {
+      "profile_path": null,
+      "label": "Household Member 3 Birthdate",
+      "needs_user_input": true
+    },
+    "SOC 295 73": {
+      "profile_path": null,
+      "label": "Household Member 3 SSN",
+      "needs_user_input": true
+    },
+    "SOC 295 78": {
+      "profile_path": null,
+      "label": "Household Member 4 Name",
+      "needs_user_input": true
+    },
+    "SOC 295 79": {
+      "profile_path": null,
+      "label": "Household Member 4 Birthdate",
+      "needs_user_input": true
+    },
+    "SOC 295 80": {
+      "profile_path": null,
+      "label": "Household Member 4 SSN",
+      "needs_user_input": true
+    },
+    "SOC 295 85": {
+      "profile_path": null,
+      "label": "Household Member 5 Name",
+      "needs_user_input": true
+    },
+    "SOC 295 86": {
+      "profile_path": null,
+      "label": "Household Member 5 Birthdate",
+      "needs_user_input": true
+    },
+    "SOC 295 87": {
+      "profile_path": null,
+      "label": "Household Member 5 SSN",
+      "needs_user_input": true
+    },
+    "SOC 295 1053": {
+      "profile_path": "goals",
+      "label": "Notes",
+      "transform": "join_list"
+    }
+  }
+}

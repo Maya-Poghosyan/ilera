@@ -1,0 +1,15 @@
+{
+  "agency": "CDSS",
+  "program": "IHSS-Provider",
+  "form_id": "SOC-2298",
+  "title": "Live-In Self-Certification for Tax Wage Exclusion",
+  "source_url": "https://www.cdss.ca.gov/Portals/9/FMUForms/Q-T/SOC2298.pdf?ver=2019-05-23-131934-603",
+  "source_type": "pdf",
+  "policy": "HOST_CONDITIONAL",
+  "status": "downloaded",
+  "resolved_url": "https://www.cdss.ca.gov/Portals/9/FMUForms/Q-T/SOC2298.pdf?ver=2019-05-23-131934-603",
+  "downloaded_at": "2026-06-21T16:05:37.402542+00:00",
+  "sha256": "457b2b9331d73b8866f630fd0e83f2cc784860e30d375ac2a0e79497aac7a525",
+  "bytes": 693594,
+  "local_path": "benefits_forms/CDSS/IHSS-Provider/SOC-2298_2026-06-21_457b2b9331.pdf"
+}
