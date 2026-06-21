@@ -223,7 +223,7 @@ export default function RecordsPage() {
                 href="https://www.etimesheets.ihss.ca.gov"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm font-bold text-green-700 underline hover:text-green-900"
+                className="inline-flex items-center gap-1 font-serif text-sm text-black underline hover:text-black/70"
               >
                 Submit timesheet to IHSS portal
                 <ExternalLink className="size-3.5" />
@@ -411,9 +411,7 @@ export default function RecordsPage() {
               <CardHeader className="flex flex-row items-center justify-between py-3">
                 <div className="flex items-center gap-2">
                   <CardTitle className="text-sm">{formatDate(j.date)}</CardTitle>
-                  {j.fall_flagged && (
-                    <span className="text-xs font-medium text-amber-600">Fall flagged</span>
-                  )}
+
                 </div>
                 <button
                   onClick={() => handleDeleteJournal(j.id)}
