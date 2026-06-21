@@ -110,6 +110,61 @@ export type ReminderTemplates = Record<string, {
 }>;
 
 // ---------------------------------------------------------------------------
+// Records & Renewal
+// ---------------------------------------------------------------------------
+
+export interface TimekeepingEntry {
+  id: string;
+  case_id: string;
+  date: string;
+  hours: number;
+  tasks: string[];
+  created_at: string;
+}
+
+export interface TimekeepingCreate {
+  case_id: string;
+  date: string;
+  hours: number;
+  tasks: string[];
+}
+
+export interface JournalEntry {
+  id: string;
+  case_id: string;
+  date: string;
+  text: string;
+  fall_flagged: boolean;
+  created_at: string;
+}
+
+export interface JournalCreate {
+  case_id: string;
+  date: string;
+  text: string;
+}
+
+export interface RenewalInfo {
+  case_id: string;
+  program: string;
+  due_date: string | null;
+  status: string;
+}
+
+export interface RenewalUpdate {
+  program?: string;
+  due_date?: string;
+  status?: string;
+}
+
+export interface RecordsSummary {
+  timekeeping: TimekeepingEntry[];
+  journal: JournalEntry[];
+  renewal: RenewalInfo;
+  fall_flag: boolean;
+}
+
+// ---------------------------------------------------------------------------
 // Forms
 // ---------------------------------------------------------------------------
 

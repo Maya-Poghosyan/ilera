@@ -29,6 +29,20 @@ from .reminders import (
     list_reminders,
     save_reminder,
 )
+from .records import (
+    JournalEntry,
+    RenewalInfo,
+    TimekeepingEntry,
+    _detect_fall,
+    delete_journal,
+    delete_timekeeping,
+    get_renewal,
+    list_journal,
+    list_timekeeping,
+    save_journal,
+    save_renewal,
+    save_timekeeping,
+)
 from .store import get_profile, save_profile
 
 logger = logging.getLogger("ilera.scheduler")
@@ -356,3 +370,113 @@ def poke_scan_events() -> dict:
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Poke scan failed: {exc}") from exc
     return {"scanned": True, "poke": result}
+
+
+# ---------------------------------------------------------------------------
+# Records & Renewal
+# ---------------------------------------------------------------------------
+
+
+class TimekeepingCreate(BaseModel):
+    case_id: str
+    date: str
+    hours: float
+    tasks: list[str] = []
+
+
+class JournalCreate(BaseModel):
+    case_id: str
+    date: str
+    text: str
+
+
+class RenewalUpdate(BaseModel):
+    program: Optional[str] = None
+    due_date: Optional[str] = None
+    status: Optional[str] = None
+
+
+@app.get("/api/records/timekeeping/{case_id}")
+def api_list_timekeeping(case_id: str) -> list[TimekeepingEntry]:
+    return list_timekeeping(case_id)
+
+
+@app.post("/api/records/timekeeping", status_code=201)
+def api_create_timekeeping(body: TimekeepingCreate) -> TimekeepingEntry:
+    entry = TimekeepingEntry(
+        case_id=body.case_id,
+        date=body.date,
+        hours=body.hours,
+        tasks=body.tasks,
+    )
+    save_timekeeping(entry)
+    return entry
+
+
+@app.delete("/api/records/timekeeping/{entry_id}")
+def api_delete_timekeeping(entry_id: str, case_id: str) -> dict:
+    if not delete_timekeeping(entry_id, case_id):
+        raise HTTPException(status_code=404, detail="timekeeping entry not found")
+    return {"deleted": True}
+
+
+@app.get("/api/records/journal/{case_id}")
+def api_list_journal(case_id: str) -> list[JournalEntry]:
+    return list_journal(case_id)
+
+
+@app.post("/api/records/journal", status_code=201)
+def api_create_journal(body: JournalCreate) -> JournalEntry:
+    entry = JournalEntry(
+        case_id=body.case_id,
+        date=body.date,
+        text=body.text,
+        fall_flagged=_detect_fall(body.text),
+    )
+    save_journal(entry)
+    return entry
+
+
+@app.delete("/api/records/journal/{entry_id}")
+def api_delete_journal(entry_id: str, case_id: str) -> dict:
+    if not delete_journal(entry_id, case_id):
+        raise HTTPException(status_code=404, detail="journal entry not found")
+    return {"deleted": True}
+
+
+@app.get("/api/records/renewal/{case_id}")
+def api_get_renewal(case_id: str) -> RenewalInfo:
+    info = get_renewal(case_id)
+    if info is None:
+        return RenewalInfo(case_id=case_id)
+    return info
+
+
+@app.put("/api/records/renewal/{case_id}")
+def api_put_renewal(case_id: str, body: RenewalUpdate) -> RenewalInfo:
+    existing = get_renewal(case_id)
+    if existing is None:
+        existing = RenewalInfo(case_id=case_id)
+    if body.program is not None:
+        existing.program = body.program
+    if body.due_date is not None:
+        existing.due_date = body.due_date
+    if body.status is not None:
+        existing.status = body.status
+    save_renewal(existing)
+    return existing
+
+
+@app.get("/api/records/{case_id}")
+def api_records_summary(case_id: str) -> dict:
+    """Combined summary: timekeeping + journal + renewal + fall_flag."""
+    timekeeping = list_timekeeping(case_id)
+    journal = list_journal(case_id)
+    renewal = get_renewal(case_id) or RenewalInfo(case_id=case_id)
+    fall_flag = any(j.fall_flagged for j in journal)
+    return {
+        "timekeeping": timekeeping,
+        "journal": journal,
+        "renewal": renewal,
+        "fall_flag": fall_flag,
+    }
