@@ -326,7 +326,7 @@ export default function RecordsPage() {
 
           {timekeeping.map((t) => (
             <Card key={t.id}>
-              <CardHeader className="flex flex-row items-center justify-between py-3">
+              <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3">
                 <CardTitle className="text-base font-semibold">{formatDate(t.date)}</CardTitle>
                 <button
                   onClick={() => handleDeleteTimekeeping(t.id)}
@@ -336,23 +336,26 @@ export default function RecordsPage() {
                   <Trash2 className="size-3.5" />
                 </button>
               </CardHeader>
-              <CardContent className="space-y-2 py-0 pb-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-medium tabular-nums">{t.hours} hrs</span>
+              <CardContent className="space-y-1 pb-3 pt-0">
+                <p className="text-sm">
+                  <span className="text-muted-foreground">Hours:</span>{" "}
+                  <span className="font-medium tabular-nums">{t.hours}</span>
                   {t.start_time && t.end_time && (
-                    <span className="text-sm text-muted-foreground tabular-nums">
-                      {t.start_time}\u2013{t.end_time}
-                    </span>
+                    <span className="text-muted-foreground"> ({t.start_time}\u2013{t.end_time})</span>
                   )}
-                  <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-medium">
-                    {SERVICE_LABELS[t.service_type] ?? t.service_type}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {t.tasks.length > 0 ? t.tasks.join(", ") : "No activities recorded"}
+                </p>
+                <p className="text-sm">
+                  <span className="text-muted-foreground">Service:</span>{" "}
+                  {SERVICE_LABELS[t.service_type] ?? t.service_type}
+                </p>
+                <p className="text-sm">
+                  <span className="text-muted-foreground">Activities:</span>{" "}
+                  {t.tasks.length > 0 ? t.tasks.join(", ") : "None recorded"}
                 </p>
                 {t.notes && (
-                  <p className="text-xs italic text-muted-foreground/70">{t.notes}</p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Notes:</span> {t.notes}
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -406,7 +409,7 @@ export default function RecordsPage() {
 
           {journal.map((j) => (
             <Card key={j.id} className={j.fall_flagged ? "border-amber-300" : ""}>
-              <CardHeader className="flex flex-row items-center justify-between py-3">
+              <CardHeader className="flex flex-row items-center justify-between pb-1 pt-3">
                 <CardTitle className="text-base font-semibold">{formatDate(j.date)}</CardTitle>
                 <button
                   onClick={() => handleDeleteJournal(j.id)}
@@ -416,7 +419,7 @@ export default function RecordsPage() {
                   <Trash2 className="size-3.5" />
                 </button>
               </CardHeader>
-              <CardContent className="py-0 pb-3 text-sm text-muted-foreground">{j.text}</CardContent>
+              <CardContent className="pb-3 pt-0 text-sm text-muted-foreground">{j.text}</CardContent>
             </Card>
           ))}
 
