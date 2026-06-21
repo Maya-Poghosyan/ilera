@@ -33,7 +33,7 @@ export default function GetStartedPage() {
         </div>
       </header>
 
-      <section className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
+      <section className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
         {/* Progress indicators */}
         <div className="flex items-center gap-3">
           <StepDot active={step === "account"} done={step !== "account"} label="1" />
@@ -147,13 +147,13 @@ export default function GetStartedPage() {
 
         {/* Step 3: Done — proceed to intake */}
         {step === "done" && (
-          <Card className="w-full">
+          <Card className="w-full px-8 py-6">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <Check className="size-5" />
+              <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Check className="size-6" />
               </div>
-              <CardTitle className="text-xl">You&apos;re all set!</CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <CardTitle className="text-2xl">You&apos;re all set!</CardTitle>
+              <p className="text-base text-muted-foreground">
                 {name ? `Welcome, ${name}. ` : ""}Now let&apos;s figure out which benefits you qualify for.
               </p>
             </CardHeader>
