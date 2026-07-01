@@ -28,7 +28,9 @@ class Caregiver(BaseModel):
     employment_status: str = ""
     hours_per_week: Optional[int] = None
     phone: str = ""
+    email: str = ""
     address: str = ""
+    caregiving_impact: list[str] = Field(default_factory=list)
 
 
 class Household(BaseModel):

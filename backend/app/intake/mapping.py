@@ -79,8 +79,89 @@ def _derive_insurance(coverage: list[str], medicaid_status: str | None) -> str:
     return "unknown"
 
 
+def _derive_skipped_answers(answers: dict[str, Any]) -> None:
+    """Auto-fill answers that can be derived from earlier base-screen responses.
+
+    The simplified intake collects fewer fields than specialist agents expect.
+    This function bridges the gap by deriving values from what was collected.
+    """
+    a = answers
+
+    # The simplified form is always from a caregiver's perspective.
+    if "case.user_role" not in a:
+        a["case.user_role"] = "I provide care for someone else"
+
+    # When caregiver and recipient live together, share location.
+    if a.get("caregiver.coresidence") == "Yes":
+        if "recipient.address.state" not in a and "caregiver.address.state" in a:
+            a["recipient.address.state"] = a["caregiver.address.state"]
+        if "recipient.address.zip" not in a and "caregiver.address.zip" in a:
+            a["recipient.address.zip"] = a["caregiver.address.zip"]
+
+    # Module B — caregiver.age_18_or_older from caregiver.age
+    if "caregiver.age_18_or_older" not in a:
+        age = _int(a.get("caregiver.age"))
+        if age is not None:
+            a["caregiver.age_18_or_older"] = age >= 18
+
+    # Module B — caregiver.va_relationship_or_coresidence from relationship + coresidence
+    if "caregiver.va_relationship_or_coresidence" not in a:
+        rel = a.get("caregiver.relationship", "")
+        cores = a.get("caregiver.coresidence", "")
+        family_types = {
+            "Spouse or domestic partner", "Parent", "Adult child",
+            "Child under 18", "Sibling", "Grandparent", "Grandchild",
+            "Other relative",
+        }
+        if rel and cores:
+            if rel in family_types:
+                a["caregiver.va_relationship_or_coresidence"] = "Family member"
+            elif cores in ("Yes", "Yes, full time"):
+                a["caregiver.va_relationship_or_coresidence"] = "Live together full time"
+            else:
+                a["caregiver.va_relationship_or_coresidence"] = "None of these"
+
+    # Module B — recipient.va_health_enrolled from health_coverage
+    if "recipient.va_health_enrolled" not in a:
+        coverage = _as_list(a.get("recipient.health_coverage"))
+        if "VA health care" in coverage:
+            a["recipient.va_health_enrolled"] = "Yes"
+
+    # Module C — recipient.dd_onset_before_18 from recipient.onset_age
+    if "recipient.dd_onset_before_18" not in a:
+        onset = a.get("recipient.onset_age")
+        if onset == "Before age 18":
+            a["recipient.dd_onset_before_18"] = "Yes"
+        elif onset and onset not in ("I'm not sure", "There is no disability or long-term condition"):
+            a["recipient.dd_onset_before_18"] = "No"
+
+    # Module C — recipient.child_institutional_level_risk from safe_without_support
+    if "recipient.child_institutional_level_risk" not in a:
+        safe = a.get("recipient.safe_without_support")
+        if safe == "No, they would likely need hospital, nursing-home, or other facility care":
+            a["recipient.child_institutional_level_risk"] = "Yes"
+        elif safe == "They are already in a facility":
+            a["recipient.child_institutional_level_risk"] = "Yes"
+        elif safe in ("Yes", "Maybe, but there would be significant difficulty or risk"):
+            a["recipient.child_institutional_level_risk"] = "No"
+
+    # Module D — recipient.facility_type from recipient.living_setting
+    if "recipient.facility_type" not in a:
+        setting = a.get("recipient.living_setting")
+        if setting in ("Hospital", "Rehabilitation facility", "Nursing home or skilled nursing facility"):
+            a["recipient.facility_type"] = setting
+
+    # Module D — recipient.wants_community_transition from community_goal
+    if "recipient.wants_community_transition" not in a:
+        goal = a.get("recipient.community_goal")
+        if goal in ("Move from a hospital or facility back into the community",
+                     "Avoid moving into a nursing home or facility"):
+            a["recipient.wants_community_transition"] = "Yes"
+
+
 def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> CaseProfile:
     """Project ``answers`` onto the legacy structured CaseProfile fields in place."""
+    _derive_skipped_answers(answers)
     profile.answers = dict(answers)
     a = answers
 
@@ -126,7 +207,17 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
         cr.zip_code = str(zip_code)
 
     # --- care recipient medical/eligibility -----------------------------------
+    # Derive age from date_of_birth when available
     age = _int(a.get("recipient.age"))
+    if age is None and dob:
+        from datetime import date as _date
+        try:
+            bd = _date.fromisoformat(str(dob))
+            today = _date.today()
+            age = today.year - bd.year - ((today.month, today.day) < (bd.month, bd.day))
+            a["recipient.age"] = age  # store so mini-module triggers can use it
+        except (ValueError, TypeError):
+            pass
     if age is not None:
         cr.age = age
 
@@ -153,7 +244,8 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
         cr.current_benefits = current_benefits
 
     care_needs: list[str] = []
-    for fid in ("recipient.adl_needs", "recipient.iadl_needs", "recipient.health_related_tasks"):
+    for fid in ("recipient.adl_needs", "recipient.iadl_needs",
+                "recipient.health_related_tasks", "caregiver.assistance_tasks"):
         for item in _as_list(a.get(fid)):
             if item not in {"None of these", "No", "I'm not sure"} and item not in care_needs:
                 care_needs.append(item)
@@ -166,10 +258,16 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
     cg_full = f"{cg_first} {cg_last}".strip()
     if cg_full:
         cg.name = cg_full
+    elif a.get("caregiver.preferred_name"):
+        cg.name = str(a["caregiver.preferred_name"])
 
     cg_phone = a.get("caregiver.phone")
     if cg_phone:
         cg.phone = str(cg_phone)
+
+    cg_email = a.get("caregiver.email")
+    if cg_email:
+        cg.email = str(cg_email)
 
     cg_address = a.get("caregiver.address")
     if cg_address:
@@ -184,6 +282,10 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
         cg.employment_status = ", ".join(employment)
 
     cg.hours_per_week = _HOURS_MIDPOINTS.get(str(a.get("caregiver.hours_weekly")))
+
+    impact = _as_list(a.get("caregiver.impact"))
+    if impact:
+        cg.caregiving_impact = impact
 
     # --- household ----------------------------------------------------------
     hsize = _int(a.get("recipient.household_size"))

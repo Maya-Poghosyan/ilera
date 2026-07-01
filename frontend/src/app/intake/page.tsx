@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QuestionField } from "@/components/intake/question-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +22,7 @@ import {
 } from "@/lib/intake-schema";
 
 const MAX_PER_PAGE = 2;
+const HEAVY_OPTION_THRESHOLD = 5;
 
 interface Page {
   key: string;
@@ -32,17 +33,104 @@ interface Page {
   questions: Question[];
 }
 
-// Split a screen's visible questions into balanced pages of at most MAX_PER_PAGE
-// (the spec groups up to 6 questions on a screen, but no page may show > 5).
+function isHeavy(q: Question): boolean {
+  return (q.options?.length ?? 0) > HEAVY_OPTION_THRESHOLD;
+}
+
 function paginate(questions: Question[]): Question[][] {
-  if (questions.length <= MAX_PER_PAGE) return questions.length ? [questions] : [];
-  const pageCount = Math.ceil(questions.length / MAX_PER_PAGE);
-  const perPage = Math.ceil(questions.length / pageCount);
-  const out: Question[][] = [];
-  for (let i = 0; i < questions.length; i += perPage) {
-    out.push(questions.slice(i, i + perPage));
+  if (questions.length === 0) return [];
+
+  // Collect consecutive runs of questions sharing the same group tag.
+  const runs: Question[][] = [];
+  let i = 0;
+  while (i < questions.length) {
+    const g = questions[i].group;
+    if (g) {
+      const run: Question[] = [];
+      while (i < questions.length && questions[i].group === g) {
+        run.push(questions[i]);
+        i++;
+      }
+      runs.push(run);
+    } else {
+      runs.push([questions[i]]);
+      i++;
+    }
   }
+
+  const out: Question[][] = [];
+  let buf: Question[] = [];
+  for (const run of runs) {
+    const heavy = run.length === 1 && isHeavy(run[0]);
+    if (heavy) {
+      if (buf.length) { out.push(buf); buf = []; }
+      out.push(run);
+    } else if (run.length > MAX_PER_PAGE) {
+      // Group is bigger than a page — give it its own page.
+      if (buf.length) { out.push(buf); buf = []; }
+      out.push(run);
+    } else if (buf.length + run.length > MAX_PER_PAGE) {
+      // Won't fit — flush current buffer, start new page with this group.
+      if (buf.length) { out.push(buf); buf = []; }
+      buf.push(...run);
+    } else {
+      buf.push(...run);
+    }
+    if (buf.length >= MAX_PER_PAGE) { out.push(buf); buf = []; }
+  }
+  if (buf.length) out.push(buf);
   return out;
+}
+
+function renderQuestions(
+  questions: Question[],
+  name: string,
+  answers: Answers,
+  errors: Record<string, string>,
+  setAnswer: (fieldId: string, value: AnswerValue) => void,
+) {
+  const elements: React.ReactNode[] = [];
+  let i = 0;
+  while (i < questions.length) {
+    const cur = questions[i];
+    if (cur.layout === "inline") {
+      const inlineGroup: Question[] = [cur];
+      const g = cur.group;
+      let j = i + 1;
+      while (j < questions.length && questions[j].layout === "inline" && questions[j].group === g) {
+        inlineGroup.push(questions[j]);
+        j++;
+      }
+      elements.push(
+        <div key={`inline-${cur.field_id}`} className="grid grid-cols-2 gap-4">
+          {inlineGroup.map((iq) => (
+            <QuestionField
+              key={iq.field_id}
+              question={iq}
+              value={answers[iq.field_id] ?? null}
+              name={name}
+              error={errors[iq.field_id]}
+              onChange={(v) => setAnswer(iq.field_id, v)}
+            />
+          ))}
+        </div>,
+      );
+      i = j;
+    } else {
+      elements.push(
+        <QuestionField
+          key={cur.field_id}
+          question={cur}
+          value={answers[cur.field_id] ?? null}
+          name={name}
+          error={errors[cur.field_id]}
+          onChange={(v) => setAnswer(cur.field_id, v)}
+        />,
+      );
+      i++;
+    }
+  }
+  return elements;
 }
 
 export default function IntakePage() {
@@ -63,6 +151,31 @@ function IntakeContent() {
   const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const slide = useCallback((dir: "left" | "right", cb: () => void) => {
+    const el = cardRef.current;
+    if (!el) { cb(); return; }
+    setAnimating(true);
+    el.style.transition = "transform 250ms ease, opacity 250ms ease";
+    el.style.transform = dir === "left" ? "translateX(-40px)" : "translateX(40px)";
+    el.style.opacity = "0";
+    const onEnd = () => {
+      el.removeEventListener("transitionend", onEnd);
+      cb();
+      el.style.transition = "none";
+      el.style.transform = dir === "left" ? "translateX(40px)" : "translateX(-40px)";
+      el.style.opacity = "0";
+      void el.offsetHeight;
+      el.style.transition = "transform 250ms ease, opacity 250ms ease";
+      el.style.transform = "translateX(0)";
+      el.style.opacity = "1";
+      const onIn = () => { el.removeEventListener("transitionend", onIn); setAnimating(false); };
+      el.addEventListener("transitionend", onIn, { once: true });
+    };
+    el.addEventListener("transitionend", onEnd, { once: true });
+  }, []);
 
   useEffect(() => {
     getIntakeSchema()
@@ -75,6 +188,7 @@ function IntakeContent() {
   // conditional questions and mini-modules appear/disappear as the user responds.
   const pages: Page[] = useMemo(() => {
     if (!schema) return [];
+    const contact = schema.contact_screen;
     const sections: { id: string; title: string; intro?: string; isModule: boolean; questions: Question[] }[] = [
       ...schema.screens.map((s: Screen) => ({
         id: s.id,
@@ -86,6 +200,7 @@ function IntakeContent() {
       ...schema.mini_modules
         .filter((m: MiniModule) => evalCondition(m.trigger, answers))
         .map((m: MiniModule) => ({ id: m.id, title: m.title, isModule: true, questions: m.questions })),
+      { id: contact.id, title: contact.title, intro: contact.intro_text, isModule: false, questions: contact.questions },
     ];
 
     const out: Page[] = [];
@@ -145,7 +260,22 @@ function IntakeContent() {
   const isLast = safeIndex === pages.length - 1;
 
   function setAnswer(fieldId: string, value: AnswerValue) {
-    setAnswers((prev) => ({ ...prev, [fieldId]: value }));
+    setAnswers((prev) => {
+      const next = { ...prev, [fieldId]: value };
+      // Derive recipient.age from date_of_birth so mini-module triggers work
+      if (fieldId === "recipient.date_of_birth" && typeof value === "string" && value) {
+        try {
+          const bd = new Date(value);
+          const today = new Date();
+          let age = today.getFullYear() - bd.getFullYear();
+          if (today.getMonth() < bd.getMonth() || (today.getMonth() === bd.getMonth() && today.getDate() < bd.getDate())) {
+            age--;
+          }
+          next["recipient.age"] = age;
+        } catch { /* ignore invalid dates */ }
+      }
+      return next;
+    });
     setErrors((prev) => {
       if (!prev[fieldId]) return prev;
       const next = { ...prev };
@@ -166,15 +296,19 @@ function IntakeContent() {
       void finish();
       return;
     }
-    setStepIndex((s) => Math.min(s + 1, pages.length - 1));
-    setErrors({});
-    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    slide("left", () => {
+      setStepIndex((s) => Math.min(s + 1, pages.length - 1));
+      setErrors({});
+      if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    });
   }
 
   function back() {
-    setStepIndex((s) => Math.max(s - 1, 0));
-    setErrors({});
-    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    slide("right", () => {
+      setStepIndex((s) => Math.max(s - 1, 0));
+      setErrors({});
+      if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    });
   }
 
   async function finish() {
@@ -194,34 +328,17 @@ function IntakeContent() {
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-6 py-12">
       <div className="space-y-2">
         <Progress value={pct} />
-        <p className="text-sm text-muted-foreground">
-          Step {safeIndex + 1} of {pages.length}: {page.title}
-          {page.isModule && (
-            <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
-              Follow-up for programs that may fit
-            </span>
-          )}
-        </p>
       </div>
 
-      <Card>
+      <Card ref={cardRef} className="overflow-visible">
         <CardHeader>
           <CardTitle>{page.title}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 overflow-visible">
           {page.showIntro && page.introText && (
             <p className="text-sm text-muted-foreground">{page.introText.replaceAll("[recipient name]", name)}</p>
           )}
-          {visibleQuestions.map((q) => (
-            <QuestionField
-              key={q.field_id}
-              question={q}
-              value={answers[q.field_id] ?? null}
-              name={name}
-              error={errors[q.field_id]}
-              onChange={(v) => setAnswer(q.field_id, v)}
-            />
-          ))}
+          {renderQuestions(visibleQuestions, name, answers, errors, setAnswer)}
         </CardContent>
       </Card>
 

@@ -11,7 +11,8 @@ export type FieldType =
   | "state_dropdown"
   | "zip"
   | "date"
-  | "boolean";
+  | "boolean"
+  | "tag_input";
 
 export interface Validation {
   exclusive_options?: string[];
@@ -37,6 +38,8 @@ export interface Question {
   allow_prefer_not_to_answer?: boolean;
   alt_ui?: string;
   system_behavior?: string;
+  group?: string;
+  layout?: string;
 }
 
 export interface Screen {
@@ -63,6 +66,7 @@ export interface IntakeSchema {
   form_wide_rules: string[];
   delayed_questions: string[];
   screens: Screen[];
+  contact_screen: Screen;
   mini_modules: MiniModule[];
 }
 
