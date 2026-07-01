@@ -235,29 +235,31 @@ def _adapter(prompt: str, tools):
     )
 
 
-def _make_agent(adapter, creds: dict):
-    from band import Agent
+def _make_agent(adapter, creds: dict, *, skip_backlog: bool = False):
+    from band import Agent, AgentConfig
 
     s = get_settings()
+    config = AgentConfig(auto_subscribe_existing_rooms=not skip_backlog) if skip_backlog else None
     return Agent.create(
         adapter=adapter,
         agent_id=creds["agent_id"],
         api_key=creds["api_key"],
         ws_url=s.band_ws_url,
         rest_url=s.band_rest_url.rstrip("/"),
+        config=config,
     )
 
 
-def build_routing_agent(creds: dict):
+def build_routing_agent(creds: dict, *, skip_backlog: bool = False):
     tools = [
         (AssessEligibilityInput, _wrap(_assess_all_sync)),
         (AnalyzeInteractionsInput, _wrap(_interactions_sync)),
         (SearchProgramDocsInput, _wrap(_search_docs_sync)),
     ]
-    return _make_agent(_adapter(_ROUTING_PROMPT, tools), creds)
+    return _make_agent(_adapter(_ROUTING_PROMPT, tools), creds, skip_backlog=skip_backlog)
 
 
-def build_specialist_agent(doc_key: str, creds: dict):
+def build_specialist_agent(doc_key: str, creds: dict, *, skip_backlog: bool = False):
     program = _PROGRAM_NAMES[doc_key]
 
     async def assess(inp: AssessEligibilityInput) -> dict:
@@ -267,7 +269,7 @@ def build_specialist_agent(doc_key: str, creds: dict):
         return await asyncio.to_thread(_lookup_sync, doc_key, inp)
 
     tools = [(AssessEligibilityInput, assess), (LookupProgramDocsInput, lookup)]
-    return _make_agent(_adapter(_specialist_prompt(program), tools), creds)
+    return _make_agent(_adapter(_specialist_prompt(program), tools), creds, skip_backlog=skip_backlog)
 
 
 def _wrap(sync_fn):
@@ -300,8 +302,13 @@ def load_registry() -> dict[str, dict]:
     return registry
 
 
-def build_agents() -> list:
-    """Construct every configured Band agent (routing coordinator + per-program specialists)."""
+def build_agents(*, skip_backlog: bool = False) -> list:
+    """Construct every configured Band agent (routing coordinator + per-program specialists).
+
+    Args:
+        skip_backlog: If True, agents won't auto-subscribe to existing rooms on
+            startup, preventing them from processing old backlog messages.
+    """
     if not get_settings().anthropic_api_key:
         raise RuntimeError("Band agents need ANTHROPIC_API_KEY for reasoning")
     registry = load_registry()
@@ -312,9 +319,9 @@ def build_agents() -> list:
     agents = []
     for key, creds in registry.items():
         if key in _SPECIALISTS:
-            agents.append((key, build_specialist_agent(key, creds)))
+            agents.append((key, build_specialist_agent(key, creds, skip_backlog=skip_backlog)))
         elif key == "routing":
-            agents.append((key, build_routing_agent(creds)))
+            agents.append((key, build_routing_agent(creds, skip_backlog=skip_backlog)))
         else:
             logger.warning("Unknown Band agent group %r in registry; skipping", key)
     return agents

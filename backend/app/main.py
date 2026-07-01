@@ -238,10 +238,17 @@ class EligibilityResponse(BaseModel):
 _agent_executions: list[dict] = []
 
 
+_BAND_AGENT_TIMEOUT = 90  # seconds to let agents process before stopping
+
+
 async def _dispatch_to_band(profile: CaseProfile) -> None:
-    """Send the eligibility request to Band agents so executions register on the dashboard."""
+    """Start Band agents on-demand, send the eligibility request, let them process, then stop.
+
+    Agents are started with skip_backlog=True so they only respond to the NEW
+    message and don't reprocess old conversations (which would waste LLM credits).
+    """
     try:
-        from .integrations.band import _SPECIALIST_NAMES, load_registry
+        from .integrations.band import _SPECIALIST_NAMES, build_agents, load_registry
 
         from band.client.rest import (
             AsyncRestClient,
@@ -302,6 +309,11 @@ async def _dispatch_to_band(profile: CaseProfile) -> None:
             logger.warning("Band dispatch: no specialist agents could be added")
             return
 
+        # Start agents on-demand (skip_backlog prevents reprocessing old messages)
+        agents = build_agents(skip_backlog=True)
+        await asyncio.gather(*(a.start() for _, a in agents))
+        logger.info("Band agents started on-demand for eligibility assessment")
+
         # Compose message with @mentions so agents are properly activated
         cr = profile.care_recipient
         cg = profile.caregiver
@@ -322,6 +334,18 @@ async def _dispatch_to_band(profile: CaseProfile) -> None:
             request_options=DEFAULT_REQUEST_OPTIONS,
         )
         logger.info("Band dispatch: sent to %d specialists in room %s", len(mentions), chat_id)
+
+        # Let agents run for a limited time to process the message, then stop
+        try:
+            await asyncio.wait_for(
+                asyncio.gather(*(a.run_forever() for _, a in agents)),
+                timeout=_BAND_AGENT_TIMEOUT,
+            )
+        except asyncio.TimeoutError:
+            logger.info("Band agents timed out after %ds — stopping", _BAND_AGENT_TIMEOUT)
+        finally:
+            await asyncio.gather(*(a.stop() for _, a in agents), return_exceptions=True)
+            logger.info("Band agents stopped")
     except Exception:
         logger.warning("Band dispatch failed", exc_info=True)
 
