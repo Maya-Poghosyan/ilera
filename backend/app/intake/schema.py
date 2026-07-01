@@ -215,6 +215,13 @@ SCREENS: list[dict] = [
                 group="recipient_info",
             ),
             q(
+                "recipient.age",
+                "How old are they?",
+                "number",
+                True,
+                group="recipient_info",
+            ),
+            q(
                 "caregiver.coresidence",
                 "Do they live with you?",
                 "single_select",
