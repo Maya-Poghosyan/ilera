@@ -66,6 +66,7 @@ export interface IntakeSchema {
   form_wide_rules: string[];
   delayed_questions: string[];
   screens: Screen[];
+  contact_screen: Screen;
   mini_modules: MiniModule[];
 }
 

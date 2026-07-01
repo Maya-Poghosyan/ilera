@@ -274,6 +274,7 @@ SCREENS: list[dict] = [
                 True,
                 options=CONDITION_SUGGESTIONS,
                 helper_text="Type to search or add your own.",
+                group="conditions",
             ),
             q(
                 "recipient.condition_documented",
@@ -281,6 +282,7 @@ SCREENS: list[dict] = [
                 "single_select",
                 True,
                 options=["Yes", "No", "I'm not sure"],
+                group="conditions",
             ),
             q(
                 "recipient.adl_needs",
@@ -422,26 +424,26 @@ SCREENS: list[dict] = [
             ),
         ],
     },
-    # ---- Section 4: Contact -----------------------------------------------
-    {
-        "id": "screen_4",
-        "title": "Contact",
-        "questions": [
-            q(
-                "caregiver.phone",
-                "What is your phone number?",
-                "short_text",
-                False,
-            ),
-            q(
-                "caregiver.email",
-                "What is your email address?",
-                "short_text",
-                False,
-            ),
-        ],
-    },
 ]
+
+CONTACT_SCREEN: dict = {
+    "id": "screen_contact",
+    "title": "Contact",
+    "questions": [
+        q(
+            "caregiver.phone",
+            "What is your phone number?",
+            "short_text",
+            True,
+        ),
+        q(
+            "caregiver.email",
+            "What is your email address?",
+            "short_text",
+            True,
+        ),
+    ],
+}
 
 
 # ---------------------------------------------------------------------------
@@ -1002,6 +1004,7 @@ def build_schema() -> dict:
         "form_wide_rules": FORM_WIDE_RULES,
         "delayed_questions": DELAYED_QUESTIONS,
         "screens": SCREENS,
+        "contact_screen": CONTACT_SCREEN,
         "mini_modules": MINI_MODULES,
     }
 

@@ -163,6 +163,7 @@ function IntakeContent() {
   // conditional questions and mini-modules appear/disappear as the user responds.
   const pages: Page[] = useMemo(() => {
     if (!schema) return [];
+    const contact = schema.contact_screen;
     const sections: { id: string; title: string; intro?: string; isModule: boolean; questions: Question[] }[] = [
       ...schema.screens.map((s: Screen) => ({
         id: s.id,
@@ -174,6 +175,7 @@ function IntakeContent() {
       ...schema.mini_modules
         .filter((m: MiniModule) => evalCondition(m.trigger, answers))
         .map((m: MiniModule) => ({ id: m.id, title: m.title, isModule: true, questions: m.questions })),
+      { id: contact.id, title: contact.title, intro: contact.intro_text, isModule: false, questions: contact.questions },
     ];
 
     const out: Page[] = [];
