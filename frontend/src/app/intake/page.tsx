@@ -22,6 +22,7 @@ import {
 } from "@/lib/intake-schema";
 
 const MAX_PER_PAGE = 2;
+const HEAVY_OPTION_THRESHOLD = 5;
 
 interface Page {
   key: string;
@@ -32,16 +33,24 @@ interface Page {
   questions: Question[];
 }
 
-// Split a screen's visible questions into balanced pages of at most MAX_PER_PAGE
-// (the spec groups up to 6 questions on a screen, but no page may show > 5).
+function isHeavy(q: Question): boolean {
+  return (q.options?.length ?? 0) > HEAVY_OPTION_THRESHOLD;
+}
+
 function paginate(questions: Question[]): Question[][] {
-  if (questions.length <= MAX_PER_PAGE) return questions.length ? [questions] : [];
-  const pageCount = Math.ceil(questions.length / MAX_PER_PAGE);
-  const perPage = Math.ceil(questions.length / pageCount);
+  if (questions.length === 0) return [];
   const out: Question[][] = [];
-  for (let i = 0; i < questions.length; i += perPage) {
-    out.push(questions.slice(i, i + perPage));
+  let buf: Question[] = [];
+  for (const q of questions) {
+    if (isHeavy(q)) {
+      if (buf.length) { out.push(buf); buf = []; }
+      out.push([q]);
+    } else {
+      buf.push(q);
+      if (buf.length >= MAX_PER_PAGE) { out.push(buf); buf = []; }
+    }
   }
+  if (buf.length) out.push(buf);
   return out;
 }
 
@@ -194,14 +203,6 @@ function IntakeContent() {
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-6 py-12">
       <div className="space-y-2">
         <Progress value={pct} />
-        <p className="text-sm text-muted-foreground">
-          Step {safeIndex + 1} of {pages.length}: {page.title}
-          {page.isModule && (
-            <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs">
-              Follow-up for programs that may fit
-            </span>
-          )}
-        </p>
       </div>
 
       <Card>
