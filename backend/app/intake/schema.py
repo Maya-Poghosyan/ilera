@@ -554,26 +554,7 @@ MINI_MODULES: list[dict] = [
                 ],
                 system_behavior="Use the relationship already captured in Q3 and ask only if the leave is for a different person.",
             ),
-            q(
-                "caregiver.leave_pattern",
-                "What kind of time away from work do you expect to need?",
-                "single_select",
-                True,
-                options=[
-                    "One continuous period",
-                    "Separate days or hours as needed",
-                    "A reduced weekly schedule",
-                    "I already took leave",
-                    "I'm not sure",
-                ],
-            ),
-            q(
-                "caregiver.leave_start",
-                "When do you expect the leave to begin?",
-                "date",
-                False,
-                allow_not_sure=True,
-            ),
+
         ],
     },
     {
@@ -694,19 +675,7 @@ MINI_MODULES: list[dict] = [
                 True,
                 options=["Yes", "No", "Part of the time", "I'm not sure"],
             ),
-            q(
-                "recipient.medicaid_denied_parent_income",
-                "Has [recipient name] been denied Medicaid because the household or parents' income was too high?",
-                "single_select",
-                True,
-                options=[
-                    "Yes",
-                    "No",
-                    "Application pending",
-                    "Has not applied",
-                    "I'm not sure",
-                ],
-            ),
+
             q(
                 "recipient.dd_onset_before_18",
                 "Did the developmental disability begin before age 18?",
@@ -715,20 +684,7 @@ MINI_MODULES: list[dict] = [
                 options=["Yes", "No", "I'm not sure"],
                 show_when={"field": "recipient.onset_age", "op": "blank"},
             ),
-            q(
-                "recipient.child_disability_services",
-                "Is [recipient name] currently receiving special education, early intervention, or developmental-disability services?",
-                "multi_select",
-                True,
-                options=[
-                    "Early intervention",
-                    "IEP or special education",
-                    "State developmental-disability agency or Regional Center",
-                    "Medicaid waiver",
-                    "None",
-                    "I'm not sure",
-                ],
-            ),
+
         ],
     },
     {
@@ -767,25 +723,7 @@ MINI_MODULES: list[dict] = [
                     "I'm not sure",
                 ],
             ),
-            q(
-                "recipient.community_destination_available",
-                "Is there a home or community setting available for [recipient name] to move to?",
-                "single_select",
-                True,
-                options=[
-                    "Yes",
-                    "Not yet, but we are looking",
-                    "No",
-                    "I'm not sure",
-                ],
-            ),
-            q(
-                "recipient.transition_support",
-                "Is a discharge planner, social worker, or transition coordinator already involved?",
-                "single_select",
-                True,
-                options=["Yes", "No", "I'm not sure"],
-            ),
+
         ],
     },
     {
@@ -942,13 +880,7 @@ MINI_MODULES: list[dict] = [
                     "I'm not sure",
                 ],
             ),
-            q(
-                "recipient.able_interest",
-                "Is [recipient name] interested in saving for disability-related expenses without disrupting means-tested benefits?",
-                "single_select",
-                True,
-                options=["Yes", "No", "I'm not sure"],
-            ),
+
         ],
     },
 ]
