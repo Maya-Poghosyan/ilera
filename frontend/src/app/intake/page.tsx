@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QuestionField } from "@/components/intake/question-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -151,6 +151,31 @@ function IntakeContent() {
   const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [animating, setAnimating] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const slide = useCallback((dir: "left" | "right", cb: () => void) => {
+    const el = cardRef.current;
+    if (!el) { cb(); return; }
+    setAnimating(true);
+    el.style.transition = "transform 250ms ease, opacity 250ms ease";
+    el.style.transform = dir === "left" ? "translateX(-40px)" : "translateX(40px)";
+    el.style.opacity = "0";
+    const onEnd = () => {
+      el.removeEventListener("transitionend", onEnd);
+      cb();
+      el.style.transition = "none";
+      el.style.transform = dir === "left" ? "translateX(40px)" : "translateX(-40px)";
+      el.style.opacity = "0";
+      void el.offsetHeight;
+      el.style.transition = "transform 250ms ease, opacity 250ms ease";
+      el.style.transform = "translateX(0)";
+      el.style.opacity = "1";
+      const onIn = () => { el.removeEventListener("transitionend", onIn); setAnimating(false); };
+      el.addEventListener("transitionend", onIn, { once: true });
+    };
+    el.addEventListener("transitionend", onEnd, { once: true });
+  }, []);
 
   useEffect(() => {
     getIntakeSchema()
@@ -271,15 +296,19 @@ function IntakeContent() {
       void finish();
       return;
     }
-    setStepIndex((s) => Math.min(s + 1, pages.length - 1));
-    setErrors({});
-    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    slide("left", () => {
+      setStepIndex((s) => Math.min(s + 1, pages.length - 1));
+      setErrors({});
+      if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    });
   }
 
   function back() {
-    setStepIndex((s) => Math.max(s - 1, 0));
-    setErrors({});
-    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    slide("right", () => {
+      setStepIndex((s) => Math.max(s - 1, 0));
+      setErrors({});
+      if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    });
   }
 
   async function finish() {
@@ -301,7 +330,7 @@ function IntakeContent() {
         <Progress value={pct} />
       </div>
 
-      <Card className="overflow-visible">
+      <Card ref={cardRef} className="overflow-visible">
         <CardHeader>
           <CardTitle>{page.title}</CardTitle>
         </CardHeader>
