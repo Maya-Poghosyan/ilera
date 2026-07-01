@@ -75,13 +75,12 @@ IS_CAREGIVER = in_(
     ],
 )
 
-CAREGIVER_EMPLOYED = includes_any(
+CAREGIVER_EMPLOYED = in_(
     "caregiver.employment_status",
     [
         "Employed full time",
         "Employed part time",
         "Self-employed",
-        "Gig or contract work",
     ],
 )
 
@@ -104,6 +103,7 @@ Q21_MEDICARE = [
 Q23_VA_BENEFITS = [
     "VA disability compensation",
     "VA pension, Aid and Attendance, or Housebound benefits",
+    "VA pension or Aid and Attendance",
 ]
 
 
@@ -312,7 +312,19 @@ SCREENS: list[dict] = [
                 ],
                 validation={"exclusive_options": ["None of these"]},
             ),
-
+            q(
+                "caregiver.employment_status",
+                "What is your current employment status?",
+                "single_select",
+                True,
+                options=[
+                    "Employed full time",
+                    "Employed part time",
+                    "Self-employed",
+                    "Not currently employed",
+                    "Retired",
+                ],
+            ),
         ],
     },
     # ---- Section 3: Financials & Coverage ---------------------------------
@@ -357,6 +369,22 @@ SCREENS: list[dict] = [
                     "I'm not sure",
                 ],
                 helper_text="Medicaid may have a different name in your state, such as Medi-Cal in California.",
+            ),
+            q(
+                "recipient.health_coverage",
+                "What health coverage does [recipient name] have?",
+                "multi_select",
+                True,
+                options=[
+                    "Medicaid",
+                    "Medicare",
+                    "Both Medicare and Medicaid",
+                    "VA health care",
+                    "Employer or private insurance",
+                    "No health coverage",
+                    "Other",
+                    "I'm not sure",
+                ],
             ),
             q(
                 "recipient.current_benefits",
@@ -411,26 +439,13 @@ MINI_MODULES: list[dict] = [
     {
         "id": "module_a",
         "title": "Employment and leave",
-        "trigger": any_(
-            includes_any(
-                "caregiver.employment_status",
-                [
-                    "Employed full time",
-                    "Employed part time",
-                    "Self-employed",
-                    "Gig or contract work",
-                    "Not working because of caregiving",
-                ],
-            ),
-            includes_any(
-                "caregiver.leave_goals",
-                [
-                    "Paid family or medical leave",
-                    "Unpaid job-protected leave",
-                    "Using paid sick leave to provide care",
-                    "A flexible or reduced work schedule",
-                ],
-            ),
+        "trigger": in_(
+            "caregiver.employment_status",
+            [
+                "Employed full time",
+                "Employed part time",
+                "Self-employed",
+            ],
         ),
         "routing": [
             "Federal FMLA Agent",

@@ -98,7 +98,6 @@ class AssessEligibilityInput(BaseModel):
     caregiver_employment: str = Field(default="", description="Caregiver employment status, e.g. full-time")
     household_size: int | None = Field(default=None, description="Number of people in the household")
     household_income_monthly: float | None = Field(default=None, description="Total monthly household income (USD)")
-    goals: list[str] = Field(default_factory=list, description="Caregiver goals, e.g. keep recipient at home")
 
 
 class SearchProgramDocsInput(BaseModel):
@@ -139,7 +138,6 @@ def _profile_from_input(inp: AssessEligibilityInput) -> CaseProfile:
             employment_status=inp.caregiver_employment,
         ),
         household=Household(size=inp.household_size, income_monthly=inp.household_income_monthly),
-        goals=inp.goals,
     )
 
 

@@ -25,13 +25,13 @@ export interface Caregiver {
   employment_status: string;
   hours_per_week?: number | null;
   phone: string;
+  email: string;
   address: string;
 }
 
 export interface Household {
   size?: number | null;
   income_monthly?: number | null;
-  assets?: number | null;
 }
 
 export interface CaseProfile {
@@ -39,7 +39,6 @@ export interface CaseProfile {
   care_recipient: CareRecipient;
   caregiver: Caregiver;
   household: Household;
-  goals: string[];
   answers: Record<string, unknown>;
   followups: Record<string, string>;
   eligibility: Record<string, EligibilityResult>;
