@@ -82,6 +82,57 @@ function paginate(questions: Question[]): Question[][] {
   return out;
 }
 
+function renderQuestions(
+  questions: Question[],
+  name: string,
+  answers: Answers,
+  errors: Record<string, string>,
+  setAnswer: (fieldId: string, value: AnswerValue) => void,
+) {
+  const elements: React.ReactNode[] = [];
+  let i = 0;
+  while (i < questions.length) {
+    const cur = questions[i];
+    if (cur.layout === "inline") {
+      const inlineGroup: Question[] = [cur];
+      const g = cur.group;
+      let j = i + 1;
+      while (j < questions.length && questions[j].layout === "inline" && questions[j].group === g) {
+        inlineGroup.push(questions[j]);
+        j++;
+      }
+      elements.push(
+        <div key={`inline-${cur.field_id}`} className="grid grid-cols-2 gap-4">
+          {inlineGroup.map((iq) => (
+            <QuestionField
+              key={iq.field_id}
+              question={iq}
+              value={answers[iq.field_id] ?? null}
+              name={name}
+              error={errors[iq.field_id]}
+              onChange={(v) => setAnswer(iq.field_id, v)}
+            />
+          ))}
+        </div>,
+      );
+      i = j;
+    } else {
+      elements.push(
+        <QuestionField
+          key={cur.field_id}
+          question={cur}
+          value={answers[cur.field_id] ?? null}
+          name={name}
+          error={errors[cur.field_id]}
+          onChange={(v) => setAnswer(cur.field_id, v)}
+        />,
+      );
+      i++;
+    }
+  }
+  return elements;
+}
+
 export default function IntakePage() {
   return (
     <RequireAuth>
@@ -241,16 +292,7 @@ function IntakeContent() {
           {page.showIntro && page.introText && (
             <p className="text-sm text-muted-foreground">{page.introText.replaceAll("[recipient name]", name)}</p>
           )}
-          {visibleQuestions.map((q) => (
-            <QuestionField
-              key={q.field_id}
-              question={q}
-              value={answers[q.field_id] ?? null}
-              name={name}
-              error={errors[q.field_id]}
-              onChange={(v) => setAnswer(q.field_id, v)}
-            />
-          ))}
+          {renderQuestions(visibleQuestions, name, answers, errors, setAnswer)}
         </CardContent>
       </Card>
 

@@ -39,6 +39,7 @@ export interface Question {
   alt_ui?: string;
   system_behavior?: string;
   group?: string;
+  layout?: string;
 }
 
 export interface Screen {

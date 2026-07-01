@@ -123,6 +123,7 @@ def q(
     alt_ui: str | None = None,
     system_behavior: str | None = None,
     group: str | None = None,
+    layout: str | None = None,
 ) -> dict:
     out: dict[str, Any] = {
         "field_id": field_id,
@@ -150,6 +151,8 @@ def q(
         out["system_behavior"] = system_behavior
     if group:
         out["group"] = group
+    if layout:
+        out["layout"] = layout
     return out
 
 
@@ -189,17 +192,19 @@ SCREENS: list[dict] = [
             ),
             q(
                 "caregiver.address.state",
-                "What state do you live in?",
+                "State",
                 "state_dropdown",
                 True,
                 group="caregiver_info",
+                layout="inline",
             ),
             q(
                 "caregiver.address.zip",
-                "What is your ZIP code?",
+                "ZIP code",
                 "zip",
                 True,
                 group="caregiver_info",
+                layout="inline",
             ),
             q(
                 "recipient.preferred_name",
@@ -219,19 +224,21 @@ SCREENS: list[dict] = [
             ),
             q(
                 "recipient.address.state",
-                "What state does [recipient name] live in?",
+                "[recipient name]'s state",
                 "state_dropdown",
                 True,
                 show_when=eq("caregiver.coresidence", "No"),
-                group="recipient_info",
+                group="recipient_location",
+                layout="inline",
             ),
             q(
                 "recipient.address.zip",
-                "What is [recipient name]'s ZIP code?",
+                "[recipient name]'s ZIP code",
                 "zip",
                 True,
                 show_when=eq("caregiver.coresidence", "No"),
-                group="recipient_info",
+                group="recipient_location",
+                layout="inline",
             ),
         ],
     },
@@ -329,6 +336,25 @@ SCREENS: list[dict] = [
                     "Other",
                 ],
                 validation={"exclusive_options": ["No one else"]},
+            ),
+            q(
+                "caregiver.impact",
+                "How has caregiving impacted your life?",
+                "multi_select",
+                True,
+                options=[
+                    "Reduced work hours or left a job",
+                    "Financial strain",
+                    "Less time for myself or my family",
+                    "Physical health effects",
+                    "Emotional stress, anxiety, or burnout",
+                    "Social isolation",
+                    "Difficulty maintaining relationships",
+                    "Housing instability or changes",
+                    "Had to relocate",
+                    "None of the above",
+                ],
+                validation={"exclusive_options": ["None of the above"]},
             ),
         ],
     },

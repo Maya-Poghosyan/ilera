@@ -273,6 +273,10 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
 
     cg.hours_per_week = _HOURS_MIDPOINTS.get(str(a.get("caregiver.hours_weekly")))
 
+    impact = _as_list(a.get("caregiver.impact"))
+    if impact:
+        cg.caregiving_impact = impact
+
     # --- household ----------------------------------------------------------
     hsize = _int(a.get("recipient.household_size"))
     if hsize is not None:
