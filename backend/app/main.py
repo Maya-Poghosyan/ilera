@@ -149,13 +149,19 @@ async def _band_loop() -> None:
     """Start Band agents in the background so they appear active on the dashboard."""
     try:
         from .integrations.band import build_agents
+    except Exception:
+        logger.warning("Band SDK not available — skipping agent startup")
+        return
+    try:
         agents = build_agents()
         await asyncio.gather(*(a.start() for _, a in agents))
         names = ", ".join(f"{k}" for k, _ in agents)
         logger.info("Band agents connected: %s", names)
         await asyncio.gather(*(a.run_forever() for _, a in agents))
+    except asyncio.CancelledError:
+        raise
     except Exception:
-        logger.warning("Band agents could not start (missing credentials or band package)")
+        logger.exception("Band agents failed")
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
@@ -235,7 +241,7 @@ _agent_executions: list[dict] = []
 async def _dispatch_to_band(profile: CaseProfile) -> None:
     """Send the eligibility request to Band agents so executions register on the dashboard."""
     try:
-        from .integrations.band import load_registry
+        from .integrations.band import _SPECIALIST_NAMES, load_registry
 
         from band.client.rest import (
             AsyncRestClient,
@@ -251,15 +257,25 @@ async def _dispatch_to_band(profile: CaseProfile) -> None:
         if not routing_creds:
             return
         client = AsyncRestClient(
-            api_key=routing_creds["api_key"], base_url="https://app.band.ai"
+            api_key=routing_creds["api_key"],
+            base_url=get_settings().band_rest_url.rstrip("/"),
         )
+
+        # Fetch routing agent's identity so we know its handle
+        me = await client.agent_api_identity.get_agent_me(
+            request_options=DEFAULT_REQUEST_OPTIONS
+        )
+        owner_handle = getattr(me, "owner_handle", None) or getattr(me, "handle", "")
+
         # Create a chat room
         chat = await client.agent_api_chats.create_agent_chat(
             chat=ChatRoomRequest(), request_options=DEFAULT_REQUEST_OPTIONS
         )
         chat_id = chat.data.id
-        # Add specialist agents as participants
-        mentions = []
+
+        # Add specialist agents as participants and build mention items
+        mentions: list[ChatMessageRequestMentionsItem] = []
+        handle_tags: list[str] = []
         for key, creds in registry.items():
             if key == "routing":
                 continue
@@ -271,15 +287,27 @@ async def _dispatch_to_band(profile: CaseProfile) -> None:
                     ),
                     request_options=DEFAULT_REQUEST_OPTIONS,
                 )
+                agent_name = _SPECIALIST_NAMES.get(key, key)
+                handle = f"{owner_handle}/{agent_name}" if owner_handle else agent_name
                 mentions.append(
-                    ChatMessageRequestMentionsItem(id=creds["agent_id"])
+                    ChatMessageRequestMentionsItem(
+                        id=creds["agent_id"], handle=handle
+                    )
                 )
+                handle_tags.append(f"@{handle}")
             except Exception:
-                pass
-        # Compose message from profile
+                logger.debug("Could not add specialist %s to room", key, exc_info=True)
+
+        if not mentions:
+            logger.warning("Band dispatch: no specialist agents could be added")
+            return
+
+        # Compose message with @mentions so agents are properly activated
         cr = profile.care_recipient
         cg = profile.caregiver
+        mention_prefix = " ".join(handle_tags)
         msg = (
+            f"{mention_prefix} "
             f"Assess eligibility for {cr.name or 'care recipient'}, "
             f"age {cr.age or 'unknown'}, {cr.state}. "
             f"Insurance: {cr.insurance}. "
@@ -293,8 +321,9 @@ async def _dispatch_to_band(profile: CaseProfile) -> None:
             message=ChatMessageRequest(content=msg, mentions=mentions),
             request_options=DEFAULT_REQUEST_OPTIONS,
         )
+        logger.info("Band dispatch: sent to %d specialists in room %s", len(mentions), chat_id)
     except Exception:
-        logger.debug("Band dispatch failed (non-critical)", exc_info=True)
+        logger.warning("Band dispatch failed", exc_info=True)
 
 
 @app.post("/api/eligibility/{case_id}", response_model=EligibilityResponse)

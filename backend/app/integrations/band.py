@@ -217,17 +217,18 @@ def _passages(hits) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Agent construction
 # ---------------------------------------------------------------------------
-def _adapter(system_prompt: str, tools):
+def _adapter(prompt: str, tools):
     from band import AdapterFeatures, Capability
     from band.adapters.anthropic import AnthropicAdapter
 
-    # Enable contact + memory capabilities so agents can discover peers, add each other
-    # to rooms, and consult one another. The chat tools (lookup_peers, add_participant,
-    # create_chatroom, send_message) are always available.
+    # Use `prompt` (not `system_prompt`) so the SDK's base instructions are
+    # included — they teach the agent to use band_send_message, handle
+    # mentions, look up peers, etc.  Passing `system_prompt` would bypass
+    # all of that and leave the agent unable to communicate on the platform.
     features = AdapterFeatures(capabilities=frozenset({Capability.CONTACTS, Capability.MEMORY}))
     return AnthropicAdapter(
         model=get_settings().anthropic_model,
-        system_prompt=system_prompt,
+        prompt=prompt,
         provider_key=get_settings().anthropic_api_key,
         additional_tools=tools,
         features=features,
