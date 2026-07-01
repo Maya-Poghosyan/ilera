@@ -1144,14 +1144,6 @@ MINI_MODULES: list[dict] = [
                 ],
             ),
             q(
-                "recipient.va_health_enrolled",
-                "Is [recipient name] enrolled in VA health care?",
-                "single_select",
-                True,
-                options=["Yes", "Application pending", "No", "I'm not sure"],
-                show_when=not_({"field": "recipient.health_coverage", "op": "includes", "value": "VA health care"}),
-            ),
-            q(
                 "recipient.va_rating",
                 "Does [recipient name] have a VA service-connected disability rating?",
                 "single_select",
@@ -1194,24 +1186,6 @@ MINI_MODULES: list[dict] = [
                     lt("caregiver.age", 18),
                 ),
                 system_behavior="Derive from Q4 (caregiver.age) when possible; do not ask twice.",
-            ),
-            q(
-                "caregiver.va_relationship_or_coresidence",
-                "Are you a family member of the veteran, or do you live with or plan to live full time with the veteran?",
-                "single_select",
-                True,
-                options=[
-                    "Family member",
-                    "Live together full time",
-                    "Willing to live together full time",
-                    "None of these",
-                    "I'm not sure",
-                ],
-                show_when=any_(
-                    {"field": "caregiver.relationship", "op": "blank"},
-                    {"field": "caregiver.coresidence", "op": "blank"},
-                ),
-                system_behavior="Derive from Q3 (caregiver.relationship) and Q5 (caregiver.coresidence) when possible; ask only if unresolved.",
             ),
             q(
                 "recipient.va_pension_status",
@@ -1269,14 +1243,6 @@ MINI_MODULES: list[dict] = [
                 ],
             ),
             q(
-                "recipient.child_institutional_level_risk",
-                "Would [recipient name] likely need hospital, nursing-facility, or institutional care without services at home?",
-                "single_select",
-                True,
-                options=["Yes", "No", "I'm not sure"],
-                show_when={"field": "recipient.safe_without_support", "op": "blank"},
-            ),
-            q(
                 "recipient.dd_onset_before_18",
                 "Did the developmental disability begin before age 18?",
                 "single_select",
@@ -1324,29 +1290,6 @@ MINI_MODULES: list[dict] = [
         ],
         "questions": [
             q(
-                "recipient.facility_type",
-                "What type of facility is [recipient name] in?",
-                "single_select",
-                True,
-                options=[
-                    "Hospital",
-                    "Rehabilitation facility",
-                    "Nursing home or skilled nursing facility",
-                    "Intermediate care facility",
-                    "Psychiatric facility",
-                    "Other",
-                    "I'm not sure",
-                ],
-                show_when=not_(in_(
-                    "recipient.living_setting",
-                    [
-                        "Hospital",
-                        "Rehabilitation facility",
-                        "Nursing home or skilled nursing facility",
-                    ],
-                )),
-            ),
-            q(
                 "recipient.facility_length_of_stay",
                 "About how long has [recipient name] been there?",
                 "single_select",
@@ -1358,26 +1301,6 @@ MINI_MODULES: list[dict] = [
                     "6 months or longer",
                     "I'm not sure",
                 ],
-            ),
-            q(
-                "recipient.wants_community_transition",
-                "Does [recipient name] want to return to a home or community setting?",
-                "single_select",
-                True,
-                options=[
-                    "Yes",
-                    "No",
-                    "Maybe",
-                    "They cannot express a preference",
-                    "I'm not sure",
-                ],
-                show_when=not_(in_(
-                    "recipient.community_goal",
-                    [
-                        "Move from a hospital or facility back into the community",
-                        "Avoid moving into a nursing home or facility",
-                    ],
-                )),
             ),
             q(
                 "recipient.community_destination_available",
