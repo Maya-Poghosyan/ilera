@@ -79,8 +79,81 @@ def _derive_insurance(coverage: list[str], medicaid_status: str | None) -> str:
     return "unknown"
 
 
+def _derive_skipped_answers(answers: dict[str, Any]) -> None:
+    """Auto-fill answers that can be derived from earlier base-screen responses.
+
+    Mini-module questions that overlap with earlier screens are now hidden by
+    ``show_when`` guards.  When they are skipped, the downstream routing /
+    specialist agents still need the values, so we derive them here.
+    """
+    a = answers
+
+    # Module B — caregiver.age_18_or_older from caregiver.age
+    if "caregiver.age_18_or_older" not in a:
+        age = _int(a.get("caregiver.age"))
+        if age is not None:
+            a["caregiver.age_18_or_older"] = age >= 18
+
+    # Module B — caregiver.va_relationship_or_coresidence from relationship + coresidence
+    if "caregiver.va_relationship_or_coresidence" not in a:
+        rel = a.get("caregiver.relationship", "")
+        cores = a.get("caregiver.coresidence", "")
+        family_types = {
+            "Spouse or domestic partner", "Parent", "Adult child",
+            "Child under 18", "Sibling", "Grandparent", "Grandchild",
+            "Other relative",
+        }
+        if rel and cores:
+            if rel in family_types:
+                a["caregiver.va_relationship_or_coresidence"] = "Family member"
+            elif cores in ("Yes, full time",):
+                a["caregiver.va_relationship_or_coresidence"] = "Live together full time"
+            elif cores in ("No, but I would be willing to live together", "We plan to live together soon"):
+                a["caregiver.va_relationship_or_coresidence"] = "Willing to live together full time"
+            else:
+                a["caregiver.va_relationship_or_coresidence"] = "None of these"
+
+    # Module B — recipient.va_health_enrolled from health_coverage
+    if "recipient.va_health_enrolled" not in a:
+        coverage = _as_list(a.get("recipient.health_coverage"))
+        if "VA health care" in coverage:
+            a["recipient.va_health_enrolled"] = "Yes"
+
+    # Module C — recipient.dd_onset_before_18 from recipient.onset_age
+    if "recipient.dd_onset_before_18" not in a:
+        onset = a.get("recipient.onset_age")
+        if onset == "Before age 18":
+            a["recipient.dd_onset_before_18"] = "Yes"
+        elif onset and onset not in ("I'm not sure", "There is no disability or long-term condition"):
+            a["recipient.dd_onset_before_18"] = "No"
+
+    # Module C — recipient.child_institutional_level_risk from safe_without_support
+    if "recipient.child_institutional_level_risk" not in a:
+        safe = a.get("recipient.safe_without_support")
+        if safe == "No, they would likely need hospital, nursing-home, or other facility care":
+            a["recipient.child_institutional_level_risk"] = "Yes"
+        elif safe == "They are already in a facility":
+            a["recipient.child_institutional_level_risk"] = "Yes"
+        elif safe in ("Yes", "Maybe, but there would be significant difficulty or risk"):
+            a["recipient.child_institutional_level_risk"] = "No"
+
+    # Module D — recipient.facility_type from recipient.living_setting
+    if "recipient.facility_type" not in a:
+        setting = a.get("recipient.living_setting")
+        if setting in ("Hospital", "Rehabilitation facility", "Nursing home or skilled nursing facility"):
+            a["recipient.facility_type"] = setting
+
+    # Module D — recipient.wants_community_transition from community_goal
+    if "recipient.wants_community_transition" not in a:
+        goal = a.get("recipient.community_goal")
+        if goal in ("Move from a hospital or facility back into the community",
+                     "Avoid moving into a nursing home or facility"):
+            a["recipient.wants_community_transition"] = "Yes"
+
+
 def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> CaseProfile:
     """Project ``answers`` onto the legacy structured CaseProfile fields in place."""
+    _derive_skipped_answers(answers)
     profile.answers = dict(answers)
     a = answers
 

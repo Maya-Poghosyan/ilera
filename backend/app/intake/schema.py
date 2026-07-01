@@ -1149,6 +1149,7 @@ MINI_MODULES: list[dict] = [
                 "single_select",
                 True,
                 options=["Yes", "Application pending", "No", "I'm not sure"],
+                show_when=not_({"field": "recipient.health_coverage", "op": "includes", "value": "VA health care"}),
             ),
             q(
                 "recipient.va_rating",
@@ -1188,6 +1189,10 @@ MINI_MODULES: list[dict] = [
                 "Are you at least 18 years old?",
                 "boolean",
                 True,
+                show_when=any_(
+                    {"field": "caregiver.age", "op": "blank"},
+                    lt("caregiver.age", 18),
+                ),
                 system_behavior="Derive from Q4 (caregiver.age) when possible; do not ask twice.",
             ),
             q(
@@ -1202,6 +1207,10 @@ MINI_MODULES: list[dict] = [
                     "None of these",
                     "I'm not sure",
                 ],
+                show_when=any_(
+                    {"field": "caregiver.relationship", "op": "blank"},
+                    {"field": "caregiver.coresidence", "op": "blank"},
+                ),
                 system_behavior="Derive from Q3 (caregiver.relationship) and Q5 (caregiver.coresidence) when possible; ask only if unresolved.",
             ),
             q(
@@ -1265,6 +1274,7 @@ MINI_MODULES: list[dict] = [
                 "single_select",
                 True,
                 options=["Yes", "No", "I'm not sure"],
+                show_when={"field": "recipient.safe_without_support", "op": "blank"},
             ),
             q(
                 "recipient.dd_onset_before_18",
@@ -1272,6 +1282,7 @@ MINI_MODULES: list[dict] = [
                 "single_select",
                 True,
                 options=["Yes", "No", "I'm not sure"],
+                show_when={"field": "recipient.onset_age", "op": "blank"},
             ),
             q(
                 "recipient.child_disability_services",
@@ -1326,6 +1337,14 @@ MINI_MODULES: list[dict] = [
                     "Other",
                     "I'm not sure",
                 ],
+                show_when=not_(in_(
+                    "recipient.living_setting",
+                    [
+                        "Hospital",
+                        "Rehabilitation facility",
+                        "Nursing home or skilled nursing facility",
+                    ],
+                )),
             ),
             q(
                 "recipient.facility_length_of_stay",
@@ -1352,6 +1371,13 @@ MINI_MODULES: list[dict] = [
                     "They cannot express a preference",
                     "I'm not sure",
                 ],
+                show_when=not_(in_(
+                    "recipient.community_goal",
+                    [
+                        "Move from a hospital or facility back into the community",
+                        "Avoid moving into a nursing home or facility",
+                    ],
+                )),
             ),
             q(
                 "recipient.community_destination_available",
