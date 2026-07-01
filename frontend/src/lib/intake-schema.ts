@@ -11,7 +11,8 @@ export type FieldType =
   | "state_dropdown"
   | "zip"
   | "date"
-  | "boolean";
+  | "boolean"
+  | "tag_input";
 
 export interface Validation {
   exclusive_options?: string[];

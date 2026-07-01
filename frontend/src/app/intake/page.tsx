@@ -205,11 +205,11 @@ function IntakeContent() {
         <Progress value={pct} />
       </div>
 
-      <Card>
+      <Card className="overflow-visible">
         <CardHeader>
           <CardTitle>{page.title}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-6 overflow-visible">
           {page.showIntro && page.introText && (
             <p className="text-sm text-muted-foreground">{page.introText.replaceAll("[recipient name]", name)}</p>
           )}

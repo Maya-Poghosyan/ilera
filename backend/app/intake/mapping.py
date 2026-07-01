@@ -82,11 +82,21 @@ def _derive_insurance(coverage: list[str], medicaid_status: str | None) -> str:
 def _derive_skipped_answers(answers: dict[str, Any]) -> None:
     """Auto-fill answers that can be derived from earlier base-screen responses.
 
-    Mini-module questions that overlap with earlier screens are now hidden by
-    ``show_when`` guards.  When they are skipped, the downstream routing /
-    specialist agents still need the values, so we derive them here.
+    The simplified intake collects fewer fields than specialist agents expect.
+    This function bridges the gap by deriving values from what was collected.
     """
     a = answers
+
+    # The simplified form is always from a caregiver's perspective.
+    if "case.user_role" not in a:
+        a["case.user_role"] = "I provide care for someone else"
+
+    # When caregiver and recipient live together, share location.
+    if a.get("caregiver.coresidence") == "Yes":
+        if "recipient.address.state" not in a and "caregiver.address.state" in a:
+            a["recipient.address.state"] = a["caregiver.address.state"]
+        if "recipient.address.zip" not in a and "caregiver.address.zip" in a:
+            a["recipient.address.zip"] = a["caregiver.address.zip"]
 
     # Module B — caregiver.age_18_or_older from caregiver.age
     if "caregiver.age_18_or_older" not in a:
@@ -108,8 +118,6 @@ def _derive_skipped_answers(answers: dict[str, Any]) -> None:
                 a["caregiver.va_relationship_or_coresidence"] = "Family member"
             elif cores in ("Yes", "Yes, full time"):
                 a["caregiver.va_relationship_or_coresidence"] = "Live together full time"
-            elif cores in ("No, but I would be willing to live together", "We plan to live together soon"):
-                a["caregiver.va_relationship_or_coresidence"] = "Willing to live together full time"
             else:
                 a["caregiver.va_relationship_or_coresidence"] = "None of these"
 
@@ -226,7 +234,8 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
         cr.current_benefits = current_benefits
 
     care_needs: list[str] = []
-    for fid in ("recipient.adl_needs", "recipient.iadl_needs", "recipient.health_related_tasks"):
+    for fid in ("recipient.adl_needs", "recipient.iadl_needs",
+                "recipient.health_related_tasks", "caregiver.assistance_tasks"):
         for item in _as_list(a.get(fid)):
             if item not in {"None of these", "No", "I'm not sure"} and item not in care_needs:
                 care_needs.append(item)
@@ -239,10 +248,16 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
     cg_full = f"{cg_first} {cg_last}".strip()
     if cg_full:
         cg.name = cg_full
+    elif a.get("caregiver.preferred_name"):
+        cg.name = str(a["caregiver.preferred_name"])
 
     cg_phone = a.get("caregiver.phone")
     if cg_phone:
         cg.phone = str(cg_phone)
+
+    cg_email = a.get("caregiver.email")
+    if cg_email:
+        cg.email = str(cg_email)
 
     cg_address = a.get("caregiver.address")
     if cg_address:

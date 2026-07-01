@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { TagInput } from "@/components/intake/tag-input";
 import { cn } from "@/lib/utils";
 import {
   type AnswerValue,
@@ -53,6 +54,14 @@ function FieldControl({
   onChange,
 }: Pick<Props, "question" | "value" | "name" | "onChange">) {
   switch (question.type) {
+    case "tag_input":
+      return (
+        <TagInput
+          suggestions={question.options ?? []}
+          value={(value as string[]) ?? []}
+          onChange={(tags) => onChange(tags)}
+        />
+      );
     case "single_select":
       return <SingleSelect question={question} value={value as string} name={name} onChange={onChange} />;
     case "multi_select":
