@@ -39,16 +39,44 @@ function isHeavy(q: Question): boolean {
 
 function paginate(questions: Question[]): Question[][] {
   if (questions.length === 0) return [];
+
+  // Collect consecutive runs of questions sharing the same group tag.
+  const runs: Question[][] = [];
+  let i = 0;
+  while (i < questions.length) {
+    const g = questions[i].group;
+    if (g) {
+      const run: Question[] = [];
+      while (i < questions.length && questions[i].group === g) {
+        run.push(questions[i]);
+        i++;
+      }
+      runs.push(run);
+    } else {
+      runs.push([questions[i]]);
+      i++;
+    }
+  }
+
   const out: Question[][] = [];
   let buf: Question[] = [];
-  for (const q of questions) {
-    if (isHeavy(q)) {
+  for (const run of runs) {
+    const heavy = run.length === 1 && isHeavy(run[0]);
+    if (heavy) {
       if (buf.length) { out.push(buf); buf = []; }
-      out.push([q]);
+      out.push(run);
+    } else if (run.length > MAX_PER_PAGE) {
+      // Group is bigger than a page — give it its own page.
+      if (buf.length) { out.push(buf); buf = []; }
+      out.push(run);
+    } else if (buf.length + run.length > MAX_PER_PAGE) {
+      // Won't fit — flush current buffer, start new page with this group.
+      if (buf.length) { out.push(buf); buf = []; }
+      buf.push(...run);
     } else {
-      buf.push(q);
-      if (buf.length >= MAX_PER_PAGE) { out.push(buf); buf = []; }
+      buf.push(...run);
     }
+    if (buf.length >= MAX_PER_PAGE) { out.push(buf); buf = []; }
   }
   if (buf.length) out.push(buf);
   return out;

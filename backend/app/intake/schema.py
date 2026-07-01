@@ -122,6 +122,7 @@ def q(
     allow_prefer_not_to_answer: bool = False,
     alt_ui: str | None = None,
     system_behavior: str | None = None,
+    group: str | None = None,
 ) -> dict:
     out: dict[str, Any] = {
         "field_id": field_id,
@@ -147,6 +148,8 @@ def q(
         out["alt_ui"] = alt_ui
     if system_behavior:
         out["system_behavior"] = system_behavior
+    if group:
+        out["group"] = group
     return out
 
 
@@ -182,18 +185,21 @@ SCREENS: list[dict] = [
                 "short_text",
                 True,
                 helper_text="A first name or nickname is fine.",
+                group="caregiver_info",
             ),
             q(
                 "caregiver.address.state",
                 "What state do you live in?",
                 "state_dropdown",
                 True,
+                group="caregiver_info",
             ),
             q(
                 "caregiver.address.zip",
                 "What is your ZIP code?",
                 "zip",
                 True,
+                group="caregiver_info",
             ),
             q(
                 "recipient.preferred_name",
@@ -201,6 +207,7 @@ SCREENS: list[dict] = [
                 "short_text",
                 True,
                 helper_text="A first name or nickname is fine.",
+                group="recipient_info",
             ),
             q(
                 "caregiver.coresidence",
@@ -208,6 +215,7 @@ SCREENS: list[dict] = [
                 "single_select",
                 True,
                 options=["Yes", "No"],
+                group="recipient_info",
             ),
             q(
                 "recipient.address.state",
@@ -215,6 +223,7 @@ SCREENS: list[dict] = [
                 "state_dropdown",
                 True,
                 show_when=eq("caregiver.coresidence", "No"),
+                group="recipient_info",
             ),
             q(
                 "recipient.address.zip",
@@ -222,6 +231,7 @@ SCREENS: list[dict] = [
                 "zip",
                 True,
                 show_when=eq("caregiver.coresidence", "No"),
+                group="recipient_info",
             ),
         ],
     },

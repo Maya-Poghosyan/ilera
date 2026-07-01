@@ -38,6 +38,7 @@ export interface Question {
   allow_prefer_not_to_answer?: boolean;
   alt_ui?: string;
   system_behavior?: string;
+  group?: string;
 }
 
 export interface Screen {
