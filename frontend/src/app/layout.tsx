@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Manrope, Source_Serif_4, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/lib/auth-context";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -32,7 +33,9 @@ export default function RootLayout({
       lang="en"
       className={`${manrope.variable} ${sourceSerif.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

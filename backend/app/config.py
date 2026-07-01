@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     app_name: str = "Ilera API"
     cors_origins: str = "http://localhost:3000"
 
+    # Auth
+    jwt_secret: str = "ilera-dev-secret-change-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_hours: int = 72
+
     # Redis (RAG + agent memory + document store)
     redis_url: str = ""
 

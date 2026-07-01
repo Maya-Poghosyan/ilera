@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel
 
+from .auth import router as auth_router
 from .agents.routing import run_routing
 from .applications import (
     AppStatus,
@@ -169,6 +170,9 @@ app.add_middleware(
 
 # Mount MCP server for Poke integration (SSE transport at /mcp)
 app.mount("/mcp", mcp_server.sse_app())
+
+# Auth routes
+app.include_router(auth_router)
 
 
 @app.get("/health")

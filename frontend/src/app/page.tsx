@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   ArrowRight,
@@ -10,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
+import { useAuth } from "@/lib/auth-context";
 
 const features = [
   {
@@ -35,12 +38,25 @@ const features = [
 ];
 
 export default function Home() {
+  const { user, loading } = useAuth();
+
   return (
     <main className="flex flex-1 flex-col">
       <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
           <Logo />
-          <Button render={<Link href="/get-started" />}>Get started</Button>
+          <div className="flex items-center gap-2">
+            {!loading && user ? (
+              <Button render={<Link href="/dashboard" />}>Dashboard</Button>
+            ) : (
+              <>
+                <Button variant="outline" render={<Link href="/login" />}>
+                  Sign in
+                </Button>
+                <Button render={<Link href="/signup" />}>Get started</Button>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
@@ -53,13 +69,22 @@ export default function Home() {
           what you qualify for, optimizes your strategy, and completes the applications for you.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <Button size="lg" render={<Link href="/get-started" />}>
-            Get started
-            <ArrowRight />
-          </Button>
-          <Button size="lg" variant="outline" render={<Link href="/dashboard" />}>
-            View dashboard
-          </Button>
+          {!loading && user ? (
+            <Button size="lg" render={<Link href="/dashboard" />}>
+              Go to dashboard
+              <ArrowRight />
+            </Button>
+          ) : (
+            <>
+              <Button size="lg" render={<Link href="/signup" />}>
+                Get started
+                <ArrowRight />
+              </Button>
+              <Button size="lg" variant="outline" render={<Link href="/login" />}>
+                Sign in
+              </Button>
+            </>
+          )}
         </div>
       </section>
 

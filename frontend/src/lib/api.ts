@@ -3,9 +3,19 @@ import type { AppStatus, ApplicationEntry, CaseProfile, EligibilityResponse, For
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("ilera_token");
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = getToken();
+  const headers: Record<string, string> = {
+    "content-type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "content-type": "application/json" },
+    headers,
     ...init,
   });
   if (!res.ok) {

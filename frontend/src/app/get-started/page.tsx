@@ -1,29 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   Check,
   ExternalLink,
   MessageCircle,
-  User,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
+import { useAuth } from "@/lib/auth-context";
 
 const POKE_RECIPE_URL = "https://poke.com/r/DsatCoA1all";
 
-type Step = "account" | "poke" | "done";
+type Step = "poke" | "done";
 
 export default function GetStartedPage() {
-  const [step, setStep] = useState<Step>("account");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const [step, setStep] = useState<Step>("poke");
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/signup");
+    }
+  }, [loading, user, router]);
+
+  if (loading || !user) {
+    return null;
+  }
 
   return (
     <main className="flex flex-1 flex-col">
@@ -36,58 +45,14 @@ export default function GetStartedPage() {
       <section className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
         {/* Progress indicators */}
         <div className="flex items-center gap-3">
-          <StepDot active={step === "account"} done={step !== "account"} label="1" />
+          <StepDot active={false} done={true} label="1" />
           <div className="h-px w-8 bg-border" />
           <StepDot active={step === "poke"} done={step === "done"} label="2" />
           <div className="h-px w-8 bg-border" />
           <StepDot active={step === "done"} done={false} label="3" />
         </div>
 
-        {/* Step 1: Create account */}
-        {step === "account" && (
-          <Card className="w-full">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <User className="size-5" />
-              </div>
-              <CardTitle className="text-xl">Create your account</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Set up your Ilera caregiver profile to get started.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-1">
-                <Label htmlFor="name">Your name</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-                  placeholder="First name"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                />
-              </div>
-              <Button
-                className="w-full"
-                disabled={!name.trim() || !email.trim()}
-                onClick={() => setStep("poke")}
-              >
-                Continue
-                <ArrowRight className="size-4" />
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Step 2: Connect Poke */}
+        {/* Step: Connect Poke */}
         {step === "poke" && (
           <Card className="w-full">
             <CardHeader className="text-center">
@@ -145,7 +110,7 @@ export default function GetStartedPage() {
           </Card>
         )}
 
-        {/* Step 3: Done — proceed to intake */}
+        {/* Step: Done — proceed to intake */}
         {step === "done" && (
           <Card className="w-full min-w-[28rem] px-8 py-6">
             <CardHeader className="text-center">
@@ -154,7 +119,7 @@ export default function GetStartedPage() {
               </div>
               <CardTitle className="text-2xl">You&apos;re all set!</CardTitle>
               <p className="text-base text-muted-foreground">
-                {name ? `Welcome, ${name}. ` : ""}Now let&apos;s figure out which benefits you qualify for.
+                Welcome, {user.name}. Now let&apos;s figure out which benefits you qualify for.
               </p>
             </CardHeader>
             <CardContent>
