@@ -21,7 +21,7 @@ import {
   validateQuestions,
 } from "@/lib/intake-schema";
 
-const MAX_PER_PAGE = 5;
+const MAX_PER_PAGE = 2;
 
 interface Page {
   key: string;
@@ -108,7 +108,7 @@ function IntakeContent() {
 
   if (loadError) {
     return (
-      <main className="mx-auto max-w-xl px-6 py-20 text-center">
+      <main className="mx-auto max-w-2xl px-6 py-20 text-center">
         <p className="text-muted-foreground">{loadError}</p>
       </main>
     );
@@ -116,7 +116,7 @@ function IntakeContent() {
 
   if (!schema) {
     return (
-      <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
+      <main className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-foreground" />
         <p className="text-sm text-muted-foreground">Loading the intake form…</p>
       </main>
@@ -127,16 +127,12 @@ function IntakeContent() {
 
   if (!started) {
     return (
-      <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-6 py-16">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-xl">{schema.welcome.header}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <p className="text-sm text-muted-foreground">{schema.welcome.body}</p>
-            <Button onClick={() => setStarted(true)}>{schema.welcome.button}</Button>
-          </CardContent>
-        </Card>
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-6 py-16">
+        <div className="space-y-6">
+          <h1 className="text-xl font-semibold">{schema.welcome.header}</h1>
+          <p className="text-sm text-muted-foreground">{schema.welcome.body}</p>
+          <Button onClick={() => setStarted(true)}>{schema.welcome.button}</Button>
+        </div>
       </main>
     );
   }
@@ -195,7 +191,7 @@ function IntakeContent() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-6 py-12">
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-6 py-12">
       <div className="space-y-2">
         <Progress value={pct} />
         <p className="text-sm text-muted-foreground">
