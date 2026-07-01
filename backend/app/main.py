@@ -118,7 +118,7 @@ async def _scheduler_loop() -> None:
 async def lifespan(app: FastAPI):
     task = asyncio.create_task(_scheduler_loop())
     band_task = None
-    if settings.has_band or _band_registry_exists():
+    if settings.band_auto_start and (settings.has_band or _band_registry_exists()):
         band_task = asyncio.create_task(_band_loop())
     yield
     task.cancel()

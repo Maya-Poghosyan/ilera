@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     # Optional JSON registry mapping program group -> {agent_id, api_key} so each
     # specialist runs as its own Band agent. See band_agents.example.json.
     band_agents_file: str = "band_agents.json"
+    # If true, Band agents auto-start on boot and process backlog (costs LLM credits).
+    # Set false to keep agents offline until explicitly needed.
+    band_auto_start: bool = False
 
     # Integrations
     poke_api_key: str = ""
