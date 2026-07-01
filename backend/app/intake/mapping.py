@@ -106,7 +106,7 @@ def _derive_skipped_answers(answers: dict[str, Any]) -> None:
         if rel and cores:
             if rel in family_types:
                 a["caregiver.va_relationship_or_coresidence"] = "Family member"
-            elif cores in ("Yes, full time",):
+            elif cores in ("Yes", "Yes, full time"):
                 a["caregiver.va_relationship_or_coresidence"] = "Live together full time"
             elif cores in ("No, but I would be willing to live together", "We plan to live together soon"):
                 a["caregiver.va_relationship_or_coresidence"] = "Willing to live together full time"
