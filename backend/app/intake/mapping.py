@@ -207,7 +207,17 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
         cr.zip_code = str(zip_code)
 
     # --- care recipient medical/eligibility -----------------------------------
+    # Derive age from date_of_birth when available
     age = _int(a.get("recipient.age"))
+    if age is None and dob:
+        from datetime import date as _date
+        try:
+            bd = _date.fromisoformat(str(dob))
+            today = _date.today()
+            age = today.year - bd.year - ((today.month, today.day) < (bd.month, bd.day))
+            a["recipient.age"] = age  # store so mini-module triggers can use it
+        except (ValueError, TypeError):
+            pass
     if age is not None:
         cr.age = age
 

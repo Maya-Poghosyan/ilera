@@ -235,7 +235,22 @@ function IntakeContent() {
   const isLast = safeIndex === pages.length - 1;
 
   function setAnswer(fieldId: string, value: AnswerValue) {
-    setAnswers((prev) => ({ ...prev, [fieldId]: value }));
+    setAnswers((prev) => {
+      const next = { ...prev, [fieldId]: value };
+      // Derive recipient.age from date_of_birth so mini-module triggers work
+      if (fieldId === "recipient.date_of_birth" && typeof value === "string" && value) {
+        try {
+          const bd = new Date(value);
+          const today = new Date();
+          let age = today.getFullYear() - bd.getFullYear();
+          if (today.getMonth() < bd.getMonth() || (today.getMonth() === bd.getMonth() && today.getDate() < bd.getDate())) {
+            age--;
+          }
+          next["recipient.age"] = age;
+        } catch { /* ignore invalid dates */ }
+      }
+      return next;
+    });
     setErrors((prev) => {
       if (!prev[fieldId]) return prev;
       const next = { ...prev };

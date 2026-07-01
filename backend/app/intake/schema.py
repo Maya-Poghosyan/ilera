@@ -213,13 +213,15 @@ SCREENS: list[dict] = [
                 True,
                 helper_text="A first name or nickname is fine.",
                 group="recipient_info",
+                layout="inline",
             ),
             q(
-                "recipient.age",
-                "How old are they?",
-                "number",
+                "recipient.date_of_birth",
+                "Date of birth",
+                "date",
                 True,
                 group="recipient_info",
+                layout="inline",
             ),
             q(
                 "caregiver.coresidence",
@@ -324,12 +326,14 @@ SCREENS: list[dict] = [
                 "number",
                 True,
                 helper_text="Include [recipient name].",
+                group="household_financials",
             ),
             q(
                 "recipient.monthly_income_range",
                 "What is the approximate monthly household income?",
                 "single_select",
                 True,
+                group="household_financials",
                 options=[
                     "No income",
                     "Less than $1,000",
