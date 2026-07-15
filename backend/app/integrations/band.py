@@ -43,6 +43,7 @@ import os
 
 from pydantic import BaseModel, Field
 
+from .. import llm
 from ..agents.interactions import analyze_program_interactions
 from ..agents.specialists import ALL_SPECIALISTS
 from ..config import get_settings
@@ -230,19 +231,70 @@ def _passages(hits) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Agent construction
 # ---------------------------------------------------------------------------
+def _configure_openai_env() -> None:
+    """Expose the app's OpenAI settings to pydantic-ai's OpenAI client, which reads
+    OPENAI_API_KEY / OPENAI_BASE_URL from the environment. OPENAI_BASE_URL points at
+    an OpenAI-compatible endpoint (e.g. an Azure OpenAI v1 endpoint)."""
+    s = get_settings()
+    if s.openai_api_key:
+        os.environ["OPENAI_API_KEY"] = s.openai_api_key
+    if s.openai_base_url:
+        os.environ["OPENAI_BASE_URL"] = s.openai_base_url
+
+
+def _to_pai_tool(input_model, handler):
+    """Adapt an (InputModel, async handler) tool into a pydantic-ai tool function.
+
+    pydantic-ai flattens a single Pydantic-model argument into the tool's parameter
+    schema, so we can reuse the same input models as the Anthropic path. The tool name
+    matches band's convention (model class name minus "Input", lowercased).
+    """
+    from band.core.protocols import AgentToolsProtocol
+    from band.runtime.custom_tools import get_custom_tool_name
+    from pydantic_ai import RunContext
+
+    name = get_custom_tool_name(input_model)
+
+    async def _tool(ctx, inp):
+        return await handler(inp)
+
+    _tool.__name__ = name
+    _tool.__qualname__ = name
+    _tool.__doc__ = (input_model.__doc__ or "").strip()
+    _tool.__annotations__ = {
+        "ctx": RunContext[AgentToolsProtocol],
+        "inp": input_model,
+        "return": dict,
+    }
+    return _tool
+
+
 def _adapter(prompt: str, tools):
     from band import AdapterFeatures, Capability
+
+    # `prompt`/`custom_section` (not `system_prompt`) so the SDK's base instructions are
+    # included — they teach the agent to use band_send_message, handle mentions, look up
+    # peers, etc. Passing the full system prompt would bypass all of that and leave the
+    # agent unable to communicate on the platform.
+    features = AdapterFeatures(capabilities=frozenset({Capability.CONTACTS, Capability.MEMORY}))
+    s = get_settings()
+    if llm.provider() == "openai":
+        from band.adapters.pydantic_ai import PydanticAIAdapter
+
+        _configure_openai_env()
+        pai_tools = [_to_pai_tool(model, handler) for model, handler in tools]
+        return PydanticAIAdapter(
+            model=f"openai:{s.openai_model}",
+            custom_section=prompt,
+            additional_tools=pai_tools,
+            features=features,
+        )
     from band.adapters.anthropic import AnthropicAdapter
 
-    # Use `prompt` (not `system_prompt`) so the SDK's base instructions are
-    # included — they teach the agent to use band_send_message, handle
-    # mentions, look up peers, etc.  Passing `system_prompt` would bypass
-    # all of that and leave the agent unable to communicate on the platform.
-    features = AdapterFeatures(capabilities=frozenset({Capability.CONTACTS, Capability.MEMORY}))
     return AnthropicAdapter(
-        model=get_settings().anthropic_model,
+        model=s.anthropic_model,
         prompt=prompt,
-        provider_key=get_settings().anthropic_api_key,
+        provider_key=s.anthropic_api_key,
         additional_tools=tools,
         features=features,
     )
@@ -321,8 +373,11 @@ def build_agents(*, skip_backlog: bool = False) -> list:
         skip_backlog: If True, agents won't auto-subscribe to existing rooms on
             startup, preventing them from processing old backlog messages.
     """
-    if not get_settings().anthropic_api_key:
-        raise RuntimeError("Band agents need ANTHROPIC_API_KEY for reasoning")
+    if not llm.available():
+        raise RuntimeError(
+            "Band agents need an LLM key for reasoning "
+            "(ANTHROPIC_API_KEY, or OPENAI_API_KEY with LLM_PROVIDER=openai)"
+        )
     registry = load_registry()
     if not registry:
         raise RuntimeError(

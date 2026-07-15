@@ -36,9 +36,18 @@ def _get_fastembed():
     return _fastembed_model
 
 
-def provider() -> str:
+def _use_openai() -> bool:
     s = get_settings()
-    if s.openai_api_key:
+    mode = (s.embedding_provider or "auto").lower()
+    if mode == "openai":
+        return True
+    if mode == "fastembed":
+        return False
+    return bool(s.openai_api_key)  # "auto"
+
+
+def provider() -> str:
+    if _use_openai():
         return "openai"
     try:
         _get_fastembed()
@@ -49,10 +58,12 @@ def provider() -> str:
 
 def embed(texts: list[str]) -> list[list[float]]:
     s = get_settings()
-    if s.openai_api_key:
+    if _use_openai():
         from openai import OpenAI
 
-        client = OpenAI(api_key=s.openai_api_key)
+        client = OpenAI(
+            api_key=s.openai_api_key, base_url=s.openai_base_url or None
+        )
         resp = client.embeddings.create(model=s.embedding_model, input=texts)
         return [d.embedding for d in resp.data]
     try:

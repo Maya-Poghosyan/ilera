@@ -26,7 +26,14 @@ class Settings(BaseSettings):
     anthropic_model: str = "claude-sonnet-4-5-20250929"
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
+    # Optional OpenAI-compatible base URL (e.g. an Azure OpenAI v1 endpoint:
+    # https://<resource>.openai.azure.com/openai/v1). Empty = api.openai.com.
+    openai_base_url: str = ""
     embedding_model: str = "text-embedding-3-small"
+    # Which embedding backend to use: "auto" (OpenAI if a key is set, else fastembed),
+    # "openai", or "fastembed". Force "fastembed" when the OpenAI/Azure endpoint has no
+    # embedding deployment (or to keep a fastembed-built index consistent).
+    embedding_provider: str = "auto"
     # Local embedding model used when no OpenAI key is set (fastembed / ONNX, no API needed).
     fastembed_model: str = "BAAI/bge-small-en-v1.5"
 
