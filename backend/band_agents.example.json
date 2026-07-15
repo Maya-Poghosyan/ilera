@@ -1,9 +1,10 @@
 {
-  "routing":  {"agent_id": "ROUTING_AGENT_UUID",  "api_key": "band_a_..."},
-  "ihss":     {"agent_id": "IHSS_AGENT_UUID",      "api_key": "band_a_..."},
-  "medical":  {"agent_id": "MEDICAL_AGENT_UUID",   "api_key": "band_a_..."},
-  "medicare": {"agent_id": "MEDICARE_AGENT_UUID",  "api_key": "band_a_..."},
-  "pfl":      {"agent_id": "PFL_AGENT_UUID",       "api_key": "band_a_..."},
-  "va":       {"agent_id": "VA_AGENT_UUID",        "api_key": "band_a_..."},
-  "tax":      {"agent_id": "TAX_AGENT_UUID",       "api_key": "band_a_..."}
+  "routing":   {"agent_id": "ROUTING_AGENT_UUID",   "api_key": "band_a_..."},
+  "caregiver": {"agent_id": "CAREGIVER_AGENT_UUID", "api_key": "band_a_..."},
+  "ihss":      {"agent_id": "IHSS_AGENT_UUID",       "api_key": "band_a_..."},
+  "medical":   {"agent_id": "MEDICAL_AGENT_UUID",    "api_key": "band_a_..."},
+  "medicare":  {"agent_id": "MEDICARE_AGENT_UUID",   "api_key": "band_a_..."},
+  "pfl":       {"agent_id": "PFL_AGENT_UUID",        "api_key": "band_a_..."},
+  "va":        {"agent_id": "VA_AGENT_UUID",         "api_key": "band_a_..."},
+  "tax":       {"agent_id": "TAX_AGENT_UUID",        "api_key": "band_a_..."}
 }

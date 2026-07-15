@@ -263,50 +263,61 @@ async def _dispatch_to_band(profile: CaseProfile) -> None:
         routing_creds = registry.get("routing")
         if not routing_creds:
             return
-        client = AsyncRestClient(
-            api_key=routing_creds["api_key"],
-            base_url=get_settings().band_rest_url.rstrip("/"),
-        )
 
-        # Fetch routing agent's identity so we know its handle
-        me = await client.agent_api_identity.get_agent_me(
+        base_url = get_settings().band_rest_url.rstrip("/")
+
+        # The seed message represents the CAREGIVER (the human) asking for help. In a real
+        # deployment the caregiver's own Band account posts it; for the server-triggered demo
+        # we post it as an optional "caregiver"/"user" identity if configured, so the message
+        # comes from someone other than the routing agent and actually triggers it. Falling
+        # back to the routing creds means the routing agent authors its own seed, which some
+        # setups won't re-trigger — configure a caregiver identity to avoid that.
+        seed_creds = registry.get("caregiver") or registry.get("user")
+        if not seed_creds:
+            logger.warning(
+                "Band dispatch: no 'caregiver'/'user' identity configured; seeding as the "
+                "routing agent itself, which may not re-trigger it. Add one to band_agents.json."
+            )
+            seed_creds = routing_creds
+        seed_client = AsyncRestClient(api_key=seed_creds["api_key"], base_url=base_url)
+
+        # The routing agent's identity gives us the owner handle + its own handle to @mention.
+        routing_client = AsyncRestClient(api_key=routing_creds["api_key"], base_url=base_url)
+        me = await routing_client.agent_api_identity.get_agent_me(
             request_options=DEFAULT_REQUEST_OPTIONS
         )
-        owner_handle = getattr(me, "owner_handle", None) or getattr(me, "handle", "")
+        owner_handle = getattr(me, "owner_handle", None) or ""
+        routing_handle = getattr(me, "handle", None) or (
+            f"{owner_handle}/ilera-routing" if owner_handle else "ilera-routing"
+        )
 
-        # Create a chat room
-        chat = await client.agent_api_chats.create_agent_chat(
+        # Create a chat room (as the caregiver)
+        chat = await seed_client.agent_api_chats.create_agent_chat(
             chat=ChatRoomRequest(), request_options=DEFAULT_REQUEST_OPTIONS
         )
         chat_id = chat.data.id
 
-        # Add specialist agents as participants and build mention items
-        mentions: list[ChatMessageRequestMentionsItem] = []
-        handle_tags: list[str] = []
+        # Bring the routing agent AND every specialist into the room so the routing agent can
+        # consult the specialists one-at-a-time. Only the routing agent is @mentioned in the
+        # seed — the specialists are consulted by the routing agent, not broadcast to.
+        added = 0
         for key, creds in registry.items():
-            if key == "routing":
+            if key not in _SPECIALIST_NAMES and key != "routing":
                 continue
             try:
-                await client.agent_api_participants.add_agent_chat_participant(
+                await seed_client.agent_api_participants.add_agent_chat_participant(
                     chat_id,
                     participant=ParticipantRequest(
                         participant_id=creds["agent_id"], role="member"
                     ),
                     request_options=DEFAULT_REQUEST_OPTIONS,
                 )
-                agent_name = _SPECIALIST_NAMES.get(key, key)
-                handle = f"{owner_handle}/{agent_name}" if owner_handle else agent_name
-                mentions.append(
-                    ChatMessageRequestMentionsItem(
-                        id=creds["agent_id"], handle=handle
-                    )
-                )
-                handle_tags.append(f"@{handle}")
+                added += 1
             except Exception:
-                logger.debug("Could not add specialist %s to room", key, exc_info=True)
+                logger.debug("Could not add %s to room", key, exc_info=True)
 
-        if not mentions:
-            logger.warning("Band dispatch: no specialist agents could be added")
+        if added == 0:
+            logger.warning("Band dispatch: no agents could be added to the room")
             return
 
         # Start agents on-demand (skip_backlog prevents reprocessing old messages)
@@ -314,26 +325,37 @@ async def _dispatch_to_band(profile: CaseProfile) -> None:
         await asyncio.gather(*(a.start() for _, a in agents))
         logger.info("Band agents started on-demand for eligibility assessment")
 
-        # Compose message with @mentions so agents are properly activated
+        # Seed message: the caregiver's situation, addressed to the routing agent only.
         cr = profile.care_recipient
         cg = profile.caregiver
-        mention_prefix = " ".join(handle_tags)
+        mentions = [
+            ChatMessageRequestMentionsItem(
+                id=routing_creds["agent_id"], handle=routing_handle
+            )
+        ]
         msg = (
-            f"{mention_prefix} "
-            f"Assess eligibility for {cr.name or 'care recipient'}, "
+            f"@{routing_handle} "
+            "I'm caring for a family member and want to know which caregiver benefits we "
+            "qualify for and how to apply. Please consult the relevant program specialists "
+            "and put together a plan for me.\n\n"
+            f"Care recipient: {cr.name or 'my family member'}, "
             f"age {cr.age or 'unknown'}, {cr.state}. "
             f"Insurance: {cr.insurance}. "
             f"Care needs: {', '.join(cr.care_needs) or 'unspecified'}. "
             f"Veteran: {cr.veteran}. "
-            f"Caregiver: {cg.name or 'family member'} ({cg.relationship}). "
+            f"I am the {cg.relationship or 'family caregiver'}"
+            f"{f' ({cg.name})' if cg.name else ''}. "
             f"Household income: ${profile.household.income_monthly or 0}/mo."
         )
-        await client.agent_api_messages.create_agent_chat_message(
+        await seed_client.agent_api_messages.create_agent_chat_message(
             chat_id,
             message=ChatMessageRequest(content=msg, mentions=mentions),
             request_options=DEFAULT_REQUEST_OPTIONS,
         )
-        logger.info("Band dispatch: sent to %d specialists in room %s", len(mentions), chat_id)
+        logger.info(
+            "Band dispatch: seeded room %s for the routing agent (%d agents present)",
+            chat_id, added,
+        )
 
         # Let agents run for a limited time to process the message, then stop
         try:

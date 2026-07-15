@@ -3,20 +3,27 @@
 Every program group (IHSS, Medi-Cal, Medicare, PFL, VA, Tax) is registered as a separate
 agent on the Band platform (https://docs.band.ai) and connects over a websocket. Each
 specialist agent is grounded ONLY in its program's documentation and exposes program-scoped
-tools, so other agents in a Band room can consult, say, the IHSS specialist directly. A
-"routing" coordinator agent exposes cross-program tools.
+tools.
+
+Band is the real coordination substrate: the "routing" coordinator agent does NOT assess
+eligibility itself. When the caregiver describes their situation, the routing agent consults
+the relevant specialists ONE AT A TIME over the shared room (band_send_message), gathers
+their cited replies, reasons about cross-program interactions, and delivers a single
+synthesized strategy back to the caregiver. Specialists answer only their own program.
 
 Credentials come from a JSON registry (default: backend/band_agents.json), mapping each
-program group to its Band agent_id + api_key:
+program group to its Band agent_id + api_key. An optional "caregiver" (or "user") identity
+lets the server post the seed request as the human, so the routing agent is triggered:
 
     {
-      "routing":  {"agent_id": "...", "api_key": "..."},
-      "ihss":     {"agent_id": "...", "api_key": "..."},
-      "medical":  {"agent_id": "...", "api_key": "..."},
-      "medicare": {"agent_id": "...", "api_key": "..."},
-      "pfl":      {"agent_id": "...", "api_key": "..."},
-      "va":       {"agent_id": "...", "api_key": "..."},
-      "tax":      {"agent_id": "...", "api_key": "..."}
+      "routing":   {"agent_id": "...", "api_key": "..."},
+      "caregiver": {"agent_id": "...", "api_key": "..."},
+      "ihss":      {"agent_id": "...", "api_key": "..."},
+      "medical":   {"agent_id": "...", "api_key": "..."},
+      "medicare":  {"agent_id": "...", "api_key": "..."},
+      "pfl":       {"agent_id": "...", "api_key": "..."},
+      "va":        {"agent_id": "...", "api_key": "..."},
+      "tax":       {"agent_id": "...", "api_key": "..."}
     }
 
 For backwards-compat, if no registry file exists but BAND_API_KEY + BAND_AGENT_ID are set,
@@ -36,8 +43,7 @@ import os
 
 from pydantic import BaseModel, Field
 
-from ..agents.interactions import analyze_interactions
-from ..agents.routing import run_routing
+from ..agents.interactions import analyze_program_interactions
 from ..agents.specialists import ALL_SPECIALISTS
 from ..config import get_settings
 from ..models import CareRecipient, Caregiver, CaseProfile, EligibilityResult, Household
@@ -55,18 +61,26 @@ _SPECIALIST_NAMES = {
 }
 
 _ROUTING_PROMPT = (
-    "You are Ilera's Routing Agent, the coordinator for U.S. caregiver benefits. You work with "
-    "program specialist agents in your Band organization: ilera-ihss, ilera-medi-cal, "
-    "ilera-medicare, ilera-pfl, ilera-va, ilera-tax.\n\n"
-    "When another agent describes a caregiver's situation:\n"
-    "1. Call assesseligibility to run all specialists and get ranked, source-cited findings plus "
-    "cross-program interaction notes.\n"
-    "2. To dig deeper on one program, CONSULT that specialist directly: use band_lookup_peers to "
-    "find it, band_add_participant to bring it into the room, and band_send_message to ask your "
-    "question — then incorporate its reply.\n"
-    "3. Call analyzeinteractions to explain how the programs interact (prerequisites, payer order, "
-    "tax treatment, application sequence), grounded in the inter-eligibility advising documents.\n"
-    "Ground every claim in citations (title, page, source URL); never invent program rules."
+    "You are Ilera's Routing Agent, the coordinator for U.S. caregiver benefits. You do NOT "
+    "assess eligibility yourself — you have no assessment tool. Your job is to consult the "
+    "program specialist agents in your Band room and synthesize their answers for the "
+    "caregiver. Your specialists are: ilera-ihss, ilera-medi-cal, ilera-medicare, ilera-pfl, "
+    "ilera-va, ilera-tax.\n\n"
+    "When the caregiver (the human in the room) describes their situation:\n"
+    "1. Decide which programs are plausibly relevant to this caregiver.\n"
+    "2. CONSULT the relevant specialists ONE AT A TIME. For each: use band_lookup_peers to find "
+    "the specialist, band_add_participant to ensure it is in the room, then band_send_message "
+    "mentioning ONLY that one specialist with a specific, scoped question about the caregiver's "
+    "situation. WAIT for that specialist's cited reply before moving to the next one. Do not "
+    "@mention several specialists in one message, and do not broadcast.\n"
+    "3. After you have gathered the specialists' findings, call analyzeinteractions with the list "
+    "of programs the specialists found relevant to explain how they interact (prerequisites, "
+    "payer order, tax treatment, application sequence), grounded in the coordination/advising "
+    "documents. Use searchprogramdocs for any additional coordination lookups.\n"
+    "4. Deliver ONE final, synthesized benefit strategy addressed to the CAREGIVER (the human). "
+    "This is a human-facing deliverable: do NOT @mention any specialist agents in it. Attribute "
+    "each claim to the specialist that provided it and keep their citations (title, page, source "
+    "URL). Never invent program rules."
 )
 
 
@@ -75,10 +89,12 @@ def _specialist_prompt(program: str) -> str:
         f"You are Ilera's {program} specialist agent, part of a Band team coordinated by the "
         "routing agent. You ONLY assess eligibility for "
         f"{program} and answer questions about it, grounded strictly in {program}'s official "
-        "documentation. When the routing agent (or another agent) messages you in a room, answer "
-        "their question: call assesseligibility to evaluate the caregiver's situation for your "
-        "program, and lookupprogramdocs to quote the official rules, then reply with "
-        "band_send_message. Always cite the source (title, page, URL). If a question is outside "
+        "documentation. The routing agent will message you with a scoped question about a "
+        "caregiver's situation. To answer it: call assesseligibility to evaluate the caregiver "
+        f"for {program}, and lookupprogramdocs to quote the official rules, then reply with "
+        "band_send_message directed back to the routing agent — mention only the routing agent, "
+        "do not broadcast or @mention other specialists. Keep your answer scoped to your program "
+        "and always cite the source (title, page, URL). If a question is outside "
         f"{program}, say so and defer to the routing agent."
     )
 
@@ -118,7 +134,12 @@ class LookupProgramDocsInput(BaseModel):
 
 
 class AnalyzeInteractionsInput(AssessEligibilityInput):
-    """Explain how the caregiver's benefit programs interact — prerequisites, payer order, income/tax treatment, and the best application sequence — grounded in the official inter-eligibility advising documents with citations."""
+    """Explain how the caregiver's benefit programs interact — prerequisites, payer order, income/tax treatment, and the best application sequence — grounded in the official inter-eligibility advising documents with citations. Call this AFTER consulting the specialists, passing the programs their replies found relevant."""
+
+    programs: list[str] = Field(
+        default_factory=list,
+        description="Program names the specialists found relevant, e.g. ['IHSS', 'Medi-Cal', 'Paid Family Leave']",
+    )
 
 
 def _profile_from_input(inp: AssessEligibilityInput) -> CaseProfile:
@@ -169,20 +190,12 @@ def _result_dict(r: EligibilityResult) -> dict:
 
 
 # --- Routing (cross-program) handlers -------------------------------------
-def _assess_all_sync(inp: AssessEligibilityInput) -> dict:
-    routing = run_routing(_profile_from_input(inp))
-    return {
-        "programs": [_result_dict(r) for r in routing.results],
-        "follow_up_questions": [q.prompt for q in routing.followups],
-        "strategy_notes": routing.strategy_notes,
-        "interactions": [_interaction_dict(n) for n in routing.interaction_notes],
-    }
-
-
+# The routing agent has NO assess-all tool: it gathers eligibility by consulting the
+# specialist agents over the Band room, not by running them in-process. Interactions are
+# grounded purely in the coordination/advising corpus from the programs it gathered.
 def _interactions_sync(inp: AnalyzeInteractionsInput) -> dict:
     profile = _profile_from_input(inp)
-    results = [a.assess(profile) for a in _SPECIALISTS.values()]
-    notes = analyze_interactions(profile, results)
+    notes = analyze_program_interactions(profile, inp.programs)
     return {"interactions": [_interaction_dict(n) for n in notes]}
 
 
@@ -252,7 +265,6 @@ def _make_agent(adapter, creds: dict, *, skip_backlog: bool = False):
 
 def build_routing_agent(creds: dict, *, skip_backlog: bool = False):
     tools = [
-        (AssessEligibilityInput, _wrap(_assess_all_sync)),
         (AnalyzeInteractionsInput, _wrap(_interactions_sync)),
         (SearchProgramDocsInput, _wrap(_search_docs_sync)),
     ]
@@ -322,6 +334,10 @@ def build_agents(*, skip_backlog: bool = False) -> list:
             agents.append((key, build_specialist_agent(key, creds, skip_backlog=skip_backlog)))
         elif key == "routing":
             agents.append((key, build_routing_agent(creds, skip_backlog=skip_backlog)))
+        elif key in ("caregiver", "user"):
+            # Human seed identity used by the server to post the caregiver's request; not an
+            # autonomous agent, so nothing to build/run here.
+            continue
         else:
             logger.warning("Unknown Band agent group %r in registry; skipping", key)
     return agents

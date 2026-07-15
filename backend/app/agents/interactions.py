@@ -63,9 +63,8 @@ def _citation(h) -> Citation:
     )
 
 
-def _heuristic(results: list[EligibilityResult]) -> list[InteractionNote]:
+def _heuristic(active: set[str]) -> list[InteractionNote]:
     notes: list[InteractionNote] = []
-    active = {r.program for r in results if r.status in ("likely", "possible")}
     if "IHSS" in active and "Medi-Cal" in active:
         notes.append(InteractionNote(
             note="IHSS eligibility generally requires active Medi-Cal.",
@@ -91,15 +90,42 @@ def _heuristic(results: list[EligibilityResult]) -> list[InteractionNote]:
 def analyze_interactions(
     profile: CaseProfile, results: list[EligibilityResult]
 ) -> list[InteractionNote]:
-    """Return cited cross-program interaction notes for the active programs."""
+    """Return cited cross-program interaction notes, given full specialist results.
+
+    Used by the synchronous, no-Band HTTP fallback (`run_routing`), which still assesses
+    the specialists in-process.
+    """
     active = [r.program for r in results if r.status in ("likely", "possible", "needs_info")]
-    if len(active) < 2:
+    summary = "; ".join(f"{r.program}={r.status}({r.confidence:.2f})" for r in results)
+    return _analyze(profile, active, summary)
+
+
+def analyze_program_interactions(
+    profile: CaseProfile, programs: list[str]
+) -> list[InteractionNote]:
+    """Return cited cross-program interaction notes from just the program names the
+    Band routing agent gathered by consulting specialists over the room.
+
+    This is the coordination-layer entry point: the routing agent no longer re-runs the
+    specialists in-process, it passes along the programs its specialist consultations
+    surfaced and this grounds the interactions in the coordination/advising corpus.
+    """
+    active = [p for p in dict.fromkeys(programs) if p]
+    summary = ", ".join(active)
+    return _analyze(profile, active, summary)
+
+
+def _analyze(
+    profile: CaseProfile, active: list[str], summary: str
+) -> list[InteractionNote]:
+    active_set = set(active)
+    if len(active_set) < 2:
         return []
     if not llm.available():
-        return _heuristic(results)
+        return _heuristic(active_set)
     hits = _retrieve(active)
     if not hits:
-        return _heuristic(results)
+        return _heuristic(active_set)
     context = "\n\n".join(
         f"[{h.title or h.source}" + (f", p.{h.page}" if h.page else "") + f"] {h.text}"
         for h in hits
@@ -114,9 +140,6 @@ def analyze_interactions(
                or (h.title or h.source).casefold() in t]
         return out[:1]
 
-    summary = "; ".join(
-        f"{r.program}={r.status}({r.confidence:.2f})" for r in results
-    )
     user = (
         f"ACTIVE PROGRAMS AND STATUS: {summary}\n\n"
         f"CAREGIVER CASE PROFILE (JSON):\n{profile.model_dump_json(indent=2)}\n\n"
@@ -125,7 +148,7 @@ def analyze_interactions(
     try:
         data = llm.complete_json(_SYSTEM, user, max_tokens=1200)
     except Exception:
-        return _heuristic(results)
+        return _heuristic(active_set)
     notes: list[InteractionNote] = []
     for item in data.get("interactions", []) or []:
         note = str(item.get("note", "")).strip()
@@ -145,4 +168,4 @@ def analyze_interactions(
             action=str(item.get("action", "")),
             citations=citations,
         ))
-    return notes or _heuristic(results)
+    return notes or _heuristic(active_set)
