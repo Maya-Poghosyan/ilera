@@ -281,15 +281,14 @@ async def _dispatch_to_band(profile: CaseProfile) -> None:
             seed_creds = routing_creds
         seed_client = AsyncRestClient(api_key=seed_creds["api_key"], base_url=base_url)
 
-        # The routing agent's identity gives us the owner handle + its own handle to @mention.
+        # The routing agent's identity gives us its handle (for the mention item). The
+        # response wraps the agent under `.data`.
         routing_client = AsyncRestClient(api_key=routing_creds["api_key"], base_url=base_url)
         me = await routing_client.agent_api_identity.get_agent_me(
             request_options=DEFAULT_REQUEST_OPTIONS
         )
-        owner_handle = getattr(me, "owner_handle", None) or ""
-        routing_handle = getattr(me, "handle", None) or (
-            f"{owner_handle}/ilera-routing" if owner_handle else "ilera-routing"
-        )
+        me_data = getattr(me, "data", me)
+        routing_handle = getattr(me_data, "handle", "") or "ilera-routing"
 
         # Create a chat room (as the caregiver)
         chat = await seed_client.agent_api_chats.create_agent_chat(
@@ -334,7 +333,7 @@ async def _dispatch_to_band(profile: CaseProfile) -> None:
             )
         ]
         msg = (
-            f"@{routing_handle} "
+            f"@[[{routing_creds['agent_id']}]] "
             "I'm caring for a family member and want to know which caregiver benefits we "
             "qualify for and how to apply. Please consult the relevant program specialists "
             "and put together a plan for me.\n\n"
