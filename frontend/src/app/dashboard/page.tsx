@@ -44,17 +44,17 @@ type CalEvent = {
 
 const YEAR = 2026;
 const MONTH = 5; // June (0-indexed)
-const TODAY = 21;
+const TODAY = 4;
 
 const events: CalEvent[] = [
-  { day: 23, title: "Dr. Patel \u2014 cardiology follow-up", time: "10:00 AM", kind: "Appointment" },
-  { day: 25, title: "County social worker visit", time: "2:00 PM", kind: "Visit" },
-  { day: 27, title: "IHSS timesheet due", kind: "Deadline" },
+  { day: 2, title: "Dr. Patel \u2014 cardiology follow-up", time: "10:00 AM", kind: "Appointment" },
+  { day: 5, title: "County social worker visit", time: "2:00 PM", kind: "Visit" },
+  { day: 9, title: "IHSS timesheet due", kind: "Deadline" },
 ];
 
 const STATIC_SUGGESTED: CalEvent[] = [
-  { day: 24, title: "Pharmacy refill pickup", time: "9:00 AM", kind: "Appointment", suggested: true, description: "Found in email from CVS \u2014 prescription #4021 ready for pickup at Main St location." },
-  { day: 28, title: "IHSS pay stub review", kind: "Deadline", suggested: true, description: "IHSS direct deposit scheduled for Jun 28. Review hours logged against pay stub." },
+  { day: 3, title: "Pharmacy refill pickup", time: "9:00 AM", kind: "Appointment", suggested: true, description: "Found in email from CVS \u2014 prescription #4021 ready for pickup at Main St location." },
+  { day: 6, title: "IHSS pay stub review", kind: "Deadline", suggested: true, description: "IHSS direct deposit scheduled for Jun 6. Review hours logged against pay stub." },
 ];
 
 function apiEventToCalEvent(e: SuggestedEventAPI): CalEvent {
