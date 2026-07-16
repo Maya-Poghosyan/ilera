@@ -450,7 +450,7 @@ export default function CalendarPage() {
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-sm font-medium text-foreground">{e.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    {e.day > 0 ? `${monthName} ${e.day}` : ""}{e.time ? ` \u00b7 ${e.time}` : ""} \u00b7 {e.kind}
+                    {e.day > 0 ? `${monthName} ${e.day}` : ""}{e.time ? ` \u00b7 ${e.time}` : ""}{" \u00b7 "}{e.kind}
                   </p>
                   {e.description && (
                     <p className="text-xs leading-relaxed text-muted-foreground/80">
