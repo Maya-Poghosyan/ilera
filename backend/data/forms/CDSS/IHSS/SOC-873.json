@@ -1,0 +1,15 @@
+{
+  "agency": "CDSS",
+  "program": "IHSS",
+  "form_id": "SOC-873",
+  "title": "IHSS Program Health Care Certification",
+  "source_url": "https://www.cdss.ca.gov/cdssweb/entres/forms/english/soc873.pdf",
+  "source_type": "pdf",
+  "policy": "HOST",
+  "status": "downloaded",
+  "resolved_url": "https://www.cdss.ca.gov/cdssweb/entres/forms/english/soc873.pdf",
+  "downloaded_at": "2026-06-21T16:05:30.741278+00:00",
+  "sha256": "fb8accd1e9f96c92ff2a5edb1cf9fbef84cb65321556d366638462695dea514a",
+  "bytes": 68484,
+  "local_path": "benefits_forms/CDSS/IHSS/SOC-873_2026-06-21_fb8accd1e9.pdf"
+}

@@ -1,0 +1,15 @@
+{
+  "agency": "Covered-California",
+  "program": "Medi-Cal",
+  "form_id": "CCFRM604",
+  "title": "Application for Health Insurance",
+  "source_url": "https://www.coveredca.com/pdfs/paper-application/CA-SingleStreamApp_92MAX.pdf",
+  "source_type": "pdf",
+  "policy": "HOST",
+  "status": "downloaded",
+  "resolved_url": "https://www.coveredca.com/pdfs/paper-application/CA-SingleStreamApp_92MAX.pdf",
+  "downloaded_at": "2026-06-21T16:05:41.459755+00:00",
+  "sha256": "f7c4154e8e8c0b0fbf32d8c4623fee89bc33a7d4915dafb88eec297fddacc94c",
+  "bytes": 2518154,
+  "local_path": "benefits_forms/Covered-California/Medi-Cal/CCFRM604_2026-06-21_f7c4154e8e.pdf"
+}

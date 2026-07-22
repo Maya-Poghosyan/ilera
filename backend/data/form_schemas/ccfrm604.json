@@ -1,0 +1,53 @@
+{
+  "_meta": {
+    "form_id": "CCFRM604",
+    "title": "Application for Health Insurance",
+    "program": "Medi-Cal",
+    "agency": "Covered-California",
+    "pdf_path": "Covered-California/Medi-Cal/CCFRM604.pdf",
+    "total_fields": 1081,
+    "notes": "Scaffold - field mappings not yet authored"
+  },
+  "fields": {
+    "p_name_1": {
+      "profile_path": "care_recipient.name",
+      "label": "Primary Contact First Name"
+    },
+    "p_name_3": {
+      "profile_path": "care_recipient.name",
+      "label": "Primary Contact Last Name"
+    },
+    "person_fname_1": {
+      "profile_path": "care_recipient.name",
+      "label": "Person 1 First Name"
+    },
+    "person_lname_1": {
+      "profile_path": "care_recipient.name",
+      "label": "Person 1 Last Name"
+    },
+    "pri_state_1": {
+      "profile_path": "care_recipient.state",
+      "label": "Person 1 State"
+    },
+    "dob_person_1": {
+      "profile_path": "care_recipient.date_of_birth",
+      "label": "Person 1 Date of Birth"
+    },
+    "pri_address_1": {
+      "profile_path": "care_recipient.street_address",
+      "label": "Person 1 Home Address"
+    },
+    "pri_city_1": {
+      "profile_path": "care_recipient.city",
+      "label": "Person 1 City"
+    },
+    "primary_phone_1": {
+      "profile_path": "care_recipient.phone",
+      "label": "Person 1 Phone"
+    },
+    "contact-3-1": {
+      "profile_path": "care_recipient.email",
+      "label": "Primary Contact Email"
+    }
+  }
+}

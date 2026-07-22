@@ -1,0 +1,18 @@
+IN-HOME SUPPORTIVE SERVICES (IHSS) — PROGRAM OVERVIEW (sample placeholder)
+
+Replace this file with official IHSS documentation for production-quality RAG.
+
+Eligibility: IHSS helps eligible aged, blind, and disabled individuals who are unable to
+remain safely in their own homes without assistance. To qualify, the recipient must:
+- Be eligible for Medi-Cal.
+- Reside in their own home (not a hospital, nursing facility, or board-and-care).
+- Have a need for assistance with activities of daily living established by an in-home
+  county social worker assessment.
+
+How it works: Recipients are authorized a number of service hours per month. A caregiver
+(who may be a family member) is paid by the program to provide the authorized services.
+
+Application: Submit the SOC 295 application to the county IHSS/social services office. An
+assessment visit is scheduled to determine authorized hours.
+
+Required documents: SOC 295, Medi-Cal verification, proof of California residency.

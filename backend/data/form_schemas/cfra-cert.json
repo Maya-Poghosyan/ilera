@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "form_id": "CFRA-CERT",
+    "title": "CFRA/FMLA Health Care Provider Certification",
+    "program": "CFRA",
+    "agency": "California-CRD",
+    "pdf_path": "California-CRD/CFRA/CFRA-CERT.pdf",
+    "total_fields": 35,
+    "notes": "Scaffold - field mappings not yet authored"
+  },
+  "fields": {}
+}

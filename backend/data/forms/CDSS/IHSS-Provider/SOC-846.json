@@ -1,0 +1,15 @@
+{
+  "agency": "CDSS",
+  "program": "IHSS-Provider",
+  "form_id": "SOC-846",
+  "title": "Provider Enrollment Agreement",
+  "source_url": "https://www.cdss.ca.gov/Portals/9/Additional-Resources/Forms-and-Brochures/2019/Q-T/SOC846.pdf?ver=2019-11-22-132817-200",
+  "source_type": "pdf",
+  "policy": "HOST",
+  "status": "downloaded",
+  "resolved_url": "https://www.cdss.ca.gov/Portals/9/Additional-Resources/Forms-and-Brochures/2019/Q-T/SOC846.pdf?ver=2019-11-22-132817-200",
+  "downloaded_at": "2026-06-21T16:05:35.380400+00:00",
+  "sha256": "9503e653d8592b7dc1896bd27976ce5964f5c3a91fc36bb7553e7908ced4ec91",
+  "bytes": 163152,
+  "local_path": "benefits_forms/CDSS/IHSS-Provider/SOC-846_2026-06-21_9503e653d8.pdf"
+}

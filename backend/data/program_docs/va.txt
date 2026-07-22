@@ -1,0 +1,12 @@
+VA CAREGIVER SUPPORT PROGRAMS — OVERVIEW (sample placeholder)
+
+Replace this file with official VA documentation for production-quality RAG.
+
+Programs: The VA offers the Program of Comprehensive Assistance for Family Caregivers
+(PCAFC) and the Program of General Caregiver Support Services (PGCSS).
+
+Eligibility (PCAFC): The veteran must have a serious injury (including serious illness)
+incurred or aggravated in the line of duty, and require in-person personal care services.
+Caregivers may receive a stipend, training, and health care benefits.
+
+Application: Submit VA Form 10-10CG. Eligibility is assessed by the VA medical center.

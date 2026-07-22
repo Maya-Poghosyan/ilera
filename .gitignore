@@ -1,0 +1,21 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+!*.env.example
+
+# Band per-agent credentials (use band_agents.example.json as a template)
+backend/band_agents.json
+
+# Node / Next
+node_modules/
+.next/
+out/
+.DS_Store
+
+# Local data artifacts
+backend/data/program_docs/*.pdf
+backend/data/generated/

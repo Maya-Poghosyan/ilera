@@ -1,0 +1,15 @@
+{
+  "agency": "CDSS",
+  "program": "IHSS-Provider",
+  "form_id": "SOC-2255",
+  "title": "Provider Workweek and Travel Time Agreement",
+  "source_url": "https://www.cdss.ca.gov/Portals/9/FMUForms/Q-T/SOC2255.pdf?ver=2019-04-12-110135-190",
+  "source_type": "pdf",
+  "policy": "HOST_CONDITIONAL",
+  "status": "downloaded",
+  "resolved_url": "https://www.cdss.ca.gov/Portals/9/FMUForms/Q-T/SOC2255.pdf?ver=2019-04-12-110135-190",
+  "downloaded_at": "2026-06-21T16:05:38.804299+00:00",
+  "sha256": "893907e940b641b06d53b4a17b177661fbaf7db2a0954948abda4885f13d593f",
+  "bytes": 264368,
+  "local_path": "benefits_forms/CDSS/IHSS-Provider/SOC-2255_2026-06-21_893907e940.pdf"
+}
