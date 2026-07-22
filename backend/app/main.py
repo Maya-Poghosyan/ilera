@@ -252,9 +252,14 @@ _agent_executions: list[dict] = []
 
 
 # Time budgets for the async Band eligibility run.
-_FINDINGS_TIMEOUT = 210  # seconds to wait for all specialists to submit complete responses
+_FINDINGS_TIMEOUT = 300  # seconds to wait for ALL specialists (across every wave) to complete
+_WAVE_TIMEOUT = 150      # per-wave seconds to wait for that wave's specialists to complete
 _STRATEGY_TIMEOUT = 90   # seconds to wait for the routing agent to submit its strategy
 _POLL_INTERVAL = 4
+# How many specialists to seed at once. Seeding in small waves (rather than @mentioning all
+# specialists in one message) keeps concurrent LLM calls low so we stay under the rate limit;
+# raise this as the deployment's quota grows.
+_WAVE_SIZE = 2
 
 
 def _findings_summary(profile: CaseProfile, specialists: list[str]) -> str:
@@ -272,7 +277,7 @@ async def _run_case_eligibility(case_id: str) -> None:
     create the room + seed, wait for every specialist's complete finding, trigger the routing
     agent to synthesize the strategy, and drive the case's band_status to complete/error.
     Band is the sole engine — there is no in-process fallback."""
-    from .integrations.band import start_case_room, trigger_synthesis
+    from .integrations.band import seed_specialists, start_case_room, trigger_synthesis
 
     profile = get_profile(case_id)
     if profile is None:
@@ -304,35 +309,53 @@ async def _run_case_eligibility(case_id: str) -> None:
     p.expected_specialists = specialists
     save_profile(p)
 
-    # Barrier: routing synthesizes only once EVERY specialist has submitted a complete finding.
+    # Seed specialists in small waves and wait for each wave to finish before starting the next.
+    # This bounds concurrent LLM calls (the fan-out that otherwise blows the rate limit) while
+    # still requiring EVERY specialist to submit a complete finding before routing synthesizes.
     loop = asyncio.get_running_loop()
-    deadline = loop.time() + _FINDINGS_TIMEOUT
-    triggered = False
-    while loop.time() < deadline:
-        await asyncio.sleep(_POLL_INTERVAL)
-        p = get_profile(case_id)
-        if p is None:
-            return
-        completed = [k for k in specialists if k in p.findings and p.findings[k].complete]
-        if len(completed) >= len(specialists):
-            await trigger_synthesis(chat_id, _findings_summary(p, specialists))
-            triggered = True
+    overall_deadline = loop.time() + _FINDINGS_TIMEOUT
+    waves = [specialists[i : i + _WAVE_SIZE] for i in range(0, len(specialists), _WAVE_SIZE)]
+    all_complete = True
+    for wave in waves:
+        try:
+            p = get_profile(case_id)
+            await seed_specialists(p, chat_id, wave)
+        except Exception:
+            logger.exception("Band seed failed for wave %s (case %s)", wave, case_id)
+            all_complete = False
+            break
+        wave_deadline = min(loop.time() + _WAVE_TIMEOUT, overall_deadline)
+        wave_done = False
+        while loop.time() < wave_deadline:
+            await asyncio.sleep(_POLL_INTERVAL)
+            p = get_profile(case_id)
+            if p is None:
+                return
+            if all(k in p.findings and p.findings[k].complete for k in wave):
+                wave_done = True
+                break
+        if not wave_done:
+            all_complete = False
             break
 
-    if not triggered:
-        # Not every specialist finished in time. No fallback / no partial synthesis: surface
-        # an error naming who is missing so it can be retried.
-        p = get_profile(case_id)
-        if p is not None:
-            done = [k for k in specialists if k in p.findings and p.findings[k].complete]
-            missing = [k for k in specialists if k not in done]
-            p.band_status = "error"
-            p.band_error = (
-                "Specialist evaluation did not complete in time "
-                f"(missing: {', '.join(missing) or 'all'})."
-            )
-            save_profile(p)
+    p = get_profile(case_id)
+    if p is None:
         return
+
+    if not all_complete:
+        # A wave did not finish in time. No fallback / no partial synthesis: surface an error
+        # naming who is missing so it can be retried.
+        done = [k for k in specialists if k in p.findings and p.findings[k].complete]
+        missing = [k for k in specialists if k not in done]
+        p.band_status = "error"
+        p.band_error = (
+            "Specialist evaluation did not complete in time "
+            f"(missing: {', '.join(missing) or 'all'})."
+        )
+        save_profile(p)
+        return
+
+    await trigger_synthesis(chat_id, _findings_summary(p, specialists))
 
     # Wait for the routing agent to submit its strategy (record_strategy sets status=complete).
     deadline = loop.time() + _STRATEGY_TIMEOUT

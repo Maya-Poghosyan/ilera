@@ -96,23 +96,23 @@ def _specialist_prompt(program: str) -> str:
         f"eligibility, grounded strictly in {program}'s official and informational "
         "documentation.\n\n"
         "The routing agent will post a case with the caregiver's and care recipient's intake "
-        "details, including their STATE and COUNTY, and @mention you. When mentioned:\n"
-        f"1. Call lookupprogramdocs to ground yourself in {program}'s rules and to get exact "
-        "citations (title, page, source URL).\n"
+        "details, including their STATE and COUNTY, and @mention you. When mentioned, be "
+        "economical with tool calls — do NOT re-look-up what you already have:\n"
+        f"1. Call lookupprogramdocs ONCE (at most twice) to ground yourself in {program}'s rules "
+        "and to get exact citations (title, page, source URL).\n"
         f"2. Evaluate THIS case for {program}, explicitly factoring in the recipient's state and "
         "county and how they affect eligibility, program availability, and the office/process "
         "(many programs are county-administered).\n"
         "3. Determine a match level on this scale: none, low, medium, likely, very_likely — plus "
         "a few short notes explaining the determination, with citations.\n"
-        "4. CROSS-ELIGIBILITY: if another program could create a cross-eligibility issue or "
-        "opportunity (e.g. a prerequisite, payer order, income/tax interaction), @mention that "
-        "program's specialist agent by name (band_send_message) and hold a short dialogue with "
-        "them — together make a plan that maximizes the caregiver's benefits and ensures they "
-        "can properly qualify for at least one program. Only mention specialists that exist in "
-        "the room. Keep it to a couple of exchanges; do not loop indefinitely.\n"
-        "5. Once any needed cross-eligibility dialogue is resolved, submit your COMPLETE response "
-        "by calling the submit_complete_response tool with your match_level, notes, the list of "
-        "cross_programs you coordinated with, and citations. Call it exactly once, at the end. "
+        "4. CROSS-ELIGIBILITY (only if clearly warranted): if another program creates a real "
+        "cross-eligibility issue or opportunity (e.g. a prerequisite, payer order, income/tax "
+        "interaction), @mention that program's specialist agent by name (band_send_message) and "
+        "exchange AT MOST one or two short messages to align on a plan. Only mention specialists "
+        "that exist in the room. Do not loop; if in doubt, skip the dialogue and note it instead.\n"
+        "5. Then submit your COMPLETE response by calling the submit_complete_response tool with "
+        "your match_level, notes, the list of cross_programs you coordinated with, and citations. "
+        "Call it exactly once, as your final action. "
         f"If the case is clearly outside {program}, still submit with match_level 'none' and a "
         "one-line note."
     )
@@ -179,6 +179,34 @@ def _configure_openai_env() -> None:
         os.environ["OPENAI_BASE_URL"] = s.openai_base_url
 
 
+# How many times the OpenAI client transparently retries a throttled (429) call,
+# honoring Azure's Retry-After header with exponential backoff. This absorbs a rate-limit
+# spike *inside* the single call so the agent turn never fails — which is what otherwise
+# makes Band re-deliver the message and re-run the whole turn (RAG + reasoning) from
+# scratch, multiplying load into a retry storm.
+_OPENAI_MAX_RETRIES = 6
+_OPENAI_TIMEOUT_SECONDS = 90.0
+
+
+def _openai_model():
+    """Build a pydantic-ai model backed by an OpenAI-compatible client configured with
+    rate-limit backoff. Band's PydanticAIAdapter accepts a model instance (not just a
+    provider string), so we can inject retry/timeout behavior the bare "openai:<model>"
+    string cannot express."""
+    from openai import AsyncOpenAI
+    from pydantic_ai.models.openai import OpenAIChatModel
+    from pydantic_ai.providers.openai import OpenAIProvider
+
+    s = get_settings()
+    client = AsyncOpenAI(
+        api_key=s.openai_api_key,
+        base_url=s.openai_base_url or None,
+        max_retries=_OPENAI_MAX_RETRIES,
+        timeout=_OPENAI_TIMEOUT_SECONDS,
+    )
+    return OpenAIChatModel(s.openai_model, provider=OpenAIProvider(openai_client=client))
+
+
 def _to_pai_tool(input_model, handler):
     """Adapt an (InputModel, async handler) tool into a pydantic-ai tool function.
 
@@ -230,7 +258,7 @@ def _adapter(prompt: str, tools):
             for t in tools
         ]
         return PydanticAIAdapter(
-            model=f"openai:{s.openai_model}",
+            model=_openai_model(),
             custom_section=prompt,
             additional_tools=pai_tools,
             features=features,
@@ -430,14 +458,13 @@ def _seed_content(profile: CaseProfile, mention_ids: list[str]) -> str:
 
 
 async def start_case_room(profile: CaseProfile) -> tuple[str, list[str]]:
-    """Create one Band room for this case, add the routing agent + every specialist, map the
-    room to the case, and post the routing agent's structured seed @mentioning all specialists.
+    """Create one Band room for this case, add the routing agent + every specialist, and map the
+    room to the case. Does NOT post the seed — specialists are seeded in waves afterwards (see
+    seed_specialists) so we don't fan out to every specialist at once and blow the LLM rate limit.
 
     Returns (chat_id, specialist_doc_keys). Raises if Band/routing is not configured.
     """
     from band.client.rest import (
-        ChatMessageRequest,
-        ChatMessageRequestMentionsItem,
         ChatRoomRequest,
         DEFAULT_REQUEST_OPTIONS,
         ParticipantRequest,
@@ -472,18 +499,40 @@ async def start_case_room(profile: CaseProfile) -> tuple[str, list[str]]:
         except Exception:
             logger.debug("add participant %s conflict/ignored", key, exc_info=True)
 
-    mention_ids = [registry[k]["agent_id"] for k in specialists]
+    logger.info("Band case room %s created with %d specialists", chat_id, len(specialists))
+    return chat_id, specialists
+
+
+async def seed_specialists(profile: CaseProfile, chat_id: str, batch: list[str]) -> None:
+    """Post the structured seed @mentioning only the specialists in `batch`, prompting just
+    those agents to evaluate. Dispatching in small waves (rather than mentioning all specialists
+    in one message) keeps concurrent LLM calls low so we stay under the rate limit."""
+    from band.client.rest import (
+        ChatMessageRequest,
+        ChatMessageRequestMentionsItem,
+        DEFAULT_REQUEST_OPTIONS,
+    )
+
+    registry = load_registry()
+    routing = registry.get("routing")
+    if not routing:
+        raise RuntimeError("Band routing agent not configured")
+    keys = [k for k in batch if k in registry]
+    if not keys:
+        return
+
+    routing_client = _rest_client(routing["api_key"])
+    mention_ids = [registry[k]["agent_id"] for k in keys]
     mentions = [
         ChatMessageRequestMentionsItem(id=registry[k]["agent_id"], handle=_SPECIALIST_NAMES[k])
-        for k in specialists
+        for k in keys
     ]
     await routing_client.agent_api_messages.create_agent_chat_message(
         chat_id,
         message=ChatMessageRequest(content=_seed_content(profile, mention_ids), mentions=mentions),
         request_options=DEFAULT_REQUEST_OPTIONS,
     )
-    logger.info("Band case room %s seeded with %d specialists", chat_id, len(specialists))
-    return chat_id, specialists
+    logger.info("Band room %s seeded wave: %s", chat_id, ", ".join(keys))
 
 
 async def trigger_synthesis(chat_id: str, findings_summary: str) -> None:
