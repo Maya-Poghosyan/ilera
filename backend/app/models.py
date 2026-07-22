@@ -11,6 +11,7 @@ class CareRecipient(BaseModel):
     state: str = "CA"
     street_address: str = ""
     city: str = ""
+    county: str = ""
     zip_code: str = ""
     phone: str = ""
     email: str = ""

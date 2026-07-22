@@ -36,7 +36,11 @@ class IHSSAgent(SpecialistAgent):
             ),
             roadblocks=[] if on_medical else ["Confirm or establish Medi-Cal eligibility"],
             required_documents=["SOC 295 (application)", "Medi-Cal verification", "Proof of residency"],
-            next_steps=["Apply for IHSS via county social services", "Schedule in-home assessment"],
+            next_steps=[
+                f"Apply for IHSS through the {cr.county} social services office"
+                if cr.county else "Apply for IHSS via your county social services office",
+                "Schedule in-home assessment",
+            ],
             missing_info=[] if on_medical else ["Medi-Cal enrollment status"],
             followups=followups,
             sources=self._sources("IHSS eligibility requirements"),
@@ -50,6 +54,7 @@ class MediCalAgent(SpecialistAgent):
 
     def _heuristic_assess(self, profile: CaseProfile) -> EligibilityResult:
         hh = profile.household
+        county = profile.care_recipient.county
         income = hh.income_monthly
         if income is None:
             status, confidence = "needs_info", 0.4
@@ -73,7 +78,11 @@ class MediCalAgent(SpecialistAgent):
             rationale="Medi-Cal eligibility is primarily income-based against the federal poverty level.",
             roadblocks=[] if income is not None else ["Household income not provided"],
             required_documents=["Proof of income", "Proof of identity", "Proof of California residency"],
-            next_steps=["Apply via Covered California / county", "Gather income documentation"],
+            next_steps=[
+                f"Apply via Covered California or the {county} Medi-Cal office"
+                if county else "Apply via Covered California / your county Medi-Cal office",
+                "Gather income documentation",
+            ],
             missing_info=[] if income is not None else ["Monthly household income", "Household size"],
             followups=followups,
             sources=self._sources("Medi-Cal income eligibility"),

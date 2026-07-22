@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from ..geo import zip_to_county
 from ..models import CaseProfile
 
 # Representative midpoints for the income range buckets (monthly USD).
@@ -180,6 +181,11 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
     state = a.get("recipient.address.state")
     if state:
         cr.state = str(state)
+
+    # Many programs are county-administered, so resolve county from the ZIP.
+    county = zip_to_county(cr.zip_code, cr.state)
+    if county:
+        cr.county = county
 
     conditions = _as_list(a.get("recipient.condition_categories"))
     if conditions:

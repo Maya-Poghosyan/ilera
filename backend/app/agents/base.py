@@ -80,10 +80,22 @@ class SpecialistAgent(ABC):
             f"[{h.title or h.source}" + (f", p.{h.page}" if h.page else "") + f"] {h.text}"
             for h in hits
         ) or "(no documentation found)"
+        cr = profile.care_recipient
+        locality = ""
+        if cr.county or cr.state:
+            where = ", ".join(x for x in (cr.county, cr.state) if x)
+            locality = (
+                f"\n\nLOCALITY: The care recipient is in {where}. Many programs are "
+                "county-administered (e.g. IHSS county social services, Medi-Cal county "
+                "offices, Regional Centers, PACE service areas, Area Agencies on Aging). "
+                "Reflect the correct county office / service area in next_steps, and if a "
+                "program's availability is county- or region-specific, say so."
+            )
         user = (
             f"PROGRAM: {self.program}\n\n"
             f"OFFICIAL DOCUMENTATION:\n{context}\n\n"
-            f"CAREGIVER CASE PROFILE (JSON):\n{profile.model_dump_json(indent=2)}\n\n"
+            f"CAREGIVER CASE PROFILE (JSON):\n{profile.model_dump_json(indent=2)}"
+            f"{locality}\n\n"
             f"{_SCHEMA_HINT}"
         )
         data = llm.complete_json(_SYSTEM, user)
