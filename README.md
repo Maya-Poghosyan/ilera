@@ -47,9 +47,11 @@ the CaseProfile store falls back to in-memory. Add keys to go production-grade.
 
 ### Backend
 
+Requires **Python ≥ 3.11** (`band-sdk` in `requirements.txt` does not support 3.10).
+
 ```bash
 cd backend
-python3 -m venv .venv && source .venv/bin/activate
+python3.11 -m venv .venv && source .venv/bin/activate   # or any python ≥3.11
 pip install -r requirements.txt
 cp .env.example .env        # optional: add Redis / LLM / Band / Poke / Browserbase keys
 uvicorn app.main:app --reload --port 8000
