@@ -69,6 +69,7 @@ _SPECIALIST_NAMES = {
     "ihss": "ilera-ihss", "medical": "ilera-medi-cal", "medicare": "ilera-medicare",
     "pfl": "ilera-pfl", "va": "ilera-va", "tax": "ilera-tax",
 }
+_ROUTING_NAME = "ilera-routing"
 
 _ROUTING_PROMPT = (
     "You are Ilera's Routing Agent, the coordinator for U.S. caregiver benefits. You do NOT "
@@ -97,7 +98,8 @@ def _specialist_prompt(program: str) -> str:
         "documentation.\n\n"
         "The routing agent will post a case with the caregiver's and care recipient's intake "
         "details, including their STATE and COUNTY, and @mention you. When mentioned, be "
-        "economical with tool calls — do NOT re-look-up what you already have:\n"
+        "economical with tool calls — do NOT re-look-up what you already have, and do NOT send "
+        "chat messages or @mention anyone. Work silently and finish in one turn:\n"
         f"1. Call lookupprogramdocs ONCE (at most twice) to ground yourself in {program}'s rules "
         "and to get exact citations (title, page, source URL).\n"
         f"2. Evaluate THIS case for {program}, explicitly factoring in the recipient's state and "
@@ -105,14 +107,13 @@ def _specialist_prompt(program: str) -> str:
         "(many programs are county-administered).\n"
         "3. Determine a match level on this scale: none, low, medium, likely, very_likely — plus "
         "a few short notes explaining the determination, with citations.\n"
-        "4. CROSS-ELIGIBILITY (only if clearly warranted): if another program creates a real "
-        "cross-eligibility issue or opportunity (e.g. a prerequisite, payer order, income/tax "
-        "interaction), @mention that program's specialist agent by name (band_send_message) and "
-        "exchange AT MOST one or two short messages to align on a plan. Only mention specialists "
-        "that exist in the room. Do not loop; if in doubt, skip the dialogue and note it instead.\n"
+        "4. CROSS-ELIGIBILITY: if another program creates a cross-eligibility issue or opportunity "
+        "(e.g. a prerequisite, payer order, income/tax interaction), do NOT contact that "
+        "specialist — instead name the program in cross_programs and explain the interaction in "
+        "your notes. The routing agent coordinates across programs during synthesis.\n"
         "5. Then submit your COMPLETE response by calling the submit_complete_response tool with "
-        "your match_level, notes, the list of cross_programs you coordinated with, and citations. "
-        "Call it exactly once, as your final action. "
+        "your match_level, notes, the list of cross_programs to flag, and citations. Call it "
+        "exactly once, as your only tool call besides lookupprogramdocs. "
         f"If the case is clearly outside {program}, still submit with match_level 'none' and a "
         "one-line note."
     )
@@ -277,11 +278,20 @@ def _adapter(prompt: str, tools):
     )
 
 
+# Band permanently-fails a message after this many attempts. The default (1) is far too
+# aggressive under LLM rate limiting: a specialist turn that hits a transient 429 storm fails
+# and, after just one retry, is abandoned forever — so the specialist never submits. Give a
+# turn several attempts so it can eventually grind through once the quota window clears.
+_MAX_MESSAGE_RETRIES = 5
+
+
 def _make_agent(adapter, creds: dict, *, skip_backlog: bool = False):
     from band import Agent, AgentConfig
+    from band.runtime.types import SessionConfig
 
     s = get_settings()
-    config = AgentConfig(auto_subscribe_existing_rooms=not skip_backlog) if skip_backlog else None
+    config = AgentConfig(auto_subscribe_existing_rooms=not skip_backlog)
+    session_config = SessionConfig(max_message_retries=_MAX_MESSAGE_RETRIES)
     return Agent.create(
         adapter=adapter,
         agent_id=creds["agent_id"],
@@ -289,6 +299,7 @@ def _make_agent(adapter, creds: dict, *, skip_backlog: bool = False):
         ws_url=s.band_ws_url,
         rest_url=s.band_rest_url.rstrip("/"),
         config=config,
+        session_config=session_config,
     )
 
 
@@ -332,14 +343,9 @@ def build_specialist_agent(doc_key: str, creds: dict, *, skip_backlog: bool = Fa
             record_finding, room_id, doc_key, program, lvl, notes or [],
             cross_programs or [], citations or [],
         )
-        # Post a (non-mention) confirmation so the completion shows on the room timeline
-        # without prematurely re-triggering the routing agent; the server orchestrator
-        # triggers routing once all specialists are complete.
-        try:
-            summary = "; ".join((notes or [])[:2])
-            await ctx.deps.send_message(f"[complete] {program}: match={lvl}. {summary}")
-        except Exception:
-            logger.debug("submit_complete_response: confirmation message failed", exc_info=True)
+        # Persist only — no room broadcast. The server orchestrator polls the store for
+        # completed findings and drives the waves / routing synthesis. Posting a room message
+        # here would wake every other resident agent (a full LLM turn each) for nothing.
         return "finding recorded" if case_id else "could not resolve the case for this room"
 
     tools = [(LookupProgramDocsInput, lookup), submit_complete_response]
@@ -425,13 +431,13 @@ def _seed_content(profile: CaseProfile, mention_ids: list[str]) -> str:
     lines = [
         f"{mentions} New caregiver case — please evaluate this case for your program.",
         "",
-        "You are each an expert in your program. Using your official and informational "
-        "knowledge base, evaluate this specific case (factoring in the recipient's STATE and "
-        "COUNTY and how they affect eligibility) and determine: (a) an eligibility match level "
-        "(none, low, medium, likely, very_likely); (b) a few notes explaining it; (c) if another "
-        "program raises a cross-eligibility issue, @mention that specialist and plan together to "
-        "maximize benefits and ensure the caregiver qualifies for at least one program. When "
-        "done, call submit_complete_response.",
+        "You are an expert in your program. Using your official and informational knowledge "
+        "base, evaluate this specific case (factoring in the recipient's STATE and COUNTY and "
+        "how they affect eligibility) and determine: (a) an eligibility match level (none, low, "
+        "medium, likely, very_likely); (b) a few notes explaining it; (c) any cross-program "
+        "interactions — name them in cross_programs and explain in your notes (do NOT message "
+        "other specialists; routing coordinates across programs). Work silently, then call "
+        "submit_complete_response exactly once.",
         "",
         "== CARE RECIPIENT ==",
         f"Name: {cr.name or 'n/a'}",
@@ -458,17 +464,17 @@ def _seed_content(profile: CaseProfile, mention_ids: list[str]) -> str:
 
 
 async def start_case_room(profile: CaseProfile) -> tuple[str, list[str]]:
-    """Create one Band room for this case, add the routing agent + every specialist, and map the
-    room to the case. Does NOT post the seed — specialists are seeded in waves afterwards (see
-    seed_specialists) so we don't fan out to every specialist at once and blow the LLM rate limit.
+    """Create one Band room for this case and map the room to the case. Adds ONLY the routing
+    agent; specialists are added and removed per wave (see seed_specialists / remove_specialists).
+
+    A Band room is a group chat: EVERY participant runs a full LLM turn on EVERY message (there is
+    no mention-based gate in the adapter). So keeping all six specialists resident means one seed
+    wakes seven agents at once — the concurrency that blows the LLM rate limit. Keeping membership
+    to {routing + the current wave} makes the load effectively serial.
 
     Returns (chat_id, specialist_doc_keys). Raises if Band/routing is not configured.
     """
-    from band.client.rest import (
-        ChatRoomRequest,
-        DEFAULT_REQUEST_OPTIONS,
-        ParticipantRequest,
-    )
+    from band.client.rest import ChatRoomRequest, DEFAULT_REQUEST_OPTIONS
 
     from ..store import map_room_to_case
 
@@ -487,30 +493,21 @@ async def start_case_room(profile: CaseProfile) -> tuple[str, list[str]]:
     chat_id = chat.data.id
     map_room_to_case(chat_id, profile.id)
 
-    for key in specialists:
-        try:
-            await routing_client.agent_api_participants.add_agent_chat_participant(
-                chat_id,
-                participant=ParticipantRequest(
-                    participant_id=registry[key]["agent_id"], role="member"
-                ),
-                request_options=DEFAULT_REQUEST_OPTIONS,
-            )
-        except Exception:
-            logger.debug("add participant %s conflict/ignored", key, exc_info=True)
-
-    logger.info("Band case room %s created with %d specialists", chat_id, len(specialists))
+    logger.info("Band case room %s created (routing only; %d specialists staged in waves)",
+                chat_id, len(specialists))
     return chat_id, specialists
 
 
 async def seed_specialists(profile: CaseProfile, chat_id: str, batch: list[str]) -> None:
-    """Post the structured seed @mentioning only the specialists in `batch`, prompting just
-    those agents to evaluate. Dispatching in small waves (rather than mentioning all specialists
-    in one message) keeps concurrent LLM calls low so we stay under the rate limit."""
+    """Add only the specialists in `batch` to the room, then post the structured seed @mentioning
+    them. Because every room participant runs an LLM turn on every message, adding just the wave's
+    specialists (and removing them afterwards) keeps concurrent LLM calls low, staying under the
+    rate limit."""
     from band.client.rest import (
         ChatMessageRequest,
         ChatMessageRequestMentionsItem,
         DEFAULT_REQUEST_OPTIONS,
+        ParticipantRequest,
     )
 
     registry = load_registry()
@@ -522,6 +519,18 @@ async def seed_specialists(profile: CaseProfile, chat_id: str, batch: list[str])
         return
 
     routing_client = _rest_client(routing["api_key"])
+    for key in keys:
+        try:
+            await routing_client.agent_api_participants.add_agent_chat_participant(
+                chat_id,
+                participant=ParticipantRequest(
+                    participant_id=registry[key]["agent_id"], role="member"
+                ),
+                request_options=DEFAULT_REQUEST_OPTIONS,
+            )
+        except Exception:
+            logger.debug("add participant %s conflict/ignored", key, exc_info=True)
+
     mention_ids = [registry[k]["agent_id"] for k in keys]
     mentions = [
         ChatMessageRequestMentionsItem(id=registry[k]["agent_id"], handle=_SPECIALIST_NAMES[k])
@@ -535,32 +544,73 @@ async def seed_specialists(profile: CaseProfile, chat_id: str, batch: list[str])
     logger.info("Band room %s seeded wave: %s", chat_id, ", ".join(keys))
 
 
-async def trigger_synthesis(chat_id: str, findings_summary: str) -> None:
-    """Post a message @mentioning the routing agent telling it all specialists are complete,
-    so it synthesizes the application strategy and calls submit_strategy."""
-    from band.client.rest import (
-        ChatMessageRequest,
-        ChatMessageRequestMentionsItem,
-        DEFAULT_REQUEST_OPTIONS,
-    )
-
+async def remove_specialists(chat_id: str, batch: list[str]) -> None:
+    """Remove a completed wave's specialists from the room so the next wave's seed does not also
+    wake them (every resident participant runs an LLM turn on every message)."""
     registry = load_registry()
     routing = registry.get("routing")
     if not routing:
         return
-    client = _rest_client(routing["api_key"])
-    me = await client.agent_api_identity.get_agent_me(request_options=DEFAULT_REQUEST_OPTIONS)
-    handle = getattr(getattr(me, "data", me), "handle", "") or "ilera-routing"
+    routing_client = _rest_client(routing["api_key"])
+    for key in batch:
+        creds = registry.get(key)
+        if not creds:
+            continue
+        try:
+            await routing_client.agent_api_participants.remove_agent_chat_participant(
+                chat_id, creds["agent_id"]
+            )
+        except Exception:
+            logger.debug("remove participant %s conflict/ignored", key, exc_info=True)
+
+
+async def trigger_synthesis(chat_id: str, findings_summary: str) -> None:
+    """Wake the routing agent to synthesize the application strategy (submit_strategy).
+
+    Band rejects a message that @mentions its own sender (cannot_mention_self), so routing
+    cannot post its own trigger — and an agent never processes a message it sent itself. So we
+    post the trigger from a specialist's client @mentioning routing; routing (still resident)
+    receives it and runs synthesis. The notifier is added back just to post and skips its own
+    message, so no extra specialist turn fires."""
+    from band.client.rest import (
+        ChatMessageRequest,
+        ChatMessageRequestMentionsItem,
+        DEFAULT_REQUEST_OPTIONS,
+        ParticipantRequest,
+    )
+
+    registry = load_registry()
+    routing = registry.get("routing")
+    notifier_key = next((k for k in registry if k in _SPECIALISTS), None)
+    if not routing or not notifier_key:
+        return
+    notifier = registry[notifier_key]
+
+    routing_client = _rest_client(routing["api_key"])
+    try:
+        await routing_client.agent_api_participants.add_agent_chat_participant(
+            chat_id,
+            participant=ParticipantRequest(participant_id=notifier["agent_id"], role="member"),
+            request_options=DEFAULT_REQUEST_OPTIONS,
+        )
+    except Exception:
+        logger.debug("trigger_synthesis: add notifier conflict/ignored", exc_info=True)
+
     content = (
         f"@[[{routing['agent_id']}]] All specialists have returned complete responses. "
         "Synthesize the application strategy now and call submit_strategy.\n\n"
         f"{findings_summary}"
     )
-    await client.agent_api_messages.create_agent_chat_message(
+    notifier_client = _rest_client(notifier["api_key"])
+    await notifier_client.agent_api_messages.create_agent_chat_message(
         chat_id,
         message=ChatMessageRequest(
             content=content,
-            mentions=[ChatMessageRequestMentionsItem(id=routing["agent_id"], handle=handle)],
+            mentions=[
+                ChatMessageRequestMentionsItem(
+                    id=routing["agent_id"], handle=_ROUTING_NAME
+                )
+            ],
         ),
         request_options=DEFAULT_REQUEST_OPTIONS,
     )
@@ -588,22 +638,34 @@ async def drain_stale_rooms() -> int:
             logger.debug("drain: could not list chats for %s", key, exc_info=True)
             continue
         for chat in (getattr(chats, "data", None) or []):
+            # Mark every not-yet-delivered message (pending/processing/failed) processed so a
+            # freshly started agent's /next sync finds an empty backlog. The message-list
+            # response carries no per-message status field, so we must filter server-side by
+            # status; each pass re-queries and stops when a status returns none left.
             for status in ("processing", "failed", "pending"):
-                try:
-                    msgs = await client.agent_api_messages.list_agent_messages(
-                        chat.id, status=status, page_size=200,
-                        request_options=DEFAULT_REQUEST_OPTIONS,
-                    )
-                except Exception:
-                    continue
-                for m in (getattr(msgs, "data", None) or []):
+                for _ in range(50):
                     try:
-                        await client.agent_api_messages.mark_agent_message_processed(
-                            chat.id, m.id, request_options=DEFAULT_REQUEST_OPTIONS
+                        msgs = await client.agent_api_messages.list_agent_messages(
+                            chat.id, status=status, page_size=200,
+                            request_options=DEFAULT_REQUEST_OPTIONS,
                         )
-                        drained += 1
                     except Exception:
-                        logger.debug("drain: mark processed failed", exc_info=True)
+                        break
+                    data = getattr(msgs, "data", None) or []
+                    if not data:
+                        break
+                    marked_this_pass = 0
+                    for m in data:
+                        try:
+                            await client.agent_api_messages.mark_agent_message_processed(
+                                chat.id, m.id, request_options=DEFAULT_REQUEST_OPTIONS
+                            )
+                            drained += 1
+                            marked_this_pass += 1
+                        except Exception:
+                            logger.debug("drain: mark processed failed", exc_info=True)
+                    if marked_this_pass == 0:
+                        break
     logger.info("Band startup drain: marked %d stale message(s) processed", drained)
     return drained
 

@@ -252,14 +252,15 @@ _agent_executions: list[dict] = []
 
 
 # Time budgets for the async Band eligibility run.
-_FINDINGS_TIMEOUT = 300  # seconds to wait for ALL specialists (across every wave) to complete
-_WAVE_TIMEOUT = 150      # per-wave seconds to wait for that wave's specialists to complete
-_STRATEGY_TIMEOUT = 90   # seconds to wait for the routing agent to submit its strategy
+_FINDINGS_TIMEOUT = 900  # seconds to wait for ALL specialists (across every wave) to complete
+_WAVE_TIMEOUT = 200      # per-wave seconds to wait for that wave's specialists to complete
+_STRATEGY_TIMEOUT = 180  # seconds to wait for the routing agent to submit its strategy
 _POLL_INTERVAL = 4
-# How many specialists to seed at once. Seeding in small waves (rather than @mentioning all
-# specialists in one message) keeps concurrent LLM calls low so we stay under the rate limit;
-# raise this as the deployment's quota grows.
-_WAVE_SIZE = 2
+# How many specialists are resident in the room (and thus running) at once. A Band room is a
+# group chat where every participant runs a full LLM turn on every message, so this is the real
+# concurrency knob: 1 means fully serial (one specialist evaluates at a time), which keeps us
+# well under the deployment's tokens-per-minute limit. Raise it as the quota grows.
+_WAVE_SIZE = 1
 
 
 def _findings_summary(profile: CaseProfile, specialists: list[str]) -> str:
@@ -277,7 +278,12 @@ async def _run_case_eligibility(case_id: str) -> None:
     create the room + seed, wait for every specialist's complete finding, trigger the routing
     agent to synthesize the strategy, and drive the case's band_status to complete/error.
     Band is the sole engine — there is no in-process fallback."""
-    from .integrations.band import seed_specialists, start_case_room, trigger_synthesis
+    from .integrations.band import (
+        remove_specialists,
+        seed_specialists,
+        start_case_room,
+        trigger_synthesis,
+    )
 
     profile = get_profile(case_id)
     if profile is None:
@@ -334,6 +340,12 @@ async def _run_case_eligibility(case_id: str) -> None:
             if all(k in p.findings and p.findings[k].complete for k in wave):
                 wave_done = True
                 break
+        # Remove this wave's specialists from the room before the next wave is seeded, so its
+        # seed doesn't also wake them (every resident participant runs an LLM turn per message).
+        try:
+            await remove_specialists(chat_id, wave)
+        except Exception:
+            logger.exception("Band remove failed for wave %s (case %s)", wave, case_id)
         if not wave_done:
             all_complete = False
             break
