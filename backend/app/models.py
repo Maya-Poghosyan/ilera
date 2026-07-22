@@ -30,13 +30,11 @@ class Caregiver(BaseModel):
     phone: str = ""
     email: str = ""
     address: str = ""
-    caregiving_impact: list[str] = Field(default_factory=list)
 
 
 class Household(BaseModel):
     size: Optional[int] = None
     income_monthly: Optional[float] = None
-    assets: Optional[float] = None
 
 
 class CaseProfile(BaseModel):
@@ -46,7 +44,6 @@ class CaseProfile(BaseModel):
     care_recipient: CareRecipient = Field(default_factory=CareRecipient)
     caregiver: Caregiver = Field(default_factory=Caregiver)
     household: Household = Field(default_factory=Household)
-    goals: list[str] = Field(default_factory=list)
     # Raw structured intake answers keyed by the schema's field_id (e.g.
     # "recipient.adl_needs"). This is the canonical record of what the user
     # entered; the typed fields above are projected from it via intake.mapping.
