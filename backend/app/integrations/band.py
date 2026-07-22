@@ -44,11 +44,20 @@ import os
 from pydantic import BaseModel, Field
 
 from .. import llm
-from ..agents.interactions import analyze_program_interactions
 from ..agents.specialists import ALL_SPECIALISTS
 from ..config import get_settings
-from ..models import CareRecipient, Caregiver, CaseProfile, EligibilityResult, Household
+from ..models import CaseProfile
 from ..rag.index import get_index
+
+# Band/pydantic-ai are only required when agents actually run, but the names must live at
+# module scope so the string annotations on the context-aware tools (e.g.
+# "RunContext[AgentToolsProtocol]") resolve via get_type_hints when pydantic-ai registers them.
+try:  # pragma: no cover - optional dependency at import time
+    from band.core.protocols import AgentToolsProtocol
+    from pydantic_ai import RunContext
+except Exception:  # pragma: no cover
+    AgentToolsProtocol = None
+    RunContext = None
 
 logger = logging.getLogger(__name__)
 
@@ -63,60 +72,58 @@ _SPECIALIST_NAMES = {
 
 _ROUTING_PROMPT = (
     "You are Ilera's Routing Agent, the coordinator for U.S. caregiver benefits. You do NOT "
-    "assess eligibility yourself — you have no assessment tool. Your job is to consult the "
-    "program specialist agents in your Band room and synthesize their answers for the "
-    "caregiver. Your specialists are: ilera-ihss, ilera-medi-cal, ilera-medicare, ilera-pfl, "
-    "ilera-va, ilera-tax.\n\n"
-    "When the caregiver (the human in the room) describes their situation:\n"
-    "1. Decide which programs are plausibly relevant to this caregiver.\n"
-    "2. CONSULT the relevant specialists ONE AT A TIME. For each: use band_lookup_peers to find "
-    "the specialist, band_add_participant to ensure it is in the room, then band_send_message "
-    "mentioning ONLY that one specialist with a specific, scoped question about the caregiver's "
-    "situation. WAIT for that specialist's cited reply before moving to the next one. Do not "
-    "@mention several specialists in one message, and do not broadcast.\n"
-    "3. After you have gathered the specialists' findings, call analyzeinteractions with the list "
-    "of programs the specialists found relevant to explain how they interact (prerequisites, "
-    "payer order, tax treatment, application sequence), grounded in the coordination/advising "
-    "documents. Use searchprogramdocs for any additional coordination lookups.\n"
-    "4. Deliver ONE final, synthesized benefit strategy addressed to the CAREGIVER (the human). "
-    "This is a human-facing deliverable: do NOT @mention any specialist agents in it. Attribute "
-    "each claim to the specialist that provided it and keep their citations (title, page, source "
-    "URL). Never invent program rules."
+    "assess eligibility yourself. At the start of a case you post a structured summary of the "
+    "caregiver's intake and @mention every program specialist so they each evaluate the case. "
+    "Your specialists are: ilera-ihss, ilera-medi-cal, ilera-medicare, ilera-pfl, ilera-va, "
+    "ilera-tax.\n\n"
+    "Each specialist returns a complete response: a match level, notes, and any cross-program "
+    "coordination. When you are told that ALL specialists have returned their complete "
+    "responses (their findings will be included in that message), do this:\n"
+    "1. Optionally call searchprogramdocs to ground any cross-program sequencing "
+    "(prerequisites, payer order, tax treatment, application order) in the coordination docs.\n"
+    "2. Synthesize ONE clear, human-facing APPLICATION STRATEGY for the caregiver: which "
+    "programs to pursue and in what order, why, how the programs interact, and the concrete "
+    "next steps to qualify for and apply to the strongest options. Attribute claims to the "
+    "specialists and keep citations. Never invent program rules.\n"
+    "3. Submit it by calling the submit_strategy tool with the full strategy text. Do this "
+    "exactly once. Do not @mention specialists in the strategy."
 )
 
 
 def _specialist_prompt(program: str) -> str:
     return (
-        f"You are Ilera's {program} specialist agent, part of a Band team coordinated by the "
-        "routing agent. You ONLY assess eligibility for "
-        f"{program} and answer questions about it, grounded strictly in {program}'s official "
-        "documentation. The routing agent will message you with a scoped question about a "
-        "caregiver's situation. To answer it: call assesseligibility to evaluate the caregiver "
-        f"for {program}, and lookupprogramdocs to quote the official rules, then reply with "
-        "band_send_message directed back to the routing agent — mention only the routing agent, "
-        "do not broadcast or @mention other specialists. Keep your answer scoped to your program "
-        "and always cite the source (title, page, URL). If a question is outside "
-        f"{program}, say so and defer to the routing agent."
+        f"You are Ilera's expert specialist for {program}. You assess ONLY {program} "
+        f"eligibility, grounded strictly in {program}'s official and informational "
+        "documentation.\n\n"
+        "The routing agent will post a case with the caregiver's and care recipient's intake "
+        "details, including their STATE and COUNTY, and @mention you. When mentioned:\n"
+        f"1. Call lookupprogramdocs to ground yourself in {program}'s rules and to get exact "
+        "citations (title, page, source URL).\n"
+        f"2. Evaluate THIS case for {program}, explicitly factoring in the recipient's state and "
+        "county and how they affect eligibility, program availability, and the office/process "
+        "(many programs are county-administered).\n"
+        "3. Determine a match level on this scale: none, low, medium, likely, very_likely — plus "
+        "a few short notes explaining the determination, with citations.\n"
+        "4. CROSS-ELIGIBILITY: if another program could create a cross-eligibility issue or "
+        "opportunity (e.g. a prerequisite, payer order, income/tax interaction), @mention that "
+        "program's specialist agent by name (band_send_message) and hold a short dialogue with "
+        "them — together make a plan that maximizes the caregiver's benefits and ensures they "
+        "can properly qualify for at least one program. Only mention specialists that exist in "
+        "the room. Keep it to a couple of exchanges; do not loop indefinitely.\n"
+        "5. Once any needed cross-eligibility dialogue is resolved, submit your COMPLETE response "
+        "by calling the submit_complete_response tool with your match_level, notes, the list of "
+        "cross_programs you coordinated with, and citations. Call it exactly once, at the end. "
+        f"If the case is clearly outside {program}, still submit with match_level 'none' and a "
+        "one-line note."
     )
+
+
+_MATCH_LEVELS = {"none", "low", "medium", "likely", "very_likely"}
 
 
 # ---------------------------------------------------------------------------
 # Tool input models (the class docstring becomes the tool description shown to the LLM)
 # ---------------------------------------------------------------------------
-class AssessEligibilityInput(BaseModel):
-    """Assess caregiver benefit eligibility for a care recipient. Returns program(s) with status, rationale, next steps, and citations to official sources."""
-
-    recipient_age: int | None = Field(default=None, description="Age of the care recipient")
-    veteran: bool = Field(default=False, description="Is the care recipient a U.S. veteran?")
-    insurance: str = Field(default="unknown", description="medi-cal | medicare | private | none | unknown")
-    conditions: list[str] = Field(default_factory=list, description="Medical conditions, e.g. dementia")
-    care_needs: list[str] = Field(default_factory=list, description="Daily care needs, e.g. bathing, meals")
-    caregiver_relationship: str = Field(default="", description="Caregiver's relationship, e.g. daughter")
-    caregiver_employment: str = Field(default="", description="Caregiver employment status, e.g. full-time")
-    household_size: int | None = Field(default=None, description="Number of people in the household")
-    household_income_monthly: float | None = Field(default=None, description="Total monthly household income (USD)")
-
-
 class SearchProgramDocsInput(BaseModel):
     """Search Ilera's official program-documentation knowledge base; returns passages with titles, page numbers, and source URLs."""
 
@@ -133,81 +140,13 @@ class LookupProgramDocsInput(BaseModel):
     query: str = Field(description="What to look up within this program's rules")
 
 
-class AnalyzeInteractionsInput(AssessEligibilityInput):
-    """Explain how the caregiver's benefit programs interact — prerequisites, payer order, income/tax treatment, and the best application sequence — grounded in the official inter-eligibility advising documents with citations. Call this AFTER consulting the specialists, passing the programs their replies found relevant."""
-
-    programs: list[str] = Field(
-        default_factory=list,
-        description="Program names the specialists found relevant, e.g. ['IHSS', 'Medi-Cal', 'Paid Family Leave']",
-    )
-
-
-def _profile_from_input(inp: AssessEligibilityInput) -> CaseProfile:
-    insurance = inp.insurance if inp.insurance in {
-        "medi-cal", "medicare", "private", "none", "unknown"
-    } else "unknown"
-    return CaseProfile(
-        id="band",
-        care_recipient=CareRecipient(
-            age=inp.recipient_age,
-            veteran=inp.veteran,
-            insurance=insurance,
-            conditions=inp.conditions,
-            care_needs=inp.care_needs,
-        ),
-        caregiver=Caregiver(
-            relationship=inp.caregiver_relationship,
-            employment_status=inp.caregiver_employment,
-        ),
-        household=Household(size=inp.household_size, income_monthly=inp.household_income_monthly),
-    )
-
-
-def _interaction_dict(n) -> dict:
-    return {
-        "note": n.note,
-        "programs": n.programs,
-        "action": n.action,
-        "citations": [
-            {"title": c.title, "page": c.page, "source_url": c.source_url} for c in n.citations
-        ],
-    }
-
-
-def _result_dict(r: EligibilityResult) -> dict:
-    return {
-        "program": r.program,
-        "status": r.status,
-        "confidence": round(r.confidence, 2),
-        "rationale": r.rationale,
-        "next_steps": r.next_steps,
-        "follow_up_questions": [q.prompt for q in r.followups],
-        "citations": [
-            {"title": c.title, "page": c.page, "source_url": c.source_url} for c in r.citations
-        ],
-    }
-
-
 # --- Routing (cross-program) handlers -------------------------------------
-# The routing agent has NO assess-all tool: it gathers eligibility by consulting the
-# specialist agents over the Band room, not by running them in-process. Interactions are
-# grounded purely in the coordination/advising corpus from the programs it gathered.
-def _interactions_sync(inp: AnalyzeInteractionsInput) -> dict:
-    profile = _profile_from_input(inp)
-    notes = analyze_program_interactions(profile, inp.programs)
-    return {"interactions": [_interaction_dict(n) for n in notes]}
-
-
 def _search_docs_sync(inp: SearchProgramDocsInput) -> dict:
     hits = get_index().search(inp.query, k=5, program=inp.program)
     return {"passages": _passages(hits)}
 
 
 # --- Specialist (single-program) handlers ---------------------------------
-def _assess_one_sync(doc_key: str, inp: AssessEligibilityInput) -> dict:
-    return _result_dict(_SPECIALISTS[doc_key].assess(_profile_from_input(inp)))
-
-
 def _lookup_sync(doc_key: str, inp: LookupProgramDocsInput) -> dict:
     hits = get_index().search(inp.query, k=5, program=doc_key)
     return {"passages": _passages(hits)}
@@ -268,19 +207,28 @@ def _to_pai_tool(input_model, handler):
 
 
 def _adapter(prompt: str, tools):
+    """Build the framework adapter. `tools` is a mixed list: (InputModel, handler)
+    tuples for plain tools, and native pydantic-ai tool callables (functions taking
+    `ctx: RunContext[AgentToolsProtocol]`) for context-aware tools that need the
+    room_id (e.g. submit_complete_response / submit_strategy)."""
     from band import AdapterFeatures, Capability
 
     # `prompt`/`custom_section` (not `system_prompt`) so the SDK's base instructions are
     # included — they teach the agent to use band_send_message, handle mentions, look up
     # peers, etc. Passing the full system prompt would bypass all of that and leave the
     # agent unable to communicate on the platform.
-    features = AdapterFeatures(capabilities=frozenset({Capability.CONTACTS, Capability.MEMORY}))
+    features = AdapterFeatures(
+        capabilities=frozenset({Capability.CONTACTS, Capability.MEMORY}),
+    )
     s = get_settings()
     if llm.provider() == "openai":
         from band.adapters.pydantic_ai import PydanticAIAdapter
 
         _configure_openai_env()
-        pai_tools = [_to_pai_tool(model, handler) for model, handler in tools]
+        pai_tools = [
+            t if callable(t) and not isinstance(t, tuple) else _to_pai_tool(t[0], t[1])
+            for t in tools
+        ]
         return PydanticAIAdapter(
             model=f"openai:{s.openai_model}",
             custom_section=prompt,
@@ -289,11 +237,14 @@ def _adapter(prompt: str, tools):
         )
     from band.adapters.anthropic import AnthropicAdapter
 
+    # Anthropic path only supports the (InputModel, handler) CustomToolDef form; native
+    # ctx-aware callables (room-aware submit tools) are openai-only here.
+    tuple_tools = [t for t in tools if isinstance(t, tuple)]
     return AnthropicAdapter(
         model=s.anthropic_model,
         prompt=prompt,
         provider_key=s.anthropic_api_key,
-        additional_tools=tools,
+        additional_tools=tuple_tools,
         features=features,
     )
 
@@ -314,23 +265,56 @@ def _make_agent(adapter, creds: dict, *, skip_backlog: bool = False):
 
 
 def build_routing_agent(creds: dict, *, skip_backlog: bool = False):
-    tools = [
-        (AnalyzeInteractionsInput, _wrap(_interactions_sync)),
-        (SearchProgramDocsInput, _wrap(_search_docs_sync)),
-    ]
+    from ..store import record_strategy
+
+    async def submit_strategy(ctx: "RunContext[AgentToolsProtocol]", strategy: str) -> str:
+        """Submit the final synthesized application strategy for the caregiver. Call once,
+        after ALL specialists have returned complete responses. `strategy` is the full
+        human-facing plan (which programs, in what order, why, next steps)."""
+        room_id = getattr(ctx.deps, "room_id", "") or ""
+        case_id = await asyncio.to_thread(record_strategy, room_id, strategy)
+        return "strategy recorded" if case_id else "could not resolve the case for this room"
+
+    tools = [(SearchProgramDocsInput, _wrap(_search_docs_sync)), submit_strategy]
     return _make_agent(_adapter(_ROUTING_PROMPT, tools), creds, skip_backlog=skip_backlog)
 
 
 def build_specialist_agent(doc_key: str, creds: dict, *, skip_backlog: bool = False):
-    program = _PROGRAM_NAMES[doc_key]
+    from ..store import record_finding
 
-    async def assess(inp: AssessEligibilityInput) -> dict:
-        return await asyncio.to_thread(_assess_one_sync, doc_key, inp)
+    program = _PROGRAM_NAMES[doc_key]
 
     async def lookup(inp: LookupProgramDocsInput) -> dict:
         return await asyncio.to_thread(_lookup_sync, doc_key, inp)
 
-    tools = [(AssessEligibilityInput, assess), (LookupProgramDocsInput, lookup)]
+    async def submit_complete_response(
+        ctx: "RunContext[AgentToolsProtocol]",
+        match_level: str,
+        notes: list[str],
+        cross_programs: list[str] | None = None,
+        citations: list[str] | None = None,
+    ) -> str:
+        """Submit your FINAL, complete eligibility determination for this program back to the
+        routing agent. Call exactly once, after any cross-eligibility dialogue is resolved.
+        match_level must be one of: none, low, medium, likely, very_likely. notes is a short
+        list explaining the determination; citations are "Title (page) — URL" strings."""
+        room_id = getattr(ctx.deps, "room_id", "") or ""
+        lvl = match_level if match_level in _MATCH_LEVELS else "medium"
+        case_id = await asyncio.to_thread(
+            record_finding, room_id, doc_key, program, lvl, notes or [],
+            cross_programs or [], citations or [],
+        )
+        # Post a (non-mention) confirmation so the completion shows on the room timeline
+        # without prematurely re-triggering the routing agent; the server orchestrator
+        # triggers routing once all specialists are complete.
+        try:
+            summary = "; ".join((notes or [])[:2])
+            await ctx.deps.send_message(f"[complete] {program}: match={lvl}. {summary}")
+        except Exception:
+            logger.debug("submit_complete_response: confirmation message failed", exc_info=True)
+        return "finding recorded" if case_id else "could not resolve the case for this room"
+
+    tools = [(LookupProgramDocsInput, lookup), submit_complete_response]
     return _make_agent(_adapter(_specialist_prompt(program), tools), creds, skip_backlog=skip_backlog)
 
 
@@ -394,6 +378,185 @@ def build_agents(*, skip_backlog: bool = False) -> list:
         else:
             logger.warning("Unknown Band agent group %r in registry; skipping", key)
     return agents
+
+
+# ---------------------------------------------------------------------------
+# Per-case room orchestration
+# ---------------------------------------------------------------------------
+def _rest_client(api_key: str):
+    from band.client.rest import AsyncRestClient
+
+    return AsyncRestClient(api_key=api_key, base_url=get_settings().band_rest_url.rstrip("/"))
+
+
+def _seed_content(profile: CaseProfile, mention_ids: list[str]) -> str:
+    cr = profile.care_recipient
+    cg = profile.caregiver
+    hh = profile.household
+    mentions = " ".join(f"@[[{aid}]]" for aid in mention_ids)
+    lines = [
+        f"{mentions} New caregiver case — please evaluate this case for your program.",
+        "",
+        "You are each an expert in your program. Using your official and informational "
+        "knowledge base, evaluate this specific case (factoring in the recipient's STATE and "
+        "COUNTY and how they affect eligibility) and determine: (a) an eligibility match level "
+        "(none, low, medium, likely, very_likely); (b) a few notes explaining it; (c) if another "
+        "program raises a cross-eligibility issue, @mention that specialist and plan together to "
+        "maximize benefits and ensure the caregiver qualifies for at least one program. When "
+        "done, call submit_complete_response.",
+        "",
+        "== CARE RECIPIENT ==",
+        f"Name: {cr.name or 'n/a'}",
+        f"Age: {cr.age if cr.age is not None else 'unknown'}",
+        f"State: {cr.state or 'unknown'}    County: {cr.county or 'unknown'}",
+        f"Insurance / coverage: {cr.insurance}",
+        f"Veteran: {cr.veteran}",
+        f"Conditions: {', '.join(cr.conditions) or 'unspecified'}",
+        f"Care needs (ADLs): {', '.join(cr.care_needs) or 'unspecified'}",
+        f"Current benefits: {', '.join(cr.current_benefits) if cr.current_benefits else 'none reported'}",
+        "",
+        "== CAREGIVER ==",
+        f"Name: {cg.name or 'n/a'}",
+        f"Relationship to recipient: {cg.relationship or 'unspecified'}",
+        f"Employment status: {cg.employment_status or 'unspecified'}",
+        f"Weekly caregiving hours: {cg.hours_per_week if cg.hours_per_week is not None else 'unspecified'}",
+        f"Co-resides with recipient: {profile.answers.get('caregiver.coresidence', 'unspecified')}",
+        "",
+        "== HOUSEHOLD ==",
+        f"Size: {hh.size if hh.size is not None else 'unknown'}",
+        f"Monthly income: ${hh.income_monthly if hh.income_monthly is not None else 'unknown'}",
+    ]
+    return "\n".join(lines)
+
+
+async def start_case_room(profile: CaseProfile) -> tuple[str, list[str]]:
+    """Create one Band room for this case, add the routing agent + every specialist, map the
+    room to the case, and post the routing agent's structured seed @mentioning all specialists.
+
+    Returns (chat_id, specialist_doc_keys). Raises if Band/routing is not configured.
+    """
+    from band.client.rest import (
+        ChatMessageRequest,
+        ChatMessageRequestMentionsItem,
+        ChatRoomRequest,
+        DEFAULT_REQUEST_OPTIONS,
+        ParticipantRequest,
+    )
+
+    from ..store import map_room_to_case
+
+    registry = load_registry()
+    routing = registry.get("routing")
+    if not routing:
+        raise RuntimeError("Band routing agent not configured")
+    specialists = [k for k in registry if k in _SPECIALISTS]
+    if not specialists:
+        raise RuntimeError("No Band specialist agents configured")
+
+    routing_client = _rest_client(routing["api_key"])
+    chat = await routing_client.agent_api_chats.create_agent_chat(
+        chat=ChatRoomRequest(), request_options=DEFAULT_REQUEST_OPTIONS
+    )
+    chat_id = chat.data.id
+    map_room_to_case(chat_id, profile.id)
+
+    for key in specialists:
+        try:
+            await routing_client.agent_api_participants.add_agent_chat_participant(
+                chat_id,
+                participant=ParticipantRequest(
+                    participant_id=registry[key]["agent_id"], role="member"
+                ),
+                request_options=DEFAULT_REQUEST_OPTIONS,
+            )
+        except Exception:
+            logger.debug("add participant %s conflict/ignored", key, exc_info=True)
+
+    mention_ids = [registry[k]["agent_id"] for k in specialists]
+    mentions = [
+        ChatMessageRequestMentionsItem(id=registry[k]["agent_id"], handle=_SPECIALIST_NAMES[k])
+        for k in specialists
+    ]
+    await routing_client.agent_api_messages.create_agent_chat_message(
+        chat_id,
+        message=ChatMessageRequest(content=_seed_content(profile, mention_ids), mentions=mentions),
+        request_options=DEFAULT_REQUEST_OPTIONS,
+    )
+    logger.info("Band case room %s seeded with %d specialists", chat_id, len(specialists))
+    return chat_id, specialists
+
+
+async def trigger_synthesis(chat_id: str, findings_summary: str) -> None:
+    """Post a message @mentioning the routing agent telling it all specialists are complete,
+    so it synthesizes the application strategy and calls submit_strategy."""
+    from band.client.rest import (
+        ChatMessageRequest,
+        ChatMessageRequestMentionsItem,
+        DEFAULT_REQUEST_OPTIONS,
+    )
+
+    registry = load_registry()
+    routing = registry.get("routing")
+    if not routing:
+        return
+    client = _rest_client(routing["api_key"])
+    me = await client.agent_api_identity.get_agent_me(request_options=DEFAULT_REQUEST_OPTIONS)
+    handle = getattr(getattr(me, "data", me), "handle", "") or "ilera-routing"
+    content = (
+        f"@[[{routing['agent_id']}]] All specialists have returned complete responses. "
+        "Synthesize the application strategy now and call submit_strategy.\n\n"
+        f"{findings_summary}"
+    )
+    await client.agent_api_messages.create_agent_chat_message(
+        chat_id,
+        message=ChatMessageRequest(
+            content=content,
+            mentions=[ChatMessageRequestMentionsItem(id=routing["agent_id"], handle=handle)],
+        ),
+        request_options=DEFAULT_REQUEST_OPTIONS,
+    )
+
+
+async def drain_stale_rooms() -> int:
+    """Mark every leftover pending/processing/failed message in all existing rooms as
+    processed, per agent. Freshly started agents otherwise re-sweep this backlog on startup
+    (old orphan rooms stay open), which floods the LLM and exhausts rate limits, starving the
+    current case. Call once at startup BEFORE agents connect and before any case room exists.
+    """
+    from band.client.rest import DEFAULT_REQUEST_OPTIONS
+
+    registry = load_registry()
+    drained = 0
+    for key, creds in registry.items():
+        if key in ("caregiver", "user"):
+            continue
+        client = _rest_client(creds["api_key"])
+        try:
+            chats = await client.agent_api_chats.list_agent_chats(
+                page=1, page_size=200, request_options=DEFAULT_REQUEST_OPTIONS
+            )
+        except Exception:
+            logger.debug("drain: could not list chats for %s", key, exc_info=True)
+            continue
+        for chat in (getattr(chats, "data", None) or []):
+            for status in ("processing", "failed", "pending"):
+                try:
+                    msgs = await client.agent_api_messages.list_agent_messages(
+                        chat.id, status=status, page_size=200,
+                        request_options=DEFAULT_REQUEST_OPTIONS,
+                    )
+                except Exception:
+                    continue
+                for m in (getattr(msgs, "data", None) or []):
+                    try:
+                        await client.agent_api_messages.mark_agent_message_processed(
+                            chat.id, m.id, request_options=DEFAULT_REQUEST_OPTIONS
+                        )
+                        drained += 1
+                    except Exception:
+                        logger.debug("drain: mark processed failed", exc_info=True)
+    logger.info("Band startup drain: marked %d stale message(s) processed", drained)
+    return drained
 
 
 # Back-compat: a single routing agent.
