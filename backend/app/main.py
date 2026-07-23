@@ -255,15 +255,9 @@ _agent_executions: list[dict] = []
 
 
 # Time budgets for the async Band eligibility run.
-_FINDINGS_TIMEOUT = 900  # seconds to wait for ALL specialists (across every wave) to complete
-_WAVE_TIMEOUT = 200      # per-wave seconds to wait for that wave's specialists to complete
+_FINDINGS_TIMEOUT = 900  # seconds to wait for ALL specialists to submit complete findings
 _STRATEGY_TIMEOUT = 360  # seconds to wait for the routing agent to submit its strategy
 _POLL_INTERVAL = 4
-# How many specialists are resident in the room (and thus running) at once. A Band room is a
-# group chat where every participant runs a full LLM turn on every message, so this is the real
-# concurrency knob: 1 means fully serial (one specialist evaluates at a time), which keeps us
-# well under the deployment's tokens-per-minute limit. Raise it as the quota grows.
-_WAVE_SIZE = 1
 
 
 def _findings_summary(profile: CaseProfile, specialists: list[str]) -> str:
@@ -282,7 +276,7 @@ async def _run_case_eligibility(case_id: str) -> None:
     agent to synthesize the strategy, and drive the case's band_status to complete/error.
     Band is the sole engine — there is no in-process fallback."""
     from .integrations.band import (
-        remove_specialists,
+        drain_routing_queue,
         seed_specialists,
         settle_room,
         start_case_room,
@@ -301,6 +295,7 @@ async def _run_case_eligibility(case_id: str) -> None:
     profile.eligibility = {}
     profile.strategy = ""
     profile.strategy_complete = False
+    profile.synthesis_requested = False
     save_profile(profile)
 
     try:
@@ -319,39 +314,25 @@ async def _run_case_eligibility(case_id: str) -> None:
     p.expected_specialists = specialists
     save_profile(p)
 
-    # Seed specialists in small waves and wait for each wave to finish before starting the next.
-    # This bounds concurrent LLM calls (the fan-out that otherwise blows the rate limit) while
-    # still requiring EVERY specialist to submit a complete finding before routing synthesizes.
+    # Seed the whole specialist panel with ONE message @mentioning all of them, then wait for
+    # every specialist to submit a complete finding. The mention gate means only @mentioned agents
+    # run a turn, and specialists may hold a short bounded cross-eligibility conversation before
+    # submitting — routing does not re-post per specialist.
     loop = asyncio.get_running_loop()
-    overall_deadline = loop.time() + _FINDINGS_TIMEOUT
-    waves = [specialists[i : i + _WAVE_SIZE] for i in range(0, len(specialists), _WAVE_SIZE)]
-    all_complete = True
-    for wave in waves:
-        try:
-            p = get_profile(case_id)
-            await seed_specialists(p, chat_id, wave)
-        except Exception:
-            logger.exception("Band seed failed for wave %s (case %s)", wave, case_id)
-            all_complete = False
-            break
-        wave_deadline = min(loop.time() + _WAVE_TIMEOUT, overall_deadline)
-        wave_done = False
-        while loop.time() < wave_deadline:
-            await asyncio.sleep(_POLL_INTERVAL)
-            p = get_profile(case_id)
-            if p is None:
-                return
-            if all(k in p.findings and p.findings[k].complete for k in wave):
-                wave_done = True
-                break
-        # Remove this wave's specialists from the room before the next wave is seeded, so its
-        # seed doesn't also wake them (every resident participant runs an LLM turn per message).
-        try:
-            await remove_specialists(chat_id, wave)
-        except Exception:
-            logger.exception("Band remove failed for wave %s (case %s)", wave, case_id)
-        if not wave_done:
-            all_complete = False
+    all_complete = False
+    try:
+        await seed_specialists(profile, chat_id, specialists)
+    except Exception:
+        logger.exception("Band seed failed for case %s", case_id)
+
+    deadline_f = loop.time() + _FINDINGS_TIMEOUT
+    while loop.time() < deadline_f:
+        await asyncio.sleep(_POLL_INTERVAL)
+        p = get_profile(case_id)
+        if p is None:
+            return
+        if all(k in p.findings and p.findings[k].complete for k in specialists):
+            all_complete = True
             break
 
     p = get_profile(case_id)
@@ -359,8 +340,8 @@ async def _run_case_eligibility(case_id: str) -> None:
         return
 
     if not all_complete:
-        # A wave did not finish in time. No fallback / no partial synthesis: surface an error
-        # naming who is missing so it can be retried.
+        # Not all specialists finished in time. No fallback / no partial synthesis: surface an
+        # error naming who is missing so it can be retried.
         done = [k for k in specialists if k in p.findings and p.findings[k].complete]
         missing = [k for k in specialists if k not in done]
         p.band_status = "error"
@@ -371,6 +352,16 @@ async def _run_case_eligibility(case_id: str) -> None:
         save_profile(p)
         return
 
+    # Clear routing's accumulated backlog (specialist notices it stayed silent on) while it is
+    # still gated, THEN open the gate. That way, once synthesis_requested is set, the only
+    # unprocessed message routing sees is the synthesis trigger — so it synthesizes exactly once
+    # instead of burning a turn per stale @mention.
+    try:
+        await drain_routing_queue(chat_id)
+    except Exception:
+        logger.exception("Band drain_routing_queue failed for case %s", case_id)
+    p.synthesis_requested = True
+    save_profile(p)
     await trigger_synthesis(chat_id, _findings_summary(p, specialists))
 
     # Wait for the routing agent to submit its strategy (record_strategy sets status=complete).

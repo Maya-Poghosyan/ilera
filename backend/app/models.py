@@ -87,6 +87,9 @@ class CaseProfile(BaseModel):
     # The routing agent's synthesized, human-facing application strategy.
     strategy: str = ""
     strategy_complete: bool = False
+    # Set True right before the routing agent is asked to synthesize. The mention-gate keeps
+    # routing silent (ignores specialist chatter) until this flips, so routing only acts once.
+    synthesis_requested: bool = False
 
 
 class FollowupQuestion(BaseModel):

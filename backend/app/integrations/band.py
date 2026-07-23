@@ -96,10 +96,9 @@ def _specialist_prompt(program: str) -> str:
         f"You are Ilera's expert specialist for {program}. You assess ONLY {program} "
         f"eligibility, grounded strictly in {program}'s official and informational "
         "documentation.\n\n"
-        "The routing agent will post a case with the caregiver's and care recipient's intake "
-        "details, including their STATE and COUNTY, and @mention you. When mentioned, be "
-        "economical with tool calls — do NOT re-look-up what you already have, and do NOT send "
-        "chat messages or @mention anyone. Work silently and finish in one turn:\n"
+        "The routing agent posts the case (caregiver + care recipient intake, including STATE and "
+        "COUNTY) once and @mentions all specialists together. Only act when you are @mentioned. "
+        "Be economical with tool calls — do NOT re-look-up what you already have. Steps:\n"
         f"1. Call lookupprogramdocs ONCE (at most twice) to ground yourself in {program}'s rules "
         "and to get exact citations (title, page, source URL).\n"
         f"2. Evaluate THIS case for {program}, explicitly factoring in the recipient's state and "
@@ -107,13 +106,25 @@ def _specialist_prompt(program: str) -> str:
         "(many programs are county-administered).\n"
         "3. Determine a match level on this scale: none, low, medium, likely, very_likely — plus "
         "a few short notes explaining the determination, with citations.\n"
-        "4. CROSS-ELIGIBILITY: if another program creates a cross-eligibility issue or opportunity "
-        "(e.g. a prerequisite, payer order, income/tax interaction), do NOT contact that "
-        "specialist — instead name the program in cross_programs and explain the interaction in "
-        "your notes. The routing agent coordinates across programs during synthesis.\n"
-        "5. Then submit your COMPLETE response by calling the submit_complete_response tool with "
-        "your match_level, notes, the list of cross_programs to flag, and citations. Call it "
-        "exactly once, as your only tool call besides lookupprogramdocs. "
+        "4. CROSS-ELIGIBILITY conversations are allowed but MUST stay tiny. If — and only if — a "
+        "specific factual dependency on another program genuinely blocks your determination, you "
+        "may @mention that ONE specialist with a SINGLE concrete question (one or two sentences). "
+        "Wait for their reply, then finish. Otherwise do NOT message anyone — just name the "
+        "program in cross_programs and explain the interaction in your notes.\n"
+        "STRICT ROOM RULES — the room must not fill with chatter:\n"
+        "  • NEVER post status updates, greetings, acknowledgements, summaries, restatements of "
+        "the case, or multi-step 'action plans' / 'next steps' to the room. That belongs in your "
+        "notes and citations, delivered via submit_complete_response — never as chat messages.\n"
+        "  • Do NOT announce, summarize, or confirm your submission, and do NOT @mention the "
+        "routing agent — routing collects your finding automatically from submit_complete_response. "
+        "There is no need to tell anyone you are done.\n"
+        "  • The ONLY message you may ever post is the single cross-eligibility question above, to "
+        "one other specialist. In every other case, send NOTHING — just submit.\n"
+        "  • If another specialist @mentions you with a question, answer in ONE or two sentences, "
+        "then submit — do not ask follow-ups or keep the thread going.\n"
+        "5. Submit your COMPLETE response by calling submit_complete_response with your "
+        "match_level, notes, cross_programs to flag, and citations — this is your only deliverable "
+        "and it ends your work. "
         f"If the case is clearly outside {program}, still submit with match_level 'none' and a "
         "one-line note."
     )
@@ -259,6 +270,38 @@ def _agent_is_mentioned(agent_id: str, msg_data) -> bool:
     return any(m.id == agent_id for m in (metadata.mentions or []))
 
 
+def _agent_should_stay_silent(agent_id: str, room_id: str) -> bool:
+    """Mechanical anti-cascade gate: an agent stops responding once it has DELIVERED, and routing
+    stays silent until synthesis is actually requested.
+
+    Prompting alone can't stop a mentioned model from replying, so the room fills with a mention
+    cascade of "already submitted / acknowledged / thanks, received" messages. This gate cuts it:
+      * A specialist that has already called submit_complete_response (finding.complete) is done —
+        it ignores any further messages instead of posting acknowledgements.
+      * The routing agent ignores ALL specialist chatter until the orchestrator flips
+        synthesis_requested (then it synthesizes once); after strategy_complete it is also done.
+    The pre-submission cross-eligibility conversation is untouched — this only silences agents that
+    have nothing left to contribute."""
+    from ..store import get_case_for_room, get_profile
+
+    case_id = get_case_for_room(room_id)
+    if not case_id:
+        return False
+    profile = get_profile(case_id)
+    if profile is None:
+        return False
+    key = next(
+        (k for k, v in load_registry().items() if v.get("agent_id") == agent_id), None
+    )
+    if key == "routing":
+        # Silent while specialists work; wake only for the synthesis request; done once submitted.
+        return profile.strategy_complete or not profile.synthesis_requested
+    if key in _SPECIALISTS:
+        finding = profile.findings.get(key)
+        return finding is not None and finding.complete
+    return False
+
+
 _GATED_PREPROCESSOR_CLS = None
 
 
@@ -288,10 +331,51 @@ def _gated_preprocessor_cls():
                 if msg_data is not None and not _agent_is_mentioned(agent_id, msg_data):
                     logger.info("Band: skip msg in room %s — agent not mentioned", room_id)
                     return None
+                if _agent_should_stay_silent(agent_id, room_id):
+                    logger.info("Band: skip msg in room %s — agent already delivered", room_id)
+                    return None
             return await super().process(ctx, event, agent_id)
 
     _GATED_PREPROCESSOR_CLS = _MentionGatedPreprocessor
     return _GATED_PREPROCESSOR_CLS
+
+
+# Tools we drop from every agent. Agents keep `band_send_message` (specialists intentionally hold
+# short cross-eligibility conversations by @mentioning a peer), but they must never restructure the
+# room — creating rooms or adding/removing participants is the orchestrator's job (start_case_room /
+# seed_specialists via REST). Removing these closes off the main "spiral" vectors while leaving the
+# intended bounded peer conversation intact.
+_EXCLUDED_AGENT_TOOLS = frozenset(
+    {"band_create_chatroom", "band_add_participant", "band_remove_participant"}
+)
+
+_FILTERED_ADAPTER_CLS = None
+
+
+def _filtered_adapter_cls():
+    """PydanticAIAdapter that actually honors `AdapterFeatures.exclude_tools`. The stock adapter
+    registers every platform tool (band_send_message, band_lookup_peers, ...) unconditionally and
+    ignores exclude_tools in this path, so we prune the excluded tools from the built agent's
+    function toolset after creation."""
+    global _FILTERED_ADAPTER_CLS
+    if _FILTERED_ADAPTER_CLS is not None:
+        return _FILTERED_ADAPTER_CLS
+    from band.adapters.pydantic_ai import PydanticAIAdapter
+
+    class _FilteredAdapter(PydanticAIAdapter):
+        def _create_agent(self):
+            agent = super()._create_agent()
+            excluded = self.features.exclude_tools or frozenset()
+            toolset = getattr(agent, "_function_toolset", None)
+            tools = getattr(toolset, "tools", None)
+            if tools is not None:
+                for name in list(tools):
+                    if name in excluded:
+                        tools.pop(name, None)
+            return agent
+
+    _FILTERED_ADAPTER_CLS = _FilteredAdapter
+    return _FILTERED_ADAPTER_CLS
 
 
 def _adapter(prompt: str, tools):
@@ -302,22 +386,21 @@ def _adapter(prompt: str, tools):
     from band import AdapterFeatures, Capability
 
     # `prompt`/`custom_section` (not `system_prompt`) so the SDK's base instructions are
-    # included — they teach the agent to use band_send_message, handle mentions, look up
-    # peers, etc. Passing the full system prompt would bypass all of that and leave the
-    # agent unable to communicate on the platform.
+    # included — they teach the agent to handle mentions, use memory/contacts, etc. Passing the
+    # full system prompt would bypass all of that. `exclude_tools` drops room-posting so agents
+    # can't chatter (see _filtered_adapter_cls / _EXCLUDED_AGENT_TOOLS).
     features = AdapterFeatures(
         capabilities=frozenset({Capability.CONTACTS, Capability.MEMORY}),
+        exclude_tools=_EXCLUDED_AGENT_TOOLS,
     )
     s = get_settings()
     if llm.provider() == "openai":
-        from band.adapters.pydantic_ai import PydanticAIAdapter
-
         _configure_openai_env()
         pai_tools = [
             t if callable(t) and not isinstance(t, tuple) else _to_pai_tool(t[0], t[1])
             for t in tools
         ]
-        return PydanticAIAdapter(
+        return _filtered_adapter_cls()(
             model=_openai_model(),
             custom_section=prompt,
             additional_tools=pai_tools,
@@ -489,15 +572,18 @@ def _seed_content(profile: CaseProfile, mention_ids: list[str]) -> str:
     hh = profile.household
     mentions = " ".join(f"@[[{aid}]]" for aid in mention_ids)
     lines = [
-        f"{mentions} New caregiver case — please evaluate this case for your program.",
+        f"{mentions} New caregiver case — each mentioned specialist, please evaluate it for YOUR "
+        "program. Only respond if you are @mentioned.",
         "",
-        "You are an expert in your program. Using your official and informational knowledge "
-        "base, evaluate this specific case (factoring in the recipient's STATE and COUNTY and "
-        "how they affect eligibility) and determine: (a) an eligibility match level (none, low, "
-        "medium, likely, very_likely); (b) a few notes explaining it; (c) any cross-program "
-        "interactions — name them in cross_programs and explain in your notes (do NOT message "
-        "other specialists; routing coordinates across programs). Work silently, then call "
-        "submit_complete_response exactly once.",
+        "Using your official and informational knowledge base, evaluate this specific case "
+        "(factoring in the recipient's STATE and COUNTY and how they affect eligibility) and "
+        "determine: (a) an eligibility match level (none, low, medium, likely, very_likely); "
+        "(b) a few notes explaining it; (c) any cross-program interactions — name them in "
+        "cross_programs and explain in your notes. If (and only if) a specific dependency on "
+        "another program truly blocks your call, you may @mention that ONE specialist with a "
+        "SINGLE short question, then finish. Do NOT post status updates, summaries, or action "
+        "plans, do NOT announce or confirm your submission, and do NOT @mention the routing agent. "
+        "Just call submit_complete_response exactly once — routing collects it automatically.",
         "",
         "== CARE RECIPIENT ==",
         f"Name: {cr.name or 'n/a'}",
@@ -531,10 +617,10 @@ async def start_case_room(profile: CaseProfile) -> tuple[str, list[str]]:
     later referenced for application completion — it is not torn down per run. If the profile
     already has a band_chat_id we reuse it (just re-map room->case); otherwise we create one.
 
-    Adds ONLY the routing agent; specialists are added and removed per wave (see seed_specialists
-    / remove_specialists). A Band room is a group chat: EVERY participant runs a full LLM turn on
-    EVERY message (there is no mention-based gate in the adapter), so keeping membership to
-    {routing + the current wave} keeps the load effectively serial and under the LLM rate limit.
+    Adds ONLY the routing agent here; the specialist panel is added in one shot by seed_specialists
+    (which posts a single seed @mentioning all of them). Our custom preprocessor enforces a mention
+    gate, so only the specialists actually @mentioned run a turn — the whole room no longer reacts
+    to every message.
 
     Returns (chat_id, specialist_doc_keys). Raises if Band/routing is not configured.
     """
@@ -579,16 +665,17 @@ async def start_case_room(profile: CaseProfile) -> tuple[str, list[str]]:
     chat_id = chat.data.id
     map_room_to_case(chat_id, profile.id)
 
-    logger.info("Band case room %s created (routing only; %d specialists staged in waves)",
+    logger.info("Band case room %s created (routing; %d specialists seeded together)",
                 chat_id, len(specialists))
     return chat_id, specialists
 
 
 async def seed_specialists(profile: CaseProfile, chat_id: str, batch: list[str]) -> None:
-    """Add only the specialists in `batch` to the room, then post the structured seed @mentioning
-    them. Because every room participant runs an LLM turn on every message, adding just the wave's
-    specialists (and removing them afterwards) keeps concurrent LLM calls low, staying under the
-    rate limit."""
+    """Add the specialists in `batch` to the room, then post ONE structured seed @mentioning them
+    all. In the normal flow `batch` is every specialist, so routing seeds the whole panel with a
+    single message (no per-specialist repetition). The mention gate means only the @mentioned
+    specialists run a turn; specialists may hold a bounded cross-eligibility conversation, then
+    each submits its complete finding."""
     from band.client.rest import (
         ChatMessageRequest,
         ChatMessageRequestMentionsItem,
@@ -627,27 +714,7 @@ async def seed_specialists(profile: CaseProfile, chat_id: str, batch: list[str])
         message=ChatMessageRequest(content=_seed_content(profile, mention_ids), mentions=mentions),
         request_options=DEFAULT_REQUEST_OPTIONS,
     )
-    logger.info("Band room %s seeded wave: %s", chat_id, ", ".join(keys))
-
-
-async def remove_specialists(chat_id: str, batch: list[str]) -> None:
-    """Remove a completed wave's specialists from the room so the next wave's seed does not also
-    wake them (every resident participant runs an LLM turn on every message)."""
-    registry = load_registry()
-    routing = registry.get("routing")
-    if not routing:
-        return
-    routing_client = _rest_client(routing["api_key"])
-    for key in batch:
-        creds = registry.get(key)
-        if not creds:
-            continue
-        try:
-            await routing_client.agent_api_participants.remove_agent_chat_participant(
-                chat_id, creds["agent_id"]
-            )
-        except Exception:
-            logger.debug("remove participant %s conflict/ignored", key, exc_info=True)
+    logger.info("Band room %s seeded specialists: %s", chat_id, ", ".join(keys))
 
 
 async def trigger_synthesis(chat_id: str, findings_summary: str) -> None:
@@ -700,6 +767,19 @@ async def trigger_synthesis(chat_id: str, findings_summary: str) -> None:
         ),
         request_options=DEFAULT_REQUEST_OPTIONS,
     )
+
+
+async def drain_routing_queue(chat_id: str) -> int:
+    """Mark every not-yet-processed message in this room processed FOR ROUTING. Called right
+    before synthesis is requested: routing stays silent during the specialist phase, so the
+    specialists' submission notices (which @mention routing) pile up as its backlog. Clearing that
+    backlog first means that once the synthesis gate opens, routing processes ONLY the synthesis
+    trigger we post next — not a wasteful turn per stale mention."""
+    registry = load_registry()
+    routing = registry.get("routing")
+    if not routing:
+        return 0
+    return await _mark_room_processed(_rest_client(routing["api_key"]), chat_id)
 
 
 async def drain_stale_rooms() -> int:
