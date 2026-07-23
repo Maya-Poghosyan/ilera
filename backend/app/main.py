@@ -153,15 +153,18 @@ async def _band_loop() -> None:
     receive live messages for rooms they're added to after connecting.
     """
     try:
-        from .integrations.band import build_agents, drain_stale_rooms
+        from .integrations.band import build_agents, leave_all_rooms
     except Exception:
         logger.warning("Band SDK not available — skipping agent startup")
         return
     try:
         agents = build_agents(skip_backlog=True)
-        # Clear leftover backlog from old/orphan rooms before connecting so agents don't
-        # re-sweep it and exhaust the LLM rate limit.
-        await drain_stale_rooms()
+        # Leave every existing room before connecting. Old/orphan rooms hold undelivered `pending`
+        # backlog that can't be marked processed (see leave_all_rooms); if the agents stay members
+        # they re-run a full LLM turn per redelivered message and exhaust the rate limit. Agents
+        # are re-added per case (routing in start_case_room, specialists per wave), so they end up
+        # resident only in the room they're actively working.
+        await leave_all_rooms()
         await asyncio.gather(*(a.start() for _, a in agents))
         names = ", ".join(f"{k}" for k, _ in agents)
         logger.info("Band agents connected: %s", names)
@@ -254,7 +257,7 @@ _agent_executions: list[dict] = []
 # Time budgets for the async Band eligibility run.
 _FINDINGS_TIMEOUT = 900  # seconds to wait for ALL specialists (across every wave) to complete
 _WAVE_TIMEOUT = 200      # per-wave seconds to wait for that wave's specialists to complete
-_STRATEGY_TIMEOUT = 180  # seconds to wait for the routing agent to submit its strategy
+_STRATEGY_TIMEOUT = 360  # seconds to wait for the routing agent to submit its strategy
 _POLL_INTERVAL = 4
 # How many specialists are resident in the room (and thus running) at once. A Band room is a
 # group chat where every participant runs a full LLM turn on every message, so this is the real

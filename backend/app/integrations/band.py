@@ -235,6 +235,65 @@ def _to_pai_tool(input_model, handler):
     return _tool
 
 
+def _room_is_active(room_id: str) -> bool:
+    """A room is 'active' only if it maps to a case that is currently being processed. Band
+    tracks message status per recipient and only advances to `processed` once THAT agent handles
+    the message, so old/orphan rooms keep redelivering their `pending` backlog to every resident
+    agent. We use this gate to skip any message whose room isn't an in-flight case."""
+    from ..store import get_case_for_room, get_profile
+
+    case_id = get_case_for_room(room_id)
+    if not case_id:
+        return False
+    profile = get_profile(case_id)
+    return profile is not None and profile.band_status == "processing"
+
+
+def _agent_is_mentioned(agent_id: str, msg_data) -> bool:
+    """True if this agent is @mentioned in the message. Mentions carry the agent's own id (we
+    build them with id=agent_id in seed_specialists / trigger_synthesis), which is the same
+    namespace as the runtime's agent_id used for self-message filtering."""
+    metadata = msg_data.metadata
+    if metadata is None:
+        return False
+    return any(m.id == agent_id for m in (metadata.mentions or []))
+
+
+_GATED_PREPROCESSOR_CLS = None
+
+
+def _gated_preprocessor_cls():
+    """A DefaultPreprocessor subclass implementing the room's intended addressing model: an agent
+    runs an LLM turn for a message only when (1) the room is an active case AND (2) the agent is
+    @mentioned. Otherwise `process` returns None and the runtime marks the message processed with
+    no LLM call (verified: on_execute None -> _execute_message_cycle returns -> link.mark_processed).
+
+    Band's DefaultPreprocessor has no mention gate — every resident participant is handed every
+    message — so this is the documented `preprocessor` hook (Agent.create(preprocessor=...)) used
+    to (a) stop non-mentioned peers from reacting and (b) drain old/orphan-room backlog for free."""
+    global _GATED_PREPROCESSOR_CLS
+    if _GATED_PREPROCESSOR_CLS is not None:
+        return _GATED_PREPROCESSOR_CLS
+    from band.platform.event import MessageEvent
+    from band.preprocessing.default import DefaultPreprocessor
+
+    class _MentionGatedPreprocessor(DefaultPreprocessor):
+        async def process(self, ctx, event, agent_id):
+            if isinstance(event, MessageEvent):
+                room_id = event.room_id
+                msg_data = event.payload
+                if not _room_is_active(room_id):
+                    logger.info("Band: skip msg in inactive room %s (no LLM turn)", room_id)
+                    return None
+                if msg_data is not None and not _agent_is_mentioned(agent_id, msg_data):
+                    logger.info("Band: skip msg in room %s — agent not mentioned", room_id)
+                    return None
+            return await super().process(ctx, event, agent_id)
+
+    _GATED_PREPROCESSOR_CLS = _MentionGatedPreprocessor
+    return _GATED_PREPROCESSOR_CLS
+
+
 def _adapter(prompt: str, tools):
     """Build the framework adapter. `tools` is a mixed list: (InputModel, handler)
     tuples for plain tools, and native pydantic-ai tool callables (functions taking
@@ -300,6 +359,7 @@ def _make_agent(adapter, creds: dict, *, skip_backlog: bool = False):
         rest_url=s.band_rest_url.rstrip("/"),
         config=config,
         session_config=session_config,
+        preprocessor=_gated_preprocessor_cls()(),
     )
 
 
@@ -478,7 +538,11 @@ async def start_case_room(profile: CaseProfile) -> tuple[str, list[str]]:
 
     Returns (chat_id, specialist_doc_keys). Raises if Band/routing is not configured.
     """
-    from band.client.rest import ChatRoomRequest, DEFAULT_REQUEST_OPTIONS
+    from band.client.rest import (
+        ChatRoomRequest,
+        DEFAULT_REQUEST_OPTIONS,
+        ParticipantRequest,
+    )
 
     from ..store import map_room_to_case
 
@@ -490,12 +554,25 @@ async def start_case_room(profile: CaseProfile) -> tuple[str, list[str]]:
     if not specialists:
         raise RuntimeError("No Band specialist agents configured")
 
+    routing_client = _rest_client(routing["api_key"])
+
     if profile.band_chat_id:
         map_room_to_case(profile.band_chat_id, profile.id)
+        # Routing left every room at worker startup (see leave_all_rooms), so re-add it as the
+        # durable room's resident coordinator before we seed/synthesize.
+        try:
+            await routing_client.agent_api_participants.add_agent_chat_participant(
+                profile.band_chat_id,
+                participant=ParticipantRequest(
+                    participant_id=routing["agent_id"], role="member"
+                ),
+                request_options=DEFAULT_REQUEST_OPTIONS,
+            )
+        except Exception:
+            logger.debug("reuse: add routing participant conflict/ignored", exc_info=True)
         logger.info("Band case room %s reused for case %s", profile.band_chat_id, profile.id)
         return profile.band_chat_id, specialists
 
-    routing_client = _rest_client(routing["api_key"])
     chat = await routing_client.agent_api_chats.create_agent_chat(
         chat=ChatRoomRequest(), request_options=DEFAULT_REQUEST_OPTIONS
     )
@@ -685,6 +762,45 @@ async def _mark_room_processed(client, chat_id: str) -> int:
             if marked_this_pass == 0:
                 break
     return marked
+
+
+async def leave_all_rooms() -> int:
+    """Have every agent remove itself from every room it belongs to. Call ONCE at startup before
+    connecting agents.
+
+    Old case/orphan rooms accumulate a large backlog of undelivered `pending` messages (Band has
+    no delete-room API). `drain_stale_rooms` can't clear those — a purely pending message can't be
+    marked processed until it is delivered, and delivering it makes the agent run a full LLM turn,
+    which under load 429s, fails, and is redelivered: a self-sustaining storm across every orphan
+    room the agent is still a participant of. The only way to stop the redelivery is to leave the
+    room. Specialists are re-added per wave (seed_specialists) and routing is re-ensured per case
+    (start_case_room), so leaving everything at startup is safe and keeps agents resident only in
+    the room they're actively working."""
+    from band.client.rest import DEFAULT_REQUEST_OPTIONS
+
+    registry = load_registry()
+    left = 0
+    for key, creds in registry.items():
+        if key in ("caregiver", "user"):
+            continue
+        client = _rest_client(creds["api_key"])
+        try:
+            chats = await client.agent_api_chats.list_agent_chats(
+                page=1, page_size=200, request_options=DEFAULT_REQUEST_OPTIONS
+            )
+        except Exception:
+            logger.debug("leave: could not list chats for %s", key, exc_info=True)
+            continue
+        for chat in (getattr(chats, "data", None) or []):
+            try:
+                await client.agent_api_participants.remove_agent_chat_participant(
+                    chat.id, creds["agent_id"]
+                )
+                left += 1
+            except Exception:
+                logger.debug("leave: remove self %s from %s failed", key, chat.id, exc_info=True)
+    logger.info("Band startup: %d agent-room membership(s) left", left)
+    return left
 
 
 async def settle_room(chat_id: str) -> int:
