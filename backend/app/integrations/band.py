@@ -769,6 +769,63 @@ async def trigger_synthesis(chat_id: str, findings_summary: str) -> None:
     )
 
 
+async def force_ack_stale_peer_messages(chat_id: str, older_than_secs: float) -> int:
+    """Watchdog that breaks the runtime's `/next` resync spin.
+
+    A specialist-posted room message can end up stuck `pending` for a recipient (e.g. after a
+    delivery/processing race or a failed model turn). Band rejects marking a `pending` message
+    `processed` (422 — it must go through `processing` first), so the SDK's resync loop keeps
+    re-fetching that same message from `/next` forever, starving the agent from doing its real
+    work (it never gets to process the seed and submit). Once such a message is older than
+    `older_than_secs`, we push it through processing->processed ourselves so `/next` stops
+    returning it and the agent recovers.
+
+    Only SPECIALIST-sent messages are touched (i.e. cross-program peer chatter). The routing
+    agent's seed and synthesis trigger are never force-acked here, so every specialist always
+    gets to process its actual task; the effect is purely to cap a peer exchange that has gone
+    stale and to defuse a poison message that would otherwise hang the run."""
+    from datetime import datetime, timezone
+
+    from band.client.rest import DEFAULT_REQUEST_OPTIONS
+
+    registry = load_registry()
+    now = datetime.now(timezone.utc)
+    acked = 0
+    for key, creds in registry.items():
+        if key not in _SPECIALISTS and key != "routing":
+            continue
+        client = _rest_client(creds["api_key"])
+        for status in ("pending", "processing"):
+            try:
+                msgs = await client.agent_api_messages.list_agent_messages(
+                    chat_id, status=status, page_size=200,
+                    request_options=DEFAULT_REQUEST_OPTIONS,
+                )
+            except Exception:
+                continue
+            for m in (getattr(msgs, "data", None) or []):
+                if getattr(m, "sender_name", "") == _ROUTING_NAME:
+                    continue  # never force-ack the routing seed / synthesis trigger
+                ts = getattr(m, "inserted_at", None)
+                if ts is not None and (now - ts).total_seconds() < older_than_secs:
+                    continue
+                try:
+                    await client.agent_api_messages.mark_agent_message_processing(
+                        chat_id, m.id, request_options=DEFAULT_REQUEST_OPTIONS
+                    )
+                    await client.agent_api_messages.mark_agent_message_processed(
+                        chat_id, m.id, request_options=DEFAULT_REQUEST_OPTIONS
+                    )
+                    acked += 1
+                except Exception:
+                    logger.debug("watchdog force-ack failed for %s", m.id, exc_info=True)
+    if acked:
+        logger.info(
+            "Band watchdog: force-acked %d stale peer message(s) in room %s", acked, chat_id
+        )
+    return acked
+
+
 async def drain_routing_queue(chat_id: str) -> int:
     """Mark every not-yet-processed message in this room processed FOR ROUTING. Called right
     before synthesis is requested: routing stays silent during the specialist phase, so the

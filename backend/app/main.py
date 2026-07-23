@@ -258,6 +258,11 @@ _agent_executions: list[dict] = []
 _FINDINGS_TIMEOUT = 900  # seconds to wait for ALL specialists to submit complete findings
 _STRATEGY_TIMEOUT = 360  # seconds to wait for the routing agent to submit its strategy
 _POLL_INTERVAL = 4
+_WATCHDOG_INTERVAL = 20   # how often to sweep the room for stuck peer messages
+# A specialist-sent peer message older than this that is still un-acked is treated as stale: it
+# either finished a bounded cross-eligibility exchange or is a poison message trapping an agent in
+# a /next resync loop, so the watchdog force-acks it. Long enough to allow a real one-shot Q&A.
+_PEER_MSG_STALE_SECS = 60
 
 
 def _findings_summary(profile: CaseProfile, specialists: list[str]) -> str:
@@ -277,6 +282,7 @@ async def _run_case_eligibility(case_id: str) -> None:
     Band is the sole engine — there is no in-process fallback."""
     from .integrations.band import (
         drain_routing_queue,
+        force_ack_stale_peer_messages,
         seed_specialists,
         settle_room,
         start_case_room,
@@ -326,6 +332,7 @@ async def _run_case_eligibility(case_id: str) -> None:
         logger.exception("Band seed failed for case %s", case_id)
 
     deadline_f = loop.time() + _FINDINGS_TIMEOUT
+    next_watchdog = loop.time() + _WATCHDOG_INTERVAL
     while loop.time() < deadline_f:
         await asyncio.sleep(_POLL_INTERVAL)
         p = get_profile(case_id)
@@ -334,6 +341,15 @@ async def _run_case_eligibility(case_id: str) -> None:
         if all(k in p.findings and p.findings[k].complete for k in specialists):
             all_complete = True
             break
+        # Watchdog: clear any stale peer-chatter message that is stuck in a recipient's queue,
+        # which would otherwise trap that agent in an infinite /next resync loop and prevent it
+        # from ever submitting. Only specialist-sent messages are touched (never the seed).
+        if loop.time() >= next_watchdog:
+            next_watchdog = loop.time() + _WATCHDOG_INTERVAL
+            try:
+                await force_ack_stale_peer_messages(chat_id, _PEER_MSG_STALE_SECS)
+            except Exception:
+                logger.exception("Band peer-message watchdog failed for case %s", case_id)
 
     p = get_profile(case_id)
     if p is None:
