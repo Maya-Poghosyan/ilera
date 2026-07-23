@@ -464,13 +464,17 @@ def _seed_content(profile: CaseProfile, mention_ids: list[str]) -> str:
 
 
 async def start_case_room(profile: CaseProfile) -> tuple[str, list[str]]:
-    """Create one Band room for this case and map the room to the case. Adds ONLY the routing
-    agent; specialists are added and removed per wave (see seed_specialists / remove_specialists).
+    """Return the durable Band room for this case, creating it once and REUSING it thereafter.
 
-    A Band room is a group chat: EVERY participant runs a full LLM turn on EVERY message (there is
-    no mention-based gate in the adapter). So keeping all six specialists resident means one seed
-    wakes seven agents at once — the concurrency that blows the LLM rate limit. Keeping membership
-    to {routing + the current wave} makes the load effectively serial.
+    Because each user has exactly one case (User.case_id is 1:1), this room is effectively the
+    user's single long-lived room: it is opened at intake, reused for eligibility re-runs, and
+    later referenced for application completion — it is not torn down per run. If the profile
+    already has a band_chat_id we reuse it (just re-map room->case); otherwise we create one.
+
+    Adds ONLY the routing agent; specialists are added and removed per wave (see seed_specialists
+    / remove_specialists). A Band room is a group chat: EVERY participant runs a full LLM turn on
+    EVERY message (there is no mention-based gate in the adapter), so keeping membership to
+    {routing + the current wave} keeps the load effectively serial and under the LLM rate limit.
 
     Returns (chat_id, specialist_doc_keys). Raises if Band/routing is not configured.
     """
@@ -485,6 +489,11 @@ async def start_case_room(profile: CaseProfile) -> tuple[str, list[str]]:
     specialists = [k for k in registry if k in _SPECIALISTS]
     if not specialists:
         raise RuntimeError("No Band specialist agents configured")
+
+    if profile.band_chat_id:
+        map_room_to_case(profile.band_chat_id, profile.id)
+        logger.info("Band case room %s reused for case %s", profile.band_chat_id, profile.id)
+        return profile.band_chat_id, specialists
 
     routing_client = _rest_client(routing["api_key"])
     chat = await routing_client.agent_api_chats.create_agent_chat(
@@ -639,35 +648,63 @@ async def drain_stale_rooms() -> int:
             continue
         for chat in (getattr(chats, "data", None) or []):
             # Mark every not-yet-delivered message (pending/processing/failed) processed so a
-            # freshly started agent's /next sync finds an empty backlog. The message-list
-            # response carries no per-message status field, so we must filter server-side by
-            # status; each pass re-queries and stops when a status returns none left.
-            for status in ("processing", "failed", "pending"):
-                for _ in range(50):
-                    try:
-                        msgs = await client.agent_api_messages.list_agent_messages(
-                            chat.id, status=status, page_size=200,
-                            request_options=DEFAULT_REQUEST_OPTIONS,
-                        )
-                    except Exception:
-                        break
-                    data = getattr(msgs, "data", None) or []
-                    if not data:
-                        break
-                    marked_this_pass = 0
-                    for m in data:
-                        try:
-                            await client.agent_api_messages.mark_agent_message_processed(
-                                chat.id, m.id, request_options=DEFAULT_REQUEST_OPTIONS
-                            )
-                            drained += 1
-                            marked_this_pass += 1
-                        except Exception:
-                            logger.debug("drain: mark processed failed", exc_info=True)
-                    if marked_this_pass == 0:
-                        break
+            # freshly started agent's /next sync finds an empty backlog.
+            drained += await _mark_room_processed(client, chat.id)
     logger.info("Band startup drain: marked %d stale message(s) processed", drained)
     return drained
+
+
+async def _mark_room_processed(client, chat_id: str) -> int:
+    """Mark every leftover pending/processing/failed message in one room processed, for one
+    agent's client. Returns how many were marked."""
+    from band.client.rest import DEFAULT_REQUEST_OPTIONS
+
+    marked = 0
+    for status in ("processing", "failed", "pending"):
+        for _ in range(50):
+            try:
+                msgs = await client.agent_api_messages.list_agent_messages(
+                    chat_id, status=status, page_size=200,
+                    request_options=DEFAULT_REQUEST_OPTIONS,
+                )
+            except Exception:
+                break
+            data = getattr(msgs, "data", None) or []
+            if not data:
+                break
+            marked_this_pass = 0
+            for m in data:
+                try:
+                    await client.agent_api_messages.mark_agent_message_processed(
+                        chat_id, m.id, request_options=DEFAULT_REQUEST_OPTIONS
+                    )
+                    marked += 1
+                    marked_this_pass += 1
+                except Exception:
+                    logger.debug("settle: mark processed failed", exc_info=True)
+            if marked_this_pass == 0:
+                break
+    return marked
+
+
+async def settle_room(chat_id: str) -> int:
+    """Empty ONE room's work queue without closing it: mark all leftover pending/processing/failed
+    messages processed, for every agent. The room stays open and its history intact (findings and
+    strategy are already persisted in the store), but a worker restart won't replay these messages
+    and burn LLM quota. Call at a phase boundary (e.g. after the strategy is submitted); the room
+    is reused later for application completion. Not a delete — Band has no delete-room API."""
+    registry = load_registry()
+    settled = 0
+    for key, creds in registry.items():
+        if key in ("caregiver", "user"):
+            continue
+        client = _rest_client(creds["api_key"])
+        try:
+            settled += await _mark_room_processed(client, chat_id)
+        except Exception:
+            logger.debug("settle: could not settle room for %s", key, exc_info=True)
+    logger.info("Band settle: marked %d message(s) processed in room %s", settled, chat_id)
+    return settled
 
 
 # Back-compat: a single routing agent.

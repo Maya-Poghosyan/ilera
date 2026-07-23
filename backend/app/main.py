@@ -281,6 +281,7 @@ async def _run_case_eligibility(case_id: str) -> None:
     from .integrations.band import (
         remove_specialists,
         seed_specialists,
+        settle_room,
         start_case_room,
         trigger_synthesis,
     )
@@ -375,6 +376,12 @@ async def _run_case_eligibility(case_id: str) -> None:
         await asyncio.sleep(_POLL_INTERVAL)
         p = get_profile(case_id)
         if p is not None and p.strategy_complete:
+            # Phase done: empty this room's queue so a worker restart won't replay its messages
+            # and burn quota. The room stays open (reused later for application completion).
+            try:
+                await settle_room(chat_id)
+            except Exception:
+                logger.exception("Band settle failed for case %s", case_id)
             return
 
     # Completion requires a persisted strategy; if routing never delivered one, surface an error.
