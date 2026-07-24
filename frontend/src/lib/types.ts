@@ -8,6 +8,7 @@ export interface CareRecipient {
   state: string;
   street_address: string;
   city: string;
+  county: string;
   zip_code: string;
   phone: string;
   email: string;
@@ -34,6 +35,19 @@ export interface Household {
   income_monthly?: number | null;
 }
 
+export type BandStatus = "idle" | "processing" | "complete" | "error";
+
+export interface SpecialistFinding {
+  program: string;
+  doc_key: string;
+  match_level: MatchLevel;
+  notes: string[];
+  cross_programs: string[];
+  citations: string[];
+  complete: boolean;
+  updated_at: string;
+}
+
 export interface CaseProfile {
   id: string;
   care_recipient: CareRecipient;
@@ -42,9 +56,17 @@ export interface CaseProfile {
   answers: Record<string, unknown>;
   followups: Record<string, string>;
   eligibility: Record<string, EligibilityResult>;
+  band_chat_id: string;
+  band_status: BandStatus;
+  band_error: string;
+  findings: Record<string, SpecialistFinding>;
+  expected_specialists: string[];
+  strategy: string;
+  strategy_complete: boolean;
 }
 
 export type EligibilityStatus = "likely" | "possible" | "unlikely" | "needs_info";
+export type MatchLevel = "none" | "low" | "medium" | "likely" | "very_likely";
 
 export interface FollowupQuestion {
   program: string;
@@ -59,6 +81,7 @@ export interface EligibilityResult {
   program: string;
   confidence: number;
   status: EligibilityStatus;
+  match_level: MatchLevel;
   rationale: string;
   roadblocks: string[];
   required_documents: string[];
@@ -69,9 +92,13 @@ export interface EligibilityResult {
 }
 
 export interface EligibilityResponse {
+  status: BandStatus;
   results: EligibilityResult[];
-  followups: FollowupQuestion[];
-  strategy_notes: string[];
+  strategy: string;
+  strategy_complete: boolean;
+  expected: string[];
+  completed: string[];
+  error: string;
 }
 
 // ---------------------------------------------------------------------------

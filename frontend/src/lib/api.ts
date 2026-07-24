@@ -46,6 +46,10 @@ export function determineEligibility(caseId: string): Promise<EligibilityRespons
   return request<EligibilityResponse>(`/api/eligibility/${caseId}`, { method: "POST" });
 }
 
+export function getEligibility(caseId: string): Promise<EligibilityResponse> {
+  return request<EligibilityResponse>(`/api/eligibility/${caseId}`);
+}
+
 export function getCase(caseId: string): Promise<CaseProfile> {
   return request<CaseProfile>(`/api/case/${caseId}`);
 }

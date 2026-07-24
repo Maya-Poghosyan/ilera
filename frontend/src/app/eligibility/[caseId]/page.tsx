@@ -2,46 +2,93 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
-import { determineEligibility } from "@/lib/api";
-import type { EligibilityResponse, EligibilityStatus } from "@/lib/types";
+import { determineEligibility, getEligibility } from "@/lib/api";
+import type { EligibilityResponse, MatchLevel } from "@/lib/types";
 
-const statusColor: Record<EligibilityStatus, string> = {
-  likely: "border-transparent bg-primary text-primary-foreground",
-  possible: "border-transparent bg-amber-500 text-white",
-  unlikely: "border-transparent bg-rose-500 text-white",
-  needs_info: "border-transparent bg-sky-600 text-white",
+const matchColor: Record<MatchLevel, string> = {
+  very_likely: "border-transparent bg-primary text-primary-foreground",
+  likely: "border-transparent bg-emerald-600 text-white",
+  medium: "border-transparent bg-amber-500 text-white",
+  low: "border-transparent bg-orange-500 text-white",
+  none: "border-transparent bg-muted text-muted-foreground",
+};
+
+const matchLabel: Record<MatchLevel, string> = {
+  very_likely: "very likely",
+  likely: "likely",
+  medium: "medium",
+  low: "low",
+  none: "no match",
 };
 
 const LOADING_MESSAGES = [
-  "Activating specialist agents…",
-  "Grounding answers in official program documentation…",
-  "Matching you to Medicaid, IHSS, Paid Family Leave, and VA programs…",
-  "Ranking programs by eligibility confidence…",
+  "Spinning up the specialist agents in your case room…",
+  "Each specialist is grounding its answer in official program documentation…",
+  "Specialists are checking your state and county rules…",
+  "Coordinating cross-program eligibility between specialists…",
+  "The routing agent is synthesizing your application strategy…",
 ];
+
+const POLL_MS = 3000;
 
 export default function EligibilityPage() {
   const { caseId } = useParams<{ caseId: string }>();
   const [data, setData] = useState<EligibilityResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [messageIndex, setMessageIndex] = useState(0);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    determineEligibility(caseId).then(setData).catch(() => setError("Could not reach the API."));
+    let active = true;
+
+    const poll = () => {
+      getEligibility(caseId)
+        .then((res) => {
+          if (!active) return;
+          setData(res);
+          if (res.status === "idle" || res.status === "processing") {
+            timer.current = setTimeout(poll, POLL_MS);
+          }
+        })
+        .catch(() => {
+          if (active) setError("Could not reach the API.");
+        });
+    };
+
+    // Kick off the Band eligibility run (idempotent), then poll for results.
+    determineEligibility(caseId)
+      .then((res) => {
+        if (!active) return;
+        setData(res);
+        if (res.status === "idle" || res.status === "processing") {
+          timer.current = setTimeout(poll, POLL_MS);
+        }
+      })
+      .catch(() => {
+        if (active) setError("Could not reach the API.");
+      });
+
+    return () => {
+      active = false;
+      if (timer.current) clearTimeout(timer.current);
+    };
   }, [caseId]);
 
+  const processing = !data || data.status === "idle" || data.status === "processing";
+
   useEffect(() => {
-    if (data || error) return;
+    if (error || !processing) return;
     const id = setInterval(() => {
       setMessageIndex((i) => (i + 1) % LOADING_MESSAGES.length);
-    }, 2200);
+    }, 2600);
     return () => clearInterval(id);
-  }, [data, error]);
+  }, [error, processing]);
 
   if (error) {
     return (
@@ -51,7 +98,23 @@ export default function EligibilityPage() {
     );
   }
 
-  if (!data) {
+  if (data && data.status === "error") {
+    return (
+      <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
+        <h1 className="text-xl font-semibold text-rose-600">Eligibility could not be completed</h1>
+        <p className="max-w-sm text-sm text-muted-foreground">
+          {data.error || "The specialist agents did not return a result. Please try again."}
+        </p>
+        <Button variant="outline" render={<Link href="/intake" />}>
+          Back to intake
+        </Button>
+      </main>
+    );
+  }
+
+  if (processing) {
+    const done = data?.completed.length ?? 0;
+    const total = data?.expected.length ?? 0;
     return (
       <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
@@ -62,6 +125,11 @@ export default function EligibilityPage() {
         >
           {LOADING_MESSAGES[messageIndex]}
         </p>
+        {total > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {done} of {total} specialists have responded
+          </p>
+        )}
       </main>
     );
   }
@@ -77,59 +145,35 @@ export default function EligibilityPage() {
         </div>
       </header>
       <main className="mx-auto w-full max-w-5xl flex-1 space-y-6 px-6 py-12">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Your benefits strategy</h1>
-        <p className="text-sm text-muted-foreground">Ranked by eligibility confidence.</p>
-      </div>
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">Your eligibility results</h1>
+          <p className="text-sm text-muted-foreground">
+            Match levels determined by each program specialist.
+          </p>
+        </div>
 
-      {data.strategy_notes.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Strategy notes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-              {data.strategy_notes.map((n) => (
-                <li key={n}>{n}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
+        {data.strategy && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Application strategy</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="whitespace-pre-wrap text-sm text-muted-foreground">{data.strategy}</p>
+            </CardContent>
+          </Card>
+        )}
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {data.results.map((r) => {
-          const pct = Math.round(r.confidence * 100);
-          return (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {data.results.map((r) => (
             <Card key={r.program} size="sm" className="gap-3">
               <CardHeader className="gap-2">
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle className="text-base">{r.program}</CardTitle>
-                  <Badge className={statusColor[r.status]}>
-                    {r.status.replace("_", " ")}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary"
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-semibold tabular-nums text-muted-foreground">
-                    {pct}%
-                  </span>
+                  <Badge className={matchColor[r.match_level]}>{matchLabel[r.match_level]}</Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-2.5 text-xs">
                 <p className="text-muted-foreground">{r.rationale}</p>
-                {r.roadblocks.length > 0 && (
-                  <Detail label="Roadblocks" items={r.roadblocks} />
-                )}
-                <Detail label="Required documents" items={r.required_documents} />
-                {r.next_steps.length > 0 && (
-                  <Detail label="Next steps" items={r.next_steps} />
-                )}
                 {r.sources.length > 0 && (
                   <p className="text-[11px] text-muted-foreground">
                     Sources: {r.sources.join(", ")}
@@ -137,28 +181,14 @@ export default function EligibilityPage() {
                 )}
               </CardContent>
             </Card>
-          );
-        })}
-      </div>
+          ))}
+        </div>
 
-      <Button render={<Link href="/dashboard/applications" />}>
-        Continue to applications
-        <ArrowRight />
-      </Button>
+        <Button render={<Link href="/dashboard/applications" />}>
+          Continue to applications
+          <ArrowRight />
+        </Button>
       </main>
     </>
-  );
-}
-
-function Detail({ label, items }: { label: string; items: string[] }) {
-  return (
-    <div>
-      <p className="font-medium">{label}</p>
-      <ul className="list-disc pl-5 text-muted-foreground">
-        {items.map((i) => (
-          <li key={i}>{i}</li>
-        ))}
-      </ul>
-    </div>
   );
 }
