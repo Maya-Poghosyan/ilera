@@ -724,7 +724,7 @@ def api_start_application(case_id: str, program: str) -> dict:
 
 
 class AnswersSubmit(BaseModel):
-    answers: dict[str, str]
+    answers: dict[str, Any]
 
 
 @app.post("/api/applications/{case_id}/{program}/submit")

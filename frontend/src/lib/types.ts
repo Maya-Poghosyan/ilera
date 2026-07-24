@@ -1,3 +1,5 @@
+import type { FieldType } from "@/lib/intake-schema";
+
 export type Insurance = "medi-cal" | "medicare" | "private" | "none" | "unknown";
 
 export interface CareRecipient {
@@ -249,11 +251,20 @@ export interface ApplicationEntry {
   has_forms: boolean;
 }
 
+// Shape mirrors the intake `Question` type so it can be handed straight to
+// <QuestionField> with no adapter. Extra keys (form_id/fields/interpret) are
+// backend metadata the renderer ignores.
 export interface AppQuestion {
-  field: string;
-  label: string;
-  type: string;
-  form_id: string;
+  field_id: string;
+  text: string;
+  type: FieldType;
+  required: boolean;
+  options?: string[];
+  why_this_matters?: string;
+  helper_text?: string;
+  form_id?: string;
+  fields?: string[];
+  interpret?: boolean;
 }
 
 export interface StartApplicationResult {
