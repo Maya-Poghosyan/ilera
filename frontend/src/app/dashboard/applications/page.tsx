@@ -278,8 +278,8 @@ export default function ApplicationsPage() {
 
         <div className="flex-1 overflow-hidden rounded-lg border border-border">
           <iframe
-            src={pdfUrl}
-            className="h-[600px] w-full"
+            src={`${pdfUrl}#navpanes=0`}
+            className="h-[75vh] w-full"
             title="PDF Preview"
           />
         </div>
