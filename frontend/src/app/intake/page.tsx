@@ -153,6 +153,11 @@ function IntakeContent() {
   const [submitting, setSubmitting] = useState(false);
   const [animating, setAnimating] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  // Synchronous debounce: the `submitting` state only disables the button on the
+  // next render, so a rapid double-click can call finish() twice before then. This
+  // ref flips immediately, so the second call is dropped and only one intake POST
+  // (and thus one Band room) is ever created.
+  const submittingRef = useRef(false);
 
   const slide = useCallback((dir: "left" | "right", cb: () => void) => {
     const el = cardRef.current;
@@ -312,6 +317,8 @@ function IntakeContent() {
   }
 
   async function finish() {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setSubmitting(true);
     try {
       const created = await submitIntakeAnswers(answers);
@@ -319,6 +326,7 @@ function IntakeContent() {
       await updateUser({ case_id: created.id });
       router.push(`/eligibility/${created.id}`);
     } catch {
+      submittingRef.current = false;
       setSubmitting(false);
       alert("Could not reach the API. Is the backend running on :8000?");
     }
