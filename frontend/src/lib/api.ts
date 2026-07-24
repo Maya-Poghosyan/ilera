@@ -1,4 +1,4 @@
-import type { Answers, IntakeSchema } from "./intake-schema";
+import type { Answers, AnswerValue, IntakeSchema } from "./intake-schema";
 import type { AppStatus, ApplicationEntry, CaseProfile, EligibilityResponse, FormSchema, JournalCreate, JournalEntry, RecordsSummary, Reminder, ReminderCreate, ReminderUpdate, ReminderTemplates, RenewalInfo, RenewalUpdate, StartApplicationResult, TimekeepingCreate, TimekeepingEntry } from "./types";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -230,7 +230,7 @@ export function startApplication(
 export async function submitApplicationAnswers(
   caseId: string,
   program: string,
-  answers: Record<string, string>
+  answers: Record<string, AnswerValue>
 ): Promise<Blob> {
   const res = await fetch(
     `${BASE}/api/applications/${caseId}/${encodeURIComponent(program)}/submit`,
@@ -247,7 +247,7 @@ export async function submitApplicationAnswers(
 export async function previewApplication(
   caseId: string,
   program: string,
-  answers: Record<string, string>
+  answers: Record<string, AnswerValue>
 ): Promise<Blob> {
   const res = await fetch(
     `${BASE}/api/applications/${caseId}/${encodeURIComponent(program)}/preview`,

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { QuestionField } from "@/components/intake/question-field";
 import {
   completeApplication,
   listApplications,
@@ -13,6 +13,12 @@ import {
   startApplication,
   updateAppStatus,
 } from "@/lib/api";
+import {
+  type Answers,
+  type AnswerValue,
+  type Question,
+  validateQuestions,
+} from "@/lib/intake-schema";
 import type {
   AppQuestion,
   AppStatus,
@@ -45,13 +51,12 @@ export default function ApplicationsPage() {
   const [flowStep, setFlowStep] = useState<FlowStep>("list");
   const [activeProgram, setActiveProgram] = useState<string | null>(null);
   const [questions, setQuestions] = useState<AppQuestion[]>([]);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<Answers>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [autofilled, setAutofilled] = useState(0);
   const [totalFields, setTotalFields] = useState(0);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [questionPage, setQuestionPage] = useState(0);
-
-  const QUESTIONS_PER_PAGE = 6;
+  const [questionIndex, setQuestionIndex] = useState(0);
 
   useEffect(() => {
     const stored =
@@ -85,7 +90,8 @@ export default function ApplicationsPage() {
     setActiveProgram(program);
     setFlowStep("loading");
     setAnswers({});
-    setQuestionPage(0);
+    setErrors({});
+    setQuestionIndex(0);
 
     startApplication(caseId, program).then((result) => {
       setAutofilled(result.autofilled);
@@ -99,9 +105,39 @@ export default function ApplicationsPage() {
     });
   }
 
+  function setAnswer(fieldId: string, value: AnswerValue) {
+    setAnswers((prev) => ({ ...prev, [fieldId]: value }));
+    setErrors((prev) => {
+      if (!prev[fieldId]) return prev;
+      const next = { ...prev };
+      delete next[fieldId];
+      return next;
+    });
+  }
+
+  function goToNextQuestion() {
+    const current = questions[questionIndex];
+    if (!current) return;
+    const errs = validateQuestions([current as Question], answers);
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
+    if (questionIndex >= questions.length - 1) {
+      if (activeProgram) handleGeneratePreview(activeProgram, answers);
+      return;
+    }
+    setQuestionIndex((i) => i + 1);
+  }
+
+  function goToPrevQuestion() {
+    setErrors({});
+    setQuestionIndex((i) => Math.max(0, i - 1));
+  }
+
   function handleGeneratePreview(
     program: string,
-    finalAnswers: Record<string, string>
+    finalAnswers: Answers
   ) {
     if (!caseId) return;
     setFlowStep("completing");
@@ -143,14 +179,6 @@ export default function ApplicationsPage() {
     setPdfUrl(null);
   }
 
-  // --- Q&A pagination ---
-  const pageQuestions = questions.slice(
-    questionPage * QUESTIONS_PER_PAGE,
-    (questionPage + 1) * QUESTIONS_PER_PAGE
-  );
-  const totalPages = Math.ceil(questions.length / QUESTIONS_PER_PAGE);
-  const isLastPage = questionPage >= totalPages - 1;
-
   // -----------------------------------------------------------------------
   // LOADING step
   // -----------------------------------------------------------------------
@@ -172,6 +200,9 @@ export default function ApplicationsPage() {
   // Q&A step
   // -----------------------------------------------------------------------
   if (flowStep === "questions" && activeProgram) {
+    const current = questions[questionIndex];
+    const isLastQuestion = questionIndex >= questions.length - 1;
+    const pct = ((questionIndex + 1) / questions.length) * 100;
     return (
       <div className="mx-auto w-full max-w-2xl space-y-6">
         <Button variant="ghost" size="sm" onClick={handleBackToList}>
@@ -188,53 +219,38 @@ export default function ApplicationsPage() {
           </p>
         </div>
 
+        <div className="space-y-2">
+          <Progress value={pct} />
+          <p className="text-xs text-muted-foreground">
+            Question {questionIndex + 1} of {questions.length}
+          </p>
+        </div>
+
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">
-              Questions {questionPage * QUESTIONS_PER_PAGE + 1}&ndash;
-              {Math.min(
-                (questionPage + 1) * QUESTIONS_PER_PAGE,
-                questions.length
-              )}{" "}
-              of {questions.length}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {pageQuestions.map((q) => (
-              <div key={q.field} className="space-y-1.5">
-                <Label>{q.label}</Label>
-                <Input
-                  value={answers[q.field] ?? ""}
-                  onChange={(e) =>
-                    setAnswers((prev) => ({
-                      ...prev,
-                      [q.field]: e.target.value,
-                    }))
-                  }
-                  placeholder={`Enter ${q.label.toLowerCase()}`}
-                />
-              </div>
-            ))}
+          <CardContent className="pt-6">
+            {current && (
+              <QuestionField
+                question={current as Question}
+                value={answers[current.field_id] ?? null}
+                name=""
+                error={errors[current.field_id]}
+                onChange={(v) => setAnswer(current.field_id, v)}
+              />
+            )}
           </CardContent>
         </Card>
 
         <div className="flex justify-between">
           <Button
             variant="outline"
-            disabled={questionPage === 0}
-            onClick={() => setQuestionPage((p) => p - 1)}
+            disabled={questionIndex === 0}
+            onClick={goToPrevQuestion}
           >
-            Previous
+            Back
           </Button>
-          {isLastPage ? (
-            <Button
-              onClick={() => handleGeneratePreview(activeProgram, answers)}
-            >
-              Generate preview
-            </Button>
-          ) : (
-            <Button onClick={() => setQuestionPage((p) => p + 1)}>Next</Button>
-          )}
+          <Button onClick={goToNextQuestion}>
+            {isLastQuestion ? "Generate preview" : "Next"}
+          </Button>
         </div>
       </div>
     );
