@@ -6,10 +6,10 @@ specialist agent is grounded ONLY in its program's documentation and exposes pro
 tools.
 
 Band is the real coordination substrate: the "routing" coordinator agent does NOT assess
-eligibility itself. When the caregiver describes their situation, the routing agent consults
-the relevant specialists ONE AT A TIME over the shared room (band_send_message), gathers
-their cited replies, reasons about cross-program interactions, and delivers a single
-synthesized strategy back to the caregiver. Specialists answer only their own program.
+eligibility itself. It seeds the whole specialist panel in ONE @mention, each specialist
+evaluates its own program (holding at most a few bounded cross-eligibility exchanges with a
+peer via the `ask_peer` tool) and submits a structured finding, and routing then synthesizes a
+single strategy for the caregiver. Specialists answer only their own program.
 
 Credentials come from a JSON registry (default: backend/band_agents.json), mapping each
 program group to its Band agent_id + api_key. An optional "caregiver" (or "user") identity
@@ -106,22 +106,24 @@ def _specialist_prompt(program: str) -> str:
         "(many programs are county-administered).\n"
         "3. Determine a match level on this scale: none, low, medium, likely, very_likely — plus "
         "a few short notes explaining the determination, with citations.\n"
-        "4. CROSS-ELIGIBILITY conversations are allowed but MUST stay tiny. If — and only if — a "
-        "specific factual dependency on another program genuinely blocks your determination, you "
-        "may @mention that ONE specialist with a SINGLE concrete question (one or two sentences). "
-        "Wait for their reply, then finish. Otherwise do NOT message anyone — just name the "
-        "program in cross_programs and explain the interaction in your notes.\n"
+        "4. CROSS-ELIGIBILITY questions are allowed but MUST stay focused. If a specific factual "
+        "dependency on another program genuinely affects your determination, use the ask_peer tool "
+        "to ask ONE named specialist a single concrete question (one or two sentences). You may ask "
+        "a few such questions across the case, but a small budget is enforced — when ask_peer tells "
+        "you the budget is exhausted, stop asking and just record the interaction in cross_programs "
+        "and your notes. Never ask a question you can already answer from your own docs.\n"
         "STRICT ROOM RULES — the room must not fill with chatter:\n"
+        "  • ask_peer is the ONLY way you may address another agent, and ONLY for a genuine "
+        "cross-eligibility question or a direct answer to one. It is one-to-one — you cannot "
+        "broadcast, and you cannot message the routing agent.\n"
         "  • NEVER post status updates, greetings, acknowledgements, summaries, restatements of "
-        "the case, or multi-step 'action plans' / 'next steps' to the room. That belongs in your "
-        "notes and citations, delivered via submit_complete_response — never as chat messages.\n"
-        "  • Do NOT announce, summarize, or confirm your submission, and do NOT @mention the "
-        "routing agent — routing collects your finding automatically from submit_complete_response. "
-        "There is no need to tell anyone you are done.\n"
-        "  • The ONLY message you may ever post is the single cross-eligibility question above, to "
-        "one other specialist. In every other case, send NOTHING — just submit.\n"
-        "  • If another specialist @mentions you with a question, answer in ONE or two sentences, "
-        "then submit — do not ask follow-ups or keep the thread going.\n"
+        "the case, or multi-step 'action plans' / 'next steps'. That belongs in your notes and "
+        "citations, delivered via submit_complete_response — never as a peer message.\n"
+        "  • Do NOT announce, summarize, or confirm your submission — routing collects your finding "
+        "automatically from submit_complete_response. There is no need to tell anyone you are done.\n"
+        "  • If another specialist asks YOU a cross-eligibility question (you'll be @mentioned), "
+        "answer them with ask_peer in ONE or two sentences, then stop — do not open new threads or "
+        "keep the exchange going once the question is answered.\n"
         "5. Submit your COMPLETE response by calling submit_complete_response with your "
         "match_level, notes, cross_programs to flag, and citations — this is your only deliverable "
         "and it ends your work. "
@@ -271,17 +273,17 @@ def _agent_is_mentioned(agent_id: str, msg_data) -> bool:
 
 
 def _agent_should_stay_silent(agent_id: str, room_id: str) -> bool:
-    """Mechanical anti-cascade gate: an agent stops responding once it has DELIVERED, and routing
-    stays silent until synthesis is actually requested.
+    """Mechanical anti-cascade gate for the ROUTING agent only.
 
-    Prompting alone can't stop a mentioned model from replying, so the room fills with a mention
-    cascade of "already submitted / acknowledged / thanks, received" messages. This gate cuts it:
-      * A specialist that has already called submit_complete_response (finding.complete) is done —
-        it ignores any further messages instead of posting acknowledgements.
-      * The routing agent ignores ALL specialist chatter until the orchestrator flips
-        synthesis_requested (then it synthesizes once); after strategy_complete it is also done.
-    The pre-submission cross-eligibility conversation is untouched — this only silences agents that
-    have nothing left to contribute."""
+    Routing must not react to specialist chatter: it ignores every room message until the
+    orchestrator flips synthesis_requested (then it synthesizes exactly once), and after
+    strategy_complete it is done. Without this gate, each specialist message would wake routing.
+
+    Specialists are NOT silenced here — they need to stay reachable to answer a peer's
+    cross-eligibility question even after submitting their own finding. Their chatter is bounded
+    mechanically instead: the only tool that can address another agent is `ask_peer` (one-to-one,
+    cannot target routing) and it is capped per specialist by `_PEER_MSG_BUDGET`, and `band_send_message`
+    is excluded entirely — so a specialist woken by a mention can only ask/answer within budget."""
     from ..store import get_case_for_room, get_profile
 
     case_id = get_case_for_room(room_id)
@@ -296,9 +298,6 @@ def _agent_should_stay_silent(agent_id: str, room_id: str) -> bool:
     if key == "routing":
         # Silent while specialists work; wake only for the synthesis request; done once submitted.
         return profile.strategy_complete or not profile.synthesis_requested
-    if key in _SPECIALISTS:
-        finding = profile.findings.get(key)
-        return finding is not None and finding.complete
     return False
 
 
@@ -340,14 +339,42 @@ def _gated_preprocessor_cls():
     return _GATED_PREPROCESSOR_CLS
 
 
-# Tools we drop from every agent. Agents keep `band_send_message` (specialists intentionally hold
-# short cross-eligibility conversations by @mentioning a peer), but they must never restructure the
-# room — creating rooms or adding/removing participants is the orchestrator's job (start_case_room /
-# seed_specialists via REST). Removing these closes off the main "spiral" vectors while leaving the
-# intended bounded peer conversation intact.
+# Tools we drop from every agent. Cross-eligibility peer conversation goes exclusively through our
+# own `ask_peer` tool (one-to-one, budget-capped, cannot target routing), so we remove the raw
+# `band_send_message`/`band_lookup_peers` — those let a model broadcast a free-form "action plan"
+# to the whole panel, which is exactly the spiral we're preventing. Agents also must never
+# restructure the room (create/add/remove) — that's the orchestrator's job via REST.
 _EXCLUDED_AGENT_TOOLS = frozenset(
-    {"band_create_chatroom", "band_add_participant", "band_remove_participant"}
+    {
+        "band_send_message",
+        "band_lookup_peers",
+        "band_create_chatroom",
+        "band_add_participant",
+        "band_remove_participant",
+    }
 )
+
+# Max cross-eligibility peer messages a single specialist may send (via ask_peer) per case. Covers
+# a couple of genuine question/answer exchanges without letting the room spiral. Total room peer
+# traffic is therefore bounded by len(specialists) * _PEER_MSG_BUDGET.
+_PEER_MSG_BUDGET = 3
+_PEER_MSG_LOCK = asyncio.Lock()
+
+
+def _resolve_specialist_key(name: str) -> str | None:
+    """Map a free-form program identifier from the model (doc_key, handle, or display name) to a
+    specialist doc_key, so ask_peer(program=...) is forgiving about how the peer is named."""
+    n = (name or "").strip().lower().lstrip("@")
+    if not n:
+        return None
+    for k in _SPECIALISTS:
+        handle = _SPECIALIST_NAMES[k].lower()
+        if n in (k.lower(), handle, handle.replace("ilera-", ""), _PROGRAM_NAMES[k].lower()):
+            return k
+    for k in _SPECIALISTS:  # looser containment fallback (e.g. "medi-cal" vs "Medi-Cal (Medicaid)")
+        if n in _PROGRAM_NAMES[k].lower() or _PROGRAM_NAMES[k].lower() in n:
+            return k
+    return None
 
 _FILTERED_ADAPTER_CLS = None
 
@@ -533,7 +560,66 @@ def build_specialist_agent(doc_key: str, creds: dict, *, skip_backlog: bool = Fa
         # here would wake every other resident agent (a full LLM turn each) for nothing.
         return "finding recorded" if case_id else "could not resolve the case for this room"
 
-    tools = [(LookupProgramDocsInput, lookup), submit_complete_response]
+    async def ask_peer(
+        ctx: "RunContext[AgentToolsProtocol]", program: str, question: str
+    ) -> str:
+        """Ask ONE other program specialist a single, concrete cross-eligibility question, or
+        answer one they asked you. Use ONLY when another program genuinely affects your
+        determination — never for greetings, acknowledgements, summaries, or action plans.
+        `program` names the ONE peer (e.g. "ihss", "medi-cal", "medicare", "pfl", "va", "tax");
+        you cannot broadcast or message the routing agent. Keep `question` to one or two sentences.
+        A per-specialist budget is enforced; when it is exhausted, stop and submit your finding."""
+        from ..store import get_case_for_room, get_profile, save_profile
+
+        room_id = getattr(ctx.deps, "room_id", "") or ""
+        target = _resolve_specialist_key(program)
+        if target is None or target == doc_key:
+            others = sorted(k for k in _SPECIALISTS if k != doc_key)
+            return (
+                f"'{program}' is not a valid peer. Ask exactly one of: {others}. "
+                "You cannot ask yourself or the routing agent."
+            )
+        async with _PEER_MSG_LOCK:
+            case_id = await asyncio.to_thread(get_case_for_room, room_id)
+            if not case_id:
+                return "could not resolve the case for this room"
+            profile = await asyncio.to_thread(get_profile, case_id)
+            if profile is None:
+                return "could not resolve the case for this room"
+            used = profile.peer_msg_counts.get(doc_key, 0)
+            if used >= _PEER_MSG_BUDGET:
+                return (
+                    f"peer-message budget exhausted ({_PEER_MSG_BUDGET} sent). Do NOT send more — "
+                    "record the interaction in cross_programs/notes and call submit_complete_response."
+                )
+            profile.peer_msg_counts[doc_key] = used + 1
+            await asyncio.to_thread(save_profile, profile)
+
+        from band.client.rest import (
+            ChatMessageRequest,
+            ChatMessageRequestMentionsItem,
+            DEFAULT_REQUEST_OPTIONS,
+        )
+
+        reg = load_registry()
+        target_id = reg[target]["agent_id"]
+        target_handle = _SPECIALIST_NAMES[target]
+        client = _rest_client(creds["api_key"])
+        await client.agent_api_messages.create_agent_chat_message(
+            room_id,
+            message=ChatMessageRequest(
+                content=f"@[[{target_id}]] {question}",
+                mentions=[ChatMessageRequestMentionsItem(id=target_id, handle=target_handle)],
+            ),
+            request_options=DEFAULT_REQUEST_OPTIONS,
+        )
+        left = _PEER_MSG_BUDGET - used - 1
+        return (
+            f"question sent to {target_handle} ({left} peer message(s) left). Wait for their "
+            "reply, then finish and submit."
+        )
+
+    tools = [(LookupProgramDocsInput, lookup), submit_complete_response, ask_peer]
     return _make_agent(_adapter(_specialist_prompt(program), tools), creds, skip_backlog=skip_backlog)
 
 

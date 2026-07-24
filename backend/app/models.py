@@ -90,6 +90,9 @@ class CaseProfile(BaseModel):
     # Set True right before the routing agent is asked to synthesize. The mention-gate keeps
     # routing silent (ignores specialist chatter) until this flips, so routing only acts once.
     synthesis_requested: bool = False
+    # Per-specialist count of cross-eligibility peer messages sent via ask_peer this run. Bounds
+    # the peer conversation: once a specialist hits the budget, ask_peer refuses further sends.
+    peer_msg_counts: dict[str, int] = Field(default_factory=dict)
 
 
 class FollowupQuestion(BaseModel):

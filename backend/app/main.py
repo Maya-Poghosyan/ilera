@@ -302,6 +302,7 @@ async def _run_case_eligibility(case_id: str) -> None:
     profile.strategy = ""
     profile.strategy_complete = False
     profile.synthesis_requested = False
+    profile.peer_msg_counts = {}
     save_profile(profile)
 
     try:
