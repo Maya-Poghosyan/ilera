@@ -22,7 +22,27 @@ import {
 } from "@/lib/intake-schema";
 
 const MAX_PER_PAGE = 2;
+// Answers only reach the server on the final submit, so keep a local copy in the
+// meantime — a refresh mid-intake shouldn't cost the user everything they typed.
+const DRAFT_KEY = "ilera_intake_draft";
 const HEAVY_OPTION_THRESHOLD = 5;
+
+interface Draft {
+  answers: Answers;
+  stepIndex: number;
+}
+
+function readDraft(): Draft | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const draft = JSON.parse(raw) as Draft;
+    if (!draft.answers || Object.keys(draft.answers).length === 0) return null;
+    return { answers: draft.answers, stepIndex: draft.stepIndex ?? 0 };
+  } catch {
+    return null;
+  }
+}
 
 interface Page {
   key: string;
@@ -196,9 +216,24 @@ function IntakeContent() {
 
   useEffect(() => {
     getIntakeSchema()
-      .then(setSchema)
+      .then((loaded) => {
+        // Resume an interrupted intake. Restored alongside the schema so the first
+        // render with questions already has the draft in hand.
+        const draft = readDraft();
+        if (draft) {
+          setAnswers(draft.answers);
+          setStepIndex(draft.stepIndex);
+          setStarted(true);
+        }
+        setSchema(loaded);
+      })
       .catch(() => setLoadError("Could not load the intake form. Is the backend running on :8000?"));
   }, []);
+
+  useEffect(() => {
+    if (!started) return;
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIndex }));
+  }, [started, answers, stepIndex]);
 
   // The active flow = all base screens + any triggered mini-modules (A–F), each
   // split into pages of ≤5 visible questions. Recomputed from answers so
@@ -353,6 +388,7 @@ function IntakeContent() {
     setSubmitting(true);
     try {
       const created = await submitIntakeAnswers(answers);
+      localStorage.removeItem(DRAFT_KEY);
       localStorage.setItem("ilera_case_id", created.id);
       await updateUser({ case_id: created.id });
       router.push(`/eligibility/${created.id}`);
