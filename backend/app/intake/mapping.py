@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..geo import zip_to_county
+from ..geo import normalize_county, zip_to_county
 from ..models import CaseProfile
 
 # Representative midpoints for the income range buckets (monthly USD).
@@ -79,6 +79,8 @@ def _derive_skipped_answers(answers: dict[str, Any]) -> None:
             a["recipient.address.state"] = a["caregiver.address.state"]
         if "recipient.address.zip" not in a and "caregiver.address.zip" in a:
             a["recipient.address.zip"] = a["caregiver.address.zip"]
+        if "recipient.address.county" not in a and "caregiver.address.county" in a:
+            a["recipient.address.county"] = a["caregiver.address.county"]
 
     # Module B — caregiver.age_18_or_older from caregiver.age
     if "caregiver.age_18_or_older" not in a:
@@ -182,10 +184,11 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
     if state:
         cr.state = str(state)
 
-    # Many programs are county-administered, so resolve county from the ZIP.
-    county = zip_to_county(cr.zip_code, cr.state)
+    # Many programs are county-administered. Prefer what the user told us; a ZIP can
+    # straddle a county line, so the lookup is only a fallback.
+    county = a.get("recipient.address.county") or zip_to_county(cr.zip_code, cr.state)
     if county:
-        cr.county = county
+        cr.county = normalize_county(county)
 
     conditions = _as_list(a.get("recipient.condition_categories"))
     if conditions:
