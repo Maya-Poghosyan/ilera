@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -59,31 +60,36 @@ export default function GetStartedPage() {
               <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <MessageCircle className="size-5" />
               </div>
-              <CardTitle className="text-xl">Connect Poke</CardTitle>
+              <CardTitle className="text-xl">Connect Assistant</CardTitle>
+              <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                Made with
+                <Image src="/poke.svg" alt="" width={10} height={10} className="h-auto w-2.5" />
+                Poke
+              </p>
               <p className="text-sm text-muted-foreground">
-                Poke delivers care reminders, appointment nudges, and benefit renewal
-                alerts straight to your messages.
+                Intelligent reminders and scheduling.
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-lg border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
-                <p className="text-sm font-medium">What you get with Poke:</p>
+                <p className="text-sm font-medium">What you get:</p>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
                     <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
-                    Daily care-log check-ins via text
+                    Log daily care via text check-ins
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
-                    Appointment and renewal deadline reminders
+                    Detect medical, benefit-related, and other appointments across text,
+                    email, calendar, and more
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
-                    Works with iMessage, WhatsApp, Telegram, or RCS
+                    Send reminders for paperwork and renewal deadlines
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
-                    Email scanning for medical events (optional)
+                    Sync everything you need into one Care Calendar
                   </li>
                 </ul>
               </div>
@@ -95,7 +101,7 @@ export default function GetStartedPage() {
                 className="block"
               >
                 <Button className="w-full gap-1.5">
-                  Set up Poke
+                  Set up Assistant
                   <ExternalLink className="size-3.5" />
                 </Button>
               </a>
