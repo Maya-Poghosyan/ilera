@@ -11,25 +11,40 @@
   },
   "fields": {
     "form1[0].#subform[0].FirstName-1[0]": {
-      "profile_path": "care_recipient.name",
-      "label": "Beneficiary Last Name"
+      "profile_path": null,
+      "label": "Apellido",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].LastName-1[0]": {
-      "profile_path": "care_recipient.name",
-      "label": "Beneficiary First Name"
+      "profile_path": null,
+      "label": "Nombre",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].MiddleInitial-1[0]": {
       "profile_path": null,
-      "label": "Beneficiary Middle Initial",
+      "label": "Inicial del segundo nombre",
       "needs_user_input": true
     },
     "form1[0].#subform[0].Address-1[0]": {
-      "profile_path": "care_recipient.street_address",
-      "label": "Beneficiary Address"
+      "profile_path": null,
+      "label": "Dirección (número, calle, caja postal, # de apto.)",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].RadioButtonList[0]": {
+      "profile_path": null,
+      "label": "Sexo",
+      "type": "radio",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].City-1[0]": {
-      "profile_path": "care_recipient.city",
-      "label": "Beneficiary City"
+      "profile_path": null,
+      "label": "Ciudad",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].State-1[0]": {
       "profile_path": "care_recipient.state",
@@ -40,23 +55,18 @@
       "label": "Beneficiary Zip Code"
     },
     "form1[0].#subform[0].SSN-1[0]": {
-      "profile_path": "care_recipient.phone",
-      "label": "Beneficiary Phone Number"
+      "profile_path": null,
+      "label": "Número de Seguro Social",
+      "needs_user_input": true
     },
     "form1[0].#subform[0].PhoneNumb-1[0]": {
       "profile_path": null,
-      "label": "Beneficiary SSN",
+      "label": "Teléfono (incluya código área)",
       "needs_user_input": true
-    },
-    "form1[0].#subform[0].RadioButtonList[0]": {
-      "profile_path": "care_recipient.gender",
-      "label": "Beneficiary Gender",
-      "type": "radio",
-      "value_map": {"male": "Hombre", "female": "Mujer"}
     },
     "form1[0].#subform[0].NewAddressBox-1[0]": {
       "profile_path": null,
-      "label": "New Address Checkbox",
+      "label": "Marque si es nueva dirección",
       "type": "checkbox",
       "needs_user_input": true
     },
@@ -74,155 +84,271 @@
     },
     "form1[0].#subform[0].#area[0].Date-PartD[0]": {
       "profile_path": null,
-      "label": "Medicare Part A Effective Date",
-      "needs_user_input": true
+      "label": "Fecha vigente - Parte A (MMDDYYYY)",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[0].PartD_CarrierName[0]": {
       "profile_path": null,
-      "label": "Medicare Part A Carrier Name",
-      "needs_user_input": true
+      "label": "Parte A - nombre del portador",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[1].RadioButtonList[2]": {
       "profile_path": null,
-      "label": "Has Medicare Part B",
+      "label": "¿Tiene Parte B de Medicare?",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[1].Date-PartD[1]": {
       "profile_path": null,
-      "label": "Medicare Part B Effective Date",
-      "needs_user_input": true
+      "label": "Fecha vigente - Parte B (MMDDYYYY)",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[1].PartD_CarrierName[1]": {
       "profile_path": null,
-      "label": "Medicare Part B Carrier Name",
-      "needs_user_input": true
+      "label": "Parte B - nombre del portador",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[2].RadioButtonList[3]": {
       "profile_path": null,
-      "label": "Has Medicare Part D",
+      "label": "¿Tiene Parte D de Medicare?",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[2].Date-PartD[2]": {
       "profile_path": null,
-      "label": "Medicare Part D Effective Date",
-      "needs_user_input": true
+      "label": "Fecha vigente - Parte D (MMDDYYYY)",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[2].PartD_CarrierName[2]": {
       "profile_path": null,
-      "label": "Medicare Part D Carrier Name",
-      "needs_user_input": true
+      "label": "Parte D - nombre del portador",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].RadioButtonList[4]": {
       "profile_path": null,
-      "label": "Has Medicaid",
+      "label": "¿Su Medicare le da beneficios de farmacia?",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[3].MedicareAdvantage[0]": {
       "profile_path": null,
-      "label": "Has Medicare Advantage",
+      "label": "¿Ha escogido un Plan Medicare Advantage para su cobertura de Medicare?",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].PartA[0]": {
       "profile_path": null,
-      "label": "Has Part A",
+      "label": "¿Tiene otro seguro de salud aparte de Medicare?",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].NameofInsurance-1[0]": {
       "profile_path": null,
-      "label": "Insurance #1 Name",
-      "needs_user_input": true
+      "label": "Nombre del seguro #1",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].Date-TermnNameInsurance-1[0]": {
       "profile_path": null,
-      "label": "Insurance #1 Termination Date",
-      "needs_user_input": true
+      "label": "Fecha de caducación - seguro #1 (MMDDYYYY). Escriba solo si la póliza no está activa",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].Date-TermnNameInsurance-1[1]": {
       "profile_path": null,
-      "label": "Insurance #1 Effective Date",
-      "needs_user_input": true
+      "label": "Fecha vigente - seguro #1 (MMDDYYYY)",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].Insurancethruemployer[0]": {
-      "profile_path": "caregiver.employment_status",
-      "label": "Insurance through employer #1",
+      "profile_path": null,
+      "label": "¿Este seguro es por su empleo? (seguro #1)",
       "type": "radio",
-      "value_map": {
-        "employed": "Si",
-        "full-time": "Si",
-        "part-time": "Si",
-        "": "No",
-        "unemployed": "No",
-        "retired": "No"
-      }
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].InsuranceCoverPrescript[0]": {
       "profile_path": null,
-      "label": "Insurance #1 Covers Prescriptions",
+      "label": "¿Este seguro cubre recetas? (seguro #1)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].InsuranceprescriptExplain[0]": {
       "profile_path": null,
-      "label": "Insurance #1 Prescription Explanation",
+      "label": "¿Este seguro le provee una explicación de beneficios para recetas? (seguro #1)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[5].CheckBox-RxDiscount-1[0]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #1: Descuento de Recetas",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[5].CheckBox1-MedicaidSA-1[0]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #1: PPO",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[5].CheckBox-PPO-1[0]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #1: Medicaid/Asistencia del Estado",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[5].CheckBox-HMO-1[0]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #1: HMO",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[5].CheckBox-Other-1[0]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #1: Otro (especialidad, cobertura limitada, o exclusivamente CHAMPVA suplemental)",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[5].CheckBox-Medigap-1[0]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #1: Medigap (si es Medigap, especifique)",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[5].DropDownList-Medigap-1[0]": {
+      "profile_path": null,
+      "label": "Si Medigap, especifique (A-J) - seguro #1",
+      "type": "choice",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].Comments-Ins-1[0]": {
       "profile_path": null,
-      "label": "Insurance #1 Comments",
-      "needs_user_input": true
+      "label": "Comentarios - seguro #1",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].NameofInsurance-1[1]": {
       "profile_path": null,
-      "label": "Insurance #2 Name",
-      "needs_user_input": true
+      "label": "Nombre del seguro #2",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].Date-TermnNameInsurance-2[0]": {
       "profile_path": null,
-      "label": "Insurance #2 Termination Date",
-      "needs_user_input": true
+      "label": "Fecha de caducación - seguro #2 (MMDDYYYY). Escriba solo si la póliza está caducada",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].Date-TermnNameInsurance-2\\.1[0]": {
       "profile_path": null,
-      "label": "Insurance #2 Effective Date",
-      "needs_user_input": true
+      "label": "Fecha vigente - seguro #2 (MMDDYYYY)",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].Insurancethruemployer-2[0]": {
       "profile_path": null,
-      "label": "Insurance through employer #2",
+      "label": "¿Este seguro es por su empleo? (seguro #2)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].InsuranceprescriptExplain-2[0]": {
       "profile_path": null,
-      "label": "Insurance #2 Covers Prescriptions",
+      "label": "¿Este seguro cubre recetas? (seguro #2)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].InsuranceprescriptExplain[1]": {
       "profile_path": null,
-      "label": "Insurance #2 Prescription Explanation",
+      "label": "¿Este seguro le provee una explicación de beneficios para recetas? (seguro #2)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[6].CheckBox-RxDiscount-1[1]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #2: Descuento de Prescripciones",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[6].CheckBox1-MedicaidSA-1[1]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #2: PPO",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[6].CheckBox-PPO-1[1]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #2: Medicaid/Asistencia del Estado",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[6].CheckBox-HMO-1[1]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #2: HMO",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[6].CheckBox-Other-1[1]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #2: Otro (especialidad, cobertura limitada, o exclusivamente CHAMPVA suplemental)",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[6].DropDownList-Medigap-1[1]": {
+      "profile_path": null,
+      "label": "Si Medigap, especifique (A-J) - seguro #2",
+      "type": "choice",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "form1[0].#subform[0].#area[6].CheckBox-Medigap-2[0]": {
+      "profile_path": null,
+      "label": "Tipo de seguro #2: Medigap (si es Medigap, especifique)",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].Comments-Ins-1[1]": {
       "profile_path": null,
-      "label": "Insurance #2 Comments",
-      "needs_user_input": true
+      "label": "Comentarios - seguro #2",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].Signature[0]": {
       "profile_path": null,
-      "label": "Signature",
+      "label": "Firma (si devuelve electrónicamente, mecanografía aquí)",
       "needs_user_input": true
     },
     "form1[0].#subform[0].#area[6].DateTimeField1[0]": {
       "profile_path": null,
-      "label": "Date",
+      "label": "Fecha (firma)",
       "needs_user_input": true
     }
   }

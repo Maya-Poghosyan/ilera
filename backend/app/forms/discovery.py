@@ -48,7 +48,8 @@ def _clean(text) -> str:
     return " ".join(str(text or "").split())
 
 
-def _is_junk(entry: dict) -> bool:
+def is_junk(entry: dict) -> bool:
+    """True for a fillable field that is not a data input (signature or a11y artifact)."""
     if entry.get("type") == "signature":
         return True
     tooltip = (entry.get("tooltip") or "").lower()
@@ -65,7 +66,7 @@ def discover_fields(form_id: str) -> list[FieldInfo]:
         return []
     fields: list[FieldInfo] = []
     for entry in extract_fields(pdf_path):
-        if _is_junk(entry):
+        if is_junk(entry):
             continue
         fields.append(
             FieldInfo(

@@ -8,5 +8,176 @@
     "total_fields": 30,
     "notes": "Scaffold - field mappings not yet authored"
   },
-  "fields": {}
+  "fields": {
+    "SOC 426 Pg 3 2": {
+      "profile_path": null,
+      "label": "Date of birth of the provider/enrollee",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 1": {
+      "profile_path": "caregiver.name",
+      "label": "Full name (first, middle initial, last) of the provider/enrollee"
+    },
+    "SOC 426 Pg 3 3": {
+      "profile_path": null,
+      "label": "Gender — check this box if you are male",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 4": {
+      "profile_path": null,
+      "label": "Gender — check this box if you are female",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 6": {
+      "profile_path": null,
+      "label": "City of your home address",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC426 Pg 3 5": {
+      "profile_path": null,
+      "label": "Home address (physical street address; not a P.O. Box)",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 7": {
+      "profile_path": null,
+      "label": "State of your home address",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 8": {
+      "profile_path": null,
+      "label": "ZIP code of your home address",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 9": {
+      "profile_path": null,
+      "label": "Mailing address (if different from home address)",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 10": {
+      "profile_path": null,
+      "label": "City of your mailing address",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 11": {
+      "profile_path": null,
+      "label": "State of your mailing address",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 12": {
+      "profile_path": null,
+      "label": "ZIP code of your mailing address",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 13": {
+      "profile_path": "caregiver.phone",
+      "label": "Telephone number (with area code) for the provider"
+    },
+    "SOC 426 Pg 3 14": {
+      "profile_path": null,
+      "label": "Social Security Number of the provider",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 15": {
+      "profile_path": "caregiver.email",
+      "label": "E-mail address of the provider"
+    },
+    "SOC 426 Pg 3 16": {
+      "profile_path": null,
+      "label": "Driver's license number or government-issued ID number",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 17": {
+      "profile_path": null,
+      "label": "Expiration date of the driver's license or ID",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 18": {
+      "profile_path": null,
+      "label": "Issuing state of the driver's license or ID",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 426 Pg 3 19": {
+      "profile_path": null,
+      "label": "Primary spoken language of the provider",
+      "needs_user_input": true,
+      "confidence": "low"
+    },
+    "SOC 426 Pg 3 20": {
+      "profile_path": null,
+      "label": "Primary written language of the provider",
+      "needs_user_input": true,
+      "confidence": "low"
+    },
+    "SOC 426 Pg 4 2": {
+      "profile_path": null,
+      "label": "Within the past 10 years, have you been convicted of or incarcerated following a conviction for a Tier 1 crime? (Yes)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 426 Pg 4 3": {
+      "profile_path": null,
+      "label": "Within the past 10 years, have you been convicted of or incarcerated following a conviction for a Tier 1 crime? (No)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 426 Pg 4 5": {
+      "profile_path": null,
+      "label": "Within the past 10 years, have you been convicted of or incarcerated following a conviction for a Tier 2 crime? (No)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 426 Pg 4 6": {
+      "profile_path": null,
+      "label": "If you answered yes to Tier 2 above, have you obtained a certificate of rehabilitation or expungement (dismissal pursuant to PC section 1203.4) of the Tier 2 crime? (Yes)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 426 Pg 4 4": {
+      "profile_path": null,
+      "label": "Within the past 10 years, have you been convicted of or incarcerated following a conviction for a Tier 2 crime? (Yes)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 426 Pg 4 7": {
+      "profile_path": null,
+      "label": "If you answered yes to Tier 2 above, have you obtained a certificate of rehabilitation or expungement (dismissal pursuant to PC section 1203.4) of the Tier 2 crime? (No)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 426 Pg 4 1": {
+      "profile_path": "caregiver.name",
+      "label": "Provider’s name"
+    },
+    "SOC 426 Pg 5 1": {
+      "profile_path": null,
+      "label": "Date signed (provider signature date)",
+      "needs_user_input": true
+    },
+    "soc 426 Pg 5 2": {
+      "profile_path": "caregiver.name",
+      "label": "Printed name (provider)"
+    },
+    "SOC 426 Pg 5 3": {
+      "profile_path": null,
+      "label": "Date county representative signed (optional)",
+      "needs_user_input": true
+    }
+  }
 }

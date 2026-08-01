@@ -8,5 +8,135 @@
     "total_fields": 23,
     "notes": "Scaffold - field mappings not yet authored"
   },
-  "fields": {}
+  "fields": {
+    "pg1-1": {
+      "profile_path": "care_recipient.name",
+      "label": "Recipient’s Name"
+    },
+    "pg1-2": {
+      "profile_path": null,
+      "label": "County IHSS Case #",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "pg1-3": {
+      "profile_path": "caregiver.name",
+      "label": "Provider’s Name"
+    },
+    "pg1-4": {
+      "profile_path": null,
+      "label": "Provider’s Address (street address)",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "pg1-5": {
+      "profile_path": null,
+      "label": "Provider’s City, State, ZIP Code",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "pg1-6": {
+      "profile_path": "caregiver.phone",
+      "label": "Provider’s Telephone Number"
+    },
+    "pg1-7": {
+      "profile_path": null,
+      "label": "Provider’s Date of Birth",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "pg1-8": {
+      "profile_path": null,
+      "label": "Provider’s Social Security Number",
+      "needs_user_input": true
+    },
+    "pg3-1": {
+      "profile_path": null,
+      "label": "Date recipient signed",
+      "needs_user_input": true
+    },
+    "pg3-3": {
+      "profile_path": null,
+      "label": "Date authorized representative signed",
+      "needs_user_input": true
+    },
+    "pg3-2": {
+      "profile_path": "care_recipient.name",
+      "label": "Recipient's printed name"
+    },
+    "pg3-4": {
+      "profile_path": null,
+      "label": "Authorized representative's printed name",
+      "needs_user_input": true
+    },
+    "pg3-5": {
+      "profile_path": null,
+      "label": "County worker name",
+      "needs_user_input": true
+    },
+    "pg3-6": {
+      "profile_path": null,
+      "label": "Date worker signed",
+      "needs_user_input": true
+    },
+    "pg1-9": {
+      "profile_path": null,
+      "label": "Provider’s Gender",
+      "type": "radio",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "pg1-11": {
+      "profile_path": null,
+      "label": "Other (please specify)",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "pg1-12": {
+      "profile_path": null,
+      "label": "Provider’s Start Date",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "pg1_10": {
+      "profile_path": "caregiver.relationship",
+      "label": "Provider’s Relationship to Recipient: Parent",
+      "type": "checkbox",
+      "check_when": "Parent"
+    },
+    "Pg 1_11": {
+      "profile_path": null,
+      "label": "Provider’s Relationship to Recipient: Child",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "Pg1_12": {
+      "profile_path": "caregiver.relationship",
+      "label": "Provider’s Relationship to Recipient: Spouse/Domestic Partner",
+      "type": "checkbox",
+      "check_when": "Spouse or domestic partner"
+    },
+    "Pg1_13": {
+      "profile_path": null,
+      "label": "Provider’s Relationship to Recipient: Conservator",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "Pg1_14": {
+      "profile_path": null,
+      "label": "Provider’s Relationship to Recipient: Guardian",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "Pg1_16": {
+      "profile_path": "caregiver.relationship",
+      "label": "Provider’s Relationship to Recipient: Other",
+      "type": "checkbox",
+      "check_when": "Other",
+      "confidence": "medium"
+    }
+  }
 }

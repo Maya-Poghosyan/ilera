@@ -8,5 +8,105 @@
     "total_fields": 20,
     "notes": "Scaffold - field mappings not yet authored"
   },
-  "fields": {}
+  "fields": {
+    "SOC 829 7": {
+      "profile_path": null,
+      "label": "Select action (check one): NEW, CHANGE, or CANCEL",
+      "needs_user_input": true
+    },
+    "SOC 829 8": {
+      "profile_path": null,
+      "label": "Check if this is a NEW enrollment (authorize direct deposit)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 829 9": {
+      "profile_path": null,
+      "label": "Check if this is a CHANGE of direct deposit (authorize change to new account)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 829 10": {
+      "profile_path": null,
+      "label": "Check if this is a CANCEL of direct deposit authorization",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 829 2": {
+      "profile_path": "caregiver.name",
+      "label": "Provider name (first, middle, last)"
+    },
+    "SOC 829 3": {
+      "profile_path": null,
+      "label": "Provider street address",
+      "needs_user_input": true
+    },
+    "SOC 829 4": {
+      "profile_path": null,
+      "label": "Provider city",
+      "needs_user_input": true
+    },
+    "SOC 829 5": {
+      "profile_path": null,
+      "label": "Provider state",
+      "needs_user_input": true
+    },
+    "SOC 829 6": {
+      "profile_path": null,
+      "label": "Provider ZIP code",
+      "needs_user_input": true
+    },
+    "SOC 829 11": {
+      "profile_path": null,
+      "label": "Case number",
+      "needs_user_input": true
+    },
+    "SOC 829 12": {
+      "profile_path": null,
+      "label": "Provider number",
+      "needs_user_input": true
+    },
+    "SOC 829 13": {
+      "profile_path": null,
+      "label": "Type of account: Checking (check if checking)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 829 14": {
+      "profile_path": null,
+      "label": "Type of account: Savings (check if savings)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 829 15": {
+      "profile_path": null,
+      "label": "Bank routing number (must be 9 numbers)",
+      "needs_user_input": true
+    },
+    "SOC 829 16": {
+      "profile_path": null,
+      "label": "Bank account number",
+      "needs_user_input": true
+    },
+    "SOC 829 17": {
+      "profile_path": null,
+      "label": "Bank name",
+      "needs_user_input": true
+    },
+    "SOC 829 18": {
+      "profile_path": null,
+      "label": "Signature of payee (provider)",
+      "needs_user_input": true
+    },
+    "SOC 829 19": {
+      "profile_path": null,
+      "label": "Date of signature",
+      "needs_user_input": true
+    },
+    "SOC 829 21": {
+      "profile_path": null,
+      "label": "End of form.",
+      "needs_user_input": true
+    }
+  }
 }

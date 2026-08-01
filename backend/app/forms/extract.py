@@ -8,6 +8,7 @@ Lists every fillable field name, type (text/checkbox/radio/choice), and tooltip.
 
 import json
 import sys
+from typing import Any
 
 from pypdf import PdfReader
 
@@ -56,6 +57,54 @@ def extract_fields(pdf_path: str) -> list[dict]:
         result.append(entry)
 
     return result
+
+
+def _qualified_name(annot: Any) -> str | None:
+    """Fully qualified field name of a widget, matching ``PdfReader.get_fields`` keys.
+
+    A widget annotation often carries only the leaf ``/T``; the rest of the name comes
+    from its ``/Parent`` chain. Widgets merged into their field node have no ``/T`` of
+    their own and inherit the parent's name outright.
+    """
+    parts: list[str] = []
+    node = annot
+    seen: set[int] = set()
+    while node is not None and id(node) not in seen:
+        seen.add(id(node))
+        title = node.get("/T")
+        if title is not None:
+            parts.append(str(title))
+        parent = node.get("/Parent")
+        node = parent.get_object() if parent is not None else None
+    if not parts:
+        return None
+    return ".".join(reversed(parts))
+
+
+def extract_pages(pdf_path: str) -> list[dict]:
+    """Per page: the printed text and the fields whose widgets sit on it.
+
+    ``extract_fields`` only sees the AcroForm layer, which has no page text and often
+    no usable label. Pairing the two lets a reader line an opaque field name up with
+    the question actually printed next to it.
+    """
+    reader = PdfReader(pdf_path)
+    pages: list[dict] = []
+    for number, page in enumerate(reader.pages, start=1):
+        names: list[str] = []
+        for ref in page.get("/Annots") or []:
+            annot = ref.get_object()
+            if annot.get("/Subtype") != "/Widget":
+                continue
+            name = _qualified_name(annot)
+            if name and name not in names:
+                names.append(name)
+        pages.append({
+            "page": number,
+            "text": page.extract_text() or "",
+            "fields": names,
+        })
+    return pages
 
 
 def main() -> None:
