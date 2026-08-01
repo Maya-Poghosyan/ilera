@@ -48,6 +48,15 @@ def _int(value: Any) -> int | None:
         return None
 
 
+def _normalize_county(value: Any) -> str:
+    """Bare county name, so typed answers and ZIP lookups agree on one spelling."""
+    text = " ".join(str(value or "").split())
+    for suffix in (" County", " Parish", " Borough"):
+        if text.endswith(suffix):
+            return text[: -len(suffix)]
+    return text
+
+
 def _derive_insurance(coverage: list[str], medicaid_status: str | None) -> str:
     cov = set(coverage)
     if "Medicaid" in cov or "Both Medicare and Medicaid" in cov or medicaid_status == "Enrolled now":
@@ -79,6 +88,8 @@ def _derive_skipped_answers(answers: dict[str, Any]) -> None:
             a["recipient.address.state"] = a["caregiver.address.state"]
         if "recipient.address.zip" not in a and "caregiver.address.zip" in a:
             a["recipient.address.zip"] = a["caregiver.address.zip"]
+        if "recipient.address.county" not in a and "caregiver.address.county" in a:
+            a["recipient.address.county"] = a["caregiver.address.county"]
 
     # Module B — caregiver.age_18_or_older from caregiver.age
     if "caregiver.age_18_or_older" not in a:
@@ -182,10 +193,11 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
     if state:
         cr.state = str(state)
 
-    # Many programs are county-administered, so resolve county from the ZIP.
-    county = zip_to_county(cr.zip_code, cr.state)
+    # Many programs are county-administered. Prefer what the user told us; a ZIP can
+    # straddle a county line, so the lookup is only a fallback.
+    county = a.get("recipient.address.county") or zip_to_county(cr.zip_code, cr.state)
     if county:
-        cr.county = county
+        cr.county = _normalize_county(county)
 
     conditions = _as_list(a.get("recipient.condition_categories"))
     if conditions:

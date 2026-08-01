@@ -82,6 +82,12 @@ function paginate(questions: Question[]): Question[][] {
   return out;
 }
 
+const INLINE_COLS: Record<number, string> = {
+  1: "grid-cols-1",
+  2: "grid-cols-2",
+  3: "grid-cols-3",
+};
+
 function renderQuestions(
   questions: Question[],
   name: string,
@@ -102,7 +108,10 @@ function renderQuestions(
         j++;
       }
       elements.push(
-        <div key={`inline-${cur.field_id}`} className="grid grid-cols-2 gap-4">
+        <div
+          key={`inline-${cur.field_id}`}
+          className={`grid gap-4 ${INLINE_COLS[inlineGroup.length] ?? "grid-cols-2"}`}
+        >
           {inlineGroup.map((iq) => (
             <QuestionField
               key={iq.field_id}
