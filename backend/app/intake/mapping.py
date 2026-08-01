@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..geo import zip_to_county
+from ..geo import normalize_county, zip_to_county
 from ..models import CaseProfile
 
 # Representative midpoints for the income range buckets (monthly USD).
@@ -46,15 +46,6 @@ def _int(value: Any) -> int | None:
         return int(value)
     except (TypeError, ValueError):
         return None
-
-
-def _normalize_county(value: Any) -> str:
-    """Bare county name, so typed answers and ZIP lookups agree on one spelling."""
-    text = " ".join(str(value or "").split())
-    for suffix in (" County", " Parish", " Borough"):
-        if text.endswith(suffix):
-            return text[: -len(suffix)]
-    return text
 
 
 def _derive_insurance(coverage: list[str], medicaid_status: str | None) -> str:
@@ -197,7 +188,7 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
     # straddle a county line, so the lookup is only a fallback.
     county = a.get("recipient.address.county") or zip_to_county(cr.zip_code, cr.state)
     if county:
-        cr.county = _normalize_county(county)
+        cr.county = normalize_county(county)
 
     conditions = _as_list(a.get("recipient.condition_categories"))
     if conditions:

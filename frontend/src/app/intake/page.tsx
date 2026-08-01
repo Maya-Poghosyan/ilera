@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { RequireAuth } from "@/components/require-auth";
 import { useAuth } from "@/lib/auth-context";
-import { getIntakeSchema, submitIntakeAnswers } from "@/lib/api";
+import { getIntakeSchema, lookupCounty, submitIntakeAnswers } from "@/lib/api";
 import {
   type Answers,
   type AnswerValue,
@@ -167,6 +167,9 @@ function IntakeContent() {
   // ref flips immediately, so the second call is dropped and only one intake POST
   // (and thus one Band room) is ever created.
   const submittingRef = useRef(false);
+  // County values we filled in from a ZIP lookup, so a prefill can be replaced by a
+  // later ZIP but anything the user typed themselves is left alone.
+  const [prefilledCounties, setPrefilledCounties] = useState<Record<string, string>>({});
 
   const slide = useCallback((dir: "left" | "right", cb: () => void) => {
     const el = cardRef.current;
@@ -270,10 +273,29 @@ function IntakeContent() {
   const page = pages[safeIndex];
   const visibleQuestions = page.questions;
 
+  function prefillCounty(zipFieldId: string, zip: AnswerValue) {
+    const prefix = zipFieldId.slice(0, -"zip".length);
+    const countyField = `${prefix}county`;
+    const current = answers[countyField];
+    if (current && current !== prefilledCounties[countyField]) return;
+    if (typeof zip !== "string" || !/^\d{5}$/.test(zip)) return;
+    const state = answers[`${prefix}state`];
+    lookupCounty(zip, typeof state === "string" ? state : "")
+      .then(({ county }) => {
+        if (!county) return;
+        setAnswers((prev) => ({ ...prev, [countyField]: county }));
+        setPrefilledCounties((prev) => ({ ...prev, [countyField]: county }));
+      })
+      .catch(() => { /* leave the field for the user to fill in */ });
+  }
+
   const pct = ((safeIndex + 1) / pages.length) * 100;
   const isLast = safeIndex === pages.length - 1;
 
   function setAnswer(fieldId: string, value: AnswerValue) {
+    if (fieldId.endsWith(".address.zip")) {
+      prefillCounty(fieldId, value);
+    }
     setAnswers((prev) => {
       const next = { ...prev, [fieldId]: value };
       // Derive recipient.age from date_of_birth so mini-module triggers work

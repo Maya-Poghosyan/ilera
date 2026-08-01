@@ -18,6 +18,15 @@ except Exception:  # pragma: no cover - dependency optional at runtime
     _zipcodes = None
 
 
+def normalize_county(value: object) -> str:
+    """Bare county name, so typed answers and ZIP lookups agree on one spelling."""
+    text = " ".join(str(value or "").split())
+    for suffix in (" County", " Parish", " Borough"):
+        if text.endswith(suffix):
+            return text[: -len(suffix)]
+    return text
+
+
 @lru_cache(maxsize=4096)
 def zip_to_county(zip_code: str, state: str = "") -> Optional[str]:
     """Return the county name for a 5-digit ZIP, or None if unknown.

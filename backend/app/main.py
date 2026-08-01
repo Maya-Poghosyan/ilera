@@ -25,6 +25,7 @@ from .applications import (
 )
 from .config import get_settings
 from .forms.filler import fill_pdf, list_schemas, resolve_fields
+from .geo import normalize_county, zip_to_county
 from .integrations import poke
 from .intake import INTAKE_SCHEMA, map_answers_to_profile
 from .mcp_server import mcp as mcp_server
@@ -212,6 +213,12 @@ def intake_schema() -> dict:
     """The schema-driven intake: Welcome, Screens 1–9 (Q1–Q42), and Conditional
     Mini-Modules A–F, with field_ids, types, options, and show_when conditions."""
     return INTAKE_SCHEMA
+
+
+@app.get("/api/geo/county")
+def lookup_county(zip: str, state: str = "") -> dict:
+    """Best-guess county for a ZIP, so the intake can prefill it for confirmation."""
+    return {"county": normalize_county(zip_to_county(zip, state))}
 
 
 class IntakeRequest(BaseModel):
