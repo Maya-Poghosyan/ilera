@@ -56,7 +56,7 @@
 
 :root {
   /* Ilera design tokens — calm, trustworthy, healthcare-grade.
-     Palette: white backgrounds, light-gray surfaces, mature dark (forest) green accent. */
+     Palette: warm off-white backgrounds, light-gray surfaces, mature dark (forest) green accent. */
 
   /* Brand greens */
   --brand: #1e3d2f;          /* primary forest green */
@@ -65,11 +65,11 @@
   --brand-subtle: #eaf1ed;   /* faint green tint for surfaces/badges */
 
   /* Neutrals */
-  --background: #ffffff;
+  --background: #fffdfa;     /* warm off-white */
   --foreground: #1a211d;     /* near-black, slightly green */
-  --card: #ffffff;
+  --card: #fffdfa;
   --card-foreground: #1a211d;
-  --popover: #ffffff;
+  --popover: #fffdfa;
   --popover-foreground: #1a211d;
 
   /* Primary = brand green */
@@ -81,7 +81,7 @@
   --secondary: #efe7d6;
   --secondary-foreground: #1a211d;
   --muted: #f6f1e7;
-  --muted-foreground: #6e6450;  /* warm muted text, AA on white */
+  --muted-foreground: #6e6450;  /* warm muted text, AA on the off-white background */
   --accent: #eaf1ed;            /* green-tinted accent surface */
   --accent-foreground: #1e3d2f;
 
