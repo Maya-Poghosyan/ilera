@@ -110,9 +110,33 @@ export function getReminderTemplates(): Promise<ReminderTemplates> {
 
 // Poke scans asynchronously and files results by calling the MCP server, so this
 // only confirms the request was queued — poll listSuggestedEvents for results.
-export function scanForEvents(): Promise<{ requested: boolean; known_event_ids: string[] }> {
-  return request<{ requested: boolean; known_event_ids: string[] }>("/api/poke/scan", {
+export function scanForEvents(
+  caseId?: string | null
+): Promise<{ requested: boolean; known_event_ids: string[] }> {
+  const query = caseId ? `?case_id=${encodeURIComponent(caseId)}` : "";
+  return request<{ requested: boolean; known_event_ids: string[] }>(`/api/poke/scan${query}`, {
     method: "POST",
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Preferences
+// ---------------------------------------------------------------------------
+
+export type Preferences = {
+  case_id: string;
+  monitor_inboxes: boolean;
+  monitor_inboxes_updated_at: string;
+};
+
+export function getPreferences(caseId: string): Promise<Preferences> {
+  return request<Preferences>(`/api/preferences/${caseId}`);
+}
+
+export function setMonitorInboxes(caseId: string, on: boolean): Promise<Preferences> {
+  return request<Preferences>(`/api/preferences/${caseId}`, {
+    method: "PUT",
+    body: JSON.stringify({ monitor_inboxes: on }),
   });
 }
 

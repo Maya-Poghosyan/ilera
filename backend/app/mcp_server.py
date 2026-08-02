@@ -21,6 +21,7 @@ from mcp.server.fastmcp import FastMCP
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from .config import get_settings
+from .preferences import get_preferences
 from .records import JournalEntry, TimekeepingEntry, _detect_fall, save_journal, save_timekeeping
 from .reminders import (
     Reminder,
@@ -100,6 +101,7 @@ def add_suggested_event(
     description: str,
     time: str | None = None,
     kind: str = "Appointment",
+    case_id: str | None = None,
 ) -> dict:
     """File a caregiving event you found in the user's email, messages or calendar.
 
@@ -117,7 +119,16 @@ def add_suggested_event(
             (e.g. "Found in email from Kaiser — appointment confirmation for June 15").
         time: Optional time of day (e.g. "2:30 PM").
         kind: Event type — one of "Appointment", "Visit", "Deadline", "Reminder".
+        case_id: Ilera case this belongs to. Omit unless the caregiver names one.
     """
+    # The caregiver's inbox-monitoring switch is their consent to Ilera keeping
+    # what Poke finds in their mail, so it gates the write as well as the ask.
+    resolved_case = case_id or get_settings().default_case_id
+    if not get_preferences(resolved_case).monitor_inboxes:
+        return {
+            "status": "rejected",
+            "reason": "The caregiver has inbox monitoring turned off in Ilera.",
+        }
     event = SuggestedEvent(
         date=date,
         title=title,

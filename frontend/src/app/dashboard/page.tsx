@@ -13,10 +13,12 @@ import {
   createReminder,
   deleteReminder,
   deleteSuggestedEvent,
+  getPreferences,
   listReminders,
   listSuggestedEvents,
   runReminderNow,
   scanForEvents,
+  setMonitorInboxes as setMonitorInboxes_,
   updateReminder,
 } from "@/lib/api";
 import type { SuggestedEventAPI } from "@/lib/api";
@@ -54,6 +56,9 @@ const events: CalEvent[] = [
   { day: 5, title: "County social worker visit", time: "2:00 PM", kind: "Visit" },
   { day: 9, title: "IHSS timesheet due", kind: "Deadline" },
 ];
+
+// Matches settings.default_case_id on the backend, for the pre-intake demo case.
+const DEFAULT_CASE_ID = "demo";
 
 // Reminder times are wall-clock in the caregiver's own zone, not the server's.
 const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -151,6 +156,12 @@ export default function CalendarPage() {
   const [apiSuggested, setApiSuggested] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
+  const [caseId] = useState(
+    () =>
+      (typeof window !== "undefined" ? localStorage.getItem("ilera_case_id") : null) ??
+      DEFAULT_CASE_ID
+  );
+  const [monitorInboxes, setMonitorInboxes] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // Reminder form
@@ -188,17 +199,42 @@ export default function CalendarPage() {
     }
   }, []);
 
+  const loadPreferences = useCallback(async () => {
+    try {
+      setMonitorInboxes((await getPreferences(caseId)).monitor_inboxes);
+    } catch {
+      // API may not be running
+    }
+  }, [caseId]);
+
   useEffect(() => {
     loadReminders();
     loadSuggestedEvents();
-  }, [loadReminders, loadSuggestedEvents]);
+    loadPreferences();
+  }, [loadReminders, loadSuggestedEvents, loadPreferences]);
+
+  const handleToggleMonitoring = useCallback(async () => {
+    const next = !monitorInboxes;
+    setMonitorInboxes(next);
+    try {
+      await setMonitorInboxes_(caseId, next);
+      showToast(
+        next
+          ? "Monitoring on \u2014 your assistant can look for care events"
+          : "Monitoring off \u2014 your assistant won't read your inboxes"
+      );
+    } catch {
+      setMonitorInboxes(!next);
+      showToast("Couldn't save that setting");
+    }
+  }, [caseId, monitorInboxes, showToast]);
 
   // Poke files what it finds asynchronously via MCP, so poll for a while after asking.
   const handleScan = useCallback(async () => {
     setScanning(true);
     try {
-      await scanForEvents();
-      showToast("Scanning your inbox \u2014 new events will appear here");
+      await scanForEvents(caseId);
+      showToast("Looking for new events \u2014 they'll appear here");
       for (let i = 0; i < SCAN_POLL_ATTEMPTS; i++) {
         await new Promise((r) => setTimeout(r, SCAN_POLL_INTERVAL_MS));
         await loadSuggestedEvents();
@@ -208,7 +244,7 @@ export default function CalendarPage() {
     } finally {
       setScanning(false);
     }
-  }, [loadSuggestedEvents, showToast]);
+  }, [caseId, loadSuggestedEvents, showToast]);
 
   const resetForm = () => {
     setFormKind("custom");
@@ -481,23 +517,45 @@ export default function CalendarPage() {
       )}
 
       {/* Suggested Events panel */}
-      {allSuggested.length > 0 && (
-        <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
+      <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="size-4" />
             <h3 className="text-sm font-semibold">Suggested Events</h3>
-            <Button
-              variant="outline"
-              size="sm"
-              className="ml-auto"
-              disabled={scanning}
-              onClick={handleScan}
-            >
-              {scanning ? "Scanning\u2026" : "Scan inbox"}
-            </Button>
+            <div className="ml-auto flex items-center gap-3">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={monitorInboxes}
+                onClick={handleToggleMonitoring}
+                className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
+              >
+                Monitor inboxes
+                <span
+                  className={`relative h-5 w-9 rounded-full transition-colors ${
+                    monitorInboxes ? "bg-primary" : "bg-muted-foreground/30"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${
+                      monitorInboxes ? "left-4.5" : "left-0.5"
+                    }`}
+                  />
+                </span>
+              </button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={scanning || !monitorInboxes}
+                onClick={handleScan}
+              >
+                {scanning ? "Syncing\u2026" : "Sync new events"}
+              </Button>
+            </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Detected from recent emails and documents. Accept to add to your calendar.
+            {monitorInboxes
+              ? "Detected from recent emails and documents. Accept to add to your calendar."
+              : "Turn on monitoring to let your assistant find appointments and deadlines in your email, messages and calendar."}
           </p>
           <div className="space-y-2">
             {allSuggested.map((e, idx) => (
@@ -534,8 +592,7 @@ export default function CalendarPage() {
               </div>
             ))}
           </div>
-        </div>
-      )}
+      </div>
 
       {/* Month-view calendar grid */}
       <div className="overflow-hidden rounded-xl border border-brand-subtle bg-white shadow-xs">

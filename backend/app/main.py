@@ -58,6 +58,7 @@ from .records import (
     save_renewal,
     save_timekeeping,
 )
+from .preferences import Preferences, get_preferences, save_preferences
 from .store import get_profile, save_profile
 from .suggested_events import (
     SuggestedEvent,
@@ -798,14 +799,37 @@ def api_preview_stitched(case_id: str, program: str, body: AnswersSubmit) -> Res
 # ---------------------------------------------------------------------------
 
 
+@app.get("/api/preferences/{case_id}")
+def api_get_preferences(case_id: str) -> Preferences:
+    return get_preferences(case_id)
+
+
+class PreferencesUpdate(BaseModel):
+    monitor_inboxes: bool
+
+
+@app.put("/api/preferences/{case_id}")
+def api_set_preferences(case_id: str, body: PreferencesUpdate) -> Preferences:
+    prefs = get_preferences(case_id)
+    prefs.monitor_inboxes = body.monitor_inboxes
+    prefs.monitor_inboxes_updated_at = datetime.now(timezone.utc).isoformat()
+    return save_preferences(prefs)
+
+
 @app.post("/api/poke/scan")
-def poke_scan_events() -> dict:
+def poke_scan_events(case_id: str | None = None) -> dict:
     """Ask Poke to scan the user's messages/emails for medical events.
+
+    Requires inbox monitoring to be switched on for the case: that toggle is
+    the caregiver's consent to Poke reading their mail on Ilera's behalf.
 
     Poke works asynchronously and files what it finds by calling the
     ``add_suggested_event`` MCP tool, so this only confirms the request was
     queued — clients should poll ``/api/suggested-events`` for results.
     """
+    resolved_case = case_id or settings.default_case_id
+    if not get_preferences(resolved_case).monitor_inboxes:
+        raise HTTPException(status_code=403, detail="Inbox monitoring is turned off")
     if not poke.available():
         raise HTTPException(status_code=400, detail="POKE_API_KEY not configured")
     try:
