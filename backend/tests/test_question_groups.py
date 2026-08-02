@@ -28,6 +28,13 @@ from app.forms.groups import (  # noqa: E402
     parse_condition,
     pdf_values,
 )
+from app.forms.generate_groups import (  # noqa: E402
+    DerivedInput,
+    DerivedOption,
+    FormPlan,
+    _validate_plan,
+    apply_plan,
+)
 from app.forms.profile_paths import profile_paths  # noqa: E402
 from app.models import CareRecipient, CaseProfile, Household  # noqa: E402
 from tests.test_form_maps import _filled_profile  # noqa: E402
@@ -66,15 +73,19 @@ def test_groups_only_target_real_unfilled_fields():
     assert checked > 0, "expected at least one form with committed groups"
 
 
-def test_each_field_belongs_to_one_group():
-    """Two groups owning a box means one of them silently overwrites the other."""
+def test_each_field_belongs_to_one_question():
+    """Two questions owning a box means one of them silently overwrites the other.
+
+    Several choices of the *same* question may tick one box — every Asian option on a
+    race list ticks the summary "Asian" — because they all write the same "/Yes".
+    """
     for form_id in _grouped_form_ids():
         owner: dict[str, str] = {}
         for group in load_groups(filler.load_schema(form_id)):
             for inp in group.inputs:
-                for name in inp.target_fields():
-                    where = f"{group.id}.{inp.key}"
-                    assert name not in owner, (
+                where = f"{group.id}.{inp.key}"
+                for name in set(inp.target_fields()):
+                    assert owner.get(name, where) == where, (
                         f"{form_id}: field {name!r} is claimed by both {owner[name]} "
                         f"and {where}"
                     )
@@ -363,6 +374,126 @@ def test_an_optional_section_waits_for_the_question_that_opens_it():
             assert path in owners, f"{group.id} waits on {path}, which nobody asks"
             gated += 1
     assert gated, "no section is gated on an answer"
+
+
+def test_race_is_asked_once_and_fills_both_printings():
+    """CCFRM604 prints a six-box race row and a fifteen-box list; one answer does both.
+
+    The detailed list is the question asked, and each choice also ticks the summary box
+    it belongs to, so the page-1 row is filled without anyone answering it twice.
+    """
+    profile = CaseProfile(id="race", household=Household(size=1))
+    questions = applications.start_application("race", "Medi-Cal", profile)["questions"]
+    asking = [
+        q
+        for q in questions
+        if "race" in q["text"].lower() and q["type"] == "multi_select"
+    ]
+    assert len(asking) == 1, [q["text"] for q in asking]
+
+    keys = {
+        f"{g.id}.{i.key}" for g in load_groups(filler.load_schema("ccfrm604"))
+        for i in g.inputs
+    }
+    assert "person_1_profile.ethnicity" not in keys, (
+        "the summary race row is derived from the detailed list, so it is not asked"
+    )
+
+    # Chinese ticks its own box and the summary "Asian" one; same for the other choice.
+    values = applications._grouped_values(
+        applications.AppQuestion(**asking[0]), ["Chinese", "Black or African American"]
+    )
+    assert values == {
+        "race-p1-5": "/Yes",
+        "eth_p1-5": "/Yes",
+        "race-p1-3": "/Yes",
+        "eth_p1-3": "/Yes",
+    }
+
+
+def test_a_derived_row_is_dropped_and_its_boxes_moved():
+    """The coarse question disappears and every box it owned is ticked by a finer one."""
+    groups = [
+        QuestionGroup(
+            id="p1",
+            prompt="About you",
+            inputs=[
+                GroupInput(
+                    key="summary",
+                    label="Race or ethnicity",
+                    type="multi_select",
+                    options=["Asian", "White"],
+                    option_fields={"Asian": ["sum_asian"], "White": ["sum_white"]},
+                ),
+                GroupInput(
+                    key="race",
+                    label="What is your race?",
+                    type="multi_select",
+                    options=["Chinese", "Filipino", "White"],
+                    option_fields={
+                        "Chinese": ["r_chinese"],
+                        "Filipino": ["r_filipino"],
+                        "White": ["r_white"],
+                    },
+                ),
+            ],
+        )
+    ]
+    plan = FormPlan(derived=[
+        DerivedInput(input="p1.summary", options=[
+            DerivedOption(option="Asian", from_input="p1.race",
+                          from_options=["Chinese", "Filipino"]),
+            DerivedOption(option="White", from_input="p1.race", from_options=["White"]),
+        ])
+    ])
+    kept = apply_plan(plan, groups)
+    keys = [i.key for g in kept for i in g.inputs]
+    assert keys == ["race"]
+    race = kept[0].inputs[0]
+    assert race.option_fields == {
+        "Chinese": ["r_chinese", "sum_asian"],
+        "Filipino": ["r_filipino", "sum_asian"],
+        "White": ["r_white", "sum_white"],
+    }
+    assert pdf_values(race, ["Filipino"]) == {"r_filipino": "/Yes", "sum_asian": "/Yes"}
+
+
+def test_a_derivation_is_rejected_when_it_would_contradict_itself():
+    """A pick-one row can't be derived: two implications would tick two answers."""
+    groups = [
+        QuestionGroup(
+            id="p1",
+            prompt="About you",
+            inputs=[
+                GroupInput(
+                    key="native",
+                    label="American Indian or Alaska Native?",
+                    type="single_select",
+                    options=["Yes", "No"],
+                    option_fields={"Yes": ["n_yes"], "No": ["n_no"]},
+                ),
+                GroupInput(
+                    key="race",
+                    label="What is your race?",
+                    type="multi_select",
+                    options=["American Indian or Alaska Native", "White"],
+                    option_fields={
+                        "American Indian or Alaska Native": ["r_aian"],
+                        "White": ["r_white"],
+                    },
+                ),
+            ],
+        )
+    ]
+    plan = FormPlan(derived=[
+        DerivedInput(input="p1.native", options=[
+            DerivedOption(option="Yes", from_input="p1.race",
+                          from_options=["American Indian or Alaska Native"]),
+            DerivedOption(option="No", from_input="p1.race", from_options=["White"]),
+        ])
+    ])
+    errors = _validate_plan(plan, groups)
+    assert any("single_select" in e for e in errors), errors
 
 
 def test_a_grouped_answer_survives_to_a_filled_pdf():

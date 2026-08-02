@@ -479,13 +479,22 @@ or Alaska Native, pregnancy details on being pregnant, tax-filer details on fili
 taxes, an appendix on the yes/no question that introduces it. Most applicants should \
 see a small fraction of a long form.
 
+`derived`: a check-all-that-apply input asking the SAME fact as another, but in coarser \
+terms — a form that prints a six-box race row on page 1 and a fifteen-box race list on \
+page 9. The coarse question disappears and its boxes are ticked from the detailed \
+answers, so give one entry per coarse choice: the choice, the question it follows from, \
+and that question's options which imply it (`{"option": "Asian", "from_input": \
+"person_1_race.race", "from_options": ["Chinese", "Filipino", ...]}`). Every coarse \
+choice must appear. Use this only when the detailed answers decide the coarse one with \
+no judgement left over; when they don't, leave both asked.
+
 `optional`: a group the form leaves entirely to the applicant's choice and that \
 nothing else can gate — naming an authorized representative, choosing a dental plan. \
 `ask` is the short yes/no question that decides it, in the applicant's words: \
 "Do you want to name someone to act for you on this application?". Answering no costs \
 them one question instead of a page.
 
-Leave anything you are unsure about out of all three lists: it stays as it is, and the \
+Leave anything you are unsure about out of all four lists: it stays as it is, and the \
 applicant is asked. Do not invent groups or inputs; every id must appear below verbatim.
 """
 
@@ -500,6 +509,19 @@ class GroupGate(BaseModel):
     applies_when: str
 
 
+class DerivedOption(BaseModel):
+    """One coarse choice, and the detailed choices that imply it."""
+
+    option: str
+    from_input: str
+    from_options: list[str] = Field(default_factory=list)
+
+
+class DerivedInput(BaseModel):
+    input: str
+    options: list[DerivedOption] = Field(default_factory=list)
+
+
 class OptionalSection(BaseModel):
     group: str
     ask: str
@@ -507,6 +529,7 @@ class OptionalSection(BaseModel):
 
 class FormPlan(BaseModel):
     duplicates: list[DuplicateInput] = Field(default_factory=list)
+    derived: list[DerivedInput] = Field(default_factory=list)
     gates: list[GroupGate] = Field(default_factory=list)
     optional: list[OptionalSection] = Field(default_factory=list)
 
@@ -564,6 +587,56 @@ def _validate_plan(plan: FormPlan, groups: list[QuestionGroup]) -> list[str]:
                 f"{sorted(set(second.options) - set(first.options))}"
             )
 
+    for derived in plan.derived:
+        coarse = inputs.get(derived.input)
+        if coarse is None:
+            errors.append(f"derived: {derived.input!r} is not a question on this form")
+            continue
+        # Order doesn't matter here as it does for a duplicate: the coarse question is
+        # removed outright, so the detailed ones are answered wherever they sit. What
+        # does matter is that a choice implies a box; nothing implies free text, and
+        # nothing implies the *absence* of a choice, so a one-of-these question can't
+        # be derived — two implications would tick two boxes that contradict.
+        if coarse.type != "multi_select":
+            errors.append(
+                f"derived: {derived.input!r} is a {coarse.type}; only a multi_select, "
+                "where each box stands on its own, can be derived"
+            )
+        if coarse.fields:
+            errors.append(
+                f"derived: {derived.input!r} writes text to {coarse.fields}, which no "
+                "other answer can supply"
+            )
+        covered = {o.option for o in derived.options}
+        uncovered = set(coarse.option_fields) - covered
+        if uncovered:
+            errors.append(
+                f"derived: {derived.input!r} options {sorted(uncovered)} tick a box but "
+                "nothing is given that implies them, so those boxes could never be "
+                "ticked"
+            )
+        for option in derived.options:
+            if option.option not in coarse.options:
+                errors.append(
+                    f"derived: {option.option!r} is not an option of {derived.input!r} "
+                    f"({coarse.options})"
+                )
+            source = inputs.get(option.from_input)
+            if source is None:
+                errors.append(
+                    f"derived: {option.from_input!r} is not a question on this form"
+                )
+                continue
+            if source is coarse:
+                errors.append(f"derived: {derived.input!r} cannot derive from itself")
+                continue
+            stray = [o for o in option.from_options if o not in source.options]
+            if stray:
+                errors.append(
+                    f"derived: {stray} are not options of {option.from_input!r} "
+                    f"({source.options})"
+                )
+
     for section in plan.optional:
         if section.group not in group_at:
             errors.append(f"optional: {section.group!r} is not a group on this form")
@@ -612,6 +685,22 @@ def apply_plan(plan: FormPlan, groups: list[QuestionGroup]) -> list[QuestionGrou
             first.option_fields[label] = list(dict.fromkeys(merged))
         dropped.add(dup.input)
 
+    for derived in plan.derived:
+        coarse = inputs.get(derived.input)
+        if coarse is None:
+            continue
+        # The coarse box goes to every detailed choice that implies it, so picking
+        # "Chinese" ticks both the detailed box and the page-1 "Asian" one.
+        for option in derived.options:
+            source = inputs.get(option.from_input)
+            if source is None or source is coarse:
+                continue
+            for name in coarse.option_fields.get(option.option, []):
+                for choice in option.from_options:
+                    boxes = [*source.option_fields.get(choice, []), name]
+                    source.option_fields[choice] = list(dict.fromkeys(boxes))
+        dropped.add(derived.input)
+
     for gate in plan.gates:
         for group in groups:
             if group.id == gate.group and not group.applies_when:
@@ -652,11 +741,87 @@ async def plan_form(
     result = await agent.run(_plan_prompt(form_id, groups))
     print(
         f"  whole form: {len(result.output.duplicates)} repeated questions, "
+        f"{len(result.output.derived)} derived from a finer one, "
         f"{len(result.output.gates)} sections gated, "
         f"{len(result.output.optional)} offered rather than asked",
         file=sys.stderr,
     )
     return apply_plan(result.output, groups)
+
+
+DERIVED_PROMPT = """\
+You are removing a question a US government benefits form asks twice at two levels of \
+detail. You are given every multiple-choice question on one form, in the order the \
+applicant meets them, as `<group id>.<input key>: label  options: [...]`.
+
+A long form often prints a short summary row of boxes on an early page and the full list \
+of boxes later: six race boxes on page 1 and fifteen on page 9, an income bracket beside \
+an income amount. Both must be filled, but only the detailed one is worth asking: the \
+coarse boxes follow from the detailed answer.
+
+Return those questions. `input` is the coarse question, which disappears. Under \
+`options`, give one entry per coarse choice: the choice, the detailed question it \
+follows from — different choices may follow from different questions — and every option \
+of that question which implies it:
+
+    {"input": "person_1_profile.ethnicity", "options": [
+      {"option": "Asian", "from_input": "person_1_race.race",
+       "from_options": ["Asian Indian", "Chinese", "Filipino", "Hmong"]},
+      {"option": "Hispanic, Latino/a, or Spanish Origin",
+       "from_input": "person_1_race.hispanic_origin", "from_options": ["Yes"]}]}
+
+Every coarse choice must appear. The coarse question must be a multi_select \
+(check-all-that-apply): a pick-one question can't be derived, because implying two of \
+its choices would tick two boxes that contradict each other.
+
+Only questions about the same person and the same fact, where the detailed answers \
+settle the coarse one with no judgement left over. Two questions that merely sound \
+similar, or that are about different people, are not a pair. Return nothing rather \
+than a guess.
+"""
+
+
+class DerivedPlan(BaseModel):
+    derived: list[DerivedInput] = Field(default_factory=list)
+
+
+def _derived_prompt(form_id: str, groups: list[QuestionGroup]) -> str:
+    lines = [
+        f"{group.id}.{inp.key}: {inp.label}  options: {inp.options}"
+        for group in groups
+        for inp in group.inputs
+        if inp.options
+    ]
+    return (
+        f"Form: {form_id.upper()}\n\n--- every multiple-choice question ---\n"
+        + "\n".join(lines)
+    )
+
+
+async def find_derived(
+    form_id: str, groups: list[QuestionGroup]
+) -> list[QuestionGroup]:
+    """Drop a coarse question the form also asks in detail, ticking its boxes anyway."""
+    from pydantic_ai import Agent, ModelRetry
+
+    agent = Agent(
+        _model(), output_type=DerivedPlan, system_prompt=DERIVED_PROMPT, retries=4
+    )
+
+    @agent.output_validator
+    def check(output: DerivedPlan) -> DerivedPlan:
+        # The pair rules are the plan's, so a coarse/detailed mapping found here is held
+        # to exactly what `apply_plan` can carry out.
+        errors = _validate_plan(FormPlan(derived=output.derived), groups)
+        if errors:
+            raise ModelRetry("Fix these and return the list again:\n- " + "\n- ".join(errors))
+        return output
+
+    result = await agent.run(_derived_prompt(form_id, groups))
+    for d in result.output.derived:
+        sources = sorted({o.from_input for o in d.options})
+        print(f"  {d.input} follows from {', '.join(sources)}", file=sys.stderr)
+    return apply_plan(FormPlan(derived=result.output.derived), groups)
 
 
 def _merge(into: dict[str, QuestionGroup], drafted: list[QuestionGroup]) -> None:
@@ -744,6 +909,7 @@ async def generate_groups(
     groups = fold_repeats(groups)
     gate_person_blocks(groups)
     groups = await plan_form(form_id, groups)
+    groups = await find_derived(form_id, groups)
     repair_conditions(groups)
     return groups, skip
 
@@ -810,9 +976,12 @@ def main() -> None:
 
     if args.plan_only:
         schema = load_schema(args.form_id)
-        groups = asyncio.run(
-            plan_form(args.form_id, fold_repeats(load_groups(schema)))
-        )
+
+        async def replan() -> list[QuestionGroup]:
+            groups = await plan_form(args.form_id, fold_repeats(load_groups(schema)))
+            return await find_derived(args.form_id, groups)
+
+        groups = asyncio.run(replan())
         repair_conditions(groups)
         skip = [SkippedField(**s) for s in schema.get("skip_fields") or []]
     else:

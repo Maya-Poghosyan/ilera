@@ -8564,41 +8564,6 @@
       "prompt": "About Person 1: enter their first name and answer a few optional identity and status questions.",
       "inputs": [
         {
-          "key": "ethnicity",
-          "label": "Person 1 — race or ethnicity (optional; you can select more than one)",
-          "type": "multi_select",
-          "options": [
-            "Hispanic, Latino/a, or Spanish Origin",
-            "White",
-            "Black or African American",
-            "American Indian or Alaska Native",
-            "Asian",
-            "Native Hawaiian or Other Pacific Islander"
-          ],
-          "option_fields": {
-            "Hispanic, Latino/a, or Spanish Origin": [
-              "eth_p1-1"
-            ],
-            "White": [
-              "eth_p1-2"
-            ],
-            "Black or African American": [
-              "eth_p1-3"
-            ],
-            "American Indian or Alaska Native": [
-              "eth_p1-4"
-            ],
-            "Asian": [
-              "eth_p1-5"
-            ],
-            "Native Hawaiian or Other Pacific Islander": [
-              "eth_p1-6"
-            ]
-          },
-          "required": false,
-          "help": "This is optional. We ask this to help ensure equal access to health care."
-        },
-        {
           "key": "related_to_service_member",
           "label": "Is Person 1 the spouse, legal partner, parent, or child of someone who is or has served in the U.S. military?",
           "type": "single_select",
@@ -8664,10 +8629,12 @@
           ],
           "option_fields": {
             "Yes": [
-              "alask_p1-1"
+              "alask_p1-1",
+              "tribe-p1-1"
             ],
             "No": [
-              "alask_p1-2"
+              "alask_p1-2",
+              "tribe-p1-2"
             ]
           },
           "help": "If yes, you will need to fill out Attachment D (page 34)."
@@ -8679,41 +8646,6 @@
       "prompt": "About Person 2: enter their first name and answer a few optional identity and status questions.",
       "applies_when": "household.size >= 2",
       "inputs": [
-        {
-          "key": "ethnicity",
-          "label": "Person 2 — race or ethnicity (optional; you can select more than one)",
-          "type": "multi_select",
-          "options": [
-            "Hispanic, Latino/a, or Spanish Origin",
-            "White",
-            "Black or African American",
-            "American Indian or Alaska Native",
-            "Asian",
-            "Native Hawaiian or Other Pacific Islander"
-          ],
-          "option_fields": {
-            "Hispanic, Latino/a, or Spanish Origin": [
-              "eth_p2-1"
-            ],
-            "White": [
-              "eth_p2-2"
-            ],
-            "Black or African American": [
-              "eth_p2-3"
-            ],
-            "American Indian or Alaska Native": [
-              "eth_p2-4"
-            ],
-            "Asian": [
-              "eth_p2-5"
-            ],
-            "Native Hawaiian or Other Pacific Islander": [
-              "eth_p2-6"
-            ]
-          },
-          "required": false,
-          "help": "This is optional. We ask this to help ensure equal access to health care."
-        },
         {
           "key": "ever_served_military",
           "label": "Has Person 2 ever served in the United States military?",
@@ -8813,10 +8745,12 @@
           ],
           "option_fields": {
             "Yes": [
-              "alask_p2-1"
+              "alask_p2-1",
+              "tribe-p2-1"
             ],
             "No": [
-              "alask_p2-2"
+              "alask_p2-2",
+              "tribe-p2-2"
             ]
           },
           "help": "If yes, you will need to fill out Attachment D (page 34)."
@@ -8828,41 +8762,6 @@
       "prompt": "About Person 3: enter their first name and answer a few optional identity and status questions.",
       "applies_when": "household.size >= 3",
       "inputs": [
-        {
-          "key": "ethnicity",
-          "label": "Person 3 — race or ethnicity (optional; you can select more than one)",
-          "type": "multi_select",
-          "options": [
-            "Hispanic, Latino/a, or Spanish Origin",
-            "White",
-            "Black or African American",
-            "American Indian or Alaska Native",
-            "Asian",
-            "Native Hawaiian or Other Pacific Islander"
-          ],
-          "option_fields": {
-            "Hispanic, Latino/a, or Spanish Origin": [
-              "eth_p3-1"
-            ],
-            "White": [
-              "eth_p3-2"
-            ],
-            "Black or African American": [
-              "eth_p3-3"
-            ],
-            "American Indian or Alaska Native": [
-              "eth_p3-4"
-            ],
-            "Asian": [
-              "eth_p3-5"
-            ],
-            "Native Hawaiian or Other Pacific Islander": [
-              "eth_p3-6"
-            ]
-          },
-          "required": false,
-          "help": "This is optional. We ask this to help ensure equal access to health care."
-        },
         {
           "key": "ever_served_military",
           "label": "Has Person 3 ever served in the United States military?",
@@ -8962,10 +8861,12 @@
           ],
           "option_fields": {
             "Yes": [
-              "alask_p3-1"
+              "alask_p3-1",
+              "tribe-p3-1"
             ],
             "No": [
-              "alask_p3-2"
+              "alask_p3-2",
+              "tribe-p3-2"
             ]
           },
           "help": "If yes, you will need to fill out Attachment D (page 34)."
@@ -8977,41 +8878,6 @@
       "prompt": "About Person 4: enter their first name and answer a few optional identity and status questions.",
       "applies_when": "household.size >= 4",
       "inputs": [
-        {
-          "key": "ethnicity",
-          "label": "Person 4 — race or ethnicity (optional; you can select more than one)",
-          "type": "multi_select",
-          "options": [
-            "Hispanic, Latino/a, or Spanish Origin",
-            "White",
-            "Black or African American",
-            "American Indian or Alaska Native",
-            "Asian",
-            "Native Hawaiian or Other Pacific Islander"
-          ],
-          "option_fields": {
-            "Hispanic, Latino/a, or Spanish Origin": [
-              "eth_p4-1"
-            ],
-            "White": [
-              "eth_p4-2"
-            ],
-            "Black or African American": [
-              "eth_p4-3"
-            ],
-            "American Indian or Alaska Native": [
-              "eth_p4-4"
-            ],
-            "Asian": [
-              "eth_p4-5"
-            ],
-            "Native Hawaiian or Other Pacific Islander": [
-              "eth_p4-6"
-            ]
-          },
-          "required": false,
-          "help": "This is optional. We ask this to help ensure equal access to health care."
-        },
         {
           "key": "ever_served_military",
           "label": "Has Person 4 ever served in the United States military?",
@@ -9111,10 +8977,12 @@
           ],
           "option_fields": {
             "Yes": [
-              "alask_p4-1"
+              "alask_p4-1",
+              "tribe-p4-1"
             ],
             "No": [
-              "alask_p4-2"
+              "alask_p4-2",
+              "tribe-p4-2"
             ]
           },
           "help": "If yes, you will need to fill out Attachment D (page 34)."
@@ -9135,7 +9003,8 @@
           ],
           "option_fields": {
             "Yes": [
-              "origin-p1-1"
+              "origin-p1-1",
+              "eth_p1-1"
             ],
             "No": [
               "origin-p1-2"
@@ -9203,49 +9072,64 @@
           ],
           "option_fields": {
             "American Indian or Alaska Native": [
-              "race-p1-1"
+              "race-p1-1",
+              "eth_p1-4"
             ],
             "Asian Indian": [
-              "race-p1-2"
+              "race-p1-2",
+              "eth_p1-5"
             ],
             "Black or African American": [
-              "race-p1-3"
+              "race-p1-3",
+              "eth_p1-3"
             ],
             "Cambodian": [
-              "race-p1-4"
+              "race-p1-4",
+              "eth_p1-5"
             ],
             "Chinese": [
-              "race-p1-5"
+              "race-p1-5",
+              "eth_p1-5"
             ],
             "Filipino": [
-              "race-p1-6"
+              "race-p1-6",
+              "eth_p1-5"
             ],
             "Guamanian or Chamorro": [
-              "race-p1-7"
+              "race-p1-7",
+              "eth_p1-6"
             ],
             "Hmong": [
-              "race-p1-8"
+              "race-p1-8",
+              "eth_p1-5"
             ],
             "Japanese": [
-              "race-p1-9"
+              "race-p1-9",
+              "eth_p1-5"
             ],
             "Korean": [
-              "race-p1-10"
+              "race-p1-10",
+              "eth_p1-5"
             ],
             "Laotian": [
-              "race-p1-11"
+              "race-p1-11",
+              "eth_p1-5"
             ],
             "Native Hawaiian or Other Pacific Islander": [
-              "race-p1-12"
+              "race-p1-12",
+              "eth_p1-6"
             ],
             "Samoan": [
-              "race-p1-13"
+              "race-p1-13",
+              "eth_p1-6"
             ],
             "Vietnamese": [
-              "race-p1-14"
+              "race-p1-14",
+              "eth_p1-5"
             ],
             "White": [
-              "race-p1-15"
+              "race-p1-15",
+              "eth_p1-2"
             ],
             "Other": [
               "race-p1-16-1"
@@ -9279,7 +9163,8 @@
           ],
           "option_fields": {
             "Yes": [
-              "origin-p2-1"
+              "origin-p2-1",
+              "eth_p2-1"
             ],
             "No": [
               "origin-p2-2"
@@ -9347,49 +9232,64 @@
           ],
           "option_fields": {
             "American Indian or Alaska Native": [
-              "race-p2-1"
+              "race-p2-1",
+              "eth_p2-4"
             ],
             "Asian Indian": [
-              "race-p2-2"
+              "race-p2-2",
+              "eth_p2-5"
             ],
             "Black or African American": [
-              "race-p2-3"
+              "race-p2-3",
+              "eth_p2-3"
             ],
             "Cambodian": [
-              "race-p2-4"
+              "race-p2-4",
+              "eth_p2-5"
             ],
             "Chinese": [
-              "race-p2-5"
+              "race-p2-5",
+              "eth_p2-5"
             ],
             "Filipino": [
-              "race-p2-6"
+              "race-p2-6",
+              "eth_p2-5"
             ],
             "Guamanian or Chamorro": [
-              "race-p2-7"
+              "race-p2-7",
+              "eth_p2-6"
             ],
             "Hmong": [
-              "race-p2-8"
+              "race-p2-8",
+              "eth_p2-5"
             ],
             "Japanese": [
-              "race-p2-9"
+              "race-p2-9",
+              "eth_p2-5"
             ],
             "Korean": [
-              "race-p2-10"
+              "race-p2-10",
+              "eth_p2-5"
             ],
             "Laotian": [
-              "race-p2-11"
+              "race-p2-11",
+              "eth_p2-5"
             ],
             "Native Hawaiian or Other Pacific Islander": [
-              "race-p2-12"
+              "race-p2-12",
+              "eth_p2-6"
             ],
             "Samoan": [
-              "race-p2-13"
+              "race-p2-13",
+              "eth_p2-6"
             ],
             "Vietnamese": [
-              "race-p2-14"
+              "race-p2-14",
+              "eth_p2-5"
             ],
             "White": [
-              "race-p2-15"
+              "race-p2-15",
+              "eth_p2-2"
             ],
             "Other": [
               "race-p2-16-1"
@@ -9423,7 +9323,8 @@
           ],
           "option_fields": {
             "Yes": [
-              "origin-p3-1"
+              "origin-p3-1",
+              "eth_p3-1"
             ],
             "No": [
               "origin-p3-2"
@@ -9491,49 +9392,64 @@
           ],
           "option_fields": {
             "American Indian or Alaska Native": [
-              "race-p3-1"
+              "race-p3-1",
+              "eth_p3-4"
             ],
             "Asian Indian": [
-              "race-p3-2"
+              "race-p3-2",
+              "eth_p3-5"
             ],
             "Black or African American": [
-              "race-p3-3"
+              "race-p3-3",
+              "eth_p3-3"
             ],
             "Cambodian": [
-              "race-p3-4"
+              "race-p3-4",
+              "eth_p3-5"
             ],
             "Chinese": [
-              "race-p3-5"
+              "race-p3-5",
+              "eth_p3-5"
             ],
             "Filipino": [
-              "race-p3-6"
+              "race-p3-6",
+              "eth_p3-5"
             ],
             "Guamanian or Chamorro": [
-              "race-p3-7"
+              "race-p3-7",
+              "eth_p3-6"
             ],
             "Hmong": [
-              "race-p3-8"
+              "race-p3-8",
+              "eth_p3-5"
             ],
             "Japanese": [
-              "race-p3-9"
+              "race-p3-9",
+              "eth_p3-5"
             ],
             "Korean": [
-              "race-p3-10"
+              "race-p3-10",
+              "eth_p3-5"
             ],
             "Laotian": [
-              "race-p3-11"
+              "race-p3-11",
+              "eth_p3-5"
             ],
             "Native Hawaiian or Other Pacific Islander": [
-              "race-p3-12"
+              "race-p3-12",
+              "eth_p3-6"
             ],
             "Samoan": [
-              "race-p3-13"
+              "race-p3-13",
+              "eth_p3-6"
             ],
             "Vietnamese": [
-              "race-p3-14"
+              "race-p3-14",
+              "eth_p3-5"
             ],
             "White": [
-              "race-p3-15"
+              "race-p3-15",
+              "eth_p3-2"
             ],
             "Other": [
               "race-p3-16-1"
@@ -9567,7 +9483,8 @@
           ],
           "option_fields": {
             "Yes": [
-              "origin-p4-1"
+              "origin-p4-1",
+              "eth_p4-1"
             ],
             "No": [
               "origin-p4-2"
@@ -9635,49 +9552,64 @@
           ],
           "option_fields": {
             "American Indian or Alaska Native": [
-              "race-p4-1"
+              "race-p4-1",
+              "eth_p4-4"
             ],
             "Asian Indian": [
-              "race-p4-2"
+              "race-p4-2",
+              "eth_p4-5"
             ],
             "Black or African American": [
-              "race-p4-3"
+              "race-p4-3",
+              "eth_p4-3"
             ],
             "Cambodian": [
-              "race-p4-4"
+              "race-p4-4",
+              "eth_p4-5"
             ],
             "Chinese": [
-              "race-p4-5"
+              "race-p4-5",
+              "eth_p4-5"
             ],
             "Filipino": [
-              "race-p4-6"
+              "race-p4-6",
+              "eth_p4-5"
             ],
             "Guamanian or Chamorro": [
-              "race-p4-7"
+              "race-p4-7",
+              "eth_p4-6"
             ],
             "Hmong": [
-              "race-p4-8"
+              "race-p4-8",
+              "eth_p4-5"
             ],
             "Japanese": [
-              "race-p4-9"
+              "race-p4-9",
+              "eth_p4-5"
             ],
             "Korean": [
-              "race-p4-10"
+              "race-p4-10",
+              "eth_p4-5"
             ],
             "Laotian": [
-              "race-p4-11"
+              "race-p4-11",
+              "eth_p4-5"
             ],
             "Native Hawaiian or Other Pacific Islander": [
-              "race-p4-12"
+              "race-p4-12",
+              "eth_p4-6"
             ],
             "Samoan": [
-              "race-p4-13"
+              "race-p4-13",
+              "eth_p4-6"
             ],
             "Vietnamese": [
-              "race-p4-14"
+              "race-p4-14",
+              "eth_p4-5"
             ],
             "White": [
-              "race-p4-15"
+              "race-p4-15",
+              "eth_p4-2"
             ],
             "Other": [
               "race-p4-16-1"
@@ -14045,23 +13977,6 @@
       "applies_when": "person_1_profile.american_indian_alaska_native == 'Yes'",
       "inputs": [
         {
-          "key": "person_1_tribe_member",
-          "label": "Is this person a member of a federally recognized American Indian or Alaska Native (Native American) tribe?",
-          "type": "single_select",
-          "options": [
-            "Yes",
-            "No"
-          ],
-          "option_fields": {
-            "Yes": [
-              "tribe-p1-1"
-            ],
-            "No": [
-              "tribe-p1-2"
-            ]
-          }
-        },
-        {
           "key": "person_1_tribe_name",
           "label": "If yes, what is the name of the tribe?",
           "fields": [
@@ -14119,23 +14034,6 @@
       "prompt": "Person 2 — first name, tribal membership, and Indian Health Service (IHS)/tribal program service details",
       "applies_when": "household.size >= 2",
       "inputs": [
-        {
-          "key": "person_2_tribe_member",
-          "label": "Is this person a member of a federally recognized American Indian or Alaska Native (Native American) tribe?",
-          "type": "single_select",
-          "options": [
-            "Yes",
-            "No"
-          ],
-          "option_fields": {
-            "Yes": [
-              "tribe-p2-1"
-            ],
-            "No": [
-              "tribe-p2-2"
-            ]
-          }
-        },
         {
           "key": "person_2_tribe_name",
           "label": "If yes, what is the name of the tribe?",
@@ -14195,23 +14093,6 @@
       "applies_when": "household.size >= 3",
       "inputs": [
         {
-          "key": "person_3_tribe_member",
-          "label": "Is this person a member of a federally recognized American Indian or Alaska Native (Native American) tribe?",
-          "type": "single_select",
-          "options": [
-            "Yes",
-            "No"
-          ],
-          "option_fields": {
-            "Yes": [
-              "tribe-p3-1"
-            ],
-            "No": [
-              "tribe-p3-2"
-            ]
-          }
-        },
-        {
           "key": "person_3_tribe_name",
           "label": "If yes, what is the name of the tribe?",
           "fields": [
@@ -14269,23 +14150,6 @@
       "prompt": "Person 4 — first name, tribal membership, and Indian Health Service (IHS)/tribal program service details",
       "applies_when": "household.size >= 4",
       "inputs": [
-        {
-          "key": "person_4_tribe_member",
-          "label": "Is this person a member of a federally recognized American Indian or Alaska Native (Native American) tribe?",
-          "type": "single_select",
-          "options": [
-            "Yes",
-            "No"
-          ],
-          "option_fields": {
-            "Yes": [
-              "tribe-p4-1"
-            ],
-            "No": [
-              "tribe-p4-2"
-            ]
-          }
-        },
         {
           "key": "person_4_tribe_name",
           "label": "If yes, what is the name of the tribe?",
