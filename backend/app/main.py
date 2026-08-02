@@ -86,6 +86,8 @@ async def _scheduler_loop() -> None:
                 if not reminder.active or not reminder.next_run:
                     continue
                 fire_at = datetime.fromisoformat(reminder.next_run)
+                if fire_at.tzinfo is None:
+                    fire_at = fire_at.replace(tzinfo=timezone.utc)
                 if fire_at > now:
                     continue
                 # Determine message

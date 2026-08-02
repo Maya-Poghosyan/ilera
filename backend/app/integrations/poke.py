@@ -40,9 +40,12 @@ def send_message(message: str) -> dict:
 
 def daily_care_log_prompt(recipient_name: str = "your loved one") -> str:
     return (
-        f"Daily Ilera check-in: How did caregiving go today for {recipient_name}? "
-        "Reply with hours spent and anything notable (meals, meds, mood, incidents) "
-        "and I'll log it for benefits renewal."
+        f"Daily Ilera check-in: ask me how caregiving went today for {recipient_name} "
+        "— hours spent and anything notable (meals, meds, mood, incidents). "
+        "When I reply, record it in Ilera: call the `log_care_hours` tool with the "
+        "hours and the kind of care, and `log_care_note` with what I said. "
+        "Don't just acknowledge it in chat — the timesheet is what benefit "
+        "renewals are built from."
     )
 
 

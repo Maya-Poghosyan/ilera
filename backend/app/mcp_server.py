@@ -14,11 +14,14 @@ request. Poke sends the integration's API key as ``Authorization: Bearer ...``.
 
 import hmac
 import logging
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from mcp.server.fastmcp import FastMCP
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 from .config import get_settings
+from .records import JournalEntry, TimekeepingEntry, _detect_fall, save_journal, save_timekeeping
 from .reminders import (
     Reminder,
     ReminderKind,
@@ -39,9 +42,11 @@ from .suggested_events import (
 mcp = FastMCP(
     "Ilera Caregiver",
     instructions=(
-        "You are connected to the Ilera caregiver app. "
-        "Use these tools to create calendar events from emails/messages, "
-        "manage care reminders, and help caregivers stay on top of benefits."
+        "You are connected to the Ilera caregiver app. Use these tools to log "
+        "caregiving hours and notes the caregiver reports, file calendar events "
+        "found in their email or messages, and manage care reminders. Anything "
+        "the caregiver tells you about care they gave or an upcoming date should "
+        "be written through a tool — chat replies alone are not recorded."
     ),
 )
 
@@ -134,6 +139,84 @@ def get_suggested_events() -> list[dict]:
     return [e.model_dump(mode="json") for e in list_suggested_events()]
 
 
+def _today() -> str:
+    return datetime.now(ZoneInfo(get_settings().default_timezone)).date().isoformat()
+
+
+@mcp.tool()
+def log_care_hours(
+    hours: float,
+    date: str | None = None,
+    service_type: str = "personal_care",
+    tasks: list[str] | None = None,
+    notes: str = "",
+    case_id: str | None = None,
+) -> dict:
+    """Record caregiving hours on the Ilera timesheet.
+
+    Call this whenever the caregiver tells you how long they spent caring for
+    someone — including replies to the daily check-in like "about 5 hours,
+    mostly bathing and meals". These hours are what IHSS timesheets and benefit
+    renewals are built from, so log them rather than only replying in chat.
+
+    Args:
+        hours: Hours spent caregiving, e.g. 4.5.
+        date: ISO date (YYYY-MM-DD) the care happened. Defaults to today.
+        service_type: One of "personal_care", "domestic", "paramedical",
+            "accompaniment". Bathing/dressing/feeding is personal_care;
+            cleaning/cooking/laundry is domestic; injections, wound care or
+            medication administration is paramedical; driving to or sitting in
+            on appointments is accompaniment.
+        tasks: Short task labels, e.g. ["bathing", "meal prep"].
+        notes: Anything else worth keeping for the record.
+        case_id: Ilera case this belongs to. Omit unless the caregiver names one.
+    """
+    entry = TimekeepingEntry(
+        case_id=case_id or get_settings().default_case_id,
+        date=date or _today(),
+        hours=hours,
+        service_type=service_type,
+        tasks=tasks or [],
+        notes=notes,
+    )
+    save_timekeeping(entry)
+    return {
+        "status": "created",
+        "entry_id": entry.id,
+        "date": entry.date,
+        "hours": entry.hours,
+        "service_type": entry.service_type,
+    }
+
+
+@mcp.tool()
+def log_care_note(text: str, date: str | None = None, case_id: str | None = None) -> dict:
+    """Record a care journal note — meals, mood, medications, incidents, falls.
+
+    Call this for the qualitative half of a check-in reply, alongside
+    `log_care_hours`. Notes mentioning a fall are flagged automatically, which
+    matters for benefit reviews, so log the caregiver's own words.
+
+    Args:
+        text: What happened, in the caregiver's words.
+        date: ISO date (YYYY-MM-DD). Defaults to today.
+        case_id: Ilera case this belongs to. Omit unless the caregiver names one.
+    """
+    entry = JournalEntry(
+        case_id=case_id or get_settings().default_case_id,
+        date=date or _today(),
+        text=text,
+        fall_flagged=_detect_fall(text),
+    )
+    save_journal(entry)
+    return {
+        "status": "created",
+        "entry_id": entry.id,
+        "date": entry.date,
+        "fall_flagged": entry.fall_flagged,
+    }
+
+
 @mcp.tool()
 def remove_suggested_event(event_id: str) -> dict:
     """Remove a suggested event from the calendar.
@@ -151,7 +234,7 @@ def get_reminders() -> list[dict]:
 
     Returns reminders for daily care logs, appointments, renewal deadlines, etc.
     """
-    return [r.model_dump() for r in list_reminders()]
+    return [r.model_dump(mode="json") for r in list_reminders()]
 
 
 @mcp.tool()

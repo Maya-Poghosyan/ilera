@@ -55,6 +55,9 @@ const events: CalEvent[] = [
   { day: 9, title: "IHSS timesheet due", kind: "Deadline" },
 ];
 
+// Reminder times are wall-clock in the caregiver's own zone, not the server's.
+const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 const SCAN_POLL_ATTEMPTS = 10;
 const SCAN_POLL_INTERVAL_MS = 3000;
 
@@ -228,6 +231,7 @@ export default function CalendarPage() {
           time: formTime,
           weekday: formFreq === "weekly" ? formWeekday : null,
           date: formFreq === "once" ? formDate : null,
+          timezone: LOCAL_TIMEZONE,
         },
       });
       showToast("Reminder updated");
@@ -240,6 +244,7 @@ export default function CalendarPage() {
           time: formTime,
           weekday: formFreq === "weekly" ? formWeekday : undefined,
           date: formFreq === "once" ? formDate : undefined,
+          timezone: LOCAL_TIMEZONE,
         },
       };
       await createReminder(body);
@@ -286,7 +291,7 @@ export default function CalendarPage() {
     await createReminder({
       kind: "daily_care_log",
       message: "",
-      schedule: { freq: "daily", time: "18:00" },
+      schedule: { freq: "daily", time: "18:00", timezone: LOCAL_TIMEZONE },
     });
     showToast("Daily care-log check-in enabled");
     await loadReminders();

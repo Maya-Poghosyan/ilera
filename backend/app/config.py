@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     # Core
     app_name: str = "Ilera API"
     cors_origins: str = "http://localhost:3000"
+    # IANA zone reminder schedules are interpreted in ("18:00" means 6pm here).
+    default_timezone: str = "America/Los_Angeles"
+    # Case that Poke's check-in replies are logged against when it doesn't name one.
+    default_case_id: str = "demo"
 
     # Auth
     jwt_secret: str = "ilera-dev-secret-change-in-production"
