@@ -76,6 +76,19 @@ settings = get_settings()
 _SCHEDULER_INTERVAL = 30  # seconds between ticks
 
 
+def _care_log_message(reminder: Reminder) -> str:
+    """The daily check-in, personalised from the reminder's case when there is one."""
+    case_id = reminder.case_id or settings.default_case_id
+    profile = get_profile(case_id) if case_id else None
+    if profile is None:
+        return poke.daily_care_log_prompt()
+    return poke.daily_care_log_prompt(
+        recipient_name=profile.care_recipient.name,
+        caregiver_name=profile.caregiver.name,
+        case_id=case_id,
+    )
+
+
 async def _scheduler_loop() -> None:
     """Check for due reminders every interval and fire them via Poke."""
     while True:
@@ -93,7 +106,7 @@ async def _scheduler_loop() -> None:
                 # Determine message
                 msg = reminder.message
                 if reminder.kind == ReminderKind.daily_care_log and not msg:
-                    msg = poke.daily_care_log_prompt()
+                    msg = _care_log_message(reminder)
                 if not msg:
                     continue
                 # Send via Poke (no-op if key missing)
@@ -663,7 +676,7 @@ def api_run_now(reminder_id: str) -> dict:
         raise HTTPException(status_code=404, detail="reminder not found")
     msg = r.message
     if r.kind == ReminderKind.daily_care_log and not msg:
-        msg = poke.daily_care_log_prompt()
+        msg = _care_log_message(r)
     if not msg:
         raise HTTPException(status_code=400, detail="reminder has no message")
     if not poke.available():

@@ -289,6 +289,8 @@ export default function CalendarPage() {
 
   const enableDailyCareLog = async () => {
     await createReminder({
+      // Scopes the check-in to this case so Poke logs hours against the right one.
+      case_id: localStorage.getItem("ilera_case_id"),
       kind: "daily_care_log",
       message: "",
       schedule: { freq: "daily", time: "18:00", timezone: LOCAL_TIMEZONE },

@@ -38,14 +38,24 @@ def send_message(message: str) -> dict:
         return {"status": resp.status_code, "text": resp.text}
 
 
-def daily_care_log_prompt(recipient_name: str = "your loved one") -> str:
+def daily_care_log_prompt(
+    recipient_name: str = "", caregiver_name: str = "", case_id: str = ""
+) -> str:
+    """The daily check-in, written as an instruction to the user's Poke.
+
+    The inbound API drops this into the caregiver's own conversation, so it
+    addresses the assistant and refers to the caregiver in the third person.
+    """
+    who = recipient_name or "their loved one"
+    caregiver = caregiver_name or "the caregiver"
+    scoped = f' Pass case_id "{case_id}" to both tools.' if case_id else ""
     return (
-        f"Daily Ilera check-in: ask me how caregiving went today for {recipient_name} "
-        "— hours spent and anything notable (meals, meds, mood, incidents). "
-        "When I reply, record it in Ilera: call the `log_care_hours` tool with the "
-        "hours and the kind of care, and `log_care_note` with what I said. "
-        "Don't just acknowledge it in chat — the timesheet is what benefit "
-        "renewals are built from."
+        f"Daily Ilera check-in: ask {caregiver} how caregiving went today for "
+        f"{who} — hours spent and anything notable (meals, meds, mood, incidents). "
+        "When they reply, record it in Ilera: call the `log_care_hours` tool with "
+        "the hours and the kind of care, and `log_care_note` with what they said."
+        f"{scoped} Don't just acknowledge it in chat — the timesheet is what "
+        "benefit renewals are built from."
     )
 
 
