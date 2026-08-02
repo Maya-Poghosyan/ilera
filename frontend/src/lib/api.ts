@@ -122,6 +122,8 @@ export function scanForEvents(): Promise<{ requested: boolean; known_event_ids: 
 
 export type SuggestedEventAPI = {
   id: string;
+  /** ISO YYYY-MM-DD. `day` is the day-of-month derived from it. */
+  date: string;
   day: number;
   title: string;
   time?: string;

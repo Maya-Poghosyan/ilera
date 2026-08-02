@@ -70,7 +70,7 @@ def scan_for_events() -> dict:
                 "caregiving-related — appointments, prescription refills, "
                 "insurance renewals, lab results, care-plan updates. "
                 "For each item you find, call the Ilera Caregiver "
-                "`add_suggested_event` tool with the day of the month, a short "
+                "`add_suggested_event` tool with the date as YYYY-MM-DD, a short "
                 "title, the time if one is given, a kind of Appointment, Visit, "
                 "Deadline or Reminder, and a description saying where you found "
                 "it. Skip anything already returned by `get_suggested_events` so "

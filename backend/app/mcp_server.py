@@ -90,45 +90,48 @@ def build_mcp_app() -> ASGIApp:
 
 @mcp.tool()
 def add_suggested_event(
-    day: int,
+    date: str,
     title: str,
     description: str,
     time: str | None = None,
     kind: str = "Appointment",
 ) -> dict:
-    """Create a suggested calendar event detected from an email or message.
+    """File a caregiving event you found in the user's email, messages or calendar.
 
-    Use this when you find a medical appointment, pharmacy pickup, benefit
-    deadline, or other caregiving-related event in the user's emails or
-    messages. The event will appear as a suggestion on the Ilera Care Calendar.
+    Call this once per event, as soon as you find one — medical appointments,
+    pharmacy pickups and refills, lab results, insurance or benefit renewal
+    deadlines, paperwork due dates, home visits. It is the only way to get an
+    event onto the Ilera Care Calendar; describing it in chat does nothing.
+    Call `get_suggested_events` first and skip anything already filed.
 
     Args:
-        day: Day of the month (1-31).
+        date: Calendar date as ISO 8601 YYYY-MM-DD (e.g. "2026-06-15"). Resolve
+            relative dates like "next Tuesday" against today before calling.
         title: Short event title (e.g. "Dr. Smith cardiology follow-up").
         description: Where it was detected and context
             (e.g. "Found in email from Kaiser — appointment confirmation for June 15").
-        time: Optional time string (e.g. "2:30 PM").
+        time: Optional time of day (e.g. "2:30 PM").
         kind: Event type — one of "Appointment", "Visit", "Deadline", "Reminder".
     """
     event = SuggestedEvent(
-        day=day,
+        date=date,
         title=title,
         time=time,
         kind=kind,
         description=description,
     )
     save_suggested_event(event)
-    return {"status": "created", "event_id": event.id, "title": title, "day": day}
+    return {"status": "created", "event_id": event.id, "title": title, "date": date}
 
 
 @mcp.tool()
 def get_suggested_events() -> list[dict]:
-    """List all suggested calendar events currently on the Ilera Care Calendar.
+    """List the events already filed on the Ilera Care Calendar.
 
-    Returns the events that were detected from emails/messages and are
-    waiting for the caregiver to accept or dismiss.
+    Check this before calling `add_suggested_event` so you don't file the same
+    appointment or deadline twice.
     """
-    return [e.model_dump() for e in list_suggested_events()]
+    return [e.model_dump(mode="json") for e in list_suggested_events()]
 
 
 @mcp.tool()

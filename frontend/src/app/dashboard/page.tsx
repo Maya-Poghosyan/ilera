@@ -36,6 +36,8 @@ type EventKind = "Appointment" | "Visit" | "Deadline";
 type CalEvent = {
   id?: string;
   day: number;
+  /** ISO YYYY-MM-DD when known; absent for the hardcoded demo events. */
+  date?: string;
   title: string;
   time?: string;
   kind: EventKind;
@@ -65,6 +67,7 @@ function apiEventToCalEvent(e: SuggestedEventAPI): CalEvent {
   return {
     id: e.id,
     day: e.day,
+    date: e.date,
     title: e.title,
     time: e.time,
     kind: (e.kind as EventKind) || "Appointment",
@@ -76,6 +79,23 @@ function apiEventToCalEvent(e: SuggestedEventAPI): CalEvent {
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const monthName = new Date(YEAR, MONTH, 1).toLocaleString("en-US", { month: "long" });
+
+// Events carrying a date only belong on the grid when it falls in the shown month.
+function isInDisplayedMonth(e: CalEvent): boolean {
+  if (!e.date) return true;
+  const [year, month] = e.date.split("-").map(Number);
+  return year === YEAR && month === MONTH + 1;
+}
+
+function formatEventDate(e: CalEvent): string {
+  if (!e.date) return e.day > 0 ? `${monthName} ${e.day}` : "";
+  const [year, month, day] = e.date.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: year === YEAR ? undefined : "numeric",
+  });
+}
 
 type Cell = { day: number; inMonth: boolean };
 
@@ -481,7 +501,7 @@ export default function CalendarPage() {
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-sm font-medium text-foreground">{e.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    {e.day > 0 ? `${monthName} ${e.day}` : ""}{e.time ? ` \u00b7 ${e.time}` : ""}{" \u00b7 "}{e.kind}
+                    {formatEventDate(e)}{e.time ? ` \u00b7 ${e.time}` : ""}{" \u00b7 "}{e.kind}
                   </p>
                   {e.description && (
                     <p className="text-xs leading-relaxed text-muted-foreground/80">
@@ -542,7 +562,7 @@ export default function CalendarPage() {
           {cells.map((cell, i) => {
             const isToday = cell.inMonth && cell.day === TODAY;
             const dayEvents = cell.inMonth
-              ? allEvents.filter((e) => e.day === cell.day)
+              ? allEvents.filter((e) => e.day === cell.day && isInDisplayedMonth(e))
               : [];
             return (
               <div
