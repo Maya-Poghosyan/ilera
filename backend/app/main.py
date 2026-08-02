@@ -28,7 +28,7 @@ from .forms.filler import fill_pdf, list_schemas, resolve_fields
 from .geo import normalize_county, zip_to_county
 from .integrations import poke
 from .intake import INTAKE_SCHEMA, map_answers_to_profile
-from .mcp_server import mcp as mcp_server
+from .mcp_server import build_mcp_app
 from .models import BandStatus, CaseProfile, EligibilityResult
 from .rag.embeddings import provider as embedding_provider
 from .rag.index import get_index, rebuild_index
@@ -187,10 +187,19 @@ app.add_middleware(
 )
 
 # Mount MCP server for Poke integration (SSE transport at /mcp)
-app.mount("/mcp", mcp_server.sse_app())
+app.mount("/mcp", build_mcp_app())
 
 # Auth routes
 app.include_router(auth_router)
+
+
+@app.get("/healthz")
+def healthz() -> dict:
+    """Liveness only — cheap enough for a platform health check.
+
+    ``/health`` builds the RAG index on first call, which takes minutes cold.
+    """
+    return {"status": "ok"}
 
 
 @app.get("/health")

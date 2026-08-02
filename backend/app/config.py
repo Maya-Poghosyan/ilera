@@ -51,6 +51,9 @@ class Settings(BaseSettings):
 
     # Integrations
     poke_api_key: str = ""
+    # Shared secret Poke must present as a bearer token on the /mcp mount.
+    # Empty disables the check (local development only).
+    mcp_api_key: str = ""
     browserbase_api_key: str = ""
     browserbase_project_id: str = ""
 

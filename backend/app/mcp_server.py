@@ -5,12 +5,20 @@ calendar events, manage reminders, and interact with the Ilera caregiver app.
 
 Mount the SSE app at ``/mcp`` in the main FastAPI application::
 
-    from .mcp_server import mcp
-    app.mount("/mcp", mcp.sse_app())
+    from .mcp_server import build_mcp_app
+    app.mount("/mcp", build_mcp_app())
+
+Poke reaches this over the public internet, so ``MCP_API_KEY`` gates every
+request. Poke sends the integration's API key as ``Authorization: Bearer ...``.
 """
 
-from mcp.server.fastmcp import FastMCP
+import hmac
+import logging
 
+from mcp.server.fastmcp import FastMCP
+from starlette.types import ASGIApp, Receive, Scope, Send
+
+from .config import get_settings
 from .reminders import (
     Reminder,
     ReminderKind,
@@ -36,6 +44,48 @@ mcp = FastMCP(
         "manage care reminders, and help caregivers stay on top of benefits."
     ),
 )
+
+
+logger = logging.getLogger(__name__)
+
+
+class BearerTokenMiddleware:
+    """Reject requests whose bearer token doesn't match the configured key."""
+
+    def __init__(self, app: ASGIApp, token: str) -> None:
+        self.app = app
+        self.token = token
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        header = dict(scope["headers"]).get(b"authorization", b"").decode()
+        presented = header[7:] if header.lower().startswith("bearer ") else ""
+        if not hmac.compare_digest(presented, self.token):
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": 401,
+                    "headers": [(b"content-type", b"text/plain")],
+                }
+            )
+            await send({"type": "http.response.body", "body": b"unauthorized"})
+            return
+        await self.app(scope, receive, send)
+
+
+def build_mcp_app() -> ASGIApp:
+    """The MCP SSE app, wrapped in bearer auth when ``MCP_API_KEY`` is set."""
+    app = mcp.sse_app()
+    token = get_settings().mcp_api_key
+    if not token:
+        logger.warning(
+            "MCP_API_KEY is not set — the MCP server is unauthenticated. "
+            "Set it before exposing this app publicly."
+        )
+        return app
+    return BearerTokenMiddleware(app, token)
 
 
 @mcp.tool()
