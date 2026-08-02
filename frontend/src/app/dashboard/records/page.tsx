@@ -10,15 +10,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createJournal,
+  createReminder,
   createTimekeeping,
   deleteJournalEntry,
+  deleteReminder,
   deleteTimekeepingEntry,
   getRenewal,
   listJournal,
+  listReminders,
   listTimekeeping,
   updateRenewal,
 } from "@/lib/api";
 import type { JournalEntry, RenewalInfo, ServiceType, TimekeepingEntry } from "@/lib/types";
+
+// The check-in fires at 6pm wall-clock wherever the caregiver is.
+const CHECK_IN_TIME = "18:00";
+const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   personal_care: "Personal Care",
@@ -32,6 +39,8 @@ export default function RecordsPage() {
   const [timekeeping, setTimekeeping] = useState<TimekeepingEntry[]>([]);
   const [journal, setJournal] = useState<JournalEntry[]>([]);
   const [renewal, setRenewal] = useState<RenewalInfo | null>(null);
+  // id of this case's daily check-in reminder, null when it isn't set up
+  const [checkInId, setCheckInId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Timekeeping form
@@ -55,14 +64,18 @@ export default function RecordsPage() {
 
   const loadData = useCallback(async (id: string) => {
     try {
-      const [tk, jn, rn] = await Promise.all([
+      const [tk, jn, rn, reminders] = await Promise.all([
         listTimekeeping(id),
         listJournal(id),
         getRenewal(id),
+        listReminders(),
       ]);
       setTimekeeping(tk);
       setJournal(jn);
       setRenewal(rn);
+      setCheckInId(
+        reminders.find((r) => r.kind === "daily_care_log" && r.case_id === id)?.id ?? null
+      );
     } catch {
       // API may not be running
     } finally {
@@ -105,6 +118,21 @@ export default function RecordsPage() {
     setTkServiceType("personal_care");
     setTkTasks("");
     setTkNotes("");
+    await loadData(caseId);
+  };
+
+  const handleToggleCheckIn = async () => {
+    if (!caseId) return;
+    if (checkInId) {
+      await deleteReminder(checkInId);
+    } else {
+      await createReminder({
+        case_id: caseId,
+        kind: "daily_care_log",
+        message: "",
+        schedule: { freq: "daily", time: CHECK_IN_TIME, timezone: LOCAL_TIMEZONE },
+      });
+    }
     await loadData(caseId);
   };
 
@@ -228,6 +256,28 @@ export default function RecordsPage() {
                 Submit timesheet to IHSS portal
                 <ExternalLink className="size-3.5" />
               </a>
+              <div className="flex items-start gap-2 pt-1">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-label="Daily text check-in"
+                  aria-checked={checkInId !== null}
+                  onClick={handleToggleCheckIn}
+                  className={`relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors ${
+                    checkInId ? "bg-primary" : "bg-muted-foreground/30"
+                  }`}
+                >
+                  <span
+                    className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${
+                      checkInId ? "left-4.5" : "left-0.5"
+                    }`}
+                  />
+                </button>
+                <p className="max-w-sm text-sm text-muted-foreground">
+                  Your assistant texts you at 6pm asking how care went, and logs your
+                  hours here from the reply
+                </p>
+              </div>
             </div>
             <Button size="sm" variant="outline" onClick={() => setShowTkForm(true)}>
               + Entry
