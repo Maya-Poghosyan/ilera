@@ -16,6 +16,7 @@ import {
   listReminders,
   listSuggestedEvents,
   runReminderNow,
+  scanForEvents,
   updateReminder,
 } from "@/lib/api";
 import type { SuggestedEventAPI } from "@/lib/api";
@@ -51,6 +52,9 @@ const events: CalEvent[] = [
   { day: 5, title: "County social worker visit", time: "2:00 PM", kind: "Visit" },
   { day: 9, title: "IHSS timesheet due", kind: "Deadline" },
 ];
+
+const SCAN_POLL_ATTEMPTS = 10;
+const SCAN_POLL_INTERVAL_MS = 3000;
 
 const STATIC_SUGGESTED: CalEvent[] = [
   { day: 3, title: "Pharmacy refill pickup", time: "9:00 AM", kind: "Appointment", suggested: true, description: "Found in email from CVS \u2014 prescription #4021 ready for pickup at Main St location." },
@@ -123,6 +127,7 @@ export default function CalendarPage() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [apiSuggested, setApiSuggested] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [scanning, setScanning] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // Reminder form
@@ -164,6 +169,23 @@ export default function CalendarPage() {
     loadReminders();
     loadSuggestedEvents();
   }, [loadReminders, loadSuggestedEvents]);
+
+  // Poke files what it finds asynchronously via MCP, so poll for a while after asking.
+  const handleScan = useCallback(async () => {
+    setScanning(true);
+    try {
+      await scanForEvents();
+      showToast("Scanning your inbox \u2014 new events will appear here");
+      for (let i = 0; i < SCAN_POLL_ATTEMPTS; i++) {
+        await new Promise((r) => setTimeout(r, SCAN_POLL_INTERVAL_MS));
+        await loadSuggestedEvents();
+      }
+    } catch {
+      showToast("Couldn't reach Poke \u2014 check the assistant connection");
+    } finally {
+      setScanning(false);
+    }
+  }, [loadSuggestedEvents, showToast]);
 
   const resetForm = () => {
     setFormKind("custom");
@@ -437,6 +459,15 @@ export default function CalendarPage() {
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="size-4" />
             <h3 className="text-sm font-semibold">Suggested Events</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto"
+              disabled={scanning}
+              onClick={handleScan}
+            >
+              {scanning ? "Scanning\u2026" : "Scan inbox"}
+            </Button>
           </div>
           <p className="text-xs text-muted-foreground">
             Detected from recent emails and documents. Accept to add to your calendar.

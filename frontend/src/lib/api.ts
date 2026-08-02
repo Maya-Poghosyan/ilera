@@ -108,8 +108,12 @@ export function getReminderTemplates(): Promise<ReminderTemplates> {
 // Poke scanning
 // ---------------------------------------------------------------------------
 
-export function scanForEvents(): Promise<{ scanned: boolean; poke: unknown }> {
-  return request<{ scanned: boolean; poke: unknown }>("/api/poke/scan", { method: "POST" });
+// Poke scans asynchronously and files results by calling the MCP server, so this
+// only confirms the request was queued — poll listSuggestedEvents for results.
+export function scanForEvents(): Promise<{ requested: boolean; known_event_ids: string[] }> {
+  return request<{ requested: boolean; known_event_ids: string[] }>("/api/poke/scan", {
+    method: "POST",
+  });
 }
 
 // ---------------------------------------------------------------------------

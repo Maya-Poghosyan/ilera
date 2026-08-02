@@ -776,14 +776,19 @@ def api_preview_stitched(case_id: str, program: str, body: AnswersSubmit) -> Res
 
 @app.post("/api/poke/scan")
 def poke_scan_events() -> dict:
-    """Ask Poke to scan the user's messages/emails for medical events."""
+    """Ask Poke to scan the user's messages/emails for medical events.
+
+    Poke works asynchronously and files what it finds by calling the
+    ``add_suggested_event`` MCP tool, so this only confirms the request was
+    queued — clients should poll ``/api/suggested-events`` for results.
+    """
     if not poke.available():
         raise HTTPException(status_code=400, detail="POKE_API_KEY not configured")
     try:
-        result = poke.scan_for_events()
+        poke.scan_for_events()
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Poke scan failed: {exc}") from exc
-    return {"scanned": True, "poke": result}
+    return {"requested": True, "known_event_ids": [e.id for e in list_suggested_events()]}
 
 
 

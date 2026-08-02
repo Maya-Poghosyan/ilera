@@ -48,8 +48,12 @@ def daily_care_log_prompt(recipient_name: str = "your loved one") -> str:
 
 def scan_for_events() -> dict:
     """Ask Poke to scan the user's recent messages/emails for medical or
-    caregiving-related events.  Returns the raw Poke response (the caller
-    decides how to surface the suggestions).
+    caregiving-related events and file each one through the Ilera MCP server.
+
+    The inbound API is fire-and-forget: the response only acknowledges delivery.
+    Poke does the work asynchronously and reports results by calling the
+    ``add_suggested_event`` MCP tool, so the caller should poll the suggested
+    events store rather than read anything out of the return value.
     """
     settings = get_settings()
     if not settings.poke_api_key:
@@ -65,10 +69,13 @@ def scan_for_events() -> dict:
                 "Scan my recent emails and messages for anything medical or "
                 "caregiving-related — appointments, prescription refills, "
                 "insurance renewals, lab results, care-plan updates. "
-                "For each item found, return a JSON array of objects with keys: "
-                "title, date (ISO-8601 if available, otherwise descriptive), "
-                "source (email subject or message preview), and kind "
-                "(Appointment, Deadline, Refill, Lab, or Other)."
+                "For each item you find, call the Ilera Caregiver "
+                "`add_suggested_event` tool with the day of the month, a short "
+                "title, the time if one is given, a kind of Appointment, Visit, "
+                "Deadline or Reminder, and a description saying where you found "
+                "it. Skip anything already returned by `get_suggested_events` so "
+                "you do not file duplicates. When you are done, text me a one-line "
+                "summary of what you added."
             ),
         },
         timeout=30.0,
