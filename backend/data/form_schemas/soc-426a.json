@@ -263,21 +263,6 @@
       ]
     },
     {
-      "id": "recipient_signature_date",
-      "prompt": "Date you signed the Recipient Acknowledgment",
-      "help": "Enter the date you (the recipient) signed the acknowledgment on this form.",
-      "inputs": [
-        {
-          "key": "recipient_signature_date",
-          "label": "Recipient signature date",
-          "type": "date",
-          "fields": [
-            "pg3-1"
-          ]
-        }
-      ]
-    },
-    {
       "id": "authorized_representative_acknowledgment",
       "prompt": "If an authorized representative signed for you, provide their printed name and the date they signed",
       "help": "Only complete this if someone is signing on your behalf.",
@@ -287,14 +272,6 @@
           "label": "Authorized representative's printed name",
           "fields": [
             "pg3-4"
-          ]
-        },
-        {
-          "key": "authorized_representative_signature_date",
-          "label": "Authorized representative signature date",
-          "type": "date",
-          "fields": [
-            "pg3-3"
           ]
         }
       ]
@@ -308,6 +285,14 @@
     {
       "field": "pg3-6",
       "reason": "For county use only (worker signature date)"
+    },
+    {
+      "field": "pg3-1",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "pg3-3",
+      "reason": "signed by hand on the printed form"
     }
   ]
 }

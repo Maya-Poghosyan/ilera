@@ -42,18 +42,41 @@ const APP_STATUS_LABELS: Record<AppStatus, string> = {
 
 type FlowStep = "list" | "loading" | "questions" | "completing" | "preview";
 
-/** Consecutive questions belonging to the same group, so each screen is one question. */
+/** The inputs the backend put under one `group_id`: one thing a person knows. */
 function groupQuestions(questions: AppQuestion[]): AppQuestion[][] {
-  const steps: AppQuestion[][] = [];
+  const groups: AppQuestion[][] = [];
   for (const question of questions) {
-    const last = steps[steps.length - 1];
+    const last = groups[groups.length - 1];
     if (last && question.group_id && last[0].group_id === question.group_id) {
       last.push(question);
     } else {
-      steps.push([question]);
+      groups.push([question]);
     }
   }
-  return steps;
+  return groups;
+}
+
+const INPUTS_PER_SCREEN = 6;
+
+/**
+ * Groups gathered onto screens, so a yes/no question doesn't get a page to itself.
+ *
+ * Neighbouring groups come from the same part of the form, so they read as one short
+ * page of related questions. The packing is done before any answers are given and
+ * never changes, so answering something can't shuffle the screens underneath you.
+ */
+function toScreens(groups: AppQuestion[][]): AppQuestion[][][] {
+  const screens: AppQuestion[][][] = [];
+  for (const group of groups) {
+    const last = screens[screens.length - 1];
+    const filled = last?.reduce((n, g) => n + g.length, 0) ?? 0;
+    if (last && filled + group.length <= INPUTS_PER_SCREEN) {
+      last.push(group);
+    } else {
+      screens.push([group]);
+    }
+  }
+  return screens;
 }
 
 /**
@@ -64,14 +87,22 @@ function groupQuestions(questions: AppQuestion[]): AppQuestion[][] {
  * condition skips the screen; an unreadable one shows it, since an unasked question is
  * a blank box on a government form.
  */
-function shouldAsk(step: AppQuestion[], answers: Answers): boolean {
-  const condition = step[0]?.ask_when;
+function shouldAsk(
+  group: AppQuestion[],
+  answers: Answers,
+  screen: AppQuestion[][]
+): boolean {
+  const condition = group[0]?.ask_when;
   if (!condition) return true;
   const match = /^\s*([\w.]+)\s*(==|!=)\s*(.+?)\s*$/.exec(condition);
   if (!match) return true;
   const [, path, op, rawExpected] = match;
   const answer = answers[path];
-  if (answer === undefined || answer === null || answer === "") return true;
+  if (answer === undefined || answer === null || answer === "") {
+    // The question it hangs off is on this screen and still blank: wait for it rather
+    // than show a follow-up above the thing that decides whether it applies.
+    return !screen.some((g) => g.some((q) => q.field_id === path));
+  }
   const expected = rawExpected.replace(/^['"]|['"]$/g, "").toLowerCase();
   const given = (Array.isArray(answer) ? answer : [answer]).map((v) =>
     String(v).toLowerCase()
@@ -96,13 +127,14 @@ export default function ApplicationsPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
 
-  // A screen, not a question: the backend groups the inputs that make up one thing a
-  // person knows (an address, an employer) under a shared group_id, so they are asked
-  // together instead of one box at a time.
-  const steps = groupQuestions(questions).filter((step) =>
-    shouldAsk(step, answers)
-  );
-  const currentStep = steps[stepIndex] ?? [];
+  // Screens, not questions: the backend puts the inputs making up one thing a person
+  // knows (an address, an employer) under a shared group_id, and a handful of those
+  // groups share a screen.
+  const screens = toScreens(groupQuestions(questions))
+    .map((screen) => screen.filter((group) => shouldAsk(group, answers, screen)))
+    .filter((screen) => screen.length > 0);
+  const currentScreen = screens[stepIndex] ?? [];
+  const currentQuestions = currentScreen.flat();
 
   useEffect(() => {
     const stored =
@@ -162,13 +194,13 @@ export default function ApplicationsPage() {
   }
 
   function goToNextQuestion() {
-    if (currentStep.length === 0) return;
-    const errs = validateQuestions(currentStep as Question[], answers);
+    if (currentQuestions.length === 0) return;
+    const errs = validateQuestions(currentQuestions as Question[], answers);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
     }
-    if (stepIndex >= steps.length - 1) {
+    if (stepIndex >= screens.length - 1) {
       if (activeProgram) handleGeneratePreview(activeProgram, answers);
       return;
     }
@@ -245,12 +277,8 @@ export default function ApplicationsPage() {
   // Q&A step
   // -----------------------------------------------------------------------
   if (flowStep === "questions" && activeProgram) {
-    const isLastQuestion = stepIndex >= steps.length - 1;
-    const pct = ((stepIndex + 1) / steps.length) * 100;
-    const prompt = currentStep[0]?.group_prompt ?? "";
-    // Inputs of a group tend to repeat one explanation ("the Primary Contact must be 18
-    // or older") under every box. It is said once, above the boxes it applies to.
-    const helpShownAbove = currentStep[0]?.why_this_matters ?? "";
+    const isLastQuestion = stepIndex >= screens.length - 1;
+    const pct = ((stepIndex + 1) / screens.length) * 100;
     return (
       <div className="mx-auto w-full max-w-2xl space-y-6">
         <Button variant="ghost" size="sm" onClick={handleBackToList}>
@@ -270,38 +298,50 @@ export default function ApplicationsPage() {
         <div className="space-y-2">
           <Progress value={pct} />
           <p className="text-xs text-muted-foreground">
-            Question {stepIndex + 1} of {steps.length}
+            Step {stepIndex + 1} of {screens.length}
           </p>
         </div>
 
         <Card>
-          <CardContent className="space-y-6 pt-6">
-            {prompt && (
-              <div className="space-y-1">
-                <p className="font-medium">{prompt}</p>
-                {helpShownAbove && (
-                  <p className="text-xs text-muted-foreground">
-                    {helpShownAbove}
-                  </p>
-                )}
-              </div>
-            )}
-            {currentStep.map((question, i) => (
-              <QuestionField
-                key={question.field_id}
-                question={
-                  (question.why_this_matters === helpShownAbove ||
-                  question.why_this_matters ===
-                    currentStep[i - 1]?.why_this_matters
-                    ? { ...question, why_this_matters: "" }
-                    : question) as Question
-                }
-                value={answers[question.field_id] ?? null}
-                name=""
-                error={errors[question.field_id]}
-                onChange={(v) => setAnswer(question.field_id, v)}
-              />
-            ))}
+          <CardContent className="divide-y pt-6">
+            {currentScreen.map((group, g) => {
+              // Inputs of a group tend to repeat one explanation ("the Primary Contact
+              // must be 18 or older") under every box. It is said once, above them.
+              const shared = group[0]?.why_this_matters ?? "";
+              return (
+                <div
+                  key={group[0].group_id || group[0].field_id}
+                  className={`space-y-4 pb-5 ${g === 0 ? "" : "pt-5"}`}
+                >
+                  {group[0].group_prompt && (
+                    <div className="space-y-1">
+                      <p className="text-base font-semibold">
+                        {group[0].group_prompt}
+                      </p>
+                      {shared && (
+                        <p className="text-xs text-muted-foreground">{shared}</p>
+                      )}
+                    </div>
+                  )}
+                  {group.map((question, i) => (
+                    <QuestionField
+                      key={question.field_id}
+                      question={
+                        (question.why_this_matters === shared ||
+                        question.why_this_matters ===
+                          group[i - 1]?.why_this_matters
+                          ? { ...question, why_this_matters: "" }
+                          : question) as Question
+                      }
+                      value={answers[question.field_id] ?? null}
+                      name=""
+                      error={errors[question.field_id]}
+                      onChange={(v) => setAnswer(question.field_id, v)}
+                    />
+                  ))}
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
 

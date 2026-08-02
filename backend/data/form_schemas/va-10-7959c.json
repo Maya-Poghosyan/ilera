@@ -876,28 +876,16 @@
           "required": false
         }
       ]
-    },
-    {
-      "id": "signature",
-      "prompt": "Please sign and date to certify that the information is correct.",
-      "inputs": [
-        {
-          "key": "signature",
-          "label": "Signature (type if returning electronically)",
-          "fields": [
-            "form1[0].#subform[0].#area[6].Signature[0]"
-          ]
-        },
-        {
-          "key": "signature_date",
-          "label": "Date of signature",
-          "type": "date",
-          "fields": [
-            "form1[0].#subform[0].#area[6].DateTimeField1[0]"
-          ]
-        }
-      ]
     }
   ],
-  "skip_fields": []
+  "skip_fields": [
+    {
+      "field": "form1[0].#subform[0].#area[6].Signature[0]",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "form1[0].#subform[0].#area[6].DateTimeField1[0]",
+      "reason": "signed by hand on the printed form"
+    }
+  ]
 }

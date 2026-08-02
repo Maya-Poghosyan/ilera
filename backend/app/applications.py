@@ -7,6 +7,7 @@ and stitching multiple filled PDFs into a single combined document.
 
 import io
 import json
+import re
 from enum import Enum
 from typing import Any, Optional
 
@@ -185,6 +186,8 @@ def _clean_label(text: str) -> str:
         if sep in text and text.lower().startswith("section"):
             text = text.split(sep, 1)[1]
             break
+    # The frontend marks optional fields itself, so a label saying so reads twice.
+    text = re.sub(r"[\s(]*\(?optional\)?[\s)]*$", "", text, flags=re.I)
     return text.strip()
 
 
@@ -250,7 +253,7 @@ def _group_questions(
             questions.append(
                 AppQuestion(
                     field_id=f"{group.id}.{inp.key}",
-                    text=inp.label,
+                    text=_clean_label(inp.label),
                     type=inp.type,
                     required=inp.required,
                     options=list(inp.options),

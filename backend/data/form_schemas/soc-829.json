@@ -254,33 +254,20 @@
           ]
         }
       ]
-    },
-    {
-      "id": "provider_signature",
-      "prompt": "Please sign and date to authorize direct deposit (by signing you acknowledge you will not send 100% of funds deposited to your bank to another bank outside the US).",
-      "inputs": [
-        {
-          "key": "signature",
-          "label": "Signature of payee (provider)",
-          "fields": [
-            "SOC 829 18"
-          ]
-        },
-        {
-          "key": "signature_date",
-          "label": "Date of signature",
-          "type": "date",
-          "fields": [
-            "SOC 829 19"
-          ]
-        }
-      ]
     }
   ],
   "skip_fields": [
     {
       "field": "SOC 829 21",
       "reason": "End of form/footer text — informational only, not a user input; leave blank."
+    },
+    {
+      "field": "SOC 829 18",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "SOC 829 19",
+      "reason": "signed by hand on the printed form"
     }
   ]
 }

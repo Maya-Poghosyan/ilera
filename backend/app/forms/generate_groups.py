@@ -24,6 +24,7 @@ import argparse
 import asyncio
 import json
 import os
+import re
 import sys
 from typing import Optional
 
@@ -67,7 +68,8 @@ earlier group on this page, which is how you express a form's "if yes, ..." foll
 - Put a field in `skip` when no applicant should ever be asked it, rather than making a \
 group for it. Anything the printed text marks "for county use only", "for staff use", \
 "do not write in this space", a worker/agency name, an office date stamp, or an \
-instruction that happens to be fillable. Leave them blank on the form.
+instruction that happens to be fillable. Also every signature line and the date beside \
+it: the form is signed by hand once printed. Leave them blank on the form.
 - `id` must describe the content, in snake_case, and must be the same string whenever \
 the same information is asked on another page or another form: `recipient_home_address`, \
 `provider_date_of_birth`. This is what lets one answer fill several forms.
@@ -238,6 +240,44 @@ def _validate(output: PageGroups, fields: list[dict]) -> list[str]:
     return errors
 
 
+_SIGNATURE = re.compile(r"signature|signed by|initials", re.I)
+
+
+def skip_signatures(
+    groups: list[QuestionGroup], skip: list[SkippedField], fields: dict[str, dict]
+) -> list[QuestionGroup]:
+    """Stop asking people to type a signature.
+
+    A signature is made by hand on the printed form, and the date beside it is the date
+    it was signed — neither is an answer anyone can give here, so those boxes are left
+    blank and their screens disappear.
+    """
+    already = {s.field for s in skip}
+    kept: list[QuestionGroup] = []
+    for group in groups:
+        inputs: list[GroupInput] = []
+        for inp in group.inputs:
+            signed = _SIGNATURE.search(f"{group.prompt} {inp.label} {inp.key}") or any(
+                (fields.get(name) or {}).get("type") == "signature"
+                for name in inp.target_fields()
+            )
+            if not signed:
+                inputs.append(inp)
+                continue
+            for name in inp.target_fields():
+                if name not in already:
+                    already.add(name)
+                    skip.append(
+                        SkippedField(
+                            field=name, reason="signed by hand on the printed form"
+                        )
+                    )
+        if inputs:
+            group.inputs = inputs
+            kept.append(group)
+    return kept
+
+
 def dedupe_targets(groups: list[QuestionGroup]) -> list[QuestionGroup]:
     """Leave each field to one group, dropping later claims on it.
 
@@ -267,6 +307,26 @@ def dedupe_targets(groups: list[QuestionGroup]) -> list[QuestionGroup]:
             group.inputs = inputs
             kept.append(group)
     return kept
+
+
+_PERSON = re.compile(r"^person_(\d+)_")
+
+
+def gate_person_blocks(groups: list[QuestionGroup]) -> None:
+    """Ask about the second, third and fourth person only if they exist.
+
+    Forms that repeat a person block are drafted a page at a time, so whether the block
+    is the second or the fourth is visible on some pages and not others. `person_3_*`
+    says it plainly, and a three-person household is never asked the fourth block's
+    ~30 questions.
+    """
+    for group in groups:
+        match = _PERSON.match(group.id)
+        if not match or group.applies_when:
+            continue
+        nth = int(match.group(1))
+        if nth > 1:
+            group.applies_when = f"household.size >= {nth}"
 
 
 def repair_conditions(groups: list[QuestionGroup]) -> None:
@@ -391,8 +451,11 @@ async def generate_groups(
         )
 
     groups = dedupe_targets(list(merged.values()))
+    skip = list(skipped.values())
+    groups = skip_signatures(groups, skip, fields_by_name)
+    gate_person_blocks(groups)
     repair_conditions(groups)
-    return groups, list(skipped.values())
+    return groups, skip
 
 
 def write_groups(

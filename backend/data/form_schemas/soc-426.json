@@ -452,22 +452,12 @@
           ]
         }
       ]
-    },
-    {
-      "id": "county_representative_signature_date",
-      "prompt": "If a county representative signed this form, what date did they sign it? (optional)",
-      "inputs": [
-        {
-          "key": "date",
-          "label": "County representative signature date",
-          "type": "date",
-          "fields": [
-            "SOC 426 Pg 5 3"
-          ],
-          "required": false
-        }
-      ]
     }
   ],
-  "skip_fields": []
+  "skip_fields": [
+    {
+      "field": "SOC 426 Pg 5 3",
+      "reason": "signed by hand on the printed form"
+    }
+  ]
 }

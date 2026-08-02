@@ -9,6 +9,7 @@ that a grouped answer lands where the group says it does.
 Runs against the in-memory store (no services). Run directly or via pytest.
 """
 import os
+import re
 import sys
 
 os.environ.pop("REDIS_URL", None)  # force the in-memory store fallback
@@ -241,6 +242,35 @@ def test_gating_reads_booleans_and_strings():
     la = CaseProfile(id="c", care_recipient=CareRecipient(county="Los Angeles"))
     assert applies(_group("care_recipient.county == 'Los Angeles'"), la)
     assert not applies(_group("care_recipient.county != 'Los Angeles'"), la)
+
+
+def test_nobody_is_asked_to_type_a_signature():
+    """A signature is made by hand on the printed form, so it is never a question."""
+    for form_id in _grouped_form_ids():
+        for group in load_groups(filler.load_schema(form_id)):
+            for inp in group.inputs:
+                text = f"{group.prompt} {inp.label} {inp.key}".lower()
+                assert "signature" not in text, f"{form_id}/{group.id}.{inp.key}"
+
+
+def test_repeated_person_blocks_are_gated_on_household_size():
+    """Person 3's ~30 questions are for households that have a third person."""
+    for form_id in _grouped_form_ids():
+        for group in load_groups(filler.load_schema(form_id)):
+            match = re.match(r"^person_(\d+)_", group.id)
+            if not match or int(match.group(1)) < 2:
+                continue
+            assert group.applies_when, f"{form_id}/{group.id} is asked of everyone"
+
+
+def test_a_smaller_household_is_asked_less():
+    """The gating has to show up in what the applicant actually sees."""
+    def screens(size: int) -> int:
+        profile = CaseProfile(id=f"hh{size}", household=Household(size=size))
+        result = applications.start_application(f"hh-{size}", "Medi-Cal", profile)
+        return len({q["group_id"] or q["field_id"] for q in result["questions"]})
+
+    assert screens(1) < screens(4)
 
 
 # ---------------------------------------------------------------------------

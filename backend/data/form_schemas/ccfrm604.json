@@ -7286,6 +7286,7 @@
     {
       "id": "person_2_overview",
       "prompt": "Person 2 — provide the first name, date of birth, addresses, homelessness, and gender",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "person_2_first_name",
@@ -7431,6 +7432,7 @@
     {
       "id": "person_3_overview",
       "prompt": "Person 3 — provide the first name, date of birth, addresses, homelessness, and gender",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "person_3_first_name",
@@ -7576,6 +7578,7 @@
     {
       "id": "person_4_overview",
       "prompt": "Person 4 — provide the first name, date of birth, addresses, homelessness, and gender",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "person_4_first_name",
@@ -7878,6 +7881,7 @@
     {
       "id": "person_2_details",
       "prompt": "Person 2 — Tell us their first name, marital status, pregnancy info (if any), language preferences, and any alternative format needed for written communications.",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "marital_status",
@@ -8035,6 +8039,7 @@
     {
       "id": "person_3_details",
       "prompt": "Person 3 — Tell us their first name, marital status, pregnancy info (if any), language preferences, and any alternative format needed for written communications.",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "marital_status",
@@ -8192,6 +8197,7 @@
     {
       "id": "person_4_details",
       "prompt": "Person 4 — Tell us their first name, marital status, pregnancy info (if any), language preferences, and any alternative format needed for written communications.",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "marital_status",
@@ -8495,6 +8501,7 @@
     {
       "id": "person_2_profile",
       "prompt": "About Person 2: enter their first name and answer a few optional identity and status questions.",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "ethnicity",
@@ -8641,6 +8648,7 @@
     {
       "id": "person_3_profile",
       "prompt": "About Person 3: enter their first name and answer a few optional identity and status questions.",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "ethnicity",
@@ -8787,6 +8795,7 @@
     {
       "id": "person_4_profile",
       "prompt": "About Person 4: enter their first name and answer a few optional identity and status questions.",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "ethnicity",
@@ -9621,6 +9630,7 @@
     {
       "id": "person_2_coverage",
       "prompt": "Person 2 — please confirm this person's first name and answer the questions about applying and Social Security information.",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "applying",
@@ -9732,6 +9742,7 @@
     {
       "id": "person_3_coverage",
       "prompt": "Person 3 — please confirm this person's first name and answer the questions about applying and Social Security information.",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "applying",
@@ -9843,6 +9854,7 @@
     {
       "id": "person_4_coverage",
       "prompt": "Person 4 — please confirm this person's first name and answer the questions about applying and Social Security information.",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "applying",
@@ -10077,6 +10089,7 @@
     {
       "id": "person_2_health_coverage",
       "prompt": "Person 2 — write their first name and answer these health-coverage questions",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "person_2_disability",
@@ -10168,6 +10181,7 @@
     {
       "id": "person_2_foster_care",
       "prompt": "If Person 2 is 18 to 26 years old: were they in foster care on their 18th birthday or later?",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "person_2_foster_care_yes_no",
@@ -10200,6 +10214,7 @@
     {
       "id": "person_3_health_coverage",
       "prompt": "Person 3 — write their first name and answer these health-coverage questions",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "person_3_disability",
@@ -10291,6 +10306,7 @@
     {
       "id": "person_3_foster_care",
       "prompt": "If Person 3 is 18 to 26 years old: were they in foster care on their 18th birthday or later?",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "person_3_foster_care_yes_no",
@@ -10323,6 +10339,7 @@
     {
       "id": "person_4_health_coverage",
       "prompt": "Person 4 — write their first name and answer these health-coverage questions",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "person_4_disability",
@@ -10414,6 +10431,7 @@
     {
       "id": "person_4_foster_care",
       "prompt": "If Person 4 is 18 to 26 years old: were they in foster care on their 18th birthday or later?",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "person_4_foster_care_yes_no",
@@ -10506,6 +10524,7 @@
       "id": "person_2_citizenship",
       "prompt": "For Person 2, what's their first name and are they a U.S. citizen or U.S. national?",
       "help": "We only use this information to determine eligibility for health insurance. Certificate and Alien numbers only if they have them.",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "person_2_is_us_citizen",
@@ -10565,6 +10584,7 @@
       "id": "person_3_citizenship",
       "prompt": "For Person 3, what's their first name and are they a U.S. citizen or U.S. national?",
       "help": "We only use this information to determine eligibility for health insurance. Certificate and Alien numbers only if they have them.",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "person_3_is_us_citizen",
@@ -10624,6 +10644,7 @@
       "id": "person_4_citizenship",
       "prompt": "For Person 4, what's their first name and are they a U.S. citizen or U.S. national?",
       "help": "We only use this information to determine eligibility for health insurance. Certificate and Alien numbers only if they have them.",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "person_4_is_us_citizen",
@@ -10790,6 +10811,7 @@
     {
       "id": "person_2_citizenship_immigration",
       "prompt": "Person 2 — first name, and if they have one, their immigration status and immigration document details",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "immigration_status",
@@ -10898,6 +10920,7 @@
     {
       "id": "person_3_citizenship_immigration",
       "prompt": "Person 3 — first name, and if they have one, their immigration status and immigration document details",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "immigration_status",
@@ -11006,6 +11029,7 @@
     {
       "id": "person_4_citizenship_immigration",
       "prompt": "Person 4 — first name, and if they have one, their immigration status and immigration document details",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "immigration_status",
@@ -12813,28 +12837,6 @@
       ]
     },
     {
-      "id": "authorized_representative_signature",
-      "prompt": "Sign and date to authorize this person or organization to act on your behalf.",
-      "inputs": [
-        {
-          "key": "signature",
-          "label": "Signature to authorize the person or organization above to act on your behalf regarding your Covered California or Medi‑Cal case",
-          "fields": [
-            "rep_sign"
-          ],
-          "help": "Type the name you use as your signature."
-        },
-        {
-          "key": "signature_date",
-          "label": "Date of signature (MM/DD/YYYY)",
-          "type": "date",
-          "fields": [
-            "rep_sign_date_1"
-          ]
-        }
-      ]
-    },
-    {
       "id": "renewal_tax_check_consent",
       "prompt": "How long do you agree to allow Covered California to check your tax returns to help automatically renew your eligibility?",
       "help": "If you do not want Covered California to check your tax returns, select that option. You can change this decision at any time.",
@@ -12871,30 +12873,6 @@
               "agreement-6"
             ]
           }
-        }
-      ]
-    },
-    {
-      "id": "applicant_signature",
-      "prompt": "Please sign below and enter the date you signed the application.",
-      "help": "Signer should be the applicant or an authorized representative. Date format: MM/DD/YYYY.",
-      "inputs": [
-        {
-          "key": "signature",
-          "label": "Signature of applicant or authorized representative",
-          "fields": [
-            "signed"
-          ],
-          "help": "Enter the signature exactly as you would sign the form."
-        },
-        {
-          "key": "signature_date",
-          "label": "Date of signature (MM/DD/YYYY)",
-          "type": "date",
-          "fields": [
-            "date_signed_1"
-          ],
-          "help": "Enter the month, day, and full year you signed the application."
         }
       ]
     },
@@ -12944,42 +12922,6 @@
           "fields": [
             "certi_status-5-1"
           ]
-        }
-      ]
-    },
-    {
-      "id": "certified_individual_info",
-      "prompt": "Enter the certified individual's full name, certification number, signature, and the date signed",
-      "inputs": [
-        {
-          "key": "certified_individual_full_name",
-          "label": "Full name of the certified individual who helped fill out this application",
-          "fields": [
-            "plan_name_1"
-          ]
-        },
-        {
-          "key": "certified_individual_number",
-          "label": "Certified individual number",
-          "fields": [
-            "plan_num_1"
-          ]
-        },
-        {
-          "key": "certified_individual_signature",
-          "label": "Signature of the certified individual who helped fill out this application",
-          "fields": [
-            "signed_2"
-          ]
-        },
-        {
-          "key": "certified_individual_date_signed",
-          "label": "Date signed",
-          "type": "date",
-          "fields": [
-            "date_signed_2"
-          ],
-          "help": "Enter date as MM/DD/YYYY"
         }
       ]
     },
@@ -13130,6 +13072,7 @@
     {
       "id": "person_2_qualifying_life_event",
       "prompt": "If Person 2 had a qualifying life event in the last 60 days, enter their full name, the number for the life event from the list, and the date it happened.",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "pr2_first_name",
@@ -13216,6 +13159,7 @@
     {
       "id": "person_3_qualifying_life_event",
       "prompt": "If Person 3 had a qualifying life event in the last 60 days, enter their full name, the number for the life event from the list, and the date it happened.",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "pr3_first_name",
@@ -13302,6 +13246,7 @@
     {
       "id": "person_4_qualifying_life_event",
       "prompt": "If Person 4 had a qualifying life event in the last 60 days, enter their full name, the number for the life event from the list, and the date it happened.",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "pr4_first_name",
@@ -13436,6 +13381,7 @@
     {
       "id": "person_2_name_and_insurance",
       "prompt": "For Person 2, what is their first name and do they have (or have been offered) health insurance? If yes, tell us the name or the number from the list.",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "has_insurance",
@@ -13468,6 +13414,7 @@
     {
       "id": "person_3_name_and_insurance",
       "prompt": "For Person 3, what is their first name and do they have (or have been offered) health insurance? If yes, tell us the name or the number from the list.",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "has_insurance",
@@ -13500,6 +13447,7 @@
     {
       "id": "person_4_name_and_insurance",
       "prompt": "For Person 4, what is their first name and do they have (or have been offered) health insurance? If yes, tell us the name or the number from the list.",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "has_insurance",
@@ -14057,29 +14005,9 @@
       ]
     },
     {
-      "id": "person_1_signature",
-      "prompt": "If Person 1 is age 18 or older and is enrolling in a health plan, please sign and date here.",
-      "inputs": [
-        {
-          "key": "person_1_signature",
-          "label": "Person 1 — Signature",
-          "fields": [
-            "sign_p1"
-          ]
-        },
-        {
-          "key": "person_1_signature_date",
-          "label": "Person 1 — Date of signature (MM/DD/YYYY)",
-          "type": "date",
-          "fields": [
-            "sign_p1_date"
-          ]
-        }
-      ]
-    },
-    {
       "id": "person_2_signature",
       "prompt": "If Person 2 is age 18 or older and is enrolling in a health plan, please print name, sign, and date here.",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "person_2_printed_name",
@@ -14087,27 +14015,13 @@
           "fields": [
             "sign_p2_name"
           ]
-        },
-        {
-          "key": "person_2_signature",
-          "label": "Person 2 — Signature",
-          "fields": [
-            "sign_p2"
-          ]
-        },
-        {
-          "key": "person_2_signature_date",
-          "label": "Person 2 — Date of signature (MM/DD/YYYY)",
-          "type": "date",
-          "fields": [
-            "sign_p2_date"
-          ]
         }
       ]
     },
     {
       "id": "person_3_signature",
       "prompt": "If Person 3 is age 18 or older and is enrolling in a health plan, please print name, sign, and date here.",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "person_3_printed_name",
@@ -14115,48 +14029,19 @@
           "fields": [
             "sign_p3_name"
           ]
-        },
-        {
-          "key": "person_3_signature",
-          "label": "Person 3 — Signature",
-          "fields": [
-            "sign_p3"
-          ]
-        },
-        {
-          "key": "person_3_signature_date",
-          "label": "Person 3 — Date of signature (MM/DD/YYYY)",
-          "type": "date",
-          "fields": [
-            "sign_p3_date"
-          ]
         }
       ]
     },
     {
       "id": "person_4_signature",
       "prompt": "If Person 4 is age 18 or older and is enrolling in a health plan, please print name, sign, and date here.",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "person_4_printed_name",
           "label": "Person 4 — Printed name",
           "fields": [
             "sign_p4_name"
-          ]
-        },
-        {
-          "key": "person_4_signature",
-          "label": "Person 4 — Signature",
-          "fields": [
-            "sign_p4"
-          ]
-        },
-        {
-          "key": "person_4_signature_date",
-          "label": "Person 4 — Date of signature (MM/DD/YYYY)",
-          "type": "date",
-          "fields": [
-            "sign_p4_date"
           ]
         }
       ]
@@ -14298,6 +14183,7 @@
     {
       "id": "person_2_american_indian",
       "prompt": "Person 2 — first name, tribal membership, and Indian Health Service (IHS)/tribal program service details",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "person_2_tribe_member",
@@ -14372,6 +14258,7 @@
     {
       "id": "person_3_american_indian",
       "prompt": "Person 3 — first name, tribal membership, and Indian Health Service (IHS)/tribal program service details",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "person_3_tribe_member",
@@ -14446,6 +14333,7 @@
     {
       "id": "person_4_american_indian",
       "prompt": "Person 4 — first name, tribal membership, and Indian Health Service (IHS)/tribal program service details",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "person_4_tribe_member",
@@ -14704,6 +14592,7 @@
     {
       "id": "person_2_basic",
       "prompt": "Person 2 – first name and whether they get income from the listed American Indian/Alaska Native sources",
+      "applies_when": "household.size >= 2",
       "inputs": [
         {
           "key": "person_2_native_income",
@@ -14888,6 +14777,7 @@
     {
       "id": "person_3_basic",
       "prompt": "Person 3 – first name and whether they get income from the listed American Indian/Alaska Native sources",
+      "applies_when": "household.size >= 3",
       "inputs": [
         {
           "key": "person_3_native_income",
@@ -15072,6 +14962,7 @@
     {
       "id": "person_4_basic",
       "prompt": "Person 4 – first name and whether they get income from the listed American Indian/Alaska Native sources",
+      "applies_when": "household.size >= 4",
       "inputs": [
         {
           "key": "person_4_native_income",
@@ -15536,5 +15427,70 @@
       ]
     }
   ],
-  "skip_fields": []
+  "skip_fields": [
+    {
+      "field": "rep_sign",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "rep_sign_date_1",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "signed",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "date_signed_1",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "plan_name_1",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "plan_num_1",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "signed_2",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "date_signed_2",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "sign_p1",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "sign_p1_date",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "sign_p2",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "sign_p2_date",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "sign_p3",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "sign_p3_date",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "sign_p4",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "sign_p4_date",
+      "reason": "signed by hand on the printed form"
+    }
+  ]
 }

@@ -934,29 +934,16 @@
           "required": false
         }
       ]
-    },
-    {
-      "id": "certification_signature",
-      "prompt": "Certification — signature and date",
-      "help": "By signing you certify the information is true and you will notify VA of changes.",
-      "inputs": [
-        {
-          "key": "signature",
-          "label": "Signature (type name if returning electronically)",
-          "fields": [
-            "form1[0].#subform[0].#area[6].Signature[0]"
-          ]
-        },
-        {
-          "key": "signature_date",
-          "label": "Date (MMDDYYYY)",
-          "type": "date",
-          "fields": [
-            "form1[0].#subform[0].#area[6].DateTimeField1[0]"
-          ]
-        }
-      ]
     }
   ],
-  "skip_fields": []
+  "skip_fields": [
+    {
+      "field": "form1[0].#subform[0].#area[6].Signature[0]",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "form1[0].#subform[0].#area[6].DateTimeField1[0]",
+      "reason": "signed by hand on the printed form"
+    }
+  ]
 }

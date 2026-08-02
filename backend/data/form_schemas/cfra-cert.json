@@ -562,29 +562,16 @@
           ]
         }
       ]
-    },
-    {
-      "id": "signature_dates",
-      "prompt": "Enter the dates for the provider and employee signatures.",
-      "inputs": [
-        {
-          "key": "provider_signature_date",
-          "label": "Date (health care provider signature)",
-          "type": "date",
-          "fields": [
-            "DATE"
-          ]
-        },
-        {
-          "key": "employee_signature_date",
-          "label": "Date (employee signature)",
-          "type": "date",
-          "fields": [
-            "DATE_2"
-          ]
-        }
-      ]
     }
   ],
-  "skip_fields": []
+  "skip_fields": [
+    {
+      "field": "DATE",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "DATE_2",
+      "reason": "signed by hand on the printed form"
+    }
+  ]
 }

@@ -2016,61 +2016,6 @@
           "help": "Only complete this if you selected County Support above."
         }
       ]
-    },
-    {
-      "id": "affirmation_signature",
-      "prompt": "Please sign to affirm that the information on this form is true to the best of your knowledge and belief.",
-      "inputs": [
-        {
-          "key": "signature",
-          "label": "Signature (Affirmation)",
-          "fields": [
-            "SOC 295 1035"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "applicant_signature",
-      "prompt": "Please sign to confirm your application and provide the date.",
-      "inputs": [
-        {
-          "key": "signature",
-          "label": "Signature of applicant",
-          "fields": [
-            "SOC 295 Sig 1"
-          ]
-        },
-        {
-          "key": "signature_date",
-          "label": "Date (applicant signature)",
-          "type": "date",
-          "fields": [
-            "SOC 295 1038"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "applicant_representative_signature",
-      "prompt": "If someone is signing for you as your representative, please have them sign and provide the date.",
-      "inputs": [
-        {
-          "key": "rep_signature",
-          "label": "Signature of applicant’s representative",
-          "fields": [
-            "SOC 295 Sig 2"
-          ]
-        },
-        {
-          "key": "rep_signature_date",
-          "label": "Date (applicant’s representative signature)",
-          "type": "date",
-          "fields": [
-            "SOC 295 1040"
-          ]
-        }
-      ]
     }
   ],
   "skip_fields": [
@@ -2129,6 +2074,26 @@
     {
       "field": "SOC 295 1057",
       "reason": "Form control text: end-of-form marker — not for applicant input."
+    },
+    {
+      "field": "SOC 295 1035",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "SOC 295 Sig 1",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "SOC 295 1038",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "SOC 295 Sig 2",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "SOC 295 1040",
+      "reason": "signed by hand on the printed form"
     }
   ]
 }
