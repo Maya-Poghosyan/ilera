@@ -736,9 +736,8 @@
       "confidence": "medium"
     },
     "person_fname_1_1": {
-      "profile_path": null,
-      "label": "Person 1 — first name",
-      "needs_user_input": true
+      "profile_path": "care_recipient.first_name",
+      "label": "Person 1 — first name"
     },
     "person_fname_2_1": {
       "profile_path": null,
@@ -5001,24 +5000,29 @@
       "confidence": "medium"
     },
     "org_phone_1": {
-      "profile_path": "caregiver.phone",
-      "label": "Authorized representative phone number"
+      "profile_path": null,
+      "label": "Authorized representative phone number",
+      "needs_user_input": true
     },
     "org_zip_code_1": {
-      "profile_path": "caregiver.zip_code",
-      "label": "Authorized representative mailing address ZIP code"
+      "profile_path": null,
+      "label": "Authorized representative mailing address ZIP code",
+      "needs_user_input": true
     },
     "org_state_1": {
-      "profile_path": "caregiver.state",
-      "label": "Authorized representative mailing address state"
+      "profile_path": null,
+      "label": "Authorized representative mailing address state",
+      "needs_user_input": true
     },
     "org_city_1": {
-      "profile_path": "caregiver.city",
-      "label": "Authorized representative mailing address city"
+      "profile_path": null,
+      "label": "Authorized representative mailing address city",
+      "needs_user_input": true
     },
     "org_madd_1": {
-      "profile_path": "caregiver.street_address",
-      "label": "Authorized representative mailing address (number and street)"
+      "profile_path": null,
+      "label": "Authorized representative mailing address (number and street)",
+      "needs_user_input": true
     },
     "rep_sign_date_1": {
       "profile_path": null,
@@ -5676,13 +5680,15 @@
       "needs_user_input": true
     },
     "org_name_1": {
-      "profile_path": "caregiver.name",
+      "profile_path": null,
       "label": "Name of person or organization (authorized representative)",
-      "confidence": "medium"
+      "confidence": "medium",
+      "needs_user_input": true
     },
     "org_email_1": {
-      "profile_path": "caregiver.email",
-      "label": "Authorized representative email address"
+      "profile_path": null,
+      "label": "Authorized representative email address",
+      "needs_user_input": true
     },
     "insurance_emp-1": {
       "profile_path": null,
@@ -6483,9 +6489,8 @@
       "needs_user_input": true
     },
     "pr1_fname_1": {
-      "profile_path": null,
-      "label": "If Person 1 had a qualifying life event, enter their first name",
-      "needs_user_input": true
+      "profile_path": "care_recipient.first_name",
+      "label": "If Person 1 had a qualifying life event, enter their first name"
     },
     "pr2_fname_1": {
       "profile_path": null,
@@ -6815,9 +6820,10 @@
       "confidence": "medium"
     },
     "signed": {
-      "profile_path": "care_recipient.name",
+      "profile_path": null,
       "label": "Signature of applicant or authorized representative",
-      "confidence": "medium"
+      "confidence": "medium",
+      "needs_user_input": true
     },
     "signed_2": {
       "profile_path": null,
@@ -6825,9 +6831,8 @@
       "needs_user_input": true
     },
     "pr1_fname_3": {
-      "profile_path": null,
-      "label": "If Person 1 had a qualifying life event, enter their last name",
-      "needs_user_input": true
+      "profile_path": "care_recipient.last_name",
+      "label": "If Person 1 had a qualifying life event, enter their last name"
     },
     "pr1_fname_4": {
       "profile_path": null,
@@ -6917,14 +6922,6 @@
       "help": "The Primary Contact must be 18 or older. We will ask for their phone number and address on the next pages.",
       "inputs": [
         {
-          "key": "first_name",
-          "label": "First name",
-          "fields": [
-            "person_fname_1_1",
-            "pr1_fname_1"
-          ]
-        },
-        {
           "key": "middle_name",
           "label": "Middle name",
           "fields": [
@@ -6933,13 +6930,6 @@
             "pr1_fname_2"
           ],
           "required": false
-        },
-        {
-          "key": "last_name",
-          "label": "Last name",
-          "fields": [
-            "pr1_fname_3"
-          ]
         },
         {
           "key": "suffix",
@@ -12862,6 +12852,62 @@
               "org_p-3"
             ]
           },
+          "required": false
+        },
+        {
+          "key": "name",
+          "label": "Name of person or organization (authorized representative)",
+          "fields": [
+            "org_name_1"
+          ]
+        },
+        {
+          "key": "phone_number",
+          "label": "Authorized representative phone number (area code and number)",
+          "fields": [
+            "org_phone_1"
+          ],
+          "required": false,
+          "help": "Enter 10-digit phone number, no punctuation."
+        },
+        {
+          "key": "email",
+          "label": "Authorized representative email address",
+          "fields": [
+            "org_email_1"
+          ],
+          "required": false
+        },
+        {
+          "key": "mailing_street",
+          "label": "Mailing address (number and street)",
+          "fields": [
+            "org_madd_1"
+          ],
+          "required": false
+        },
+        {
+          "key": "mailing_city",
+          "label": "City of mailing address",
+          "fields": [
+            "org_city_1"
+          ],
+          "required": false
+        },
+        {
+          "key": "mailing_state",
+          "label": "State of mailing address",
+          "fields": [
+            "org_state_1"
+          ],
+          "required": false
+        },
+        {
+          "key": "mailing_zip",
+          "label": "ZIP Code of mailing address",
+          "fields": [
+            "org_zip_code_1"
+          ],
           "required": false
         }
       ]
