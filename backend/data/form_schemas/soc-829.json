@@ -108,5 +108,179 @@
       "label": "End of form.",
       "needs_user_input": true
     }
-  }
+  },
+  "groups": [
+    {
+      "id": "provider_home_address",
+      "prompt": "What's your street address, city, state, and ZIP code?",
+      "inputs": [
+        {
+          "key": "street",
+          "label": "Street address",
+          "fields": [
+            "SOC 829 3"
+          ],
+          "help": "Provider street address"
+        },
+        {
+          "key": "city",
+          "label": "City",
+          "fields": [
+            "SOC 829 4"
+          ],
+          "help": "Provider city"
+        },
+        {
+          "key": "state",
+          "label": "State",
+          "fields": [
+            "SOC 829 5"
+          ],
+          "help": "Provider state (two-letter abbreviation preferred)"
+        },
+        {
+          "key": "zip",
+          "label": "ZIP code",
+          "fields": [
+            "SOC 829 6"
+          ],
+          "help": "Provider ZIP code"
+        }
+      ]
+    },
+    {
+      "id": "provider_dd_action",
+      "prompt": "Are you enrolling in, changing, or cancelling direct deposit?",
+      "help": "Check only one option.",
+      "inputs": [
+        {
+          "key": "dd_action",
+          "label": "Select action",
+          "type": "single_select",
+          "fields": [
+            "SOC 829 7"
+          ],
+          "options": [
+            "NEW",
+            "CHANGE",
+            "CANCEL"
+          ],
+          "option_fields": {
+            "NEW": [
+              "SOC 829 8"
+            ],
+            "CHANGE": [
+              "SOC 829 9"
+            ],
+            "CANCEL": [
+              "SOC 829 10"
+            ]
+          },
+          "option_values": {
+            "NEW": "NEW",
+            "CHANGE": "CHANGE",
+            "CANCEL": "CANCEL"
+          }
+        }
+      ]
+    },
+    {
+      "id": "provider_identifiers",
+      "prompt": "What's your case number and provider number?",
+      "inputs": [
+        {
+          "key": "case_number",
+          "label": "Case number",
+          "fields": [
+            "SOC 829 11"
+          ]
+        },
+        {
+          "key": "provider_number",
+          "label": "Provider number",
+          "fields": [
+            "SOC 829 12"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bank_account_type",
+      "prompt": "Is this a checking or savings account?",
+      "inputs": [
+        {
+          "key": "account_type",
+          "label": "Type of account",
+          "type": "single_select",
+          "options": [
+            "Checking",
+            "Savings"
+          ],
+          "option_fields": {
+            "Checking": [
+              "SOC 829 13"
+            ],
+            "Savings": [
+              "SOC 829 14"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bank_account",
+      "prompt": "What's your bank routing number, account number, and bank name?",
+      "inputs": [
+        {
+          "key": "routing_number",
+          "label": "Routing number (9 digits)",
+          "fields": [
+            "SOC 829 15"
+          ],
+          "help": "Enter the 9-digit bank routing (ABA) number."
+        },
+        {
+          "key": "account_number",
+          "label": "Account number",
+          "fields": [
+            "SOC 829 16"
+          ]
+        },
+        {
+          "key": "bank_name",
+          "label": "Bank name",
+          "fields": [
+            "SOC 829 17"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "provider_signature",
+      "prompt": "Please sign and date to authorize direct deposit (by signing you acknowledge you will not send 100% of funds deposited to your bank to another bank outside the US).",
+      "inputs": [
+        {
+          "key": "signature",
+          "label": "Signature of payee (provider)",
+          "fields": [
+            "SOC 829 18"
+          ]
+        },
+        {
+          "key": "signature_date",
+          "label": "Date of signature",
+          "type": "date",
+          "fields": [
+            "SOC 829 19"
+          ]
+        }
+      ]
+    }
+  ],
+  "skip_fields": [
+    {
+      "field": "SOC 829 21",
+      "reason": "End of form/footer text — informational only, not a user input; leave blank."
+    }
+  ]
 }

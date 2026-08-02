@@ -138,5 +138,176 @@
       "check_when": "Other",
       "confidence": "medium"
     }
-  }
+  },
+  "groups": [
+    {
+      "id": "ihss_case_number",
+      "prompt": "What is the County IHSS Case number for the recipient?",
+      "inputs": [
+        {
+          "key": "ihss_case_number",
+          "label": "County IHSS Case #",
+          "fields": [
+            "pg1-2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "provider_address",
+      "prompt": "Provider's mailing address",
+      "help": "Enter the street address, and then the city, state, and ZIP.",
+      "inputs": [
+        {
+          "key": "street",
+          "label": "Street address",
+          "fields": [
+            "pg1-4"
+          ]
+        },
+        {
+          "key": "city_state_zip",
+          "label": "City, State, ZIP",
+          "fields": [
+            "pg1-5"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "provider_personal",
+      "prompt": "Provider's date of birth, Social Security number, gender, and the date they will start providing services",
+      "help": "The SSN is required to verify identity and work authorization.",
+      "inputs": [
+        {
+          "key": "date_of_birth",
+          "label": "Provider's date of birth",
+          "type": "date",
+          "fields": [
+            "pg1-7"
+          ]
+        },
+        {
+          "key": "ssn",
+          "label": "Provider's Social Security number",
+          "fields": [
+            "pg1-8"
+          ],
+          "help": "Enter numbers only."
+        },
+        {
+          "key": "gender",
+          "label": "Provider's gender",
+          "type": "single_select",
+          "fields": [
+            "pg1-9"
+          ],
+          "options": [
+            "Male",
+            "Female"
+          ]
+        },
+        {
+          "key": "start_date",
+          "label": "Provider's start date",
+          "type": "date",
+          "fields": [
+            "pg1-12"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "provider_relationship",
+      "prompt": "What is the provider's relationship to the recipient?",
+      "help": "Choose the one that best describes the provider's relationship.",
+      "inputs": [
+        {
+          "key": "relationship",
+          "label": "Relationship to recipient",
+          "type": "single_select",
+          "options": [
+            "Parent",
+            "Child",
+            "Spouse/Domestic Partner",
+            "Conservator",
+            "Guardian",
+            "Other"
+          ],
+          "option_fields": {
+            "Child": [
+              "Pg 1_11"
+            ],
+            "Conservator": [
+              "Pg1_13"
+            ],
+            "Guardian": [
+              "Pg1_14"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "provider_relationship_other",
+      "prompt": "If the relationship is 'Other', please specify what it is.",
+      "applies_when": "provider_relationship.relationship == \"Other\"",
+      "inputs": [
+        {
+          "key": "other_relationship",
+          "label": "Other (please specify)",
+          "fields": [
+            "pg1-11"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "recipient_signature_date",
+      "prompt": "Date you signed the Recipient Acknowledgment",
+      "help": "Enter the date you (the recipient) signed the acknowledgment on this form.",
+      "inputs": [
+        {
+          "key": "recipient_signature_date",
+          "label": "Recipient signature date",
+          "type": "date",
+          "fields": [
+            "pg3-1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "authorized_representative_acknowledgment",
+      "prompt": "If an authorized representative signed for you, provide their printed name and the date they signed",
+      "help": "Only complete this if someone is signing on your behalf.",
+      "inputs": [
+        {
+          "key": "authorized_representative_printed_name",
+          "label": "Authorized representative's printed name",
+          "fields": [
+            "pg3-4"
+          ]
+        },
+        {
+          "key": "authorized_representative_signature_date",
+          "label": "Authorized representative signature date",
+          "type": "date",
+          "fields": [
+            "pg3-3"
+          ]
+        }
+      ]
+    }
+  ],
+  "skip_fields": [
+    {
+      "field": "pg3-5",
+      "reason": "For county use only (worker name)"
+    },
+    {
+      "field": "pg3-6",
+      "reason": "For county use only (worker signature date)"
+    }
+  ]
 }

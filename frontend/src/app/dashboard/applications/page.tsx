@@ -42,6 +42,44 @@ const APP_STATUS_LABELS: Record<AppStatus, string> = {
 
 type FlowStep = "list" | "loading" | "questions" | "completing" | "preview";
 
+/** Consecutive questions belonging to the same group, so each screen is one question. */
+function groupQuestions(questions: AppQuestion[]): AppQuestion[][] {
+  const steps: AppQuestion[][] = [];
+  for (const question of questions) {
+    const last = steps[steps.length - 1];
+    if (last && question.group_id && last[0].group_id === question.group_id) {
+      last.push(question);
+    } else {
+      steps.push([question]);
+    }
+  }
+  return steps;
+}
+
+/**
+ * Whether a follow-up screen is worth showing, given what has been answered.
+ *
+ * The backend sends the "if yes, ..." parts of a form with an `ask_when` naming the
+ * answer they depend on, e.g. `past_ihss.received_ihss_before == "Yes"`. An unmet
+ * condition skips the screen; an unreadable one shows it, since an unasked question is
+ * a blank box on a government form.
+ */
+function shouldAsk(step: AppQuestion[], answers: Answers): boolean {
+  const condition = step[0]?.ask_when;
+  if (!condition) return true;
+  const match = /^\s*([\w.]+)\s*(==|!=)\s*(.+?)\s*$/.exec(condition);
+  if (!match) return true;
+  const [, path, op, rawExpected] = match;
+  const answer = answers[path];
+  if (answer === undefined || answer === null || answer === "") return true;
+  const expected = rawExpected.replace(/^['"]|['"]$/g, "").toLowerCase();
+  const given = (Array.isArray(answer) ? answer : [answer]).map((v) =>
+    String(v).toLowerCase()
+  );
+  const matches = given.includes(expected);
+  return op === "==" ? matches : !matches;
+}
+
 export default function ApplicationsPage() {
   const [apps, setApps] = useState<ApplicationEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +94,15 @@ export default function ApplicationsPage() {
   const [autofilled, setAutofilled] = useState(0);
   const [totalFields, setTotalFields] = useState(0);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [stepIndex, setStepIndex] = useState(0);
+
+  // A screen, not a question: the backend groups the inputs that make up one thing a
+  // person knows (an address, an employer) under a shared group_id, so they are asked
+  // together instead of one box at a time.
+  const steps = groupQuestions(questions).filter((step) =>
+    shouldAsk(step, answers)
+  );
+  const currentStep = steps[stepIndex] ?? [];
 
   useEffect(() => {
     const stored =
@@ -91,7 +137,7 @@ export default function ApplicationsPage() {
     setFlowStep("loading");
     setAnswers({});
     setErrors({});
-    setQuestionIndex(0);
+    setStepIndex(0);
 
     startApplication(caseId, program).then((result) => {
       setAutofilled(result.autofilled);
@@ -116,23 +162,22 @@ export default function ApplicationsPage() {
   }
 
   function goToNextQuestion() {
-    const current = questions[questionIndex];
-    if (!current) return;
-    const errs = validateQuestions([current as Question], answers);
+    if (currentStep.length === 0) return;
+    const errs = validateQuestions(currentStep as Question[], answers);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
     }
-    if (questionIndex >= questions.length - 1) {
+    if (stepIndex >= steps.length - 1) {
       if (activeProgram) handleGeneratePreview(activeProgram, answers);
       return;
     }
-    setQuestionIndex((i) => i + 1);
+    setStepIndex((i) => i + 1);
   }
 
   function goToPrevQuestion() {
     setErrors({});
-    setQuestionIndex((i) => Math.max(0, i - 1));
+    setStepIndex((i) => Math.max(0, i - 1));
   }
 
   function handleGeneratePreview(
@@ -200,9 +245,9 @@ export default function ApplicationsPage() {
   // Q&A step
   // -----------------------------------------------------------------------
   if (flowStep === "questions" && activeProgram) {
-    const current = questions[questionIndex];
-    const isLastQuestion = questionIndex >= questions.length - 1;
-    const pct = ((questionIndex + 1) / questions.length) * 100;
+    const isLastQuestion = stepIndex >= steps.length - 1;
+    const pct = ((stepIndex + 1) / steps.length) * 100;
+    const prompt = currentStep[0]?.group_prompt ?? "";
     return (
       <div className="mx-auto w-full max-w-2xl space-y-6">
         <Button variant="ghost" size="sm" onClick={handleBackToList}>
@@ -222,28 +267,30 @@ export default function ApplicationsPage() {
         <div className="space-y-2">
           <Progress value={pct} />
           <p className="text-xs text-muted-foreground">
-            Question {questionIndex + 1} of {questions.length}
+            Question {stepIndex + 1} of {steps.length}
           </p>
         </div>
 
         <Card>
-          <CardContent className="pt-6">
-            {current && (
+          <CardContent className="space-y-6 pt-6">
+            {prompt && <p className="font-medium">{prompt}</p>}
+            {currentStep.map((question) => (
               <QuestionField
-                question={current as Question}
-                value={answers[current.field_id] ?? null}
+                key={question.field_id}
+                question={question as Question}
+                value={answers[question.field_id] ?? null}
                 name=""
-                error={errors[current.field_id]}
-                onChange={(v) => setAnswer(current.field_id, v)}
+                error={errors[question.field_id]}
+                onChange={(v) => setAnswer(question.field_id, v)}
               />
-            )}
+            ))}
           </CardContent>
         </Card>
 
         <div className="flex justify-between">
           <Button
             variant="outline"
-            disabled={questionIndex === 0}
+            disabled={stepIndex === 0}
             onClick={goToPrevQuestion}
           >
             Back

@@ -199,5 +199,392 @@
       "type": "radio",
       "needs_user_input": true
     }
-  }
+  },
+  "groups": [
+    {
+      "id": "patient_is_family_member",
+      "prompt": "Is the patient the employee’s family member (for example: child, parent, spouse, domestic partner, designated person)?",
+      "inputs": [
+        {
+          "key": "is_family_member",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "employee is the equivalent of a family relationship"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "medical_condition_commenced_date",
+      "prompt": "Date the medical condition or need for treatment commenced",
+      "inputs": [
+        {
+          "key": "condition_commenced_date",
+          "label": "Date condition commenced",
+          "type": "date",
+          "fields": [
+            "THE UNDERLYING DIAGNOSIS WITHOUT CONSENT OF THE PATIENT"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probable_duration_medical_condition",
+      "prompt": "Probable duration of the medical condition or need for treatment",
+      "inputs": [
+        {
+          "key": "probable_duration",
+          "label": "Probable duration",
+          "fields": [
+            "4  Probable duration of medical condition or need for treatment"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "condition_is_serious_health_condition",
+      "prompt": "Does the patient’s condition qualify as a serious health condition?",
+      "inputs": [
+        {
+          "key": "is_serious_health_condition",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "Below is a description of what constitutes a “serious health condition” under both the"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "employee_able_to_perform_work",
+      "prompt": "Is the employee able to perform work of any kind?",
+      "applies_when": "patient_is_family_member.is_family_member == \"No\"",
+      "inputs": [
+        {
+          "key": "able_to_work",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "Is the employee able to perform work of any kind? (If “No,” skip next question)Is the employee able to perform work of any kind? (If “No,” skip next question)"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "employee_unable_to_perform_essential_functions",
+      "prompt": "Is the employee unable to perform any one or more of the essential functions of the employee’s position?",
+      "applies_when": "patient_is_family_member.is_family_member == \"No\"",
+      "inputs": [
+        {
+          "key": "unable_essential_functions",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "Is employee unable to perform any one or more of the essential functions of employee’s"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "patient_requires_assistance",
+      "prompt": "Does (or will) the patient require assistance for basic medical, hygiene, nutritional needs, safety, or transportation?",
+      "applies_when": "patient_is_family_member.is_family_member == \"Yes\"",
+      "inputs": [
+        {
+          "key": "requires_assistance",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "Does (or will) the patient require assistance for basic medical, hygiene,"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "condition_warrants_employee_participation",
+      "prompt": "After review of the employee’s signed statement, does the condition warrant the participation of the employee (including psychological comfort or arranging for third‑party care)?",
+      "applies_when": "patient_is_family_member.is_family_member == \"Yes\"",
+      "inputs": [
+        {
+          "key": "warrants_participation",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "After review of the employee’s signed statement (see item 10 below)"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "care_period_estimate",
+      "prompt": "Estimate the period of time care is needed or during which the employee’s presence would be beneficial.",
+      "inputs": [
+        {
+          "key": "period_description",
+          "label": "Estimate period of time / explanation",
+          "type": "long_text",
+          "fields": [
+            "8  Estimate the period of time care is needed or during which the employees presence would be beneficial"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intermittent_leave",
+      "prompt": "Is it medically necessary for the employee to be off work on an intermittent basis because of the serious health condition of the employee or a family member?",
+      "inputs": [
+        {
+          "key": "intermittent_needed",
+          "label": "Intermittent leave needed?",
+          "type": "single_select",
+          "fields": [
+            "Intermittent Leave"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intermittent_leave_details",
+      "prompt": "If intermittent leave is needed, describe the estimated frequency and the duration of such leaves.",
+      "applies_when": "intermittent_leave.intermittent_needed == 'Yes'",
+      "inputs": [
+        {
+          "key": "frequency_description",
+          "label": "Describe frequency (e.g., 1 episode every 3 months)",
+          "fields": [
+            "health condition and the duration of such leaves eg 1 episode every 3 months lasting 12 days"
+          ]
+        },
+        {
+          "key": "times_per_period",
+          "label": "Times (number)",
+          "fields": [
+            "weeks"
+          ],
+          "help": "Enter the number used in the frequency (times per ___ week(s))"
+        },
+        {
+          "key": "times_per_months",
+          "label": "Months (number) for frequency period",
+          "fields": [
+            "months"
+          ],
+          "help": "Enter the number used in the frequency (times per ___ month(s))"
+        },
+        {
+          "key": "duration_hours_per_episode",
+          "label": "Duration in hours per episode (if applicable)",
+          "fields": [
+            "hours or"
+          ]
+        },
+        {
+          "key": "duration_days_per_episode",
+          "label": "Duration in days per episode (if applicable)",
+          "fields": [
+            "days per episode"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reduced_schedule_leave",
+      "prompt": "Is it medically necessary for the employee to work less than the normal work schedule (reduced schedule leave)?",
+      "inputs": [
+        {
+          "key": "reduced_needed",
+          "label": "Reduced schedule needed?",
+          "type": "single_select",
+          "fields": [
+            "Reduced Schedule Leave"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reduced_schedule_details",
+      "prompt": "If a reduced work schedule is needed, indicate the part‑time or reduced schedule required.",
+      "applies_when": "reduced_schedule_leave.reduced_needed == 'Yes'",
+      "inputs": [
+        {
+          "key": "hours_per_day",
+          "label": "Hours per day needed",
+          "fields": [
+            "If yes please indicate the parttime or reduced work schedule the employee needs"
+          ]
+        },
+        {
+          "key": "days_per_week",
+          "label": "Days per week under reduced schedule",
+          "fields": [
+            "days per week from"
+          ]
+        },
+        {
+          "key": "reduced_start_date",
+          "label": "Reduced schedule start date (from)",
+          "type": "date",
+          "fields": [
+            "through"
+          ]
+        },
+        {
+          "key": "reduced_end_date",
+          "label": "Reduced schedule end date (through)",
+          "type": "date",
+          "fields": [
+            "reduced work schedule"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "time_off_medical_appointments",
+      "prompt": "Is it medically necessary for the employee to take time off work for doctor’s visits or medical treatment?",
+      "inputs": [
+        {
+          "key": "appointments_needed",
+          "label": "Time off for appointments or treatment needed?",
+          "type": "single_select",
+          "fields": [
+            "Time Off for Medical Appointments or Treatment"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "medical_appointments_details",
+      "prompt": "If time off for appointments is needed, indicate the estimated frequency and the time required for each appointment (including recovery).",
+      "applies_when": "time_off_medical_appointments.appointments_needed == 'Yes'",
+      "inputs": [
+        {
+          "key": "appointments_description",
+          "label": "Describe the appointments and time required (including recovery)",
+          "type": "long_text",
+          "fields": [
+            "treatment and the time required for each appointment including any recovery period"
+          ]
+        },
+        {
+          "key": "appointment_times_count",
+          "label": "Number of times",
+          "fields": [
+            "times per"
+          ]
+        },
+        {
+          "key": "appointment_frequency_period",
+          "label": "Frequency period (number of weeks or months)",
+          "fields": [
+            "weeks_2"
+          ],
+          "help": "Enter the number of weeks or months used in the frequency (e.g., times per 3 week(s) or month(s))"
+        },
+        {
+          "key": "appointment_duration_hours",
+          "label": "Estimated duration in hours per appointment",
+          "fields": [
+            "Duration"
+          ]
+        },
+        {
+          "key": "appointment_duration_days",
+          "label": "Estimated duration in days per appointment",
+          "fields": [
+            "hours or_2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "family_care_description",
+      "prompt": "When family care leave is needed to care for a seriously‑ill family member, describe the care you will provide, estimate the time period, and give the schedule if leave will be intermittent or reduced.",
+      "inputs": [
+        {
+          "key": "care_line_1",
+          "label": "Care description — line 1",
+          "type": "long_text",
+          "fields": [
+            "schedule if leave is to be taken intermittently or on a reduced work schedule 1"
+          ]
+        },
+        {
+          "key": "care_line_2",
+          "label": "Care description — line 2",
+          "type": "long_text",
+          "fields": [
+            "schedule if leave is to be taken intermittently or on a reduced work schedule 2"
+          ]
+        },
+        {
+          "key": "care_line_3",
+          "label": "Care description — line 3",
+          "type": "long_text",
+          "fields": [
+            "schedule if leave is to be taken intermittently or on a reduced work schedule 3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "signature_dates",
+      "prompt": "Enter the dates for the provider and employee signatures.",
+      "inputs": [
+        {
+          "key": "provider_signature_date",
+          "label": "Date (health care provider signature)",
+          "type": "date",
+          "fields": [
+            "DATE"
+          ]
+        },
+        {
+          "key": "employee_signature_date",
+          "label": "Date (employee signature)",
+          "type": "date",
+          "fields": [
+            "DATE_2"
+          ]
+        }
+      ]
+    }
+  ],
+  "skip_fields": []
 }
