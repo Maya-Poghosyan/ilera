@@ -248,6 +248,9 @@ export default function ApplicationsPage() {
     const isLastQuestion = stepIndex >= steps.length - 1;
     const pct = ((stepIndex + 1) / steps.length) * 100;
     const prompt = currentStep[0]?.group_prompt ?? "";
+    // Inputs of a group tend to repeat one explanation ("the Primary Contact must be 18
+    // or older") under every box. It is said once, above the boxes it applies to.
+    const helpShownAbove = currentStep[0]?.why_this_matters ?? "";
     return (
       <div className="mx-auto w-full max-w-2xl space-y-6">
         <Button variant="ghost" size="sm" onClick={handleBackToList}>
@@ -273,11 +276,26 @@ export default function ApplicationsPage() {
 
         <Card>
           <CardContent className="space-y-6 pt-6">
-            {prompt && <p className="font-medium">{prompt}</p>}
-            {currentStep.map((question) => (
+            {prompt && (
+              <div className="space-y-1">
+                <p className="font-medium">{prompt}</p>
+                {helpShownAbove && (
+                  <p className="text-xs text-muted-foreground">
+                    {helpShownAbove}
+                  </p>
+                )}
+              </div>
+            )}
+            {currentStep.map((question, i) => (
               <QuestionField
                 key={question.field_id}
-                question={question as Question}
+                question={
+                  (question.why_this_matters === helpShownAbove ||
+                  question.why_this_matters ===
+                    currentStep[i - 1]?.why_this_matters
+                    ? { ...question, why_this_matters: "" }
+                    : question) as Question
+                }
                 value={answers[question.field_id] ?? null}
                 name=""
                 error={errors[question.field_id]}
