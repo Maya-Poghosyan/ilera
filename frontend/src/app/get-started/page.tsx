@@ -60,12 +60,15 @@ export default function GetStartedPage() {
               <div className="mx-auto mb-2 flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <MessageCircle className="size-5" />
               </div>
-              <CardTitle className="text-xl">Connect Assistant</CardTitle>
-              <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-                Made with
-                <Image src="/poke.svg" alt="" width={10} height={10} className="h-auto w-2.5" />
-                Poke
-              </p>
+              <CardTitle className="flex items-center justify-center gap-2 text-xl">
+                Connect Assistant
+                <span className="text-border" aria-hidden="true">|</span>
+                <span className="flex items-center gap-1.5 text-xs font-normal text-muted-foreground">
+                  Made with
+                  <Image src="/poke.svg" alt="" width={10} height={10} className="h-auto w-2.5" />
+                  Poke
+                </span>
+              </CardTitle>
               <p className="text-sm text-muted-foreground">
                 Intelligent reminders and scheduling.
               </p>
