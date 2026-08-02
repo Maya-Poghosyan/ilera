@@ -379,10 +379,6 @@ export default function CalendarPage() {
         <div className="space-y-3">
           <h1 className="text-4xl font-bold">Care Calendar</h1>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <p className="max-w-xl text-sm text-muted-foreground">
-              Enabling allows our caregiving assistant scan your email, iMessage,
-              WhatsApp, etc and suggest relevant events here
-            </p>
             <button
               type="button"
               role="switch"
@@ -399,6 +395,10 @@ export default function CalendarPage() {
                 }`}
               />
             </button>
+            <p className="max-w-xl text-sm text-muted-foreground">
+              Enabling allows our caregiving assistant scan your email, iMessage,
+              WhatsApp, etc and suggest relevant events here
+            </p>
           </div>
         </div>
         <div className="flex flex-wrap gap-3">
