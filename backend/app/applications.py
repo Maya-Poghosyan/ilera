@@ -250,6 +250,8 @@ def _group_questions(
             else ""
         )
         for inp in group.inputs:
+            if not set(inp.target_fields()) & askable:
+                continue  # the profile already fills every box this input would
             questions.append(
                 AppQuestion(
                     field_id=f"{group.id}.{inp.key}",

@@ -207,6 +207,7 @@
     {
       "id": "bank_account_type",
       "prompt": "Is this a checking or savings account?",
+      "applies_when": "provider_dd_action.dd_action != CANCEL",
       "inputs": [
         {
           "key": "account_type",
@@ -230,6 +231,7 @@
     {
       "id": "bank_account",
       "prompt": "What's your bank routing number, account number, and bank name?",
+      "applies_when": "provider_dd_action.dd_action != CANCEL",
       "inputs": [
         {
           "key": "routing_number",

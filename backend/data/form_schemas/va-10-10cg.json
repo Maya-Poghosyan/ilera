@@ -626,6 +626,7 @@
       "id": "insurance_1",
       "prompt": "Other insurance #1 (attach a copy of the front and back of the card)",
       "help": "Provide all periods of other coverage since you became CHAMPVA-eligible.",
+      "applies_when": "other_health_insurance.has_other_insurance == Yes",
       "inputs": [
         {
           "key": "insurance1_name",
@@ -782,6 +783,7 @@
     {
       "id": "insurance_2",
       "prompt": "Other insurance #2 (if applicable)",
+      "applies_when": "other_health_insurance.has_other_insurance == Yes",
       "inputs": [
         {
           "key": "insurance2_name",

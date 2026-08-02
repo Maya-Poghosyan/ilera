@@ -290,6 +290,51 @@ def test_grouping_cuts_the_number_of_screens():
         print(f"  {program}: {screens} screens for {boxes} fields")
 
 
+def test_one_person_is_asked_their_first_name_once():
+    """A form reprints a name atop every section; that isn't a dozen questions."""
+    profile = CaseProfile(id="dupes", household=Household(size=2))
+    questions = applications.start_application("dupes", "Medi-Cal", profile)["questions"]
+    for fact in ("first name", "city", "social security number"):
+        by_person: dict[str, int] = {}
+        for q in questions:
+            person = re.match(r"^(person_\d+)_", q["group_id"] or "")
+            # Their own, not their caretaker's or their taxpayer's: the label is the
+            # bare fact once the person it belongs to is stripped off the front.
+            label = re.sub(r"person\s*\d+\s*[-—:]*\s*", "", q["text"], flags=re.I)
+            if person and label.strip().lower() == fact:
+                by_person[person.group(1)] = by_person.get(person.group(1), 0) + 1
+        for person, count in by_person.items():
+            assert count == 1, f"{person} is asked for their {fact} {count} times"
+
+
+def test_two_people_are_still_asked_separately():
+    """Folding repeats is per person: Person 2's name is not Person 1's."""
+    groups = load_groups(filler.load_schema("ccfrm604"))
+    names = {
+        g.id.split("_details")[0]
+        for g in groups
+        for i in g.inputs
+        if i.label.lower().endswith("first name") or i.label.lower() == "first name"
+    }
+    assert len({n for n in names if n.startswith("person_")}) > 1
+
+
+def test_an_optional_section_waits_for_the_question_that_opens_it():
+    """Whole appendices hang off an earlier answer, so nobody scrolls past them."""
+    gated = 0
+    for group in load_groups(filler.load_schema("ccfrm604")):
+        condition = parse_condition(group.applies_when or "")
+        if condition and not is_profile_path(condition[0]):
+            path = condition[0]
+            owners = [
+                f"{g.id}.{i.key}" for g in load_groups(filler.load_schema("ccfrm604"))
+                for i in g.inputs
+            ]
+            assert path in owners, f"{group.id} waits on {path}, which nobody asks"
+            gated += 1
+    assert gated, "no section is gated on an answer"
+
+
 def test_a_grouped_answer_survives_to_a_filled_pdf():
     """Answer a real program's questions and check the PDF comes back filled."""
     profile = _filled_profile()

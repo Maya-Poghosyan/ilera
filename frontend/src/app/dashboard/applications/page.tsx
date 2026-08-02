@@ -84,13 +84,14 @@ function toScreens(groups: AppQuestion[][]): AppQuestion[][][] {
  *
  * The backend sends the "if yes, ..." parts of a form with an `ask_when` naming the
  * answer they depend on, e.g. `past_ihss.received_ihss_before == "Yes"`. An unmet
- * condition skips the screen; an unreadable one shows it, since an unasked question is
- * a blank box on a government form.
+ * condition skips the screen. A condition nobody can answer — the question it names
+ * isn't asked here — shows it, since an unasked question is a blank box on a
+ * government form.
  */
 function shouldAsk(
   group: AppQuestion[],
   answers: Answers,
-  screen: AppQuestion[][]
+  asked: Set<string>
 ): boolean {
   const condition = group[0]?.ask_when;
   if (!condition) return true;
@@ -99,9 +100,9 @@ function shouldAsk(
   const [, path, op, rawExpected] = match;
   const answer = answers[path];
   if (answer === undefined || answer === null || answer === "") {
-    // The question it hangs off is on this screen and still blank: wait for it rather
-    // than show a follow-up above the thing that decides whether it applies.
-    return !screen.some((g) => g.some((q) => q.field_id === path));
+    // Still blank. A section the applicant hasn't opted into isn't shown while it is
+    // undecided — an appendix appears when they say it applies, not before.
+    return !asked.has(path);
   }
   const expected = rawExpected.replace(/^['"]|['"]$/g, "").toLowerCase();
   const given = (Array.isArray(answer) ? answer : [answer]).map((v) =>
@@ -130,8 +131,9 @@ export default function ApplicationsPage() {
   // Screens, not questions: the backend puts the inputs making up one thing a person
   // knows (an address, an employer) under a shared group_id, and a handful of those
   // groups share a screen.
+  const asked = new Set(questions.map((q) => q.field_id));
   const screens = toScreens(groupQuestions(questions))
-    .map((screen) => screen.filter((group) => shouldAsk(group, answers, screen)))
+    .map((screen) => screen.filter((group) => shouldAsk(group, answers, asked)))
     .filter((screen) => screen.length > 0);
   const currentScreen = screens[stepIndex] ?? [];
   const currentQuestions = currentScreen.flat();

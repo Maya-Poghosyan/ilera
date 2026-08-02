@@ -1747,6 +1747,7 @@
       "id": "communication_accommodations",
       "prompt": "If you are blind or visually impaired, which alternative formats do you prefer for each type of document?",
       "help": "Choose one option for each document type. Providing this information will not affect eligibility.",
+      "applies_when": "vision_status.recipient_visually_impaired == 'Yes'",
       "inputs": [
         {
           "key": "notices_of_action_accommodation",
@@ -1854,7 +1855,8 @@
           "key": "timesheets_telephonic_ran",
           "label": "If Telephonic System, enter 4-digit RAN",
           "fields": [
-            "SOC 295 1010"
+            "SOC 295 1010",
+            "SOC 295 1030"
           ],
           "required": false,
           "help": "Enter the 4-digit RAN if you selected the Telephonic System."
@@ -1995,15 +1997,6 @@
               "SOC 295 1033"
             ]
           }
-        },
-        {
-          "key": "timesheets_telephonic_ran",
-          "label": "If you selected Telephonic System, enter the 4‑digit RAN",
-          "fields": [
-            "SOC 295 1030"
-          ],
-          "required": false,
-          "help": "Only complete this if you selected Telephonic System above."
         },
         {
           "key": "timesheets_county_support_details",

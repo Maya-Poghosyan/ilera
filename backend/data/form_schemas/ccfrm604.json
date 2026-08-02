@@ -6532,14 +6532,17 @@
           "key": "first_name",
           "label": "First name",
           "fields": [
-            "p_name_1"
+            "p_name_1",
+            "person_fname_1",
+            "person_fname_1_1"
           ]
         },
         {
           "key": "middle_name",
           "label": "Middle name",
           "fields": [
-            "p_name_2"
+            "p_name_2",
+            "person_mname_1"
           ],
           "required": false
         },
@@ -6547,14 +6550,16 @@
           "key": "last_name",
           "label": "Last name",
           "fields": [
-            "p_name_3"
+            "p_name_3",
+            "person_lname_1"
           ]
         },
         {
           "key": "suffix",
           "label": "Suffix (Jr., Sr., III, etc.)",
           "fields": [
-            "p_name_4"
+            "p_name_4",
+            "person_lsuffix_1"
           ],
           "required": false
         },
@@ -6592,74 +6597,6 @@
       ]
     },
     {
-      "id": "person_1_name",
-      "prompt": "Person 1 (Primary Contact) — full name",
-      "inputs": [
-        {
-          "key": "person_1_first_name",
-          "label": "First name",
-          "fields": [
-            "person_fname_1"
-          ]
-        },
-        {
-          "key": "person_1_middle_name",
-          "label": "Middle name",
-          "fields": [
-            "person_mname_1"
-          ],
-          "required": false
-        },
-        {
-          "key": "person_1_last_name",
-          "label": "Last name",
-          "fields": [
-            "person_lname_1"
-          ]
-        },
-        {
-          "key": "person_1_suffix",
-          "label": "Suffix (Jr., Sr., III, etc.)",
-          "fields": [
-            "person_lsuffix_1"
-          ],
-          "required": false
-        },
-        {
-          "key": "first_name",
-          "label": "Person 1 — First name",
-          "fields": [
-            "person1_fname_1"
-          ],
-          "required": false
-        },
-        {
-          "key": "middle_name",
-          "label": "Person 1 — Middle name",
-          "fields": [
-            "person1_fname_2"
-          ],
-          "required": false
-        },
-        {
-          "key": "last_name",
-          "label": "Person 1 — Last name",
-          "fields": [
-            "person1_fname_3"
-          ],
-          "required": false
-        },
-        {
-          "key": "suffix",
-          "label": "Person 1 — Suffix (Jr., Sr., III, etc.)",
-          "fields": [
-            "person1_fname_4"
-          ],
-          "required": false
-        }
-      ]
-    },
-    {
       "id": "person_2_name",
       "prompt": "Person 2 — full name",
       "applies_when": "household.size >= 2",
@@ -6668,14 +6605,20 @@
           "key": "person_2_first_name",
           "label": "First name",
           "fields": [
-            "person_fname_2"
+            "person_fname_2",
+            "person2_fname_1",
+            "person_fname_2_1",
+            "pr2_fname_1",
+            "sign_p2_name"
           ]
         },
         {
           "key": "person_2_middle_name",
           "label": "Middle name",
           "fields": [
-            "person_mname_2"
+            "person_mname_2",
+            "person2_fname_2",
+            "pr2_fname_2"
           ],
           "required": false
         },
@@ -6683,45 +6626,16 @@
           "key": "person_2_last_name",
           "label": "Last name",
           "fields": [
-            "person_lname_2"
+            "person_lname_2",
+            "person2_fname_3",
+            "pr2_fname_3"
           ]
         },
         {
           "key": "person_2_suffix",
           "label": "Suffix (Jr., Sr., III, etc.)",
           "fields": [
-            "person_lsuffix_2"
-          ],
-          "required": false
-        },
-        {
-          "key": "first_name",
-          "label": "Person 2 — First name",
-          "fields": [
-            "person2_fname_1"
-          ],
-          "required": false
-        },
-        {
-          "key": "middle_name",
-          "label": "Person 2 — Middle name",
-          "fields": [
-            "person2_fname_2"
-          ],
-          "required": false
-        },
-        {
-          "key": "last_name",
-          "label": "Person 2 — Last name",
-          "fields": [
-            "person2_fname_3"
-          ],
-          "required": false
-        },
-        {
-          "key": "suffix",
-          "label": "Person 2 — Suffix (Jr., Sr., III, etc.)",
-          "fields": [
+            "person_lsuffix_2",
             "person2_fname_4"
           ],
           "required": false
@@ -6737,14 +6651,20 @@
           "key": "person_3_first_name",
           "label": "First name",
           "fields": [
-            "person_fname_3"
+            "person_fname_3",
+            "person3_fname_1",
+            "person_fname_3_1",
+            "pr3_fname_1",
+            "sign_p3_name"
           ]
         },
         {
           "key": "person_3_middle_name",
           "label": "Middle name",
           "fields": [
-            "person_mname_3"
+            "person_mname_3",
+            "person3_fname_2",
+            "pr3_fname_2"
           ],
           "required": false
         },
@@ -6752,45 +6672,16 @@
           "key": "person_3_last_name",
           "label": "Last name",
           "fields": [
-            "person_lname_3"
+            "person_lname_3",
+            "person3_fname_3",
+            "pr3_fname_3"
           ]
         },
         {
           "key": "person_3_suffix",
           "label": "Suffix (Jr., Sr., III, etc.)",
           "fields": [
-            "person_lsuffix_3"
-          ],
-          "required": false
-        },
-        {
-          "key": "first_name",
-          "label": "Person 3 — First name",
-          "fields": [
-            "person3_fname_1"
-          ],
-          "required": false
-        },
-        {
-          "key": "middle_name",
-          "label": "Person 3 — Middle name",
-          "fields": [
-            "person3_fname_2"
-          ],
-          "required": false
-        },
-        {
-          "key": "last_name",
-          "label": "Person 3 — Last name",
-          "fields": [
-            "person3_fname_3"
-          ],
-          "required": false
-        },
-        {
-          "key": "suffix",
-          "label": "Person 3 — Suffix (Jr., Sr., III, etc.)",
-          "fields": [
+            "person_lsuffix_3",
             "person3_fname_4"
           ],
           "required": false
@@ -6806,14 +6697,20 @@
           "key": "person_4_first_name",
           "label": "First name",
           "fields": [
-            "person_fname_4"
+            "person_fname_4",
+            "person4_fname_1",
+            "person_fname_4_1",
+            "pr4_fname_1",
+            "sign_p4_name"
           ]
         },
         {
           "key": "person_4_middle_name",
           "label": "Middle name",
           "fields": [
-            "person_mname_4"
+            "person_mname_4",
+            "person4_fname_2",
+            "pr4_fname_2"
           ],
           "required": false
         },
@@ -6821,45 +6718,16 @@
           "key": "person_4_last_name",
           "label": "Last name",
           "fields": [
-            "person_lname_4"
+            "person_lname_4",
+            "person4_fname_3",
+            "pr4_fname_3"
           ]
         },
         {
           "key": "person_4_suffix",
           "label": "Suffix (Jr., Sr., III, etc.)",
           "fields": [
-            "person_lsuffix_4"
-          ],
-          "required": false
-        },
-        {
-          "key": "first_name",
-          "label": "Person 4 — First name",
-          "fields": [
-            "person4_fname_1"
-          ],
-          "required": false
-        },
-        {
-          "key": "middle_name",
-          "label": "Person 4 — Middle name",
-          "fields": [
-            "person4_fname_2"
-          ],
-          "required": false
-        },
-        {
-          "key": "last_name",
-          "label": "Person 4 — Last name",
-          "fields": [
-            "person4_fname_3"
-          ],
-          "required": false
-        },
-        {
-          "key": "suffix",
-          "label": "Person 4 — Suffix (Jr., Sr., III, etc.)",
-          "fields": [
+            "person_lsuffix_4",
             "person4_fname_4"
           ],
           "required": false
@@ -7203,13 +7071,6 @@
       "prompt": "Person 1 — provide the first name and contact details we haven’t filled yet",
       "inputs": [
         {
-          "key": "person_1_first_name",
-          "label": "Person 1 first name",
-          "fields": [
-            "person_fname_1_1"
-          ]
-        },
-        {
           "key": "person_1_home_street",
           "label": "Person 1 home street address (number and street)",
           "fields": [
@@ -7288,13 +7149,6 @@
       "prompt": "Person 2 — provide the first name, date of birth, addresses, homelessness, and gender",
       "applies_when": "household.size >= 2",
       "inputs": [
-        {
-          "key": "person_2_first_name",
-          "label": "Person 2 first name",
-          "fields": [
-            "person_fname_2_1"
-          ]
-        },
         {
           "key": "person_2_dob",
           "label": "Person 2 date of birth (MM/DD/YYYY)",
@@ -7435,13 +7289,6 @@
       "applies_when": "household.size >= 3",
       "inputs": [
         {
-          "key": "person_3_first_name",
-          "label": "Person 3 first name",
-          "fields": [
-            "person_fname_3_1"
-          ]
-        },
-        {
           "key": "person_3_dob",
           "label": "Person 3 date of birth (MM/DD/YYYY)",
           "type": "date",
@@ -7580,13 +7427,6 @@
       "prompt": "Person 4 — provide the first name, date of birth, addresses, homelessness, and gender",
       "applies_when": "household.size >= 4",
       "inputs": [
-        {
-          "key": "person_4_first_name",
-          "label": "Person 4 first name",
-          "fields": [
-            "person_fname_4_1"
-          ]
-        },
         {
           "key": "person_4_dob",
           "label": "Person 4 date of birth (MM/DD/YYYY)",
@@ -8435,10 +8275,12 @@
           ],
           "option_fields": {
             "Yes": [
-              "ins_p1-1"
+              "ins_p1-1",
+              "pr1_off-1"
             ],
             "No": [
-              "ins_p1-2"
+              "ins_p1-2",
+              "pr1_off-2"
             ]
           },
           "help": "If yes, you will need to fill out Attachment B (pages 30–31)."
@@ -8582,10 +8424,12 @@
           ],
           "option_fields": {
             "Yes": [
-              "ins_p2-1"
+              "ins_p2-1",
+              "pr2_off-1"
             ],
             "No": [
-              "ins_p2-2"
+              "ins_p2-2",
+              "pr2_off-2"
             ]
           },
           "help": "If yes, you will need to fill out Attachment B (pages 30–31)."
@@ -8729,10 +8573,12 @@
           ],
           "option_fields": {
             "Yes": [
-              "ins_p3-1"
+              "ins_p3-1",
+              "pr3_off-1"
             ],
             "No": [
-              "ins_p3-2"
+              "ins_p3-2",
+              "pr3_off-2"
             ]
           },
           "help": "If yes, you will need to fill out Attachment B (pages 30–31)."
@@ -8876,10 +8722,12 @@
           ],
           "option_fields": {
             "Yes": [
-              "ins_p4-1"
+              "ins_p4-1",
+              "pr4_off-1"
             ],
             "No": [
-              "ins_p4-2"
+              "ins_p4-2",
+              "pr4_off-2"
             ]
           },
           "help": "If yes, you will need to fill out Attachment B (pages 30–31)."
@@ -10514,7 +10362,8 @@
           "key": "person_1_alien_number",
           "label": "Person 1 — Alien Number (if they have one)",
           "fields": [
-            "citi-p1-1-1-1-2"
+            "citi-p1-1-1-1-2",
+            "alein_p1"
           ],
           "required": false
         }
@@ -10574,7 +10423,8 @@
           "key": "person_2_alien_number",
           "label": "Person 2 — Alien Number (if they have one)",
           "fields": [
-            "citi-p2-1-1-1-2"
+            "citi-p2-1-1-1-2",
+            "alein_p2"
           ],
           "required": false
         }
@@ -10634,7 +10484,8 @@
           "key": "person_3_alien_number",
           "label": "Person 3 — Alien Number (if they have one)",
           "fields": [
-            "citi-p3-1-1-1-2"
+            "citi-p3-1-1-1-2",
+            "alein_p3"
           ],
           "required": false
         }
@@ -10694,7 +10545,8 @@
           "key": "person_4_alien_number",
           "label": "Person 4 — Alien Number (if they have one)",
           "fields": [
-            "citi-p4-1-1-1-2"
+            "citi-p4-1-1-1-2",
+            "alein_p4"
           ],
           "required": false
         }
@@ -10703,6 +10555,7 @@
     {
       "id": "person_1_citizenship_immigration",
       "prompt": "Person 1 — first name, and if they have one, their immigration status and immigration document details",
+      "applies_when": "person_1_citizenship.person_1_is_us_citizen == 'No'",
       "inputs": [
         {
           "key": "immigration_status",
@@ -10712,14 +10565,6 @@
           ],
           "required": false,
           "help": "Leave blank if the person has no immigration status to report."
-        },
-        {
-          "key": "alien_number",
-          "label": "Alien Number (if they have one)",
-          "fields": [
-            "alein_p1"
-          ],
-          "required": false
         },
         {
           "key": "immigration_document_type",
@@ -10823,14 +10668,6 @@
           "help": "Leave blank if the person has no immigration status to report."
         },
         {
-          "key": "alien_number",
-          "label": "Alien Number (if they have one)",
-          "fields": [
-            "alein_p2"
-          ],
-          "required": false
-        },
-        {
           "key": "immigration_document_type",
           "label": "Immigration document type (example: Permanent Resident Card I-551)",
           "fields": [
@@ -10932,14 +10769,6 @@
           "help": "Leave blank if the person has no immigration status to report."
         },
         {
-          "key": "alien_number",
-          "label": "Alien Number (if they have one)",
-          "fields": [
-            "alein_p3"
-          ],
-          "required": false
-        },
-        {
           "key": "immigration_document_type",
           "label": "Immigration document type (example: Permanent Resident Card I-551)",
           "fields": [
@@ -11039,14 +10868,6 @@
           ],
           "required": false,
           "help": "Leave blank if the person has no immigration status to report."
-        },
-        {
-          "key": "alien_number",
-          "label": "Alien Number (if they have one)",
-          "fields": [
-            "alein_p4"
-          ],
-          "required": false
         },
         {
           "key": "immigration_document_type",
@@ -11775,6 +11596,7 @@
       "id": "income_1",
       "prompt": "Tell us about Income 1 — who has this income and what it is.",
       "help": "Fill out one column per income. To tell us about more than 2 incomes, make a copy of pages 15–16.",
+      "applies_when": "anyone_on_application_has_income.has_income == Yes",
       "inputs": [
         {
           "key": "first_name",
@@ -11999,6 +11821,7 @@
       "id": "income_2",
       "prompt": "Tell us about Income 2 — who has this income and what it is.",
       "help": "Fill out one column per income. To tell us about more than 2 incomes, make a copy of pages 15–16.",
+      "applies_when": "anyone_on_application_has_income.has_income == Yes",
       "inputs": [
         {
           "key": "first_name",
@@ -12757,6 +12580,7 @@
     {
       "id": "authorized_representative_medi_cal_limitations",
       "prompt": "If you want to limit the authorized representative’s duties for Medi‑Cal, describe those limitations.",
+      "applies_when": "authorized_representative_contact.name != ''",
       "inputs": [
         {
           "key": "limitations_medi_cal",
@@ -12772,6 +12596,7 @@
     {
       "id": "authorized_representative_notices_contact",
       "prompt": "Choose whether Covered California and Medi‑Cal may mail notices to the authorized representative, the best way to contact them, and any limits on notices.",
+      "applies_when": "authorized_representative_contact.name != ''",
       "inputs": [
         {
           "key": "covered_california_notices",
@@ -13075,28 +12900,6 @@
       "applies_when": "household.size >= 2",
       "inputs": [
         {
-          "key": "pr2_first_name",
-          "label": "Person 2 — First name",
-          "fields": [
-            "pr2_fname_1"
-          ]
-        },
-        {
-          "key": "pr2_middle_name",
-          "label": "Person 2 — Middle name",
-          "fields": [
-            "pr2_fname_2"
-          ],
-          "required": false
-        },
-        {
-          "key": "pr2_last_name",
-          "label": "Person 2 — Last name",
-          "fields": [
-            "pr2_fname_3"
-          ]
-        },
-        {
           "key": "pr2_suffix",
           "label": "Person 2 — Suffix (Jr., Sr., III) if any",
           "fields": [
@@ -13162,28 +12965,6 @@
       "applies_when": "household.size >= 3",
       "inputs": [
         {
-          "key": "pr3_first_name",
-          "label": "Person 3 — First name",
-          "fields": [
-            "pr3_fname_1"
-          ]
-        },
-        {
-          "key": "pr3_middle_name",
-          "label": "Person 3 — Middle name",
-          "fields": [
-            "pr3_fname_2"
-          ],
-          "required": false
-        },
-        {
-          "key": "pr3_last_name",
-          "label": "Person 3 — Last name",
-          "fields": [
-            "pr3_fname_3"
-          ]
-        },
-        {
           "key": "pr3_suffix",
           "label": "Person 3 — Suffix (Jr., Sr., III) if any",
           "fields": [
@@ -13248,28 +13029,6 @@
       "prompt": "If Person 4 had a qualifying life event in the last 60 days, enter their full name, the number for the life event from the list, and the date it happened.",
       "applies_when": "household.size >= 4",
       "inputs": [
-        {
-          "key": "pr4_first_name",
-          "label": "Person 4 — First name",
-          "fields": [
-            "pr4_fname_1"
-          ]
-        },
-        {
-          "key": "pr4_middle_name",
-          "label": "Person 4 — Middle name",
-          "fields": [
-            "pr4_fname_2"
-          ],
-          "required": false
-        },
-        {
-          "key": "pr4_last_name",
-          "label": "Person 4 — Last name",
-          "fields": [
-            "pr4_fname_3"
-          ]
-        },
         {
           "key": "pr4_suffix",
           "label": "Person 4 — Suffix (Jr., Sr., III) if any",
@@ -13351,23 +13110,6 @@
       "prompt": "For Person 1, what is their first name and do they have (or have been offered) health insurance? If yes, tell us the name or the number from the list.",
       "inputs": [
         {
-          "key": "has_insurance",
-          "label": "Does Person 1 have (or has been offered) health insurance?",
-          "type": "single_select",
-          "options": [
-            "Yes",
-            "No"
-          ],
-          "option_fields": {
-            "Yes": [
-              "pr1_off-1"
-            ],
-            "No": [
-              "pr1_off-2"
-            ]
-          }
-        },
-        {
           "key": "insurance_type",
           "label": "If yes, what is the name or number from the list above that best describes Person 1’s health insurance?",
           "fields": [
@@ -13383,23 +13125,6 @@
       "prompt": "For Person 2, what is their first name and do they have (or have been offered) health insurance? If yes, tell us the name or the number from the list.",
       "applies_when": "household.size >= 2",
       "inputs": [
-        {
-          "key": "has_insurance",
-          "label": "Does Person 2 have (or has been offered) health insurance?",
-          "type": "single_select",
-          "options": [
-            "Yes",
-            "No"
-          ],
-          "option_fields": {
-            "Yes": [
-              "pr2_off-1"
-            ],
-            "No": [
-              "pr2_off-2"
-            ]
-          }
-        },
         {
           "key": "insurance_type",
           "label": "If yes, what is the name or number from the list above that best describes Person 2’s health insurance?",
@@ -13417,23 +13142,6 @@
       "applies_when": "household.size >= 3",
       "inputs": [
         {
-          "key": "has_insurance",
-          "label": "Does Person 3 have (or has been offered) health insurance?",
-          "type": "single_select",
-          "options": [
-            "Yes",
-            "No"
-          ],
-          "option_fields": {
-            "Yes": [
-              "pr3_off-1"
-            ],
-            "No": [
-              "pr3_off-2"
-            ]
-          }
-        },
-        {
           "key": "insurance_type",
           "label": "If yes, what is the name or number from the list above that best describes Person 3’s health insurance?",
           "fields": [
@@ -13449,23 +13157,6 @@
       "prompt": "For Person 4, what is their first name and do they have (or have been offered) health insurance? If yes, tell us the name or the number from the list.",
       "applies_when": "household.size >= 4",
       "inputs": [
-        {
-          "key": "has_insurance",
-          "label": "Does Person 4 have (or has been offered) health insurance?",
-          "type": "single_select",
-          "options": [
-            "Yes",
-            "No"
-          ],
-          "option_fields": {
-            "Yes": [
-              "pr4_off-1"
-            ],
-            "No": [
-              "pr4_off-2"
-            ]
-          }
-        },
         {
           "key": "insurance_type",
           "label": "If yes, what is the name or number from the list above that best describes Person 4’s health insurance?",
@@ -14005,48 +13696,6 @@
       ]
     },
     {
-      "id": "person_2_signature",
-      "prompt": "If Person 2 is age 18 or older and is enrolling in a health plan, please print name, sign, and date here.",
-      "applies_when": "household.size >= 2",
-      "inputs": [
-        {
-          "key": "person_2_printed_name",
-          "label": "Person 2 — Printed name",
-          "fields": [
-            "sign_p2_name"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "person_3_signature",
-      "prompt": "If Person 3 is age 18 or older and is enrolling in a health plan, please print name, sign, and date here.",
-      "applies_when": "household.size >= 3",
-      "inputs": [
-        {
-          "key": "person_3_printed_name",
-          "label": "Person 3 — Printed name",
-          "fields": [
-            "sign_p3_name"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "person_4_signature",
-      "prompt": "If Person 4 is age 18 or older and is enrolling in a health plan, please print name, sign, and date here.",
-      "applies_when": "household.size >= 4",
-      "inputs": [
-        {
-          "key": "person_4_printed_name",
-          "label": "Person 4 — Printed name",
-          "fields": [
-            "sign_p4_name"
-          ]
-        }
-      ]
-    },
-    {
       "id": "dental_family_plan",
       "prompt": "If you want a stand-alone family dental plan, tell us the plan name, plan type, and which household adults should be enrolled.",
       "inputs": [
@@ -14109,6 +13758,7 @@
     {
       "id": "person_1_american_indian",
       "prompt": "Person 1 — first name, tribal membership, and Indian Health Service (IHS)/tribal program service details",
+      "applies_when": "person_1_profile.american_indian_alaska_native == 'Yes'",
       "inputs": [
         {
           "key": "person_1_tribe_member",
@@ -15147,6 +14797,7 @@
     {
       "id": "employer_1_employee_info",
       "prompt": "Employer 1 — employee's name and Social Security number",
+      "applies_when": "anyone_offered_employer_insurance.anyone_offered == Yes",
       "inputs": [
         {
           "key": "first_name",
@@ -15192,6 +14843,7 @@
     {
       "id": "employer_2_employee_info",
       "prompt": "Employer 2 — employee's name and Social Security number",
+      "applies_when": "anyone_offered_employer_insurance.anyone_offered == Yes",
       "inputs": [
         {
           "key": "first_name",
@@ -15237,6 +14889,7 @@
     {
       "id": "employer_1_employer_info",
       "prompt": "Employer 1 — employer name, EIN, and mailing address",
+      "applies_when": "anyone_offered_employer_insurance.anyone_offered == Yes",
       "inputs": [
         {
           "key": "employer_name",
@@ -15333,6 +14986,7 @@
     {
       "id": "employer_2_employer_info",
       "prompt": "Employer 2 — employer name, EIN, and mailing address",
+      "applies_when": "anyone_offered_employer_insurance.anyone_offered == Yes",
       "inputs": [
         {
           "key": "employer_name",

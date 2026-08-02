@@ -39,6 +39,7 @@ from .groups import (
     QuestionGroup,
     SkippedField,
     is_profile_path,
+    load_groups,
     parse_condition,
 )
 from .profile_paths import profile_paths
@@ -329,6 +330,49 @@ def gate_person_blocks(groups: list[QuestionGroup]) -> None:
             group.applies_when = f"household.size >= {nth}"
 
 
+_SCOPE = re.compile(r"^(person|employer|income|deduction)_(\d+)")
+
+
+def _fact(label: str) -> str:
+    """A label reduced to the fact it asks for, whoever it is asked about."""
+    label = re.sub(r"person\s*\d+", " ", label, flags=re.I)
+    label = re.sub(r"\b(this|their|they|the)\b", " ", label, flags=re.I)
+    return "".join(c for c in label.lower() if c.isalnum())
+
+
+def fold_repeats(groups: list[QuestionGroup]) -> list[QuestionGroup]:
+    """Ask each person's first name once, not once per section they appear in.
+
+    A form that repeats a person block over a dozen sections reprints their name at the
+    top of each one so a paper reader knows whose section it is. Drafted a page at a
+    time, that becomes a dozen identical questions. Same person, same question, same
+    shape: the first one keeps the answer and fills all of their boxes.
+    """
+    canonical: dict[tuple[str, str, str, tuple[str, ...]], GroupInput] = {}
+    kept: list[QuestionGroup] = []
+    for group in groups:
+        scope = _SCOPE.match(group.id)
+        if not scope:
+            kept.append(group)
+            continue
+        inputs: list[GroupInput] = []
+        for inp in group.inputs:
+            key = (scope.group(0), _fact(inp.label), inp.type, tuple(inp.options))
+            first = canonical.get(key)
+            if first is None:
+                canonical[key] = inp
+                inputs.append(inp)
+                continue
+            first.fields = list(dict.fromkeys([*first.fields, *inp.fields]))
+            for label, names in inp.option_fields.items():
+                merged = [*first.option_fields.get(label, []), *names]
+                first.option_fields[label] = list(dict.fromkeys(merged))
+        if inputs:
+            group.inputs = inputs
+            kept.append(group)
+    return kept
+
+
 def repair_conditions(groups: list[QuestionGroup]) -> None:
     """Point every `applies_when` at something real, or drop it.
 
@@ -369,6 +413,187 @@ def repair_conditions(groups: list[QuestionGroup]) -> None:
             group.applies_when = f"{resolved} {op} {literal}"
         else:
             group.applies_when = None
+
+
+PLAN_PROMPT = """\
+You are cutting a US government benefits form down to the questions actually worth \
+asking. You are given every question already drafted for one form, in the order the \
+applicant would meet them, written as `<group id>.<input key>: label`.
+
+The pages were drafted one at a time and no page could see the others, so the same fact \
+is asked several times over and whole sections are asked of people they don't apply to. \
+Return two lists.
+
+`duplicates`: an input that asks for something an EARLIER input already asks for, about \
+the same person or thing. `same_as` is that earlier input. The later question disappears \
+and the earlier answer fills both sets of boxes. Only when a single answer is right for \
+both — Person 1's city asked again on a later page, yes; Employer 1's city and Employer \
+2's city, no; a first name asked of Person 1 and of Person 2, no.
+
+`gates`: a group only some applicants should see, and the condition that decides. \
+Exactly one comparison, `<path> <op> <value>`, never `and`/`or`. The path is either a \
+profile path from the list below, or `<group id>.<input key>` of a question asked \
+EARLIER — the form's own "if yes, ...", "skip this section unless ...", "complete this \
+appendix only if ..." wording is what you are looking for, and the yes/no question it \
+hangs off is usually a group of its own. An optional programme nobody has asked to join \
+— a dental plan, a representative, a voter registration — is gated on the question that \
+offers it. Prefer gating the whole section over gating each group in it. Gate hard: \
+immigration details on not being a citizen, tribal questions on being American Indian \
+or Alaska Native, pregnancy details on being pregnant, tax-filer details on filing \
+taxes, an appendix on the yes/no question that introduces it. Most applicants should \
+see a small fraction of a long form.
+
+Leave anything you are unsure about out of both lists: it stays as it is, and the \
+applicant is asked. Do not invent groups or inputs; every id must appear below verbatim.
+"""
+
+
+class DuplicateInput(BaseModel):
+    input: str
+    same_as: str
+
+
+class GroupGate(BaseModel):
+    group: str
+    applies_when: str
+
+
+class FormPlan(BaseModel):
+    duplicates: list[DuplicateInput] = Field(default_factory=list)
+    gates: list[GroupGate] = Field(default_factory=list)
+
+
+def _plan_prompt(form_id: str, groups: list[QuestionGroup]) -> str:
+    lines = []
+    for group in groups:
+        lines.append(f"[{group.id}] {group.prompt}")
+        for inp in group.inputs:
+            options = f"  options: {inp.options}" if inp.options else ""
+            lines.append(f"  {group.id}.{inp.key}: {inp.label}{options}")
+    return (
+        f"Form: {form_id.upper()}\n\n--- every question drafted for this form ---\n"
+        + "\n".join(lines)
+        + "\n\n--- profile paths usable in a gate ---\n"
+        + ", ".join(sorted(profile_paths()))
+    )
+
+
+def _validate_plan(plan: FormPlan, groups: list[QuestionGroup]) -> list[str]:
+    """Reasons the plan can't be applied, phrased for the model to correct."""
+    order = {
+        f"{g.id}.{i.key}": (n, m)
+        for n, g in enumerate(groups)
+        for m, i in enumerate(g.inputs)
+    }
+    inputs = {
+        f"{g.id}.{i.key}": i for g in groups for i in g.inputs
+    }
+    group_at = {g.id: n for n, g in enumerate(groups)}
+    known = set(profile_paths())
+    errors: list[str] = []
+
+    for dup in plan.duplicates:
+        if dup.input not in order:
+            errors.append(f"duplicates: {dup.input!r} is not a question on this form")
+            continue
+        if dup.same_as not in order:
+            errors.append(f"duplicates: {dup.same_as!r} is not a question on this form")
+            continue
+        if order[dup.same_as] >= order[dup.input]:
+            errors.append(
+                f"duplicates: {dup.same_as!r} is not asked before {dup.input!r}; the "
+                "one kept has to be the earlier of the two"
+            )
+        first, second = inputs[dup.same_as], inputs[dup.input]
+        if first.type != second.type:
+            errors.append(
+                f"duplicates: {dup.input!r} is a {second.type} and {dup.same_as!r} a "
+                f"{first.type}, so one answer can't serve both"
+            )
+        elif set(second.options) - set(first.options):
+            errors.append(
+                f"duplicates: {dup.input!r} offers choices {dup.same_as!r} doesn't: "
+                f"{sorted(set(second.options) - set(first.options))}"
+            )
+
+    for gate in plan.gates:
+        if gate.group not in group_at:
+            errors.append(f"gates: {gate.group!r} is not a group on this form")
+            continue
+        parsed = parse_condition(gate.applies_when)
+        if parsed is None:
+            errors.append(
+                f"gates: {gate.applies_when!r} is not a single comparison "
+                "<path> <op> <value>, e.g. household.size >= 2"
+            )
+            continue
+        path = parsed[0]
+        if is_profile_path(path):
+            if path not in known:
+                errors.append(f"gates: {path!r} is not one of the profile paths given")
+        elif path not in order:
+            errors.append(f"gates: {path!r} is not a question on this form")
+        elif order[path][0] >= group_at[gate.group]:
+            errors.append(
+                f"gates: {path!r} is not asked before {gate.group}, so the applicant "
+                "would never have answered it"
+            )
+    return errors
+
+
+def apply_plan(plan: FormPlan, groups: list[QuestionGroup]) -> list[QuestionGroup]:
+    """Fold repeated questions into the first one that asks them, and gate sections."""
+    inputs = {f"{g.id}.{i.key}": i for g in groups for i in g.inputs}
+    dropped = set()
+    for dup in plan.duplicates:
+        first, second = inputs.get(dup.same_as), inputs.get(dup.input)
+        if first is None or second is None or first is second:
+            continue
+        first.fields = list(dict.fromkeys([*first.fields, *second.fields]))
+        for label, names in second.option_fields.items():
+            merged = [*first.option_fields.get(label, []), *names]
+            first.option_fields[label] = list(dict.fromkeys(merged))
+        dropped.add(dup.input)
+
+    for gate in plan.gates:
+        for group in groups:
+            if group.id == gate.group and not group.applies_when:
+                group.applies_when = gate.applies_when
+
+    kept = []
+    for group in groups:
+        group.inputs = [
+            i for i in group.inputs if f"{group.id}.{i.key}" not in dropped
+        ]
+        if group.inputs:
+            kept.append(group)
+    return kept
+
+
+async def plan_form(
+    form_id: str, groups: list[QuestionGroup]
+) -> list[QuestionGroup]:
+    """Read the whole form at once and drop what the page-by-page pass couldn't see."""
+    from pydantic_ai import Agent, ModelRetry
+
+    agent = Agent(_model(), output_type=FormPlan, system_prompt=PLAN_PROMPT, retries=4)
+
+    @agent.output_validator
+    def check(output: FormPlan) -> FormPlan:
+        errors = _validate_plan(output, groups)
+        if errors:
+            raise ModelRetry(
+                "Fix these and return both lists again:\n- " + "\n- ".join(errors)
+            )
+        return output
+
+    result = await agent.run(_plan_prompt(form_id, groups))
+    print(
+        f"  whole form: {len(result.output.duplicates)} repeated questions, "
+        f"{len(result.output.gates)} sections gated",
+        file=sys.stderr,
+    )
+    return apply_plan(result.output, groups)
 
 
 def _merge(into: dict[str, QuestionGroup], drafted: list[QuestionGroup]) -> None:
@@ -453,7 +678,9 @@ async def generate_groups(
     groups = dedupe_targets(list(merged.values()))
     skip = list(skipped.values())
     groups = skip_signatures(groups, skip, fields_by_name)
+    groups = fold_repeats(groups)
     gate_person_blocks(groups)
+    groups = await plan_form(form_id, groups)
     repair_conditions(groups)
     return groups, skip
 
@@ -478,10 +705,23 @@ def main() -> None:
     parser.add_argument("form_id")
     parser.add_argument("--pages", help="Comma-separated page numbers (default: all)")
     parser.add_argument("--dry-run", action="store_true", help="Print instead of writing")
+    parser.add_argument(
+        "--plan-only",
+        action="store_true",
+        help="Re-read the committed groups as a whole form, without redrafting the pages",
+    )
     args = parser.parse_args()
 
-    only = [int(p) for p in args.pages.split(",")] if args.pages else None
-    groups, skip = asyncio.run(generate_groups(args.form_id, only))
+    if args.plan_only:
+        schema = load_schema(args.form_id)
+        groups = asyncio.run(
+            plan_form(args.form_id, fold_repeats(load_groups(schema)))
+        )
+        repair_conditions(groups)
+        skip = [SkippedField(**s) for s in schema.get("skip_fields") or []]
+    else:
+        only = [int(p) for p in args.pages.split(",")] if args.pages else None
+        groups, skip = asyncio.run(generate_groups(args.form_id, only))
     inputs = sum(len(g.inputs) for g in groups)
     print(
         f"{args.form_id}: {len(groups)} groups ({inputs} inputs), {len(skip)} skipped",

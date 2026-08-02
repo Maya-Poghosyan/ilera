@@ -343,6 +343,7 @@
     {
       "id": "care_period_estimate",
       "prompt": "Estimate the period of time care is needed or during which the employee’s presence would be beneficial.",
+      "applies_when": "condition_warrants_employee_participation.warrants_participation == 'Yes'",
       "inputs": [
         {
           "key": "period_description",
@@ -357,6 +358,7 @@
     {
       "id": "intermittent_leave",
       "prompt": "Is it medically necessary for the employee to be off work on an intermittent basis because of the serious health condition of the employee or a family member?",
+      "applies_when": "care_recipient.care_needs >= 1",
       "inputs": [
         {
           "key": "intermittent_needed",
@@ -419,6 +421,7 @@
     {
       "id": "reduced_schedule_leave",
       "prompt": "Is it medically necessary for the employee to work less than the normal work schedule (reduced schedule leave)?",
+      "applies_when": "care_recipient.care_needs >= 1",
       "inputs": [
         {
           "key": "reduced_needed",
@@ -474,6 +477,7 @@
     {
       "id": "time_off_medical_appointments",
       "prompt": "Is it medically necessary for the employee to take time off work for doctor’s visits or medical treatment?",
+      "applies_when": "care_recipient.care_needs >= 1",
       "inputs": [
         {
           "key": "appointments_needed",
@@ -536,6 +540,7 @@
     {
       "id": "family_care_description",
       "prompt": "When family care leave is needed to care for a seriously‑ill family member, describe the care you will provide, estimate the time period, and give the schedule if leave will be intermittent or reduced.",
+      "applies_when": "caregiver.relationship != ''",
       "inputs": [
         {
           "key": "care_line_1",
