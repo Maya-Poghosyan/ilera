@@ -366,7 +366,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Toast */}
       {toast && (
         <div className="fixed right-4 top-4 z-50 rounded-lg border bg-card px-4 py-2 text-sm shadow-lg">
@@ -375,14 +375,33 @@ export default function CalendarPage() {
       )}
 
       {/* Header */}
-      <div className="space-y-3">
-        <div>
+      <div className="space-y-6">
+        <div className="space-y-3">
           <h1 className="text-4xl font-bold">Care Calendar</h1>
-          <p className="text-sm text-muted-foreground">
-            Agents can scan email to auto-create events and text reminders.
-          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p className="max-w-xl text-sm text-muted-foreground">
+              Enabling allows our caregiving assistant scan your email, iMessage,
+              WhatsApp, etc and suggest relevant events here
+            </p>
+            <button
+              type="button"
+              role="switch"
+              aria-label="Monitor inboxes"
+              aria-checked={monitorInboxes}
+              onClick={handleToggleMonitoring}
+              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+                monitorInboxes ? "bg-primary" : "bg-muted-foreground/30"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${
+                  monitorInboxes ? "left-4.5" : "left-0.5"
+                }`}
+              />
+            </button>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           <Button className="px-10 hover:font-bold">+ Appointment</Button>
           <Button className="px-10 hover:font-bold">+ Visit</Button>
           <Button className="px-10 hover:font-bold">+ Deadline</Button>
@@ -462,7 +481,7 @@ export default function CalendarPage() {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="time">Time (UTC)</Label>
+                <Label htmlFor="time">Time (your local time)</Label>
                 <Input
                   id="time"
                   type="time"
@@ -521,41 +540,20 @@ export default function CalendarPage() {
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="size-4" />
             <h3 className="text-sm font-semibold">Suggested Events</h3>
-            <div className="ml-auto flex items-center gap-3">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={monitorInboxes}
-                onClick={handleToggleMonitoring}
-                className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
-              >
-                Monitor inboxes
-                <span
-                  className={`relative h-5 w-9 rounded-full transition-colors ${
-                    monitorInboxes ? "bg-primary" : "bg-muted-foreground/30"
-                  }`}
-                >
-                  <span
-                    className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${
-                      monitorInboxes ? "left-4.5" : "left-0.5"
-                    }`}
-                  />
-                </span>
-              </button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={scanning || !monitorInboxes}
-                onClick={handleScan}
-              >
-                {scanning ? "Syncing\u2026" : "Sync new events"}
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto"
+              disabled={scanning || !monitorInboxes}
+              onClick={handleScan}
+            >
+              {scanning ? "Syncing\u2026" : "Sync new events"}
+            </Button>
           </div>
           <p className="text-xs text-muted-foreground">
             {monitorInboxes
               ? "Detected from recent emails and documents. Accept to add to your calendar."
-              : "Turn on monitoring to let your assistant find appointments and deadlines in your email, messages and calendar."}
+              : "Turn on the switch above to let your assistant find appointments and deadlines for you."}
           </p>
           <div className="space-y-2">
             {allSuggested.map((e, idx) => (
