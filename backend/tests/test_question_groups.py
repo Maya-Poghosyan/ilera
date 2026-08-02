@@ -244,6 +244,36 @@ def test_gating_reads_booleans_and_strings():
     assert not applies(_group("care_recipient.county != 'Los Angeles'"), la)
 
 
+def test_an_optional_section_costs_one_question_to_decline():
+    """Nobody has to name an authorized representative, and the form has no box that
+    says whether they want one, so we ask before spending a page on it."""
+    group = QuestionGroup(
+        id="authorized_representative_contact",
+        prompt="Your authorized representative's name and address",
+        opt_in="Do you want to name someone to act for you on this application?",
+        inputs=[
+            GroupInput(key="name", label="Their name", fields=["rep_name"]),
+            GroupInput(key="city", label="Their city", fields=["rep_city"]),
+        ],
+    )
+    real = applications.load_groups
+    applications.load_groups = lambda _schema: [group]
+    try:
+        questions, _ = applications._group_questions(
+            "ccfrm604",
+            CaseProfile(id="c", household=Household(size=1)),
+            {"rep_name", "rep_city"},
+        )
+    finally:
+        applications.load_groups = real
+
+    assert questions[0].text == group.opt_in
+    assert questions[0].options == ["Yes", "No"]
+    assert [q.ask_when for q in questions[1:]] == [
+        'authorized_representative_contact_opt_in.wanted == "Yes"'
+    ] * 2
+
+
 def test_nobody_is_asked_to_type_a_signature():
     """A signature is made by hand on the printed form, so it is never a question."""
     for form_id in _grouped_form_ids():

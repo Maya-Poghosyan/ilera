@@ -333,11 +333,46 @@ def gate_person_blocks(groups: list[QuestionGroup]) -> None:
 _SCOPE = re.compile(r"^(person|employer|income|deduction)_(\d+)")
 
 
+# Phrases a form adds around a box without changing what the box asks for.
+_FILLER = re.compile(
+    r"\([^)]*\)|person\s*\d+|\b(this|their|they|the)\b"
+    r"|\bif (any|known|different|applicable)\b|\boptional\b",
+    re.I,
+)
+
+
 def _fact(label: str) -> str:
-    """A label reduced to the fact it asks for, whoever it is asked about."""
-    label = re.sub(r"person\s*\d+", " ", label, flags=re.I)
-    label = re.sub(r"\b(this|their|they|the)\b", " ", label, flags=re.I)
-    return "".join(c for c in label.lower() if c.isalnum())
+    """A label reduced to the fact it asks for, whoever it is asked about.
+
+    "Suffix (Jr., Sr., III, etc.)" and "Person 1 — Suffix (Jr., Sr., III) if any" are
+    the same box on the same person, printed in two sections.
+    """
+    return "".join(c for c in _FILLER.sub(" ", label).lower() if c.isalnum())
+
+
+_ALIAS = re.compile(r"person\s*(\d+)\s*\(([^)]+)\)", re.I)
+
+
+def _scopes(groups: list[QuestionGroup]) -> dict[str, str]:
+    """Which person each group is about, including the names a form gives them.
+
+    A form calls the same human "Person 1" in its table and "the Primary Contact" in
+    its opening section, and says so once: "Person 1 (Primary Contact)". Reading that
+    aside is what lets their name be asked in one place rather than both.
+    """
+    aliases: dict[str, str] = {}
+    for group in groups:
+        for nth, name in _ALIAS.findall(group.prompt):
+            aliases["_".join(name.lower().split())] = f"person_{nth}"
+
+    scopes: dict[str, str] = {}
+    for group in groups:
+        direct = _SCOPE.match(group.id)
+        if direct:
+            scopes[group.id] = direct.group(0)
+        elif group.id in aliases:
+            scopes[group.id] = aliases[group.id]
+    return scopes
 
 
 def fold_repeats(groups: list[QuestionGroup]) -> list[QuestionGroup]:
@@ -348,16 +383,17 @@ def fold_repeats(groups: list[QuestionGroup]) -> list[QuestionGroup]:
     time, that becomes a dozen identical questions. Same person, same question, same
     shape: the first one keeps the answer and fills all of their boxes.
     """
+    scopes = _scopes(groups)
     canonical: dict[tuple[str, str, str, tuple[str, ...]], GroupInput] = {}
     kept: list[QuestionGroup] = []
     for group in groups:
-        scope = _SCOPE.match(group.id)
+        scope = scopes.get(group.id)
         if not scope:
             kept.append(group)
             continue
         inputs: list[GroupInput] = []
         for inp in group.inputs:
-            key = (scope.group(0), _fact(inp.label), inp.type, tuple(inp.options))
+            key = (scope, _fact(inp.label), inp.type, tuple(inp.options))
             first = canonical.get(key)
             if first is None:
                 canonical[key] = inp
@@ -443,7 +479,13 @@ or Alaska Native, pregnancy details on being pregnant, tax-filer details on fili
 taxes, an appendix on the yes/no question that introduces it. Most applicants should \
 see a small fraction of a long form.
 
-Leave anything you are unsure about out of both lists: it stays as it is, and the \
+`optional`: a group the form leaves entirely to the applicant's choice and that \
+nothing else can gate — naming an authorized representative, choosing a dental plan. \
+`ask` is the short yes/no question that decides it, in the applicant's words: \
+"Do you want to name someone to act for you on this application?". Answering no costs \
+them one question instead of a page.
+
+Leave anything you are unsure about out of all three lists: it stays as it is, and the \
 applicant is asked. Do not invent groups or inputs; every id must appear below verbatim.
 """
 
@@ -458,9 +500,15 @@ class GroupGate(BaseModel):
     applies_when: str
 
 
+class OptionalSection(BaseModel):
+    group: str
+    ask: str
+
+
 class FormPlan(BaseModel):
     duplicates: list[DuplicateInput] = Field(default_factory=list)
     gates: list[GroupGate] = Field(default_factory=list)
+    optional: list[OptionalSection] = Field(default_factory=list)
 
 
 def _plan_prompt(form_id: str, groups: list[QuestionGroup]) -> str:
@@ -516,6 +564,15 @@ def _validate_plan(plan: FormPlan, groups: list[QuestionGroup]) -> list[str]:
                 f"{sorted(set(second.options) - set(first.options))}"
             )
 
+    for section in plan.optional:
+        if section.group not in group_at:
+            errors.append(f"optional: {section.group!r} is not a group on this form")
+        elif "?" not in section.ask:
+            errors.append(
+                f"optional: {section.ask!r} has to be a yes/no question to put to the "
+                "applicant"
+            )
+
     for gate in plan.gates:
         if gate.group not in group_at:
             errors.append(f"gates: {gate.group!r} is not a group on this form")
@@ -560,6 +617,11 @@ def apply_plan(plan: FormPlan, groups: list[QuestionGroup]) -> list[QuestionGrou
             if group.id == gate.group and not group.applies_when:
                 group.applies_when = gate.applies_when
 
+    for section in plan.optional:
+        for group in groups:
+            if group.id == section.group and not group.opt_in:
+                group.opt_in = section.ask
+
     kept = []
     for group in groups:
         group.inputs = [
@@ -590,7 +652,8 @@ async def plan_form(
     result = await agent.run(_plan_prompt(form_id, groups))
     print(
         f"  whole form: {len(result.output.duplicates)} repeated questions, "
-        f"{len(result.output.gates)} sections gated",
+        f"{len(result.output.gates)} sections gated, "
+        f"{len(result.output.optional)} offered rather than asked",
         file=sys.stderr,
     )
     return apply_plan(result.output, groups)
@@ -685,9 +748,42 @@ async def generate_groups(
     return groups, skip
 
 
+def prune_filled(form_id: str, groups: list[QuestionGroup]) -> list[QuestionGroup]:
+    """Drop what the field map has since learned to fill from the profile.
+
+    The two passes are generated independently, so a box grouped into a question one
+    week can be mapped to `care_recipient.city` the next. Whoever asks last wins, and
+    the applicant should not be asked for their own city.
+    """
+    filled = {
+        name
+        for name, spec in (load_schema(form_id).get("fields") or {}).items()
+        if isinstance(spec, dict) and spec.get("profile_path")
+    }
+    kept: list[QuestionGroup] = []
+    for group in groups:
+        inputs: list[GroupInput] = []
+        for inp in group.inputs:
+            inp.fields = [f for f in inp.fields if f not in filled]
+            pruned = {
+                label: [f for f in names if f not in filled]
+                for label, names in inp.option_fields.items()
+            }
+            # A choice left with no box to tick is a choice that does nothing.
+            inp.option_fields = {k: v for k, v in pruned.items() if v}
+            inp.options = [o for o in inp.options if pruned.get(o, ["kept"])]
+            if inp.target_fields():
+                inputs.append(inp)
+        group.inputs = inputs
+        if inputs:
+            kept.append(group)
+    return kept
+
+
 def write_groups(
     form_id: str, groups: list[QuestionGroup], skip: list[SkippedField]
 ) -> str:
+    groups = prune_filled(form_id, groups)
     schema = load_schema(form_id)
     schema["groups"] = [
         g.model_dump(exclude_defaults=True, exclude_none=True) for g in groups

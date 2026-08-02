@@ -32,8 +32,6 @@ _ROOTS: list[tuple[str, type[BaseModel]]] = [
 # must ask. `tests/test_profile_paths.py` fails if intake starts populating one.
 _NOT_COLLECTED = frozenset({
     "care_recipient.gender",
-    "care_recipient.street_address",
-    "care_recipient.city",
     "care_recipient.phone",
     "care_recipient.email",
     "care_recipient.ssn",
@@ -45,14 +43,16 @@ _NOT_COLLECTED = frozenset({
 # mapping prints wrong data onto a government form.
 _NOTES: dict[str, str] = {
     "care_recipient.name": (
-        "one string, the name the person receiving care goes by (the applicant on most "
-        "forms) — never map it to a box that wants only a first, middle or last name"
+        "first and last together, the person receiving care (the applicant on most "
+        "forms) — a box wanting only one part takes `first_name`/`last_name` instead"
     ),
     "caregiver.name": (
-        "one string, the name of the person providing care (the provider/attendant) — "
-        "never map it to a box that wants only a first, middle or last name"
+        "first and last together, the person providing care (the provider/attendant) — "
+        "a box wanting only one part takes `first_name`/`last_name` instead"
     ),
     "caregiver.address": "state and ZIP only, e.g. 'CA 90001' — NOT a street address",
+    "caregiver.street_address": "number and street, no city/state/ZIP",
+    "care_recipient.street_address": "number and street, no city/state/ZIP",
     "care_recipient.conditions": "free-text diagnoses/conditions the user typed",
     "care_recipient.care_needs": "activities of daily living the recipient needs help with",
     "care_recipient.insurance": (

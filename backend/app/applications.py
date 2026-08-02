@@ -249,9 +249,28 @@ def _group_questions(
             if parsed and not is_profile_path(parsed[0])
             else ""
         )
-        for inp in group.inputs:
-            if not set(inp.target_fields()) & askable:
-                continue  # the profile already fills every box this input would
+        # An input whose every box the profile already fills is not a question.
+        asking = [i for i in group.inputs if set(i.target_fields()) & askable]
+        if not asking:
+            continue
+        if group.opt_in:
+            # A section that is the applicant's choice — naming a representative,
+            # picking a dental plan — costs one yes/no unless they want it.
+            opt_in_id = f"{group.id}_opt_in"
+            questions.append(
+                AppQuestion(
+                    field_id=f"{opt_in_id}.wanted",
+                    text=group.opt_in,
+                    type="single_select",
+                    options=["Yes", "No"],
+                    form_id=form_id,
+                    group_id=opt_in_id,
+                    input="wanted",
+                    ask_when=ask_when,
+                )
+            )
+            ask_when = f'{opt_in_id}.wanted == "Yes"'
+        for inp in asking:
             questions.append(
                 AppQuestion(
                     field_id=f"{group.id}.{inp.key}",
@@ -285,6 +304,38 @@ def _merge_question(existing: AppQuestion, addition: AppQuestion) -> None:
             existing.options.append(label)
     if existing.form_id != addition.form_id:
         existing.form_id = ""  # it now fills more than one form
+
+
+_WHO = re.compile(r"person\s*(\d+)|(primary contact)", re.I)
+_NOISE = re.compile(
+    r"\([^)]*\)|person\s*\d+|primary contact|\b(this|their|they|the)\b", re.I
+)
+
+
+def _fact(question: AppQuestion) -> tuple[str, str]:
+    """What a question asks, and whom it asks it about.
+
+    A form names the same person two ways — "Person 1" in its table, "the Primary
+    Contact" in its opening — and labels the same box "Middle name" in one place and
+    "Person 1 (Primary Contact) middle name" in another. Both reduce to the same pair.
+    """
+    who = _WHO.search(f"{question.group_prompt} {question.text}")
+    scope = (who.group(1) or "1") if who else ""
+    asked = _NOISE.sub(" ", question.text)
+    return scope, "".join(c for c in asked.lower() if c.isalnum())
+
+
+def _same_fact(
+    question: AppQuestion, asked: list[AppQuestion]
+) -> Optional[AppQuestion]:
+    """The question already on screen that this one repeats, if there is one."""
+    fact = _fact(question)
+    if not fact[1]:
+        return None
+    for other in asked:
+        if other.type == question.type and _fact(other) == fact:
+            return other
+    return None
 
 
 def start_application(
@@ -348,15 +399,21 @@ def start_application(
             if field in existing_answers:
                 continue
             seen_fields.add(field)
-            questions.append(
-                _build_question(
-                    field_name=field,
-                    label=q.get("label", field),
-                    spec_type=q.get("type", "text"),
-                    form_id=form_id,
-                    info=info_by_field.get(field),
-                )
+            loose = _build_question(
+                field_name=field,
+                label=q.get("label", field),
+                spec_type=q.get("type", "text"),
+                form_id=form_id,
+                info=info_by_field.get(field),
             )
+            # A box no group claimed still asks something, and the something is often
+            # a question already on screen: the form reprints the applicant's middle
+            # name beside a section it belongs to.
+            asked = _same_fact(loose, questions)
+            if asked is not None:
+                _merge_question(asked, loose)
+                continue
+            questions.append(loose)
 
     if state is None:
         state = ApplicationState(

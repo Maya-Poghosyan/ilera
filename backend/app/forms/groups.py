@@ -92,6 +92,11 @@ class QuestionGroup(BaseModel):
         default=None,
         description="Only ask when this holds of the profile, e.g. household.size >= 2",
     )
+    opt_in: str = Field(
+        default="",
+        description="Yes/no question to ask first, for a section that is the "
+        "applicant's choice and that the form gives nothing else to gate on",
+    )
     inputs: list[GroupInput] = Field(default_factory=list)
 
     def target_fields(self) -> list[str]:

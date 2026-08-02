@@ -15,7 +15,7 @@
     },
     "pg1-2": {
       "profile_path": null,
-      "label": "County IHSS Case #",
+      "label": "County IHSS Case Number",
       "needs_user_input": true,
       "confidence": "medium"
     },
@@ -24,14 +24,13 @@
       "label": "Provider’s Name"
     },
     "pg1-4": {
-      "profile_path": null,
-      "label": "Provider’s Address (street address)",
-      "needs_user_input": true,
+      "profile_path": "caregiver.street_address",
+      "label": "Provider’s Street Address",
       "confidence": "medium"
     },
     "pg1-5": {
       "profile_path": null,
-      "label": "Provider’s City, State, ZIP Code",
+      "label": "Provider’s City, State, and ZIP Code",
       "needs_user_input": true,
       "confidence": "medium"
     },
@@ -52,12 +51,12 @@
     },
     "pg3-1": {
       "profile_path": null,
-      "label": "Date recipient signed",
+      "label": "Date of recipient's signature",
       "needs_user_input": true
     },
     "pg3-3": {
       "profile_path": null,
-      "label": "Date authorized representative signed",
+      "label": "Date of authorized representative's signature",
       "needs_user_input": true
     },
     "pg3-2": {
@@ -71,12 +70,12 @@
     },
     "pg3-5": {
       "profile_path": null,
-      "label": "County worker name",
+      "label": "County worker name (for county use only)",
       "needs_user_input": true
     },
     "pg3-6": {
       "profile_path": null,
-      "label": "Date worker signed",
+      "label": "Date (for county use only)",
       "needs_user_input": true
     },
     "pg1-9": {
@@ -88,7 +87,7 @@
     },
     "pg1-11": {
       "profile_path": null,
-      "label": "Other (please specify)",
+      "label": "If Other, Specify Relationship",
       "needs_user_input": true,
       "confidence": "medium"
     },
@@ -109,7 +108,7 @@
       "label": "Provider’s Relationship to Recipient: Child",
       "type": "checkbox",
       "needs_user_input": true,
-      "confidence": "medium"
+      "confidence": "low"
     },
     "Pg1_12": {
       "profile_path": "caregiver.relationship",
@@ -122,12 +121,13 @@
       "label": "Provider’s Relationship to Recipient: Conservator",
       "type": "checkbox",
       "needs_user_input": true,
-      "confidence": "medium"
+      "confidence": "low"
     },
     "Pg1_14": {
       "profile_path": null,
       "label": "Provider’s Relationship to Recipient: Guardian",
       "type": "checkbox",
+      "check_when": "Legal guardian or authorized representative",
       "needs_user_input": true,
       "confidence": "medium"
     },
@@ -158,13 +158,6 @@
       "prompt": "Provider's mailing address",
       "help": "Enter the street address, and then the city, state, and ZIP.",
       "inputs": [
-        {
-          "key": "street",
-          "label": "Street address",
-          "fields": [
-            "pg1-4"
-          ]
-        },
         {
           "key": "city_state_zip",
           "label": "City, State, ZIP",
@@ -266,6 +259,7 @@
       "id": "authorized_representative_acknowledgment",
       "prompt": "If an authorized representative signed for you, provide their printed name and the date they signed",
       "help": "Only complete this if someone is signing on your behalf.",
+      "opt_in": "Did an authorized representative sign for you?",
       "inputs": [
         {
           "key": "authorized_representative_printed_name",

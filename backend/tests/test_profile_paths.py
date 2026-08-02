@@ -86,6 +86,15 @@ def test_offered_paths_are_populated_by_intake():
     )
 
 
+def test_intake_collects_what_a_form_box_asks_for():
+    """Forms have a box per name part and a street line; one `name` string can't fill
+    them, so the applicant was asked again for what they had already typed."""
+    offered = profile_paths()
+    for who in ("care_recipient", "caregiver"):
+        for part in ("first_name", "last_name", "street_address", "city"):
+            assert f"{who}.{part}" in offered
+
+
 def test_excluded_paths_stay_uncollected():
     """The exclusion list must not outlive the gap it describes."""
     profile = _fully_answered_profile()
