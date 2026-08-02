@@ -13,9 +13,12 @@ import {
   createReminder,
   deleteReminder,
   deleteSuggestedEvent,
+  getPreferences,
   listReminders,
   listSuggestedEvents,
   runReminderNow,
+  scanForEvents,
+  setMonitorInboxes as setMonitorInboxes_,
   updateReminder,
 } from "@/lib/api";
 import type { SuggestedEventAPI } from "@/lib/api";
@@ -35,6 +38,8 @@ type EventKind = "Appointment" | "Visit" | "Deadline";
 type CalEvent = {
   id?: string;
   day: number;
+  /** ISO YYYY-MM-DD when known; absent for the hardcoded demo events. */
+  date?: string;
   title: string;
   time?: string;
   kind: EventKind;
@@ -52,6 +57,15 @@ const events: CalEvent[] = [
   { day: 9, title: "IHSS timesheet due", kind: "Deadline" },
 ];
 
+// Matches settings.default_case_id on the backend, for the pre-intake demo case.
+const DEFAULT_CASE_ID = "demo";
+
+// Reminder times are wall-clock in the caregiver's own zone, not the server's.
+const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+const SCAN_POLL_ATTEMPTS = 10;
+const SCAN_POLL_INTERVAL_MS = 3000;
+
 const STATIC_SUGGESTED: CalEvent[] = [
   { day: 3, title: "Pharmacy refill pickup", time: "9:00 AM", kind: "Appointment", suggested: true, description: "Found in email from CVS \u2014 prescription #4021 ready for pickup at Main St location." },
   { day: 6, title: "IHSS pay stub review", kind: "Deadline", suggested: true, description: "IHSS direct deposit scheduled for Jun 6. Review hours logged against pay stub." },
@@ -61,6 +75,7 @@ function apiEventToCalEvent(e: SuggestedEventAPI): CalEvent {
   return {
     id: e.id,
     day: e.day,
+    date: e.date,
     title: e.title,
     time: e.time,
     kind: (e.kind as EventKind) || "Appointment",
@@ -72,6 +87,23 @@ function apiEventToCalEvent(e: SuggestedEventAPI): CalEvent {
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const monthName = new Date(YEAR, MONTH, 1).toLocaleString("en-US", { month: "long" });
+
+// Events carrying a date only belong on the grid when it falls in the shown month.
+function isInDisplayedMonth(e: CalEvent): boolean {
+  if (!e.date) return true;
+  const [year, month] = e.date.split("-").map(Number);
+  return year === YEAR && month === MONTH + 1;
+}
+
+function formatEventDate(e: CalEvent): string {
+  if (!e.date) return e.day > 0 ? `${monthName} ${e.day}` : "";
+  const [year, month, day] = e.date.split("-").map(Number);
+  return new Date(year, month - 1, day).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: year === YEAR ? undefined : "numeric",
+  });
+}
 
 type Cell = { day: number; inMonth: boolean };
 
@@ -123,6 +155,13 @@ export default function CalendarPage() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [apiSuggested, setApiSuggested] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [scanning, setScanning] = useState(false);
+  const [caseId] = useState(
+    () =>
+      (typeof window !== "undefined" ? localStorage.getItem("ilera_case_id") : null) ??
+      DEFAULT_CASE_ID
+  );
+  const [monitorInboxes, setMonitorInboxes] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // Reminder form
@@ -160,10 +199,52 @@ export default function CalendarPage() {
     }
   }, []);
 
+  const loadPreferences = useCallback(async () => {
+    try {
+      setMonitorInboxes((await getPreferences(caseId)).monitor_inboxes);
+    } catch {
+      // API may not be running
+    }
+  }, [caseId]);
+
   useEffect(() => {
     loadReminders();
     loadSuggestedEvents();
-  }, [loadReminders, loadSuggestedEvents]);
+    loadPreferences();
+  }, [loadReminders, loadSuggestedEvents, loadPreferences]);
+
+  const handleToggleMonitoring = useCallback(async () => {
+    const next = !monitorInboxes;
+    setMonitorInboxes(next);
+    try {
+      await setMonitorInboxes_(caseId, next);
+      showToast(
+        next
+          ? "Monitoring on \u2014 your assistant can look for care events"
+          : "Monitoring off \u2014 your assistant won't read your inboxes"
+      );
+    } catch {
+      setMonitorInboxes(!next);
+      showToast("Couldn't save that setting");
+    }
+  }, [caseId, monitorInboxes, showToast]);
+
+  // Poke files what it finds asynchronously via MCP, so poll for a while after asking.
+  const handleScan = useCallback(async () => {
+    setScanning(true);
+    try {
+      await scanForEvents(caseId);
+      showToast("Looking for new events \u2014 they'll appear here");
+      for (let i = 0; i < SCAN_POLL_ATTEMPTS; i++) {
+        await new Promise((r) => setTimeout(r, SCAN_POLL_INTERVAL_MS));
+        await loadSuggestedEvents();
+      }
+    } catch {
+      showToast("Couldn't reach Poke \u2014 check the assistant connection");
+    } finally {
+      setScanning(false);
+    }
+  }, [caseId, loadSuggestedEvents, showToast]);
 
   const resetForm = () => {
     setFormKind("custom");
@@ -186,6 +267,7 @@ export default function CalendarPage() {
           time: formTime,
           weekday: formFreq === "weekly" ? formWeekday : null,
           date: formFreq === "once" ? formDate : null,
+          timezone: LOCAL_TIMEZONE,
         },
       });
       showToast("Reminder updated");
@@ -198,6 +280,7 @@ export default function CalendarPage() {
           time: formTime,
           weekday: formFreq === "weekly" ? formWeekday : undefined,
           date: formFreq === "once" ? formDate : undefined,
+          timezone: LOCAL_TIMEZONE,
         },
       };
       await createReminder(body);
@@ -242,9 +325,11 @@ export default function CalendarPage() {
 
   const enableDailyCareLog = async () => {
     await createReminder({
+      // Scopes the check-in to this case so Poke logs hours against the right one.
+      case_id: localStorage.getItem("ilera_case_id"),
       kind: "daily_care_log",
       message: "",
-      schedule: { freq: "daily", time: "18:00" },
+      schedule: { freq: "daily", time: "18:00", timezone: LOCAL_TIMEZONE },
     });
     showToast("Daily care-log check-in enabled");
     await loadReminders();
@@ -281,7 +366,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Toast */}
       {toast && (
         <div className="fixed right-4 top-4 z-50 rounded-lg border bg-card px-4 py-2 text-sm shadow-lg">
@@ -290,14 +375,33 @@ export default function CalendarPage() {
       )}
 
       {/* Header */}
-      <div className="space-y-3">
-        <div>
+      <div className="space-y-6">
+        <div className="space-y-3">
           <h1 className="text-4xl font-bold">Care Calendar</h1>
-          <p className="text-sm text-muted-foreground">
-            Agents can scan email to auto-create events and text reminders.
-          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <button
+              type="button"
+              role="switch"
+              aria-label="Monitor inboxes"
+              aria-checked={monitorInboxes}
+              onClick={handleToggleMonitoring}
+              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+                monitorInboxes ? "bg-primary" : "bg-muted-foreground/30"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${
+                  monitorInboxes ? "left-4.5" : "left-0.5"
+                }`}
+              />
+            </button>
+            <p className="max-w-xl text-sm text-muted-foreground">
+              Enabling allows our caregiving assistant scan your email, iMessage,
+              WhatsApp, etc and suggest relevant events here
+            </p>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           <Button className="px-10 hover:font-bold">+ Appointment</Button>
           <Button className="px-10 hover:font-bold">+ Visit</Button>
           <Button className="px-10 hover:font-bold">+ Deadline</Button>
@@ -377,7 +481,7 @@ export default function CalendarPage() {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="time">Time (UTC)</Label>
+                <Label htmlFor="time">Time (your local time)</Label>
                 <Input
                   id="time"
                   type="time"
@@ -432,14 +536,24 @@ export default function CalendarPage() {
       )}
 
       {/* Suggested Events panel */}
-      {allSuggested.length > 0 && (
-        <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
+      <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="size-4" />
             <h3 className="text-sm font-semibold">Suggested Events</h3>
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-auto"
+              disabled={scanning || !monitorInboxes}
+              onClick={handleScan}
+            >
+              {scanning ? "Syncing\u2026" : "Sync new events"}
+            </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            Detected from recent emails and documents. Accept to add to your calendar.
+            {monitorInboxes
+              ? "Detected from recent emails and documents. Accept to add to your calendar."
+              : "Turn on the switch above to let your assistant find appointments and deadlines for you."}
           </p>
           <div className="space-y-2">
             {allSuggested.map((e, idx) => (
@@ -450,7 +564,7 @@ export default function CalendarPage() {
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-sm font-medium text-foreground">{e.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    {e.day > 0 ? `${monthName} ${e.day}` : ""}{e.time ? ` \u00b7 ${e.time}` : ""}{" \u00b7 "}{e.kind}
+                    {formatEventDate(e)}{e.time ? ` \u00b7 ${e.time}` : ""}{" \u00b7 "}{e.kind}
                   </p>
                   {e.description && (
                     <p className="text-xs leading-relaxed text-muted-foreground/80">
@@ -476,8 +590,7 @@ export default function CalendarPage() {
               </div>
             ))}
           </div>
-        </div>
-      )}
+      </div>
 
       {/* Month-view calendar grid */}
       <div className="overflow-hidden rounded-xl border border-brand-subtle bg-white shadow-xs">
@@ -511,7 +624,7 @@ export default function CalendarPage() {
           {cells.map((cell, i) => {
             const isToday = cell.inMonth && cell.day === TODAY;
             const dayEvents = cell.inMonth
-              ? allEvents.filter((e) => e.day === cell.day)
+              ? allEvents.filter((e) => e.day === cell.day && isInDisplayedMonth(e))
               : [];
             return (
               <div

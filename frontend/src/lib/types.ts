@@ -115,6 +115,8 @@ export interface ReminderSchedule {
   time: string;
   weekday?: number | null;
   date?: string | null;
+  /** IANA zone `time` is interpreted in; backend default when omitted. */
+  timezone?: string | null;
 }
 
 export interface Reminder {

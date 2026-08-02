@@ -6,9 +6,10 @@ Persistence mirrors the CaseProfile pattern in store.py.
 
 import json
 import uuid
-from datetime import date, datetime, time, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from enum import Enum
 from typing import Optional
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, Field
 
@@ -34,9 +35,12 @@ class ScheduleFreq(str, Enum):
 
 class ReminderSchedule(BaseModel):
     freq: ScheduleFreq = ScheduleFreq.daily
-    time: str = "09:00"  # HH:MM in 24-hour format
+    time: str = "09:00"  # HH:MM in 24-hour format, in `timezone`
     weekday: Optional[int] = None  # 0=Mon … 6=Sun, used when freq=weekly
     date: Optional[str] = None  # ISO date, used when freq=once
+    # IANA name; None falls back to settings.default_timezone. A caregiver's
+    # "6pm check-in" is 6pm where they live, not 6pm UTC.
+    timezone: Optional[str] = None
 
 
 class Reminder(BaseModel):
@@ -58,42 +62,46 @@ class Reminder(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+def _zone(schedule: ReminderSchedule) -> ZoneInfo:
+    name = schedule.timezone or get_settings().default_timezone
+    try:
+        return ZoneInfo(name)
+    except (ZoneInfoNotFoundError, ValueError):
+        return ZoneInfo("UTC")
+
+
 def compute_next_run(schedule: ReminderSchedule) -> str:
-    """Return the next fire time as an ISO-8601 UTC datetime string."""
-    now = datetime.now(timezone.utc)
-    parts = schedule.time.split(":")
-    fire_time = time(int(parts[0]), int(parts[1]), tzinfo=timezone.utc)
+    """Return the next fire time as an ISO-8601 UTC datetime string.
+
+    The wall-clock time is resolved in the schedule's zone, so a daily 18:00
+    reminder stays at 6pm local across DST rather than drifting an hour.
+    """
+    zone = _zone(schedule)
+    now = datetime.now(zone)
+    hour, minute = (int(p) for p in schedule.time.split(":"))
+    fire_time = time(hour, minute)
+
+    def at(day: date) -> datetime:
+        return datetime.combine(day, fire_time, tzinfo=zone)
 
     if schedule.freq == ScheduleFreq.once:
-        if schedule.date:
-            d = date.fromisoformat(schedule.date)
-        else:
-            d = now.date()
-        candidate = datetime.combine(d, fire_time, tzinfo=timezone.utc)
-        if candidate <= now:
-            return candidate.isoformat()  # already past — will fire immediately
-        return candidate.isoformat()
-
-    if schedule.freq == ScheduleFreq.daily:
-        candidate = datetime.combine(now.date(), fire_time, tzinfo=timezone.utc)
-        if candidate <= now:
-            from datetime import timedelta
-
-            candidate += timedelta(days=1)
-        return candidate.isoformat()
-
-    if schedule.freq == ScheduleFreq.weekly:
+        day = date.fromisoformat(schedule.date) if schedule.date else now.date()
+        candidate = at(day)  # a past date fires on the next scheduler tick
+    elif schedule.freq == ScheduleFreq.weekly:
         weekday = schedule.weekday if schedule.weekday is not None else 0
-        candidate = datetime.combine(now.date(), fire_time, tzinfo=timezone.utc)
+        candidate = at(now.date())
         days_ahead = (weekday - candidate.weekday()) % 7
         if days_ahead == 0 and candidate <= now:
             days_ahead = 7
-        from datetime import timedelta
+        candidate = at(now.date() + timedelta(days=days_ahead))
+    elif schedule.freq == ScheduleFreq.daily:
+        candidate = at(now.date())
+        if candidate <= now:
+            candidate = at(now.date() + timedelta(days=1))
+    else:
+        candidate = now
 
-        candidate += timedelta(days=days_ahead)
-        return candidate.isoformat()
-
-    return now.isoformat()
+    return candidate.astimezone(timezone.utc).isoformat()
 
 
 def advance_next_run(reminder: Reminder) -> None:

@@ -28,7 +28,7 @@ from .forms.filler import fill_pdf, list_schemas, resolve_fields
 from .geo import normalize_county, zip_to_county
 from .integrations import poke
 from .intake import INTAKE_SCHEMA, map_answers_to_profile
-from .mcp_server import mcp as mcp_server
+from .mcp_server import build_mcp_app
 from .models import BandStatus, CaseProfile, EligibilityResult
 from .rag.embeddings import provider as embedding_provider
 from .rag.index import get_index, rebuild_index
@@ -58,6 +58,7 @@ from .records import (
     save_renewal,
     save_timekeeping,
 )
+from .preferences import Preferences, get_preferences, save_preferences
 from .store import get_profile, save_profile
 from .suggested_events import (
     SuggestedEvent,
@@ -76,6 +77,19 @@ settings = get_settings()
 _SCHEDULER_INTERVAL = 30  # seconds between ticks
 
 
+def _care_log_message(reminder: Reminder) -> str:
+    """The daily check-in, personalised from the reminder's case when there is one."""
+    case_id = reminder.case_id or settings.default_case_id
+    profile = get_profile(case_id) if case_id else None
+    if profile is None:
+        return poke.daily_care_log_prompt()
+    return poke.daily_care_log_prompt(
+        recipient_name=profile.care_recipient.name,
+        caregiver_name=profile.caregiver.name,
+        case_id=case_id,
+    )
+
+
 async def _scheduler_loop() -> None:
     """Check for due reminders every interval and fire them via Poke."""
     while True:
@@ -86,12 +100,14 @@ async def _scheduler_loop() -> None:
                 if not reminder.active or not reminder.next_run:
                     continue
                 fire_at = datetime.fromisoformat(reminder.next_run)
+                if fire_at.tzinfo is None:
+                    fire_at = fire_at.replace(tzinfo=timezone.utc)
                 if fire_at > now:
                     continue
                 # Determine message
                 msg = reminder.message
                 if reminder.kind == ReminderKind.daily_care_log and not msg:
-                    msg = poke.daily_care_log_prompt()
+                    msg = _care_log_message(reminder)
                 if not msg:
                     continue
                 # Send via Poke (no-op if key missing)
@@ -187,10 +203,19 @@ app.add_middleware(
 )
 
 # Mount MCP server for Poke integration (SSE transport at /mcp)
-app.mount("/mcp", mcp_server.sse_app())
+app.mount("/mcp", build_mcp_app())
 
 # Auth routes
 app.include_router(auth_router)
+
+
+@app.get("/healthz")
+def healthz() -> dict:
+    """Liveness only — cheap enough for a platform health check.
+
+    ``/health`` builds the RAG index on first call, which takes minutes cold.
+    """
+    return {"status": "ok"}
 
 
 @app.get("/health")
@@ -652,7 +677,7 @@ def api_run_now(reminder_id: str) -> dict:
         raise HTTPException(status_code=404, detail="reminder not found")
     msg = r.message
     if r.kind == ReminderKind.daily_care_log and not msg:
-        msg = poke.daily_care_log_prompt()
+        msg = _care_log_message(r)
     if not msg:
         raise HTTPException(status_code=400, detail="reminder has no message")
     if not poke.available():
@@ -774,16 +799,44 @@ def api_preview_stitched(case_id: str, program: str, body: AnswersSubmit) -> Res
 # ---------------------------------------------------------------------------
 
 
+@app.get("/api/preferences/{case_id}")
+def api_get_preferences(case_id: str) -> Preferences:
+    return get_preferences(case_id)
+
+
+class PreferencesUpdate(BaseModel):
+    monitor_inboxes: bool
+
+
+@app.put("/api/preferences/{case_id}")
+def api_set_preferences(case_id: str, body: PreferencesUpdate) -> Preferences:
+    prefs = get_preferences(case_id)
+    prefs.monitor_inboxes = body.monitor_inboxes
+    prefs.monitor_inboxes_updated_at = datetime.now(timezone.utc).isoformat()
+    return save_preferences(prefs)
+
+
 @app.post("/api/poke/scan")
-def poke_scan_events() -> dict:
-    """Ask Poke to scan the user's messages/emails for medical events."""
+def poke_scan_events(case_id: str | None = None) -> dict:
+    """Ask Poke to scan the user's messages/emails for medical events.
+
+    Requires inbox monitoring to be switched on for the case: that toggle is
+    the caregiver's consent to Poke reading their mail on Ilera's behalf.
+
+    Poke works asynchronously and files what it finds by calling the
+    ``add_suggested_event`` MCP tool, so this only confirms the request was
+    queued — clients should poll ``/api/suggested-events`` for results.
+    """
+    resolved_case = case_id or settings.default_case_id
+    if not get_preferences(resolved_case).monitor_inboxes:
+        raise HTTPException(status_code=403, detail="Inbox monitoring is turned off")
     if not poke.available():
         raise HTTPException(status_code=400, detail="POKE_API_KEY not configured")
     try:
-        result = poke.scan_for_events()
+        poke.scan_for_events()
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f"Poke scan failed: {exc}") from exc
-    return {"scanned": True, "poke": result}
+    return {"requested": True, "known_event_ids": [e.id for e in list_suggested_events()]}
 
 
 
