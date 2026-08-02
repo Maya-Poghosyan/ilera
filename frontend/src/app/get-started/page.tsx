@@ -103,7 +103,7 @@ export default function GetStartedPage() {
                 rel="noopener noreferrer"
                 className="block"
               >
-                <Button className="w-full gap-1.5">
+                <Button className="h-11 w-full gap-1.5 text-base">
                   Set up Assistant
                   <ExternalLink className="size-3.5" />
                 </Button>
