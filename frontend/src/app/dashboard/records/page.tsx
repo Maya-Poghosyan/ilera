@@ -219,6 +219,29 @@ export default function RecordsPage() {
         </div>
       </div>
 
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          role="switch"
+          aria-label="Daily text check-in"
+          aria-checked={checkInId !== null}
+          onClick={handleToggleCheckIn}
+          className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
+            checkInId ? "bg-primary" : "bg-muted-foreground/30"
+          }`}
+        >
+          <span
+            className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${
+              checkInId ? "left-4.5" : "left-0.5"
+            }`}
+          />
+        </button>
+        <p className="max-w-xl text-sm text-muted-foreground">
+          Your assistant texts you at 6pm asking how care went, and logs your hours here
+          from the reply
+        </p>
+      </div>
+
       <p className="text-2xl font-semibold">
         Renewal for {renewal?.due_date
           ? `${new Date(renewal.due_date + "T00:00:00").getFullYear() - 1}\u2013${new Date(renewal.due_date + "T00:00:00").getFullYear()}`
@@ -256,28 +279,6 @@ export default function RecordsPage() {
                 Submit timesheet to IHSS portal
                 <ExternalLink className="size-3.5" />
               </a>
-              <div className="flex items-start gap-2 pt-1">
-                <button
-                  type="button"
-                  role="switch"
-                  aria-label="Daily text check-in"
-                  aria-checked={checkInId !== null}
-                  onClick={handleToggleCheckIn}
-                  className={`relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors ${
-                    checkInId ? "bg-primary" : "bg-muted-foreground/30"
-                  }`}
-                >
-                  <span
-                    className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${
-                      checkInId ? "left-4.5" : "left-0.5"
-                    }`}
-                  />
-                </button>
-                <p className="max-w-sm text-sm text-muted-foreground">
-                  Your assistant texts you at 6pm asking how care went, and logs your
-                  hours here from the reply
-                </p>
-              </div>
             </div>
             <Button size="sm" variant="outline" onClick={() => setShowTkForm(true)}>
               + Entry
