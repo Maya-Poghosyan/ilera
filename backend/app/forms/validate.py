@@ -9,9 +9,19 @@ Used in two places: inside the generator's retry loop, where the messages are fe
 to the model, and in `tests/test_form_maps.py` over the committed schemas.
 """
 
+import re
 from typing import Any
 
 from .profile_paths import profile_paths, profile_values
+
+# Boxes about somebody the profile does not describe, or that a person must sign
+# themselves. Filling these from the profile puts a name on a legal document that
+# nobody agreed to put there.
+_NOT_OURS = re.compile(
+    r"authorized representative|legal guardian|power of attorney|witness"
+    r"|signature|\bsign(ed|ature)? (of|here|below)\b",
+    re.I,
+)
 
 
 def validate_fields(
@@ -44,6 +54,11 @@ def validate_fields(
             problems.append(
                 f'"{name}": profile_path "{path}" is not a profile field intake fills, '
                 "so it would print blank and never be asked"
+            )
+        if path is not None and _NOT_OURS.search(str(spec.get("label") or "")):
+            problems.append(
+                f'"{name}": "{spec.get("label")}" is about someone the applicant has '
+                "to name, or a box they have to sign; it takes profile_path: null"
             )
         if path is None and not spec.get("needs_user_input"):
             problems.append(

@@ -267,6 +267,11 @@ export interface AppQuestion {
   form_id?: string;
   fields?: string[];
   interpret?: boolean;
+  // Questions sharing a group_id are one screen; group_prompt heads it.
+  group_id?: string;
+  group_prompt?: string;
+  // Follow-up screens: shown only when an earlier answer satisfies this condition.
+  ask_when?: string;
 }
 
 export interface StartApplicationResult {

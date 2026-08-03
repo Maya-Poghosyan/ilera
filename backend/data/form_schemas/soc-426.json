@@ -11,7 +11,7 @@
   "fields": {
     "SOC 426 Pg 3 2": {
       "profile_path": null,
-      "label": "Date of birth of the provider/enrollee",
+      "label": "Date of birth",
       "needs_user_input": true,
       "confidence": "medium"
     },
@@ -21,63 +21,55 @@
     },
     "SOC 426 Pg 3 3": {
       "profile_path": null,
-      "label": "Gender — check this box if you are male",
+      "label": "Gender: Male (check if male)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "SOC 426 Pg 3 4": {
       "profile_path": null,
-      "label": "Gender — check this box if you are female",
+      "label": "Gender: Female (check if female)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "SOC 426 Pg 3 6": {
-      "profile_path": null,
-      "label": "City of your home address",
-      "needs_user_input": true,
-      "confidence": "medium"
+      "profile_path": "caregiver.city",
+      "label": "Home city"
     },
     "SOC426 Pg 3 5": {
-      "profile_path": null,
-      "label": "Home address (physical street address; not a P.O. Box)",
-      "needs_user_input": true,
-      "confidence": "medium"
+      "profile_path": "caregiver.street_address",
+      "label": "Home street address (physical address, not a P.O. Box)"
     },
     "SOC 426 Pg 3 7": {
-      "profile_path": null,
-      "label": "State of your home address",
-      "needs_user_input": true,
-      "confidence": "medium"
+      "profile_path": "caregiver.state",
+      "label": "Home state"
     },
     "SOC 426 Pg 3 8": {
-      "profile_path": null,
-      "label": "ZIP code of your home address",
-      "needs_user_input": true,
-      "confidence": "medium"
+      "profile_path": "caregiver.zip_code",
+      "label": "Home ZIP code"
     },
     "SOC 426 Pg 3 9": {
       "profile_path": null,
-      "label": "Mailing address (if different from home address)",
+      "label": "Mailing street address (if different from home address)",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "SOC 426 Pg 3 10": {
       "profile_path": null,
-      "label": "City of your mailing address",
+      "label": "Mailing city",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "SOC 426 Pg 3 11": {
       "profile_path": null,
-      "label": "State of your mailing address",
+      "label": "Mailing state",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "SOC 426 Pg 3 12": {
       "profile_path": null,
-      "label": "ZIP code of your mailing address",
+      "label": "Mailing ZIP code",
       "needs_user_input": true,
       "confidence": "medium"
     },
@@ -87,7 +79,7 @@
     },
     "SOC 426 Pg 3 14": {
       "profile_path": null,
-      "label": "Social Security Number of the provider",
+      "label": "Social Security number",
       "needs_user_input": true,
       "confidence": "medium"
     },
@@ -97,69 +89,75 @@
     },
     "SOC 426 Pg 3 16": {
       "profile_path": null,
-      "label": "Driver's license number or government-issued ID number",
+      "label": "Driver's license or government ID number",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "SOC 426 Pg 3 17": {
       "profile_path": null,
-      "label": "Expiration date of the driver's license or ID",
+      "label": "ID expiration date",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "SOC 426 Pg 3 18": {
       "profile_path": null,
-      "label": "Issuing state of the driver's license or ID",
+      "label": "ID issuing state",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "SOC 426 Pg 3 19": {
       "profile_path": null,
-      "label": "Primary spoken language of the provider",
+      "label": "Primary spoken language",
       "needs_user_input": true,
-      "confidence": "low"
+      "confidence": "medium"
     },
     "SOC 426 Pg 3 20": {
       "profile_path": null,
-      "label": "Primary written language of the provider",
+      "label": "Primary written language",
       "needs_user_input": true,
-      "confidence": "low"
+      "confidence": "medium"
     },
     "SOC 426 Pg 4 2": {
       "profile_path": null,
       "label": "Within the past 10 years, have you been convicted of or incarcerated following a conviction for a Tier 1 crime? (Yes)",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 426 Pg 4 3": {
       "profile_path": null,
       "label": "Within the past 10 years, have you been convicted of or incarcerated following a conviction for a Tier 1 crime? (No)",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 426 Pg 4 5": {
       "profile_path": null,
       "label": "Within the past 10 years, have you been convicted of or incarcerated following a conviction for a Tier 2 crime? (No)",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 426 Pg 4 6": {
       "profile_path": null,
-      "label": "If you answered yes to Tier 2 above, have you obtained a certificate of rehabilitation or expungement (dismissal pursuant to PC section 1203.4) of the Tier 2 crime? (Yes)",
+      "label": "If you answered “Yes” to question 1.b above, have you obtained a certificate of rehabilitation or expungement (dismissal pursuant to PC section 1203.4) of the Tier 2 crime? (Yes)",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 426 Pg 4 4": {
       "profile_path": null,
       "label": "Within the past 10 years, have you been convicted of or incarcerated following a conviction for a Tier 2 crime? (Yes)",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 426 Pg 4 7": {
       "profile_path": null,
-      "label": "If you answered yes to Tier 2 above, have you obtained a certificate of rehabilitation or expungement (dismissal pursuant to PC section 1203.4) of the Tier 2 crime? (No)",
+      "label": "If you answered “Yes” to question 1.b above, have you obtained a certificate of rehabilitation or expungement (dismissal pursuant to PC section 1203.4) of the Tier 2 crime? (No)",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 426 Pg 4 1": {
       "profile_path": "caregiver.name",
@@ -167,7 +165,7 @@
     },
     "SOC 426 Pg 5 1": {
       "profile_path": null,
-      "label": "Date signed (provider signature date)",
+      "label": "Date (provider signature date)",
       "needs_user_input": true
     },
     "soc 426 Pg 5 2": {
@@ -176,8 +174,255 @@
     },
     "SOC 426 Pg 5 3": {
       "profile_path": null,
-      "label": "Date county representative signed (optional)",
+      "label": "County representative's signature date",
       "needs_user_input": true
     }
-  }
+  },
+  "groups": [
+    {
+      "id": "provider_date_of_birth",
+      "prompt": "What is your date of birth?",
+      "inputs": [
+        {
+          "key": "date_of_birth",
+          "label": "Date of birth",
+          "type": "date",
+          "fields": [
+            "SOC 426 Pg 3 2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "provider_gender",
+      "prompt": "What is your gender?",
+      "inputs": [
+        {
+          "key": "gender",
+          "label": "Gender",
+          "type": "single_select",
+          "options": [
+            "Male",
+            "Female"
+          ],
+          "option_fields": {
+            "Male": [
+              "SOC 426 Pg 3 3"
+            ],
+            "Female": [
+              "SOC 426 Pg 3 4"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "provider_mailing_address",
+      "prompt": "If your mailing address is different from your home address, enter your mailing address (leave blank if same):",
+      "help": "Provide the street or P.O. Box, city, state and ZIP for mailing.",
+      "opt_in": "Is your mailing address different from your home address?",
+      "inputs": [
+        {
+          "key": "mailing_street",
+          "label": "Mailing street address",
+          "fields": [
+            "SOC 426 Pg 3 9"
+          ],
+          "required": false
+        },
+        {
+          "key": "mailing_city",
+          "label": "Mailing city",
+          "fields": [
+            "SOC 426 Pg 3 10"
+          ],
+          "required": false
+        },
+        {
+          "key": "mailing_state",
+          "label": "Mailing state",
+          "fields": [
+            "SOC 426 Pg 3 11"
+          ],
+          "required": false
+        },
+        {
+          "key": "mailing_zip",
+          "label": "Mailing ZIP code",
+          "fields": [
+            "SOC 426 Pg 3 12"
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "provider_ssn",
+      "prompt": "What is your Social Security Number?",
+      "inputs": [
+        {
+          "key": "ssn",
+          "label": "Social Security Number",
+          "fields": [
+            "SOC 426 Pg 3 14"
+          ],
+          "help": "Required for identity verification and authorization to work."
+        }
+      ]
+    },
+    {
+      "id": "provider_id_card",
+      "prompt": "Provide your driver's license or government-issued ID information (if you have one).",
+      "opt_in": "Do you want to provide your driver's license or government-issued ID information?",
+      "inputs": [
+        {
+          "key": "id_number",
+          "label": "Driver’s license or government ID number",
+          "fields": [
+            "SOC 426 Pg 3 16"
+          ],
+          "required": false
+        },
+        {
+          "key": "id_expiration",
+          "label": "ID expiration date",
+          "type": "date",
+          "fields": [
+            "SOC 426 Pg 3 17"
+          ],
+          "required": false
+        },
+        {
+          "key": "id_issuing_state",
+          "label": "Issuing state",
+          "fields": [
+            "SOC 426 Pg 3 18"
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "provider_primary_language",
+      "prompt": "What are your primary languages?",
+      "inputs": [
+        {
+          "key": "primary_spoken_language",
+          "label": "Primary spoken language",
+          "fields": [
+            "SOC 426 Pg 3 19"
+          ]
+        },
+        {
+          "key": "primary_written_language",
+          "label": "Primary written language",
+          "fields": [
+            "SOC 426 Pg 3 20"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "provider_tier1_conviction",
+      "prompt": "Within the past 10 years, have you been convicted of or incarcerated following a conviction for a Tier 1 crime?",
+      "inputs": [
+        {
+          "key": "tier1_convicted",
+          "label": "Tier 1 conviction or incarceration in past 10 years",
+          "type": "single_select",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "option_fields": {
+            "Yes": [
+              "SOC 426 Pg 4 2"
+            ],
+            "No": [
+              "SOC 426 Pg 4 3"
+            ]
+          },
+          "option_values": {
+            "Yes": "Yes",
+            "No": "No"
+          }
+        }
+      ]
+    },
+    {
+      "id": "provider_tier2_conviction",
+      "prompt": "Within the past 10 years, have you been convicted of or incarcerated following a conviction for a Tier 2 crime?",
+      "inputs": [
+        {
+          "key": "tier2_convicted",
+          "label": "Tier 2 conviction or incarceration in past 10 years",
+          "type": "single_select",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "option_fields": {
+            "Yes": [
+              "SOC 426 Pg 4 4"
+            ],
+            "No": [
+              "SOC 426 Pg 4 5"
+            ]
+          },
+          "option_values": {
+            "Yes": "Yes",
+            "No": "No"
+          }
+        }
+      ]
+    },
+    {
+      "id": "provider_tier2_rehabilitation_certificate",
+      "prompt": "If you answered Yes to Tier 2 above, have you obtained a certificate of rehabilitation or expungement (dismissal pursuant to PC section 1203.4) of the Tier 2 crime?",
+      "applies_when": "provider_tier2_conviction.tier2_convicted == \"Yes\"",
+      "inputs": [
+        {
+          "key": "tier2_rehab_obtained",
+          "label": "Certificate of rehabilitation or expungement obtained for Tier 2 crime",
+          "type": "single_select",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "option_fields": {
+            "Yes": [
+              "SOC 426 Pg 4 6"
+            ],
+            "No": [
+              "SOC 426 Pg 4 7"
+            ]
+          },
+          "option_values": {
+            "Yes": "Yes",
+            "No": "No"
+          }
+        }
+      ]
+    },
+    {
+      "id": "provider_signature_date",
+      "prompt": "What date did you (the provider) sign this form?",
+      "inputs": [
+        {
+          "key": "date",
+          "label": "Date signed",
+          "type": "date",
+          "fields": [
+            "SOC 426 Pg 5 1"
+          ]
+        }
+      ]
+    }
+  ],
+  "skip_fields": [
+    {
+      "field": "SOC 426 Pg 5 3",
+      "reason": "signed by hand on the printed form"
+    }
+  ]
 }

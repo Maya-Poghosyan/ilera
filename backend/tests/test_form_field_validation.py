@@ -86,7 +86,15 @@ def test_start_application_questions_use_real_field_types():
             "number",
             "date",
         )
-        assert q["fields"] == [q["field_id"]]
+        # A question is a thing to ask, not a box: grouped ones fill several fields
+        # under an id of their own, ungrouped ones fill the single box they name.
+        if q["group_id"].endswith("_opt_in"):
+            # Whether they want an optional section at all fills nothing itself.
+            assert q["fields"] == [] and q["options"] == ["Yes", "No"]
+        elif q["group_id"]:
+            assert q["fields"] or q["option_fields"]
+        else:
+            assert q["fields"] == [q["field_id"]]
 
 
 if __name__ == "__main__":

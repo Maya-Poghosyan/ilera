@@ -42,6 +42,76 @@ const APP_STATUS_LABELS: Record<AppStatus, string> = {
 
 type FlowStep = "list" | "loading" | "questions" | "completing" | "preview";
 
+/** The inputs the backend put under one `group_id`: one thing a person knows. */
+function groupQuestions(questions: AppQuestion[]): AppQuestion[][] {
+  const groups: AppQuestion[][] = [];
+  for (const question of questions) {
+    const last = groups[groups.length - 1];
+    if (last && question.group_id && last[0].group_id === question.group_id) {
+      last.push(question);
+    } else {
+      groups.push([question]);
+    }
+  }
+  return groups;
+}
+
+const INPUTS_PER_SCREEN = 6;
+
+/**
+ * Groups gathered onto screens, so a yes/no question doesn't get a page to itself.
+ *
+ * Neighbouring groups come from the same part of the form, so they read as one short
+ * page of related questions. The packing is done before any answers are given and
+ * never changes, so answering something can't shuffle the screens underneath you.
+ */
+function toScreens(groups: AppQuestion[][]): AppQuestion[][][] {
+  const screens: AppQuestion[][][] = [];
+  for (const group of groups) {
+    const last = screens[screens.length - 1];
+    const filled = last?.reduce((n, g) => n + g.length, 0) ?? 0;
+    if (last && filled + group.length <= INPUTS_PER_SCREEN) {
+      last.push(group);
+    } else {
+      screens.push([group]);
+    }
+  }
+  return screens;
+}
+
+/**
+ * Whether a follow-up screen is worth showing, given what has been answered.
+ *
+ * The backend sends the "if yes, ..." parts of a form with an `ask_when` naming the
+ * answer they depend on, e.g. `past_ihss.received_ihss_before == "Yes"`. An unmet
+ * condition skips the screen. A condition nobody can answer — the question it names
+ * isn't asked here — shows it, since an unasked question is a blank box on a
+ * government form.
+ */
+function shouldAsk(
+  group: AppQuestion[],
+  answers: Answers,
+  asked: Set<string>
+): boolean {
+  const condition = group[0]?.ask_when;
+  if (!condition) return true;
+  const match = /^\s*([\w.]+)\s*(==|!=)\s*(.+?)\s*$/.exec(condition);
+  if (!match) return true;
+  const [, path, op, rawExpected] = match;
+  const answer = answers[path];
+  if (answer === undefined || answer === null || answer === "") {
+    // Still blank. A section the applicant hasn't opted into isn't shown while it is
+    // undecided — an appendix appears when they say it applies, not before.
+    return !asked.has(path);
+  }
+  const expected = rawExpected.replace(/^['"]|['"]$/g, "").toLowerCase();
+  const given = (Array.isArray(answer) ? answer : [answer]).map((v) =>
+    String(v).toLowerCase()
+  );
+  const matches = given.includes(expected);
+  return op === "==" ? matches : !matches;
+}
+
 export default function ApplicationsPage() {
   const [apps, setApps] = useState<ApplicationEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +126,17 @@ export default function ApplicationsPage() {
   const [autofilled, setAutofilled] = useState(0);
   const [totalFields, setTotalFields] = useState(0);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [questionIndex, setQuestionIndex] = useState(0);
+  const [stepIndex, setStepIndex] = useState(0);
+
+  // Screens, not questions: the backend puts the inputs making up one thing a person
+  // knows (an address, an employer) under a shared group_id, and a handful of those
+  // groups share a screen.
+  const asked = new Set(questions.map((q) => q.field_id));
+  const screens = toScreens(groupQuestions(questions))
+    .map((screen) => screen.filter((group) => shouldAsk(group, answers, asked)))
+    .filter((screen) => screen.length > 0);
+  const currentScreen = screens[stepIndex] ?? [];
+  const currentQuestions = currentScreen.flat();
 
   useEffect(() => {
     const stored =
@@ -91,7 +171,7 @@ export default function ApplicationsPage() {
     setFlowStep("loading");
     setAnswers({});
     setErrors({});
-    setQuestionIndex(0);
+    setStepIndex(0);
 
     startApplication(caseId, program).then((result) => {
       setAutofilled(result.autofilled);
@@ -116,23 +196,22 @@ export default function ApplicationsPage() {
   }
 
   function goToNextQuestion() {
-    const current = questions[questionIndex];
-    if (!current) return;
-    const errs = validateQuestions([current as Question], answers);
+    if (currentQuestions.length === 0) return;
+    const errs = validateQuestions(currentQuestions as Question[], answers);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
     }
-    if (questionIndex >= questions.length - 1) {
+    if (stepIndex >= screens.length - 1) {
       if (activeProgram) handleGeneratePreview(activeProgram, answers);
       return;
     }
-    setQuestionIndex((i) => i + 1);
+    setStepIndex((i) => i + 1);
   }
 
   function goToPrevQuestion() {
     setErrors({});
-    setQuestionIndex((i) => Math.max(0, i - 1));
+    setStepIndex((i) => Math.max(0, i - 1));
   }
 
   function handleGeneratePreview(
@@ -200,9 +279,8 @@ export default function ApplicationsPage() {
   // Q&A step
   // -----------------------------------------------------------------------
   if (flowStep === "questions" && activeProgram) {
-    const current = questions[questionIndex];
-    const isLastQuestion = questionIndex >= questions.length - 1;
-    const pct = ((questionIndex + 1) / questions.length) * 100;
+    const isLastQuestion = stepIndex >= screens.length - 1;
+    const pct = ((stepIndex + 1) / screens.length) * 100;
     return (
       <div className="mx-auto w-full max-w-2xl space-y-6">
         <Button variant="ghost" size="sm" onClick={handleBackToList}>
@@ -222,28 +300,57 @@ export default function ApplicationsPage() {
         <div className="space-y-2">
           <Progress value={pct} />
           <p className="text-xs text-muted-foreground">
-            Question {questionIndex + 1} of {questions.length}
+            Step {stepIndex + 1} of {screens.length}
           </p>
         </div>
 
         <Card>
-          <CardContent className="pt-6">
-            {current && (
-              <QuestionField
-                question={current as Question}
-                value={answers[current.field_id] ?? null}
-                name=""
-                error={errors[current.field_id]}
-                onChange={(v) => setAnswer(current.field_id, v)}
-              />
-            )}
+          <CardContent className="divide-y pt-6">
+            {currentScreen.map((group, g) => {
+              // Inputs of a group tend to repeat one explanation ("the Primary Contact
+              // must be 18 or older") under every box. It is said once, above them.
+              const shared = group[0]?.why_this_matters ?? "";
+              return (
+                <div
+                  key={group[0].group_id || group[0].field_id}
+                  className={`space-y-4 pb-5 ${g === 0 ? "" : "pt-5"}`}
+                >
+                  {group[0].group_prompt && (
+                    <div className="space-y-1">
+                      <p className="text-base font-semibold">
+                        {group[0].group_prompt}
+                      </p>
+                      {shared && (
+                        <p className="text-xs text-muted-foreground">{shared}</p>
+                      )}
+                    </div>
+                  )}
+                  {group.map((question, i) => (
+                    <QuestionField
+                      key={question.field_id}
+                      question={
+                        (question.why_this_matters === shared ||
+                        question.why_this_matters ===
+                          group[i - 1]?.why_this_matters
+                          ? { ...question, why_this_matters: "" }
+                          : question) as Question
+                      }
+                      value={answers[question.field_id] ?? null}
+                      name=""
+                      error={errors[question.field_id]}
+                      onChange={(v) => setAnswer(question.field_id, v)}
+                    />
+                  ))}
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
 
         <div className="flex justify-between">
           <Button
             variant="outline"
-            disabled={questionIndex === 0}
+            disabled={stepIndex === 0}
             onClick={goToPrevQuestion}
           >
             Back

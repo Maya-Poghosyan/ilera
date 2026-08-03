@@ -26,6 +26,7 @@ import argparse
 import asyncio
 import json
 import os
+import re
 import sys
 from typing import Any, Literal, Optional
 
@@ -225,7 +226,70 @@ async def generate_form_map(form_id: str, only_pages: Optional[list[int]] = None
 
     # Keep the PDF's own field order so the JSON reads top-to-bottom like the form.
     ordered = {name: drafted[name] for name in fields_by_name if name in drafted}
+    spread = propagate_paths(ordered)
+    if spread:
+        print(f"  {spread} more fields filled by their twins", file=sys.stderr)
     return ordered
+
+
+_PERSON = re.compile(r"person\s*(\d+)|(primary contact)", re.I)
+_FILLER = re.compile(
+    r"\([^)]*\)|person\s*\d+|primary contact|\b(this|their|they|the)\b"
+    r"|\bif (any|known|different|applicable)\b|\boptional\b",
+    re.I,
+)
+
+
+# Somebody other than the person a section is about. A form asks for "Person 1's first
+# name" and, two lines down, "the taxpayer's first name"; those are not one box.
+_SOMEONE_ELSE = re.compile(
+    r"spouse|taxpayer|tax filer|caretaker|caregiver|representative|employer|provider"
+    r"|parent|guardian|contact person|organization|household member|dependent",
+    re.I,
+)
+# The identity parts a long form reprints section after section, each printing worded
+# its own way: "Person 1 — first name", "If Person 1 had a life event, their first name".
+_PART = re.compile(
+    r"\b(first|middle|last)\s+name\b|\bsuffix\b|\bdate of birth\b", re.I
+)
+
+
+def _asked(label: str) -> tuple[str, str]:
+    """What a box asks and whom it asks about, so two printings of it can meet."""
+    who = _PERSON.search(label)
+    scope = (who.group(1) or "1") if who else ""
+    part = _PART.search(label)
+    if scope and part and not _SOMEONE_ELSE.search(label):
+        return scope, " ".join(part.group(0).lower().split())
+    return scope, "".join(c for c in _FILLER.sub(" ", label).lower() if c.isalnum())
+
+
+def propagate_paths(fields: dict) -> int:
+    """Fill in the copies of a box that the page-by-page pass mapped only once.
+
+    A long form prints "Person 1 first name" in five sections; the model, seeing one
+    page at a time, recognises the profile behind some of them and not the rest. The
+    rest are the same question about the same person, so they take the same value —
+    and are no longer asked.
+    """
+    known: dict[tuple[str, str], set[str]] = {}
+    for spec in fields.values():
+        if isinstance(spec, dict) and spec.get("profile_path"):
+            known.setdefault(_asked(str(spec.get("label") or "")), set()).add(
+                spec["profile_path"]
+            )
+
+    filled = 0
+    for spec in fields.values():
+        if not isinstance(spec, dict) or spec.get("profile_path"):
+            continue
+        # Only where the form is unambiguous: one profile field for that question.
+        paths = known.get(_asked(str(spec.get("label") or "")), set())
+        if len(paths) == 1 and not spec.get("options"):
+            spec["profile_path"] = next(iter(paths))
+            spec.pop("needs_user_input", None)
+            filled += 1
+    return filled
 
 
 def merge_form_map(form_id: str, drafted: dict, *, replace: bool = False) -> dict:

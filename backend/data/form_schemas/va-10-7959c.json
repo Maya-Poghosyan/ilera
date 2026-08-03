@@ -10,35 +10,33 @@
   },
   "fields": {
     "form1[0].#subform[0].FirstName-1[0]": {
-      "profile_path": null,
-      "label": "Last name of the beneficiary",
-      "needs_user_input": true
+      "profile_path": "care_recipient.last_name",
+      "label": "Apellido del beneficiario"
     },
     "form1[0].#subform[0].LastName-1[0]": {
-      "profile_path": null,
-      "label": "First name of the beneficiary",
-      "needs_user_input": true
+      "profile_path": "care_recipient.first_name",
+      "label": "Nombre del beneficiario"
     },
     "form1[0].#subform[0].MiddleInitial-1[0]": {
       "profile_path": null,
-      "label": "Middle initial of the beneficiary",
-      "needs_user_input": true
+      "label": "Inicial del segundo nombre del beneficiario",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].Address-1[0]": {
-      "profile_path": null,
-      "label": "Street address (number, street, P.O. box, apt. #) of the beneficiary",
-      "needs_user_input": true
+      "profile_path": "care_recipient.street_address",
+      "label": "Dirección (número, calle, caja postal, # de apto.) del beneficiario"
     },
     "form1[0].#subform[0].RadioButtonList[0]": {
       "profile_path": null,
-      "label": "Sex of the beneficiary (Hombre = Male, Mujer = Female)",
+      "label": "Sexo del beneficiario (Hombre/Mujer)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].City-1[0]": {
-      "profile_path": null,
-      "label": "City of the beneficiary",
-      "needs_user_input": true
+      "profile_path": "care_recipient.city",
+      "label": "Ciudad del beneficiario"
     },
     "form1[0].#subform[0].State-1[0]": {
       "profile_path": "care_recipient.state",
@@ -50,285 +48,829 @@
     },
     "form1[0].#subform[0].SSN-1[0]": {
       "profile_path": null,
-      "label": "Telephone number (include area code)",
+      "label": "Número de teléfono del beneficiario (incluya código de área)",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].PhoneNumb-1[0]": {
       "profile_path": null,
-      "label": "Social Security Number of the beneficiary",
+      "label": "Número de seguro social del beneficiario",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].NewAddressBox-1[0]": {
       "profile_path": null,
-      "label": "Check if this is a new address",
+      "label": "Marque si es nueva dirección",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[0].RadioButtonList[1]": {
       "profile_path": null,
-      "label": "Do you have Medicare Part A? (Si/No)",
+      "label": "¿Tiene Parte A de Medicare? (Si/No)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[0].Date-PartD[0]": {
       "profile_path": null,
-      "label": "Medicare Part A effective date (MMDDYYYY)",
+      "label": "Fecha vigente de la Parte A (MMDDYYYY)",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[0].PartD_CarrierName[0]": {
       "profile_path": null,
-      "label": "Medicare Part A carrier name",
+      "label": "Nombre del portador de la Parte A",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[1].RadioButtonList[2]": {
       "profile_path": null,
-      "label": "Do you have Medicare Part B? (Si/No)",
+      "label": "¿Tiene Parte B de Medicare? (Si/No)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[1].Date-PartD[1]": {
       "profile_path": null,
-      "label": "Medicare Part B effective date (MMDDYYYY)",
+      "label": "Fecha vigente de la Parte B (MMDDYYYY)",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[1].PartD_CarrierName[1]": {
       "profile_path": null,
-      "label": "Medicare Part B carrier name",
+      "label": "Nombre del portador de la Parte B",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[2].RadioButtonList[3]": {
       "profile_path": null,
-      "label": "Do you have Medicare Part D? (Si/No)",
+      "label": "¿Tiene Parte D de Medicare? (Si/No)",
       "type": "radio",
       "needs_user_input": true,
-      "confidence": "low"
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[2].Date-PartD[2]": {
       "profile_path": null,
-      "label": "Medicare Part D effective date (MMDDYYYY)",
+      "label": "Fecha vigente de la Parte D (MMDDYYYY)",
       "needs_user_input": true,
-      "confidence": "low"
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[2].PartD_CarrierName[2]": {
       "profile_path": null,
-      "label": "Medicare Part D carrier name",
+      "label": "Nombre del portador de la Parte D",
       "needs_user_input": true,
-      "confidence": "low"
+      "confidence": "medium"
     },
     "form1[0].#subform[0].RadioButtonList[4]": {
       "profile_path": null,
-      "label": "Does your Medicare provide pharmacy (prescription) benefits? (Si/No)",
+      "label": "¿Su Medicare le da beneficios de farmacia? (Si/No)",
       "type": "radio",
       "needs_user_input": true,
-      "confidence": "low"
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[3].MedicareAdvantage[0]": {
       "profile_path": null,
-      "label": "Have you chosen a Medicare Advantage Plan for your Medicare coverage? (Si/No)",
+      "label": "¿Ha escogido un Plan Medicare Advantage para su cobertura de Medicare? (Si/No)",
       "type": "radio",
       "needs_user_input": true,
-      "confidence": "low"
+      "confidence": "medium"
     },
     "form1[0].#subform[0].PartA[0]": {
       "profile_path": null,
-      "label": "Do you have any other health insurance besides Medicare? (Si/No)",
+      "label": "¿Tiene otro seguro de salud aparte de Medicare? (Si/No)",
       "type": "radio",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].NameofInsurance-1[0]": {
       "profile_path": null,
-      "label": "Name of Insurance #1",
-      "needs_user_input": true
+      "label": "Nombre del seguro #1",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].Date-TermnNameInsurance-1[0]": {
       "profile_path": null,
-      "label": "Expiration date of Insurance #1 (MMDDYYYY) — enter only if policy is not active",
-      "needs_user_input": true
+      "label": "Fecha de caducación de la póliza #1 (MMDDYYYY) — solo si la póliza no está activa",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].Date-TermnNameInsurance-1[1]": {
       "profile_path": null,
-      "label": "Effective date of Insurance #1 (MMDDYYYY)",
-      "needs_user_input": true
+      "label": "Fecha vigente de la póliza #1 (MMDDYYYY)",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].Insurancethruemployer[0]": {
       "profile_path": null,
-      "label": "Is Insurance #1 provided through your employment? (Si/No)",
+      "label": "¿Este seguro #1 es por su empleo? (Si/No)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].InsuranceCoverPrescript[0]": {
       "profile_path": null,
-      "label": "Does Insurance #1 cover prescriptions? (Si/No)",
+      "label": "¿Este seguro #1 cubre recetas? (Si/No)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].InsuranceprescriptExplain[0]": {
       "profile_path": null,
-      "label": "Does Insurance #1 provide an explanation of benefits for prescriptions? (Si/No)",
+      "label": "¿Este seguro #1 le provee una explicación de beneficios para recetas? (Si/No)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].CheckBox-RxDiscount-1[0]": {
       "profile_path": null,
-      "label": "Insurance #1 type: HMO (check if this is an HMO)",
+      "label": "Tipo de seguro #1: HMO (marque si aplica)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].CheckBox1-MedicaidSA-1[0]": {
       "profile_path": null,
-      "label": "Insurance #1 type: PPO (check if this is a PPO)",
+      "label": "Tipo de seguro #1: PPO (marque si aplica)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].CheckBox-PPO-1[0]": {
       "profile_path": null,
-      "label": "Insurance #1 type: Medicaid / State Assistance (check if this applies)",
+      "label": "Tipo de seguro #1: Medicaid/Asistencia del Estado (marque si aplica)",
       "type": "checkbox",
-      "check_when": "medi-cal",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].CheckBox-HMO-1[0]": {
       "profile_path": null,
-      "label": "Insurance #1 type: Prescription Discount (check if this applies)",
+      "label": "Tipo de seguro #1: Descuento de recetas (marque si aplica)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].CheckBox-Other-1[0]": {
       "profile_path": null,
-      "label": "Insurance #1 type: Medigap (check if this is Medigap)",
+      "label": "Tipo de seguro #1: Medigap (marque si aplica)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].CheckBox-Medigap-1[0]": {
       "profile_path": null,
-      "label": "Insurance #1 type: Other (specialty, limited coverage, or CHAMPVA supplemental) (check if this applies)",
+      "label": "Tipo de seguro #1: Otro (especialidad, cobertura limitada, o exclusivamente CHAMPVA suplemental)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].DropDownList-Medigap-1[0]": {
       "profile_path": null,
-      "label": "If Medigap, specify plan letter (A-J)",
+      "label": "Si es Medigap (póliza #1), especifique la letra (A-J)",
       "type": "choice",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[5].Comments-Ins-1[0]": {
       "profile_path": null,
-      "label": "Comments about Insurance #1",
+      "label": "Comentarios sobre el seguro #1",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].NameofInsurance-1[1]": {
       "profile_path": null,
-      "label": "Name of Insurance #2",
-      "needs_user_input": true
+      "label": "Nombre del seguro #2",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].Date-TermnNameInsurance-2[0]": {
       "profile_path": null,
-      "label": "Expiration date of Insurance #2 (MMDDYYYY) — enter only if policy is not active",
-      "needs_user_input": true
+      "label": "Fecha de caducación de la póliza #2 (MMDDYYYY) — solo si la póliza está caducada",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].Date-TermnNameInsurance-2\\.1[0]": {
       "profile_path": null,
-      "label": "Effective date of Insurance #2 (MMDDYYYY)",
-      "needs_user_input": true
+      "label": "Fecha vigente de la póliza #2 (MMDDYYYY)",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].Insurancethruemployer-2[0]": {
       "profile_path": null,
-      "label": "Is Insurance #2 provided through your employment? (Si/No)",
+      "label": "¿Este seguro #2 es por su empleo? (Si/No)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].InsuranceprescriptExplain-2[0]": {
       "profile_path": null,
-      "label": "Does Insurance #2 provide an explanation of benefits for prescriptions? (Si/No)",
+      "label": "¿El seguro #2 le provee una explicación de beneficios para recetas? (Si/No)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].InsuranceprescriptExplain[1]": {
       "profile_path": null,
-      "label": "Does Insurance #2 cover prescriptions? (Si/No)",
+      "label": "¿El seguro #2 cubre recetas? (Si/No)",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].CheckBox-RxDiscount-1[1]": {
       "profile_path": null,
-      "label": "Insurance #2 type: HMO (check if this is an HMO)",
+      "label": "Tipo de seguro #2: HMO (marque si aplica)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].CheckBox1-MedicaidSA-1[1]": {
       "profile_path": null,
-      "label": "Insurance #2 type: PPO (check if this is a PPO)",
+      "label": "Tipo de seguro #2: PPO (marque si aplica)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].CheckBox-PPO-1[1]": {
       "profile_path": null,
-      "label": "Insurance #2 type: Medicaid / State Assistance (check if this applies)",
+      "label": "Tipo de seguro #2: Medicaid/Asistencia del Estado (marque si aplica)",
       "type": "checkbox",
-      "check_when": "medi-cal",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].CheckBox-HMO-1[1]": {
       "profile_path": null,
-      "label": "Insurance #2 type: Prescription Discount (check if this applies)",
+      "label": "Tipo de seguro #2: Descuento de prescripciones (marque si aplica)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].CheckBox-Other-1[1]": {
       "profile_path": null,
-      "label": "Insurance #2 type: Medigap (check if this is Medigap)",
+      "label": "Tipo de seguro #2: Medigap (marque si aplica)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].DropDownList-Medigap-1[1]": {
       "profile_path": null,
-      "label": "If Medigap for Insurance #2, specify plan letter (A-J)",
+      "label": "Si es Medigap (póliza #2), especifique la letra (A-J)",
       "type": "choice",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].CheckBox-Medigap-2[0]": {
       "profile_path": null,
-      "label": "Insurance #2 type: Other (specialty, limited coverage, or CHAMPVA supplemental) (check if this applies)",
+      "label": "Tipo de seguro #2: Otro (especialidad, cobertura limitada, o exclusivamente CHAMPVA suplemental)",
       "type": "checkbox",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].Comments-Ins-1[1]": {
       "profile_path": null,
-      "label": "Comments about Insurance #2",
+      "label": "Comentarios sobre el seguro #2",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].Signature[0]": {
       "profile_path": null,
-      "label": "Signature (type if returning electronically)",
-      "needs_user_input": true
+      "label": "Firma (en mecanografía si la devuelve electrónicamente)",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "form1[0].#subform[0].#area[6].DateTimeField1[0]": {
       "profile_path": null,
-      "label": "Date of signature",
-      "needs_user_input": true
+      "label": "Fecha (firma)",
+      "needs_user_input": true,
+      "confidence": "medium"
     }
-  }
+  },
+  "groups": [
+    {
+      "id": "recipient_name",
+      "prompt": "What's the beneficiary's full name?",
+      "inputs": [
+        {
+          "key": "middle_initial",
+          "label": "Middle initial",
+          "fields": [
+            "form1[0].#subform[0].MiddleInitial-1[0]"
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "recipient_address",
+      "prompt": "What is the beneficiary's street address and city?",
+      "help": "Include number, street, P.O. box, apt. # if applicable.",
+      "inputs": [
+        {
+          "key": "is_new_address",
+          "label": "Is this a new address?",
+          "type": "boolean",
+          "fields": [
+            "form1[0].#subform[0].NewAddressBox-1[0]"
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "recipient_sex",
+      "prompt": "What is the beneficiary's sex?",
+      "inputs": [
+        {
+          "key": "sex",
+          "label": "Sex",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].RadioButtonList[0]"
+          ],
+          "options": [
+            "Hombre",
+            "Mujer"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "recipient_contact",
+      "prompt": "What's the beneficiary's telephone number (include area code) and Social Security Number?",
+      "inputs": [
+        {
+          "key": "telephone",
+          "label": "Telephone (include area code)",
+          "fields": [
+            "form1[0].#subform[0].SSN-1[0]"
+          ]
+        },
+        {
+          "key": "ssn",
+          "label": "Social Security Number",
+          "fields": [
+            "form1[0].#subform[0].PhoneNumb-1[0]"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "medicare_part_a",
+      "prompt": "Do you have Medicare Part A? If yes, provide the effective date and carrier name.",
+      "inputs": [
+        {
+          "key": "has_part_a",
+          "label": "Do you have Medicare Part A?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[0].RadioButtonList[1]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ]
+        },
+        {
+          "key": "part_a_effective_date",
+          "label": "Medicare Part A effective date (MMDDYYYY)",
+          "type": "date",
+          "fields": [
+            "form1[0].#subform[0].#area[0].Date-PartD[0]"
+          ],
+          "required": false
+        },
+        {
+          "key": "part_a_carrier",
+          "label": "Medicare Part A carrier name",
+          "fields": [
+            "form1[0].#subform[0].#area[0].PartD_CarrierName[0]"
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "medicare_part_b",
+      "prompt": "Do you have Medicare Part B? If yes, provide the effective date and carrier name.",
+      "inputs": [
+        {
+          "key": "has_part_b",
+          "label": "Do you have Medicare Part B?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[1].RadioButtonList[2]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ],
+          "option_values": {
+            "Si": "1",
+            "No": "2"
+          }
+        },
+        {
+          "key": "part_b_effective_date",
+          "label": "Medicare Part B effective date (MMDDYYYY)",
+          "type": "date",
+          "fields": [
+            "form1[0].#subform[0].#area[1].Date-PartD[1]"
+          ],
+          "required": false
+        },
+        {
+          "key": "part_b_carrier",
+          "label": "Medicare Part B carrier name",
+          "fields": [
+            "form1[0].#subform[0].#area[1].PartD_CarrierName[1]"
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "medicare_part_d",
+      "prompt": "Do you have Medicare Part D? If yes, provide the effective date and carrier name.",
+      "inputs": [
+        {
+          "key": "has_part_d",
+          "label": "Do you have Medicare Part D?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[2].RadioButtonList[3]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ]
+        },
+        {
+          "key": "part_d_effective_date",
+          "label": "Medicare Part D effective date (MMDDYYYY)",
+          "type": "date",
+          "fields": [
+            "form1[0].#subform[0].#area[2].Date-PartD[2]"
+          ],
+          "required": false
+        },
+        {
+          "key": "part_d_carrier",
+          "label": "Medicare Part D carrier name",
+          "fields": [
+            "form1[0].#subform[0].#area[2].PartD_CarrierName[2]"
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "medicare_pharmacy_benefits",
+      "prompt": "Does your Medicare provide pharmacy (prescription) benefits?",
+      "inputs": [
+        {
+          "key": "medicare_covers_pharmacy",
+          "label": "Medicare provides pharmacy benefits?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].RadioButtonList[4]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "medicare_advantage",
+      "prompt": "Have you chosen a Medicare Advantage Plan for your Medicare coverage?",
+      "inputs": [
+        {
+          "key": "has_medicare_advantage",
+          "label": "Chosen a Medicare Advantage Plan?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[3].MedicareAdvantage[0]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "has_other_insurance",
+      "prompt": "Do you have any other health insurance besides Medicare?",
+      "inputs": [
+        {
+          "key": "has_other_insurance",
+          "label": "Other health insurance besides Medicare?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].PartA[0]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "other_insurance_1",
+      "prompt": "Provide details for Other Insurance #1 (attach a copy of any active insurance card front and back).",
+      "applies_when": "has_other_insurance.has_other_insurance == \"Si\"",
+      "inputs": [
+        {
+          "key": "insurance1_name",
+          "label": "Name of Insurance #1",
+          "fields": [
+            "form1[0].#subform[0].#area[5].NameofInsurance-1[0]"
+          ]
+        },
+        {
+          "key": "insurance1_expiration",
+          "label": "Insurance #1 expiration date (MMDDYYYY) — enter only if policy is not active",
+          "type": "date",
+          "fields": [
+            "form1[0].#subform[0].#area[5].Date-TermnNameInsurance-1[0]"
+          ],
+          "required": false
+        },
+        {
+          "key": "insurance1_effective",
+          "label": "Insurance #1 effective date (MMDDYYYY)",
+          "type": "date",
+          "fields": [
+            "form1[0].#subform[0].#area[5].Date-TermnNameInsurance-1[1]"
+          ],
+          "required": false
+        },
+        {
+          "key": "insurance1_through_employer",
+          "label": "Is Insurance #1 provided through your employment?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[5].Insurancethruemployer[0]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ]
+        },
+        {
+          "key": "insurance1_covers_prescriptions",
+          "label": "Does Insurance #1 cover prescriptions?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[5].InsuranceCoverPrescript[0]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ]
+        },
+        {
+          "key": "insurance1_provides_rx_eob",
+          "label": "Does Insurance #1 provide an explanation of benefits for prescriptions?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[5].InsuranceprescriptExplain[0]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ]
+        },
+        {
+          "key": "insurance1_type",
+          "label": "What type of insurance is Insurance #1? (check all that apply)",
+          "type": "multi_select",
+          "options": [
+            "HMO",
+            "PPO",
+            "Medicaid/State Assistance",
+            "Prescription Discount",
+            "Medigap",
+            "Other (specialty, limited coverage, or CHAMPVA supplemental)"
+          ],
+          "option_fields": {
+            "HMO": [
+              "form1[0].#subform[0].#area[5].CheckBox-HMO-1[0]"
+            ],
+            "PPO": [
+              "form1[0].#subform[0].#area[5].CheckBox-PPO-1[0]"
+            ],
+            "Medicaid/State Assistance": [
+              "form1[0].#subform[0].#area[5].CheckBox1-MedicaidSA-1[0]"
+            ],
+            "Prescription Discount": [
+              "form1[0].#subform[0].#area[5].CheckBox-RxDiscount-1[0]"
+            ],
+            "Medigap": [
+              "form1[0].#subform[0].#area[5].CheckBox-Medigap-1[0]"
+            ],
+            "Other (specialty, limited coverage, or CHAMPVA supplemental)": [
+              "form1[0].#subform[0].#area[5].CheckBox-Other-1[0]"
+            ]
+          }
+        },
+        {
+          "key": "insurance1_medigap_plan",
+          "label": "If Medigap, specify plan letter (A-J)",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[5].DropDownList-Medigap-1[0]"
+          ],
+          "options": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J"
+          ],
+          "option_values": {
+            "A": "['A', 'A']",
+            "B": "['B', 'B']",
+            "C": "['C', 'C']",
+            "D": "['D', 'D']",
+            "E": "['E', 'E']",
+            "F": "['F', 'F']",
+            "G": "['G', 'G']",
+            "H": "['H', 'H']",
+            "I": "['I', 'I']",
+            "J": "['J', 'J']"
+          },
+          "required": false
+        },
+        {
+          "key": "insurance1_comments",
+          "label": "Comments about Insurance #1",
+          "type": "long_text",
+          "fields": [
+            "form1[0].#subform[0].#area[5].Comments-Ins-1[0]"
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "id": "other_insurance_2",
+      "prompt": "Provide details for Other Insurance #2 (attach a copy of any active insurance card front and back).",
+      "applies_when": "has_other_insurance.has_other_insurance == \"Si\"",
+      "inputs": [
+        {
+          "key": "insurance2_name",
+          "label": "Name of Insurance #2",
+          "fields": [
+            "form1[0].#subform[0].#area[6].NameofInsurance-1[1]"
+          ]
+        },
+        {
+          "key": "insurance2_expiration",
+          "label": "Insurance #2 expiration date (MMDDYYYY) — enter only if policy is not active",
+          "type": "date",
+          "fields": [
+            "form1[0].#subform[0].#area[6].Date-TermnNameInsurance-2[0]"
+          ],
+          "required": false
+        },
+        {
+          "key": "insurance2_effective",
+          "label": "Insurance #2 effective date (MMDDYYYY)",
+          "type": "date",
+          "fields": [
+            "form1[0].#subform[0].#area[6].Date-TermnNameInsurance-2\\.1[0]"
+          ],
+          "required": false
+        },
+        {
+          "key": "insurance2_through_employer",
+          "label": "Is Insurance #2 provided through your employment?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[6].Insurancethruemployer-2[0]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ]
+        },
+        {
+          "key": "insurance2_provides_rx_eob",
+          "label": "Does Insurance #2 provide an explanation of benefits for prescriptions?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[6].InsuranceprescriptExplain-2[0]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ]
+        },
+        {
+          "key": "insurance2_covers_prescriptions",
+          "label": "Does Insurance #2 cover prescriptions?",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[6].InsuranceprescriptExplain[1]"
+          ],
+          "options": [
+            "Si",
+            "No"
+          ]
+        },
+        {
+          "key": "insurance2_type",
+          "label": "What type of insurance is Insurance #2? (check all that apply)",
+          "type": "multi_select",
+          "options": [
+            "HMO",
+            "PPO",
+            "Medicaid/State Assistance",
+            "Prescription Discount",
+            "Medigap",
+            "Other (specialty, limited coverage, or CHAMPVA supplemental)"
+          ],
+          "option_fields": {
+            "HMO": [
+              "form1[0].#subform[0].#area[6].CheckBox-HMO-1[1]"
+            ],
+            "PPO": [
+              "form1[0].#subform[0].#area[6].CheckBox-PPO-1[1]"
+            ],
+            "Medicaid/State Assistance": [
+              "form1[0].#subform[0].#area[6].CheckBox1-MedicaidSA-1[1]"
+            ],
+            "Prescription Discount": [
+              "form1[0].#subform[0].#area[6].CheckBox-RxDiscount-1[1]"
+            ],
+            "Medigap": [
+              "form1[0].#subform[0].#area[6].CheckBox-Medigap-2[0]"
+            ],
+            "Other (specialty, limited coverage, or CHAMPVA supplemental)": [
+              "form1[0].#subform[0].#area[6].CheckBox-Other-1[1]"
+            ]
+          }
+        },
+        {
+          "key": "insurance2_medigap_plan",
+          "label": "If Medigap, specify plan letter (A-J)",
+          "type": "single_select",
+          "fields": [
+            "form1[0].#subform[0].#area[6].DropDownList-Medigap-1[1]"
+          ],
+          "options": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J"
+          ],
+          "option_values": {
+            "A": "['A', 'A']",
+            "B": "['B', 'B']",
+            "C": "['C', 'C']",
+            "D": "['D', 'D']",
+            "E": "['E', 'E']",
+            "F": "['F', 'F']",
+            "G": "['G', 'G']",
+            "H": "['H', 'H']",
+            "I": "['I', 'I']",
+            "J": "['J', 'J']"
+          },
+          "required": false
+        },
+        {
+          "key": "insurance2_comments",
+          "label": "Comments about Insurance #2",
+          "type": "long_text",
+          "fields": [
+            "form1[0].#subform[0].#area[6].Comments-Ins-1[1]"
+          ],
+          "required": false
+        }
+      ]
+    }
+  ],
+  "skip_fields": [
+    {
+      "field": "form1[0].#subform[0].#area[6].Signature[0]",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "form1[0].#subform[0].#area[6].DateTimeField1[0]",
+      "reason": "signed by hand on the printed form"
+    }
+  ]
 }

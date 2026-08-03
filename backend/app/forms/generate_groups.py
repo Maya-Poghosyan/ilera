@@ -1,0 +1,1006 @@
+"""Second offline pass: turn a form's unfilled boxes into questions worth asking.
+
+`app.forms.generate` decides what each box means and which of them the profile can
+already answer. What's left would otherwise be shown to the applicant one box at a time
+— 1074 screens for Medi-Cal. This pass reads the same pages again and returns, for every
+box the profile can't fill, either the group it belongs to or a reason nobody should be
+asked about it (office use, filled at signing).
+
+    pip install -r requirements-band.txt
+    python -m app.forms.generate_groups ccfrm604 --dry-run
+
+The output is committed next to the field map, so what an applicant types and where it
+lands is fixed at review time rather than decided live. Validation is the same idea as
+in the mapping pass — the model retries against its own errors — and here it enforces
+that every unfilled box is accounted for exactly once, that a select's options really
+are that widget's export values, and that an `applies_when` condition parses.
+
+Groups merge across pages, and across forms in a program, by `id`. A model that names
+the same idea `recipient_home_address` on page 2 of SOC-295 and page 1 of SOC-426A gets
+one question filling both.
+"""
+
+import argparse
+import asyncio
+import json
+import os
+import re
+import sys
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
+from .discovery import is_junk
+from .extract import extract_fields, extract_pages
+from .filler import SCHEMA_DIR, _get_pdf_path, load_schema
+from .generate import _describe_field, _model
+from .groups import (
+    GroupInput,
+    QuestionGroup,
+    SkippedField,
+    is_profile_path,
+    load_groups,
+    parse_condition,
+)
+from .profile_paths import profile_paths
+
+SYSTEM_PROMPT = """\
+You turn the leftover fields of a US government benefits form into the smallest set of \
+questions that could fill them.
+
+The app already knows the applicant's basic details and has filled every field it can. \
+You are given, one page at a time, the page's printed text and the fields still unfilled.
+
+Group them the way a person would answer, not the way the form is laid out:
+- One group is one thing a person knows: an address, a date of birth, an employer. Its \
+`prompt` is what you would say out loud to ask for it.
+- Inside a group, one `input` per value the applicant has to give. An address is one \
+group with street/city/state/ZIP inputs, not four questions.
+- One input may fill several `fields` when the same value belongs in several boxes.
+- A row of checkboxes that are alternatives is ONE `single_select` input, or a \
+`multi_select` when several can be true, with `option_fields` giving the box each choice \
+ticks. Never ask about them one at a time.
+- Give `applies_when` when a whole group only matters for some applicants, so it can be \
+skipped. Exactly one comparison: `<path> <op> <value>`, never `and`/`or`. The path is \
+either one of the profile paths listed below — `household.size >= 2` for a second \
+household member, `care_recipient.veteran == true` — or `<group id>.<input key>` of an \
+earlier group on this page, which is how you express a form's "if yes, ..." follow-ups: \
+`past_ihss.received_ihss_before == "Yes"`.
+- Put a field in `skip` when no applicant should ever be asked it, rather than making a \
+group for it. Anything the printed text marks "for county use only", "for staff use", \
+"do not write in this space", a worker/agency name, an office date stamp, or an \
+instruction that happens to be fillable. Also every signature line and the date beside \
+it: the form is signed by hand once printed. Leave them blank on the form.
+- `id` must describe the content, in snake_case, and must be the same string whenever \
+the same information is asked on another page or another form: `recipient_home_address`, \
+`provider_date_of_birth`. This is what lets one answer fill several forms.
+
+Every field you are given must appear exactly once, in a group or in `skip`.
+"""
+
+
+class PageGroups(BaseModel):
+    groups: list[QuestionGroup] = Field(default_factory=list)
+    skip: list[SkippedField] = Field(default_factory=list)
+
+
+def _askable(form_id: str) -> list[str]:
+    """Fields the map leaves for the applicant: no profile path, so nothing fills them."""
+    fields = load_schema(form_id).get("fields") or {}
+    return [
+        name
+        for name, spec in fields.items()
+        if isinstance(spec, dict) and not spec.get("profile_path")
+    ]
+
+
+def _page_prompt(form_id: str, page: dict, fields: list[dict], labels: dict[str, str]) -> str:
+    described = []
+    for field in fields:
+        line = _describe_field(field)
+        label = labels.get(field["name"])
+        if label:
+            line += f' means: "{label}"'
+        described.append(line)
+    return (
+        f"Form: {form_id.upper()}  (page {page['page']})\n\n"
+        f"--- printed page text ---\n{page['text'].strip()}\n\n"
+        "--- fields still unfilled on this page ---\n"
+        + "\n".join(described)
+        + "\n\n--- profile paths usable in applies_when ---\n"
+        + ", ".join(sorted(profile_paths()))
+        + "\n\nGroup every field listed above, or skip it."
+    )
+
+
+def _normalized(name: str) -> str:
+    return "".join(c for c in name.lower() if c.isalnum())
+
+
+def _repair_names(output: PageGroups, fields: list[dict]) -> None:
+    """Fix field names that differ from the real one only in punctuation or case.
+
+    Forms name sibling widgets `Pg1-13` and `Pg1_13`, and a model transcribing dozens of
+    them per page will occasionally normalise one. Correcting an unambiguous near-miss in
+    place is deterministic; anything that doesn't resolve to exactly one real field is
+    left alone for the validator to reject.
+    """
+    real = {f["name"] for f in fields}
+    candidates: dict[str, list[str]] = {}
+    for name in real:
+        candidates.setdefault(_normalized(name), []).append(name)
+
+    def fix(name: str) -> str:
+        if name in real:
+            return name
+        matches = candidates.get(_normalized(name), [])
+        return matches[0] if len(matches) == 1 else name
+
+    for group in output.groups:
+        for inp in group.inputs:
+            inp.fields = [fix(n) for n in inp.fields]
+            inp.option_fields = {
+                label: [fix(n) for n in names]
+                for label, names in inp.option_fields.items()
+            }
+    for skipped in output.skip:
+        skipped.field = fix(skipped.field)
+
+
+def _validate(output: PageGroups, fields: list[dict]) -> list[str]:
+    """Reasons the draft can't be committed, phrased for the model to correct."""
+    by_name = {f["name"]: f for f in fields}
+    known_paths = set(profile_paths())
+    answer_paths = {
+        f"{g.id}.{i.key}" for g in output.groups for i in g.inputs
+    }
+    errors: list[str] = []
+    seen: dict[str, str] = {}
+
+    def claim(name: str, by: str) -> None:
+        if name not in by_name:
+            errors.append(f'"{name}" is not an unfilled field on this page')
+        elif name in seen:
+            errors.append(f'"{name}" is claimed by both {seen[name]} and {by}')
+        else:
+            seen[name] = by
+
+    for group in output.groups:
+        where = f"group {group.id}"
+        if group.applies_when:
+            parsed = parse_condition(group.applies_when)
+            if parsed is None:
+                errors.append(
+                    f"{where}: applies_when {group.applies_when!r} is not a single "
+                    "comparison <path> <op> <value>, e.g. household.size >= 2"
+                )
+            elif is_profile_path(parsed[0]):
+                if parsed[0] not in known_paths:
+                    errors.append(
+                        f"{where}: applies_when reads {parsed[0]!r}, which is not one of "
+                        "the profile paths given"
+                    )
+            elif parsed[0] not in answer_paths:
+                # A gate on nothing is silently ignored at runtime, so the group would
+                # be asked of everyone: reject it rather than let it look like gating.
+                errors.append(
+                    f"{where}: applies_when reads {parsed[0]!r}, which is neither a "
+                    "profile path nor <group id>.<input key> of a group on this page"
+                )
+        if not group.inputs:
+            errors.append(f"{where}: has no inputs")
+        keys: set[str] = set()
+        for inp in group.inputs:
+            if inp.key in keys:
+                errors.append(f'{where}: two inputs share the key "{inp.key}"')
+            keys.add(inp.key)
+
+            selecting = inp.type in ("single_select", "multi_select")
+            if selecting and not inp.options:
+                errors.append(f"{where}.{inp.key}: a select input needs options")
+            for label in [*inp.option_fields, *inp.option_values]:
+                if label not in inp.options:
+                    errors.append(
+                        f'{where}.{inp.key}: "{label}" is not one of its options '
+                        f"{inp.options}"
+                    )
+            for name in inp.target_fields():
+                claim(name, f"{where}.{inp.key}")
+
+            # Every choice has to end up somewhere: either it ticks a box of its own, or
+            # it writes a value the widget will accept. A radio silently ignores anything
+            # outside its export values, so "Male" on a /1,/2 widget leaves it unset.
+            for label in inp.options:
+                if label in inp.option_fields:
+                    continue
+                if not inp.fields:
+                    errors.append(
+                        f'{where}.{inp.key}: option "{label}" ticks no field and the '
+                        "input writes to none either"
+                    )
+                    continue
+                written = inp.option_values.get(label, label)
+                for name in inp.fields:
+                    allowed = (by_name.get(name) or {}).get("options") or []
+                    if allowed and written not in allowed:
+                        errors.append(
+                            f'{where}.{inp.key}: option "{label}" writes "{written}" to '
+                            f'"{name}", whose export values are {allowed}; give '
+                            "option_values mapping each option to one of those, or "
+                            "option_fields if each choice has its own box"
+                        )
+
+    for skipped in output.skip:
+        claim(skipped.field, "skip")
+        if not skipped.reason.strip():
+            errors.append(f'"{skipped.field}": skipping needs a reason')
+
+    unaccounted = [name for name in by_name if name not in seen]
+    if unaccounted:
+        errors.append(f"not grouped and not skipped: {unaccounted}")
+    return errors
+
+
+_SIGNATURE = re.compile(r"signature|signed by|initials", re.I)
+
+
+def skip_signatures(
+    groups: list[QuestionGroup], skip: list[SkippedField], fields: dict[str, dict]
+) -> list[QuestionGroup]:
+    """Stop asking people to type a signature.
+
+    A signature is made by hand on the printed form, and the date beside it is the date
+    it was signed — neither is an answer anyone can give here, so those boxes are left
+    blank and their screens disappear.
+    """
+    already = {s.field for s in skip}
+    kept: list[QuestionGroup] = []
+    for group in groups:
+        inputs: list[GroupInput] = []
+        for inp in group.inputs:
+            signed = _SIGNATURE.search(f"{group.prompt} {inp.label} {inp.key}") or any(
+                (fields.get(name) or {}).get("type") == "signature"
+                for name in inp.target_fields()
+            )
+            if not signed:
+                inputs.append(inp)
+                continue
+            for name in inp.target_fields():
+                if name not in already:
+                    already.add(name)
+                    skip.append(
+                        SkippedField(
+                            field=name, reason="signed by hand on the printed form"
+                        )
+                    )
+        if inputs:
+            group.inputs = inputs
+            kept.append(group)
+    return kept
+
+
+def dedupe_targets(groups: list[QuestionGroup]) -> list[QuestionGroup]:
+    """Leave each field to one group, dropping later claims on it.
+
+    Pages are drafted independently, so a person block spread over two pages can come
+    back as `person_1_overview` and `person_1_details` both claiming the first-name box.
+    Whichever group reached it first keeps it; the other loses that target, and an input
+    or group left with nothing to fill disappears — it was a second way of asking a
+    question already on the list.
+    """
+    owned: set[str] = set()
+    kept: list[QuestionGroup] = []
+    for group in groups:
+        inputs: list[GroupInput] = []
+        for inp in group.inputs:
+            inp.fields = [f for f in inp.fields if f not in owned]
+            inp.option_fields = {
+                label: [f for f in names if f not in owned]
+                for label, names in inp.option_fields.items()
+            }
+            inp.option_fields = {k: v for k, v in inp.option_fields.items() if v}
+            targets = inp.target_fields()
+            if not targets:
+                continue
+            owned |= set(targets)
+            inputs.append(inp)
+        if inputs:
+            group.inputs = inputs
+            kept.append(group)
+    return kept
+
+
+_PERSON = re.compile(r"^person_(\d+)_")
+
+
+def gate_person_blocks(groups: list[QuestionGroup]) -> None:
+    """Ask about the second, third and fourth person only if they exist.
+
+    Forms that repeat a person block are drafted a page at a time, so whether the block
+    is the second or the fourth is visible on some pages and not others. `person_3_*`
+    says it plainly, and a three-person household is never asked the fourth block's
+    ~30 questions.
+    """
+    for group in groups:
+        match = _PERSON.match(group.id)
+        if not match or group.applies_when:
+            continue
+        nth = int(match.group(1))
+        if nth > 1:
+            group.applies_when = f"household.size >= {nth}"
+
+
+_SCOPE = re.compile(r"^(person|employer|income|deduction)_(\d+)")
+
+
+# Phrases a form adds around a box without changing what the box asks for.
+_FILLER = re.compile(
+    r"\([^)]*\)|person\s*\d+|\b(this|their|they|the)\b"
+    r"|\bif (any|known|different|applicable)\b|\boptional\b",
+    re.I,
+)
+
+
+def _fact(label: str) -> str:
+    """A label reduced to the fact it asks for, whoever it is asked about.
+
+    "Suffix (Jr., Sr., III, etc.)" and "Person 1 — Suffix (Jr., Sr., III) if any" are
+    the same box on the same person, printed in two sections.
+    """
+    return "".join(c for c in _FILLER.sub(" ", label).lower() if c.isalnum())
+
+
+_ALIAS = re.compile(r"person\s*(\d+)\s*\(([^)]+)\)", re.I)
+
+
+def _scopes(groups: list[QuestionGroup]) -> dict[str, str]:
+    """Which person each group is about, including the names a form gives them.
+
+    A form calls the same human "Person 1" in its table and "the Primary Contact" in
+    its opening section, and says so once: "Person 1 (Primary Contact)". Reading that
+    aside is what lets their name be asked in one place rather than both.
+    """
+    aliases: dict[str, str] = {}
+    for group in groups:
+        for nth, name in _ALIAS.findall(group.prompt):
+            aliases["_".join(name.lower().split())] = f"person_{nth}"
+
+    scopes: dict[str, str] = {}
+    for group in groups:
+        direct = _SCOPE.match(group.id)
+        if direct:
+            scopes[group.id] = direct.group(0)
+        elif group.id in aliases:
+            scopes[group.id] = aliases[group.id]
+    return scopes
+
+
+def fold_repeats(groups: list[QuestionGroup]) -> list[QuestionGroup]:
+    """Ask each person's first name once, not once per section they appear in.
+
+    A form that repeats a person block over a dozen sections reprints their name at the
+    top of each one so a paper reader knows whose section it is. Drafted a page at a
+    time, that becomes a dozen identical questions. Same person, same question, same
+    shape: the first one keeps the answer and fills all of their boxes.
+    """
+    scopes = _scopes(groups)
+    canonical: dict[tuple[str, str, str, tuple[str, ...]], GroupInput] = {}
+    kept: list[QuestionGroup] = []
+    for group in groups:
+        scope = scopes.get(group.id)
+        if not scope:
+            kept.append(group)
+            continue
+        inputs: list[GroupInput] = []
+        for inp in group.inputs:
+            key = (scope, _fact(inp.label), inp.type, tuple(inp.options))
+            first = canonical.get(key)
+            if first is None:
+                canonical[key] = inp
+                inputs.append(inp)
+                continue
+            first.fields = list(dict.fromkeys([*first.fields, *inp.fields]))
+            for label, names in inp.option_fields.items():
+                merged = [*first.option_fields.get(label, []), *names]
+                first.option_fields[label] = list(dict.fromkeys(merged))
+        if inputs:
+            group.inputs = inputs
+            kept.append(group)
+    return kept
+
+
+def repair_conditions(groups: list[QuestionGroup]) -> None:
+    """Point every `applies_when` at something real, or drop it.
+
+    A gate is validated per page, but the question it depends on can be phrased loosely
+    (`patient_is_family_member` for the group of that name, `provider.tier2_convicted`
+    for an input key) or refer to nothing at all. A condition that resolves to nothing is
+    worse than none: it reads like gating and gates nothing, so it is rewritten when the
+    referent is unambiguous and removed when it isn't — which asks the question, the safe
+    direction.
+    """
+    known = set(profile_paths())
+    exact = {f"{g.id}.{i.key}" for g in groups for i in g.inputs}
+    by_group = {g.id: g for g in groups}
+    by_key: dict[str, list[str]] = {}
+    for group in groups:
+        for inp in group.inputs:
+            by_key.setdefault(inp.key, []).append(f"{group.id}.{inp.key}")
+
+    for group in groups:
+        if not group.applies_when:
+            continue
+        parsed = parse_condition(group.applies_when)
+        if parsed is None:
+            group.applies_when = None
+            continue
+        path, op, raw = parsed
+        if path in exact or (is_profile_path(path) and path in known):
+            continue
+
+        target = by_group.get(path)
+        if target is not None and len(target.inputs) == 1:
+            resolved = f"{target.id}.{target.inputs[0].key}"
+        else:
+            matches = by_key.get(path.rsplit(".", 1)[-1], [])
+            resolved = matches[0] if len(matches) == 1 else ""
+        if resolved and resolved != f"{group.id}.{group.inputs[0].key}":
+            literal = f'"{raw}"' if isinstance(raw, str) else str(raw).lower()
+            group.applies_when = f"{resolved} {op} {literal}"
+        else:
+            group.applies_when = None
+
+
+PLAN_PROMPT = """\
+You are cutting a US government benefits form down to the questions actually worth \
+asking. You are given every question already drafted for one form, in the order the \
+applicant would meet them, written as `<group id>.<input key>: label`.
+
+The pages were drafted one at a time and no page could see the others, so the same fact \
+is asked several times over and whole sections are asked of people they don't apply to. \
+Return two lists.
+
+`duplicates`: an input that asks for something an EARLIER input already asks for, about \
+the same person or thing. `same_as` is that earlier input. The later question disappears \
+and the earlier answer fills both sets of boxes. Only when a single answer is right for \
+both — Person 1's city asked again on a later page, yes; Employer 1's city and Employer \
+2's city, no; a first name asked of Person 1 and of Person 2, no.
+
+`gates`: a group only some applicants should see, and the condition that decides. \
+Exactly one comparison, `<path> <op> <value>`, never `and`/`or`. The path is either a \
+profile path from the list below, or `<group id>.<input key>` of a question asked \
+EARLIER — the form's own "if yes, ...", "skip this section unless ...", "complete this \
+appendix only if ..." wording is what you are looking for, and the yes/no question it \
+hangs off is usually a group of its own. An optional programme nobody has asked to join \
+— a dental plan, a representative, a voter registration — is gated on the question that \
+offers it. Prefer gating the whole section over gating each group in it. Gate hard: \
+immigration details on not being a citizen, tribal questions on being American Indian \
+or Alaska Native, pregnancy details on being pregnant, tax-filer details on filing \
+taxes, an appendix on the yes/no question that introduces it. Most applicants should \
+see a small fraction of a long form.
+
+`derived`: a check-all-that-apply input asking the SAME fact as another, but in coarser \
+terms — a form that prints a six-box race row on page 1 and a fifteen-box race list on \
+page 9. The coarse question disappears and its boxes are ticked from the detailed \
+answers, so give one entry per coarse choice: the choice, the question it follows from, \
+and that question's options which imply it (`{"option": "Asian", "from_input": \
+"person_1_race.race", "from_options": ["Chinese", "Filipino", ...]}`). Every coarse \
+choice must appear. Use this only when the detailed answers decide the coarse one with \
+no judgement left over; when they don't, leave both asked.
+
+`optional`: a group the form leaves entirely to the applicant's choice and that \
+nothing else can gate — naming an authorized representative, choosing a dental plan. \
+`ask` is the short yes/no question that decides it, in the applicant's words: \
+"Do you want to name someone to act for you on this application?". Answering no costs \
+them one question instead of a page.
+
+Leave anything you are unsure about out of all four lists: it stays as it is, and the \
+applicant is asked. Do not invent groups or inputs; every id must appear below verbatim.
+"""
+
+
+class DuplicateInput(BaseModel):
+    input: str
+    same_as: str
+
+
+class GroupGate(BaseModel):
+    group: str
+    applies_when: str
+
+
+class DerivedOption(BaseModel):
+    """One coarse choice, and the detailed choices that imply it."""
+
+    option: str
+    from_input: str
+    from_options: list[str] = Field(default_factory=list)
+
+
+class DerivedInput(BaseModel):
+    input: str
+    options: list[DerivedOption] = Field(default_factory=list)
+
+
+class OptionalSection(BaseModel):
+    group: str
+    ask: str
+
+
+class FormPlan(BaseModel):
+    duplicates: list[DuplicateInput] = Field(default_factory=list)
+    derived: list[DerivedInput] = Field(default_factory=list)
+    gates: list[GroupGate] = Field(default_factory=list)
+    optional: list[OptionalSection] = Field(default_factory=list)
+
+
+def _plan_prompt(form_id: str, groups: list[QuestionGroup]) -> str:
+    lines = []
+    for group in groups:
+        lines.append(f"[{group.id}] {group.prompt}")
+        for inp in group.inputs:
+            options = f"  options: {inp.options}" if inp.options else ""
+            lines.append(f"  {group.id}.{inp.key}: {inp.label}{options}")
+    return (
+        f"Form: {form_id.upper()}\n\n--- every question drafted for this form ---\n"
+        + "\n".join(lines)
+        + "\n\n--- profile paths usable in a gate ---\n"
+        + ", ".join(sorted(profile_paths()))
+    )
+
+
+def _validate_plan(plan: FormPlan, groups: list[QuestionGroup]) -> list[str]:
+    """Reasons the plan can't be applied, phrased for the model to correct."""
+    order = {
+        f"{g.id}.{i.key}": (n, m)
+        for n, g in enumerate(groups)
+        for m, i in enumerate(g.inputs)
+    }
+    inputs = {
+        f"{g.id}.{i.key}": i for g in groups for i in g.inputs
+    }
+    group_at = {g.id: n for n, g in enumerate(groups)}
+    known = set(profile_paths())
+    errors: list[str] = []
+
+    for dup in plan.duplicates:
+        if dup.input not in order:
+            errors.append(f"duplicates: {dup.input!r} is not a question on this form")
+            continue
+        if dup.same_as not in order:
+            errors.append(f"duplicates: {dup.same_as!r} is not a question on this form")
+            continue
+        if order[dup.same_as] >= order[dup.input]:
+            errors.append(
+                f"duplicates: {dup.same_as!r} is not asked before {dup.input!r}; the "
+                "one kept has to be the earlier of the two"
+            )
+        first, second = inputs[dup.same_as], inputs[dup.input]
+        if first.type != second.type:
+            errors.append(
+                f"duplicates: {dup.input!r} is a {second.type} and {dup.same_as!r} a "
+                f"{first.type}, so one answer can't serve both"
+            )
+        elif set(second.options) - set(first.options):
+            errors.append(
+                f"duplicates: {dup.input!r} offers choices {dup.same_as!r} doesn't: "
+                f"{sorted(set(second.options) - set(first.options))}"
+            )
+
+    for derived in plan.derived:
+        coarse = inputs.get(derived.input)
+        if coarse is None:
+            errors.append(f"derived: {derived.input!r} is not a question on this form")
+            continue
+        # Order doesn't matter here as it does for a duplicate: the coarse question is
+        # removed outright, so the detailed ones are answered wherever they sit. What
+        # does matter is that a choice implies a box; nothing implies free text, and
+        # nothing implies the *absence* of a choice, so a one-of-these question can't
+        # be derived — two implications would tick two boxes that contradict.
+        if coarse.type != "multi_select":
+            errors.append(
+                f"derived: {derived.input!r} is a {coarse.type}; only a multi_select, "
+                "where each box stands on its own, can be derived"
+            )
+        if coarse.fields:
+            errors.append(
+                f"derived: {derived.input!r} writes text to {coarse.fields}, which no "
+                "other answer can supply"
+            )
+        covered = {o.option for o in derived.options}
+        uncovered = set(coarse.option_fields) - covered
+        if uncovered:
+            errors.append(
+                f"derived: {derived.input!r} options {sorted(uncovered)} tick a box but "
+                "nothing is given that implies them, so those boxes could never be "
+                "ticked"
+            )
+        for option in derived.options:
+            if option.option not in coarse.options:
+                errors.append(
+                    f"derived: {option.option!r} is not an option of {derived.input!r} "
+                    f"({coarse.options})"
+                )
+            source = inputs.get(option.from_input)
+            if source is None:
+                errors.append(
+                    f"derived: {option.from_input!r} is not a question on this form"
+                )
+                continue
+            if source is coarse:
+                errors.append(f"derived: {derived.input!r} cannot derive from itself")
+                continue
+            stray = [o for o in option.from_options if o not in source.options]
+            if stray:
+                errors.append(
+                    f"derived: {stray} are not options of {option.from_input!r} "
+                    f"({source.options})"
+                )
+
+    for section in plan.optional:
+        if section.group not in group_at:
+            errors.append(f"optional: {section.group!r} is not a group on this form")
+        elif "?" not in section.ask:
+            errors.append(
+                f"optional: {section.ask!r} has to be a yes/no question to put to the "
+                "applicant"
+            )
+
+    for gate in plan.gates:
+        if gate.group not in group_at:
+            errors.append(f"gates: {gate.group!r} is not a group on this form")
+            continue
+        parsed = parse_condition(gate.applies_when)
+        if parsed is None:
+            errors.append(
+                f"gates: {gate.applies_when!r} is not a single comparison "
+                "<path> <op> <value>, e.g. household.size >= 2"
+            )
+            continue
+        path = parsed[0]
+        if is_profile_path(path):
+            if path not in known:
+                errors.append(f"gates: {path!r} is not one of the profile paths given")
+        elif path not in order:
+            errors.append(f"gates: {path!r} is not a question on this form")
+        elif order[path][0] >= group_at[gate.group]:
+            errors.append(
+                f"gates: {path!r} is not asked before {gate.group}, so the applicant "
+                "would never have answered it"
+            )
+    return errors
+
+
+def apply_plan(plan: FormPlan, groups: list[QuestionGroup]) -> list[QuestionGroup]:
+    """Fold repeated questions into the first one that asks them, and gate sections."""
+    inputs = {f"{g.id}.{i.key}": i for g in groups for i in g.inputs}
+    dropped = set()
+    for dup in plan.duplicates:
+        first, second = inputs.get(dup.same_as), inputs.get(dup.input)
+        if first is None or second is None or first is second:
+            continue
+        first.fields = list(dict.fromkeys([*first.fields, *second.fields]))
+        for label, names in second.option_fields.items():
+            merged = [*first.option_fields.get(label, []), *names]
+            first.option_fields[label] = list(dict.fromkeys(merged))
+        dropped.add(dup.input)
+
+    for derived in plan.derived:
+        coarse = inputs.get(derived.input)
+        if coarse is None:
+            continue
+        # The coarse box goes to every detailed choice that implies it, so picking
+        # "Chinese" ticks both the detailed box and the page-1 "Asian" one.
+        for option in derived.options:
+            source = inputs.get(option.from_input)
+            if source is None or source is coarse:
+                continue
+            for name in coarse.option_fields.get(option.option, []):
+                for choice in option.from_options:
+                    boxes = [*source.option_fields.get(choice, []), name]
+                    source.option_fields[choice] = list(dict.fromkeys(boxes))
+        dropped.add(derived.input)
+
+    for gate in plan.gates:
+        for group in groups:
+            if group.id == gate.group and not group.applies_when:
+                group.applies_when = gate.applies_when
+
+    for section in plan.optional:
+        for group in groups:
+            if group.id == section.group and not group.opt_in:
+                group.opt_in = section.ask
+
+    kept = []
+    for group in groups:
+        group.inputs = [
+            i for i in group.inputs if f"{group.id}.{i.key}" not in dropped
+        ]
+        if group.inputs:
+            kept.append(group)
+    return kept
+
+
+async def plan_form(
+    form_id: str, groups: list[QuestionGroup]
+) -> list[QuestionGroup]:
+    """Read the whole form at once and drop what the page-by-page pass couldn't see."""
+    from pydantic_ai import Agent, ModelRetry
+
+    agent = Agent(_model(), output_type=FormPlan, system_prompt=PLAN_PROMPT, retries=4)
+
+    @agent.output_validator
+    def check(output: FormPlan) -> FormPlan:
+        errors = _validate_plan(output, groups)
+        if errors:
+            raise ModelRetry(
+                "Fix these and return both lists again:\n- " + "\n- ".join(errors)
+            )
+        return output
+
+    result = await agent.run(_plan_prompt(form_id, groups))
+    print(
+        f"  whole form: {len(result.output.duplicates)} repeated questions, "
+        f"{len(result.output.derived)} derived from a finer one, "
+        f"{len(result.output.gates)} sections gated, "
+        f"{len(result.output.optional)} offered rather than asked",
+        file=sys.stderr,
+    )
+    return apply_plan(result.output, groups)
+
+
+DERIVED_PROMPT = """\
+You are removing a question a US government benefits form asks twice at two levels of \
+detail. You are given every multiple-choice question on one form, in the order the \
+applicant meets them, as `<group id>.<input key>: label  options: [...]`.
+
+A long form often prints a short summary row of boxes on an early page and the full list \
+of boxes later: six race boxes on page 1 and fifteen on page 9, an income bracket beside \
+an income amount. Both must be filled, but only the detailed one is worth asking: the \
+coarse boxes follow from the detailed answer.
+
+Return those questions. `input` is the coarse question, which disappears. Under \
+`options`, give one entry per coarse choice: the choice, the detailed question it \
+follows from — different choices may follow from different questions — and every option \
+of that question which implies it:
+
+    {"input": "person_1_profile.ethnicity", "options": [
+      {"option": "Asian", "from_input": "person_1_race.race",
+       "from_options": ["Asian Indian", "Chinese", "Filipino", "Hmong"]},
+      {"option": "Hispanic, Latino/a, or Spanish Origin",
+       "from_input": "person_1_race.hispanic_origin", "from_options": ["Yes"]}]}
+
+Every coarse choice must appear. The coarse question must be a multi_select \
+(check-all-that-apply): a pick-one question can't be derived, because implying two of \
+its choices would tick two boxes that contradict each other.
+
+Only questions about the same person and the same fact, where the detailed answers \
+settle the coarse one with no judgement left over. Two questions that merely sound \
+similar, or that are about different people, are not a pair. Return nothing rather \
+than a guess.
+"""
+
+
+class DerivedPlan(BaseModel):
+    derived: list[DerivedInput] = Field(default_factory=list)
+
+
+def _derived_prompt(form_id: str, groups: list[QuestionGroup]) -> str:
+    lines = [
+        f"{group.id}.{inp.key}: {inp.label}  options: {inp.options}"
+        for group in groups
+        for inp in group.inputs
+        if inp.options
+    ]
+    return (
+        f"Form: {form_id.upper()}\n\n--- every multiple-choice question ---\n"
+        + "\n".join(lines)
+    )
+
+
+async def find_derived(
+    form_id: str, groups: list[QuestionGroup]
+) -> list[QuestionGroup]:
+    """Drop a coarse question the form also asks in detail, ticking its boxes anyway."""
+    from pydantic_ai import Agent, ModelRetry
+
+    agent = Agent(
+        _model(), output_type=DerivedPlan, system_prompt=DERIVED_PROMPT, retries=4
+    )
+
+    @agent.output_validator
+    def check(output: DerivedPlan) -> DerivedPlan:
+        # The pair rules are the plan's, so a coarse/detailed mapping found here is held
+        # to exactly what `apply_plan` can carry out.
+        errors = _validate_plan(FormPlan(derived=output.derived), groups)
+        if errors:
+            raise ModelRetry("Fix these and return the list again:\n- " + "\n- ".join(errors))
+        return output
+
+    result = await agent.run(_derived_prompt(form_id, groups))
+    for d in result.output.derived:
+        sources = sorted({o.from_input for o in d.options})
+        print(f"  {d.input} follows from {', '.join(sources)}", file=sys.stderr)
+    return apply_plan(FormPlan(derived=result.output.derived), groups)
+
+
+def _merge(into: dict[str, QuestionGroup], drafted: list[QuestionGroup]) -> None:
+    """Fold a page's groups into the form's, joining on `id` then on input key."""
+    for group in drafted:
+        existing = into.get(group.id)
+        if existing is None:
+            into[group.id] = group.model_copy(deep=True)
+            continue
+        by_key = {i.key: i for i in existing.inputs}
+        for inp in group.inputs:
+            current = by_key.get(inp.key)
+            if current is None:
+                existing.inputs.append(inp.model_copy(deep=True))
+                continue
+            current.fields = list(dict.fromkeys([*current.fields, *inp.fields]))
+            for label, names in inp.option_fields.items():
+                merged = [*current.option_fields.get(label, []), *names]
+                current.option_fields[label] = list(dict.fromkeys(merged))
+            for label in inp.options:
+                if label not in current.options:
+                    current.options.append(label)
+            current.option_values.update(inp.option_values)
+
+
+async def generate_groups(
+    form_id: str, only_pages: Optional[list[int]] = None
+) -> tuple[list[QuestionGroup], list[SkippedField]]:
+    """Draft the question groups for one form, one page per model call."""
+    from pydantic_ai import Agent, ModelRetry
+
+    pdf_path = _get_pdf_path(form_id)
+    if not pdf_path:
+        raise FileNotFoundError(f"No PDF on disk for form {form_id}")
+
+    schema = load_schema(form_id)
+    labels = {
+        name: spec.get("label", "")
+        for name, spec in (schema.get("fields") or {}).items()
+        if isinstance(spec, dict)
+    }
+    askable = set(_askable(form_id))
+    fields_by_name = {
+        f["name"]: f
+        for f in extract_fields(pdf_path)
+        if not is_junk(f) and f["name"] in askable
+    }
+
+    agent = Agent(_model(), output_type=PageGroups, system_prompt=SYSTEM_PROMPT, retries=5)
+    current_fields: list[dict] = []
+
+    @agent.output_validator
+    def check(output: PageGroups) -> PageGroups:
+        _repair_names(output, current_fields)
+        errors = _validate(output, current_fields)
+        if errors:
+            raise ModelRetry(
+                "Fix these and return the whole page again:\n- " + "\n- ".join(errors)
+            )
+        return output
+
+    merged: dict[str, QuestionGroup] = {}
+    skipped: dict[str, SkippedField] = {}
+    for page in extract_pages(pdf_path):
+        if only_pages and page["page"] not in only_pages:
+            continue
+        page_fields = [fields_by_name[n] for n in page["fields"] if n in fields_by_name]
+        if not page_fields:
+            continue
+        current_fields = page_fields
+
+        result = await agent.run(_page_prompt(form_id, page, page_fields, labels))
+        _merge(merged, result.output.groups)
+        for s in result.output.skip:
+            skipped.setdefault(s.field, s)
+        print(
+            f"  page {page['page']}: {len(page_fields)} unfilled -> "
+            f"{len(result.output.groups)} groups, {len(result.output.skip)} skipped",
+            file=sys.stderr,
+        )
+
+    groups = dedupe_targets(list(merged.values()))
+    skip = list(skipped.values())
+    groups = skip_signatures(groups, skip, fields_by_name)
+    groups = fold_repeats(groups)
+    gate_person_blocks(groups)
+    groups = await plan_form(form_id, groups)
+    groups = await find_derived(form_id, groups)
+    repair_conditions(groups)
+    return groups, skip
+
+
+def prune_filled(form_id: str, groups: list[QuestionGroup]) -> list[QuestionGroup]:
+    """Drop what the field map has since learned to fill from the profile.
+
+    The two passes are generated independently, so a box grouped into a question one
+    week can be mapped to `care_recipient.city` the next. Whoever asks last wins, and
+    the applicant should not be asked for their own city.
+    """
+    filled = {
+        name
+        for name, spec in (load_schema(form_id).get("fields") or {}).items()
+        if isinstance(spec, dict) and spec.get("profile_path")
+    }
+    kept: list[QuestionGroup] = []
+    for group in groups:
+        inputs: list[GroupInput] = []
+        for inp in group.inputs:
+            inp.fields = [f for f in inp.fields if f not in filled]
+            pruned = {
+                label: [f for f in names if f not in filled]
+                for label, names in inp.option_fields.items()
+            }
+            # A choice left with no box to tick is a choice that does nothing.
+            inp.option_fields = {k: v for k, v in pruned.items() if v}
+            inp.options = [o for o in inp.options if pruned.get(o, ["kept"])]
+            if inp.target_fields():
+                inputs.append(inp)
+        group.inputs = inputs
+        if inputs:
+            kept.append(group)
+    return kept
+
+
+def write_groups(
+    form_id: str, groups: list[QuestionGroup], skip: list[SkippedField]
+) -> str:
+    groups = prune_filled(form_id, groups)
+    schema = load_schema(form_id)
+    schema["groups"] = [
+        g.model_dump(exclude_defaults=True, exclude_none=True) for g in groups
+    ]
+    schema["skip_fields"] = [s.model_dump() for s in skip]
+    path = os.path.join(SCHEMA_DIR, f"{form_id.lower()}.json")
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(schema, fh, indent=2, ensure_ascii=False)
+        fh.write("\n")
+    return path
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("form_id")
+    parser.add_argument("--pages", help="Comma-separated page numbers (default: all)")
+    parser.add_argument("--dry-run", action="store_true", help="Print instead of writing")
+    parser.add_argument(
+        "--plan-only",
+        action="store_true",
+        help="Re-read the committed groups as a whole form, without redrafting the pages",
+    )
+    args = parser.parse_args()
+
+    if args.plan_only:
+        schema = load_schema(args.form_id)
+
+        async def replan() -> list[QuestionGroup]:
+            groups = await plan_form(args.form_id, fold_repeats(load_groups(schema)))
+            return await find_derived(args.form_id, groups)
+
+        groups = asyncio.run(replan())
+        repair_conditions(groups)
+        skip = [SkippedField(**s) for s in schema.get("skip_fields") or []]
+    else:
+        only = [int(p) for p in args.pages.split(",")] if args.pages else None
+        groups, skip = asyncio.run(generate_groups(args.form_id, only))
+    inputs = sum(len(g.inputs) for g in groups)
+    print(
+        f"{args.form_id}: {len(groups)} groups ({inputs} inputs), {len(skip)} skipped",
+        file=sys.stderr,
+    )
+
+    if args.dry_run:
+        print(json.dumps({
+            "groups": [g.model_dump(exclude_defaults=True, exclude_none=True) for g in groups],
+            "skip_fields": [s.model_dump() for s in skip],
+        }, indent=2, ensure_ascii=False))
+        return
+    print(f"wrote {write_groups(args.form_id, groups, skip)}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()

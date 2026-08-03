@@ -20,110 +20,113 @@
     "THE UNDERLYING DIAGNOSIS WITHOUT CONSENT OF THE PATIENT": {
       "profile_path": null,
       "label": "Date the medical condition or need for treatment commenced",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "4  Probable duration of medical condition or need for treatment": {
       "profile_path": null,
       "label": "Probable duration of the medical condition or need for treatment",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "8  Estimate the period of time care is needed or during which the employees presence would be beneficial": {
       "profile_path": null,
       "label": "Estimate the period of time care is needed or during which the employee’s presence would be beneficial",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "health condition and the duration of such leaves eg 1 episode every 3 months lasting 12 days": {
       "profile_path": null,
-      "label": "If yes, indicate the estimated frequency of the employee’s need for intermittent leave and the duration of such leaves (e.g., 1 episode every 3 months)",
+      "label": "If intermittent leave is needed, how many times (frequency) will the employee need intermittent leave?",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "weeks": {
       "profile_path": null,
-      "label": "Number of weeks for the frequency period for intermittent leave (times per ____ week(s))",
+      "label": "Enter the number of weeks for the frequency (times per ___ week(s))",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "months": {
       "profile_path": null,
-      "label": "Number of months for the frequency period for intermittent leave (times per ____ month(s))",
+      "label": "Enter the number of months for the frequency (times per ___ month(s))",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "hours or": {
       "profile_path": null,
-      "label": "Duration in hours per intermittent leave episode",
+      "label": "If intermittent leave is measured in hours, enter the number of hours per episode",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "days per episode": {
       "profile_path": null,
-      "label": "Duration in days per intermittent leave episode",
+      "label": "If intermittent leave is measured in days, enter the number of days per episode",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "If yes please indicate the parttime or reduced work schedule the employee needs": {
       "profile_path": null,
-      "label": "If yes, indicate the part-time or reduced work schedule the employee needs (hours per day)",
+      "label": "If reduced schedule is needed, how many hours per day does the employee need to work?",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "days per week from": {
       "profile_path": null,
-      "label": "Number of days per week the employee needs under the reduced schedule",
+      "label": "If reduced schedule is needed, how many days per week will the employee work?",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "through": {
       "profile_path": null,
-      "label": "Start date (from) for the reduced work schedule",
+      "label": "If reduced schedule is needed, enter the start date for the reduced schedule (from)",
       "needs_user_input": true
     },
     "treatment and the time required for each appointment including any recovery period": {
       "profile_path": null,
-      "label": "If yes, indicate the estimated frequency of the employee’s need for leave for doctor’s visits or medical treatment and the time required for each appointment (including recovery)",
+      "label": "If time off for appointments is needed, indicate the estimated frequency of such appointments (times)",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "times per": {
       "profile_path": null,
-      "label": "Frequency: number of times per period for doctor’s visits/medical treatment",
+      "label": "Enter the number of weeks for the appointment frequency (times per ___ week(s))",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "weeks_2": {
       "profile_path": null,
-      "label": "Number of weeks (or months) in the frequency period for doctor’s visits/medical treatment",
+      "label": "Enter the number of months for the appointment frequency (times per ___ month(s))",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "Duration": {
       "profile_path": null,
-      "label": "Estimated duration (hours) required for each doctor’s appointment or medical treatment",
+      "label": "For appointments or treatments, enter the duration needed for each appointment (hours)",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "hours or_2": {
       "profile_path": null,
-      "label": "Estimated duration (days) required for each doctor’s appointment or medical treatment",
+      "label": "For appointments or treatments, enter the duration needed for each appointment (days)",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "schedule if leave is to be taken intermittently or on a reduced work schedule 1": {
       "profile_path": null,
-      "label": "Describe the care the employee will provide, estimated time period necessary for the care, and schedule of leaves to be taken intermittently or on a reduced work schedule (line 1)",
+      "label": "Describe the care the employee will provide, estimated time period necessary for the care, and schedule of intermittent or reduced leaves (line 1)",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "schedule if leave is to be taken intermittently or on a reduced work schedule 2": {
       "profile_path": null,
-      "label": "Describe the care the employee will provide, estimated time period necessary for the care, and schedule of leaves to be taken intermittently or on a reduced work schedule (line 2)",
+      "label": "Describe the care the employee will provide, estimated time period necessary for the care, and schedule of intermittent or reduced leaves (line 2)",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "schedule if leave is to be taken intermittently or on a reduced work schedule 3": {
       "profile_path": null,
-      "label": "Describe the care the employee will provide, estimated time period necessary for the care, and schedule of leaves to be taken intermittently or on a reduced work schedule (line 3)",
+      "label": "Describe the care the employee will provide, estimated time period necessary for the care, and schedule of intermittent or reduced leaves (line 3)",
       "needs_user_input": true,
       "confidence": "medium"
     },
@@ -148,56 +151,438 @@
       "profile_path": null,
       "label": "Is the employee able to perform work of any kind?",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "Is employee unable to perform any one or more of the essential functions of employee’s": {
       "profile_path": null,
       "label": "Is the employee unable to perform any one or more of the essential functions of the employee’s position?",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "Does (or will) the patient require assistance for basic medical, hygiene,": {
       "profile_path": null,
-      "label": "Does (or will) the patient require assistance for basic medical, hygiene, nutritional needs, safety, or transportation?",
+      "label": "Does (or will) the patient require assistance for basic medical care, hygiene, nutritional needs, safety, or transportation?",
       "type": "radio",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "After review of the employee’s signed statement (see item 10 below)": {
       "profile_path": null,
-      "label": "After review of the employee’s signed statement, does the condition warrant the participation of the employee (including psychological comfort or arranging care)?",
+      "label": "After review of the employee’s signed statement, does the condition warrant the participation of the employee?",
       "type": "radio",
       "needs_user_input": true,
       "confidence": "medium"
     },
     "Intermittent Leave": {
       "profile_path": null,
-      "label": "Is it medically necessary for the employee to be off work on an intermittent basis due to the serious health condition of the employee or family member?",
+      "label": "Is it medically necessary for the employee to be off work on an intermittent basis due to the serious health condition of the employee or family member? (Yes/No)",
       "type": "radio",
       "needs_user_input": true
     },
     "Reduced Schedule Leave": {
       "profile_path": null,
-      "label": "Is it medically necessary for the employee to work less than the employee’s normal work schedule due to the serious health condition of the employee or family member?",
+      "label": "Is it medically necessary for the employee to work less than the employee’s normal work schedule due to the serious health condition of the employee or family member? (Yes/No)",
       "type": "radio",
       "needs_user_input": true
     },
     "Time Off for Medical Appointments or Treatment": {
       "profile_path": null,
-      "label": "Is it medically necessary for the employee to take time off work for doctor’s visits or medical treatment?",
+      "label": "Is it medically necessary for the employee to take time off work for doctor’s visits or medical treatment? (Yes/No)",
       "type": "radio",
       "needs_user_input": true
     },
     "reduced work schedule": {
       "profile_path": null,
-      "label": "End date (through) for the reduced work schedule",
+      "label": "If reduced schedule is needed, enter the end date for the reduced schedule (through)",
       "needs_user_input": true
     },
     "Below is a description of what constitutes a “serious health condition” under both the": {
       "profile_path": null,
       "label": "Does the patient’s condition qualify as a serious health condition?",
       "type": "radio",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     }
-  }
+  },
+  "groups": [
+    {
+      "id": "patient_is_family_member",
+      "prompt": "Is the patient the employee’s family member (for example: child, parent, spouse, domestic partner, designated person)?",
+      "inputs": [
+        {
+          "key": "is_family_member",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "employee is the equivalent of a family relationship"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "medical_condition_commenced_date",
+      "prompt": "Date the medical condition or need for treatment commenced",
+      "inputs": [
+        {
+          "key": "condition_commenced_date",
+          "label": "Date condition commenced",
+          "type": "date",
+          "fields": [
+            "THE UNDERLYING DIAGNOSIS WITHOUT CONSENT OF THE PATIENT"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "probable_duration_medical_condition",
+      "prompt": "Probable duration of the medical condition or need for treatment",
+      "inputs": [
+        {
+          "key": "probable_duration",
+          "label": "Probable duration",
+          "fields": [
+            "4  Probable duration of medical condition or need for treatment"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "condition_is_serious_health_condition",
+      "prompt": "Does the patient’s condition qualify as a serious health condition?",
+      "inputs": [
+        {
+          "key": "is_serious_health_condition",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "Below is a description of what constitutes a “serious health condition” under both the"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "employee_able_to_perform_work",
+      "prompt": "Is the employee able to perform work of any kind?",
+      "applies_when": "patient_is_family_member.is_family_member == \"No\"",
+      "inputs": [
+        {
+          "key": "able_to_work",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "Is the employee able to perform work of any kind? (If “No,” skip next question)Is the employee able to perform work of any kind? (If “No,” skip next question)"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "employee_unable_to_perform_essential_functions",
+      "prompt": "Is the employee unable to perform any one or more of the essential functions of the employee’s position?",
+      "applies_when": "patient_is_family_member.is_family_member == \"No\"",
+      "inputs": [
+        {
+          "key": "unable_essential_functions",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "Is employee unable to perform any one or more of the essential functions of employee’s"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "patient_requires_assistance",
+      "prompt": "Does (or will) the patient require assistance for basic medical, hygiene, nutritional needs, safety, or transportation?",
+      "applies_when": "patient_is_family_member.is_family_member == \"Yes\"",
+      "inputs": [
+        {
+          "key": "requires_assistance",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "Does (or will) the patient require assistance for basic medical, hygiene,"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "condition_warrants_employee_participation",
+      "prompt": "After review of the employee’s signed statement, does the condition warrant the participation of the employee (including psychological comfort or arranging for third‑party care)?",
+      "applies_when": "patient_is_family_member.is_family_member == \"Yes\"",
+      "inputs": [
+        {
+          "key": "warrants_participation",
+          "label": "Yes or No",
+          "type": "single_select",
+          "fields": [
+            "After review of the employee’s signed statement (see item 10 below)"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "care_period_estimate",
+      "prompt": "Estimate the period of time care is needed or during which the employee’s presence would be beneficial.",
+      "applies_when": "condition_warrants_employee_participation.warrants_participation == 'Yes'",
+      "inputs": [
+        {
+          "key": "period_description",
+          "label": "Estimate period of time / explanation",
+          "type": "long_text",
+          "fields": [
+            "8  Estimate the period of time care is needed or during which the employees presence would be beneficial"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intermittent_leave",
+      "prompt": "Is it medically necessary for the employee to be off work on an intermittent basis because of the serious health condition of the employee or a family member?",
+      "applies_when": "care_recipient.care_needs >= 1",
+      "inputs": [
+        {
+          "key": "intermittent_needed",
+          "label": "Intermittent leave needed?",
+          "type": "single_select",
+          "fields": [
+            "Intermittent Leave"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intermittent_leave_details",
+      "prompt": "If intermittent leave is needed, describe the estimated frequency and the duration of such leaves.",
+      "applies_when": "intermittent_leave.intermittent_needed == 'Yes'",
+      "inputs": [
+        {
+          "key": "frequency_description",
+          "label": "Describe frequency (e.g., 1 episode every 3 months)",
+          "fields": [
+            "health condition and the duration of such leaves eg 1 episode every 3 months lasting 12 days"
+          ]
+        },
+        {
+          "key": "times_per_period",
+          "label": "Times (number)",
+          "fields": [
+            "weeks"
+          ],
+          "help": "Enter the number used in the frequency (times per ___ week(s))"
+        },
+        {
+          "key": "times_per_months",
+          "label": "Months (number) for frequency period",
+          "fields": [
+            "months"
+          ],
+          "help": "Enter the number used in the frequency (times per ___ month(s))"
+        },
+        {
+          "key": "duration_hours_per_episode",
+          "label": "Duration in hours per episode (if applicable)",
+          "fields": [
+            "hours or"
+          ]
+        },
+        {
+          "key": "duration_days_per_episode",
+          "label": "Duration in days per episode (if applicable)",
+          "fields": [
+            "days per episode"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reduced_schedule_leave",
+      "prompt": "Is it medically necessary for the employee to work less than the normal work schedule (reduced schedule leave)?",
+      "applies_when": "care_recipient.care_needs >= 1",
+      "inputs": [
+        {
+          "key": "reduced_needed",
+          "label": "Reduced schedule needed?",
+          "type": "single_select",
+          "fields": [
+            "Reduced Schedule Leave"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reduced_schedule_details",
+      "prompt": "If a reduced work schedule is needed, indicate the part‑time or reduced schedule required.",
+      "applies_when": "reduced_schedule_leave.reduced_needed == 'Yes'",
+      "inputs": [
+        {
+          "key": "hours_per_day",
+          "label": "Hours per day needed",
+          "fields": [
+            "If yes please indicate the parttime or reduced work schedule the employee needs"
+          ]
+        },
+        {
+          "key": "days_per_week",
+          "label": "Days per week under reduced schedule",
+          "fields": [
+            "days per week from"
+          ]
+        },
+        {
+          "key": "reduced_start_date",
+          "label": "Reduced schedule start date (from)",
+          "type": "date",
+          "fields": [
+            "through"
+          ]
+        },
+        {
+          "key": "reduced_end_date",
+          "label": "Reduced schedule end date (through)",
+          "type": "date",
+          "fields": [
+            "reduced work schedule"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "time_off_medical_appointments",
+      "prompt": "Is it medically necessary for the employee to take time off work for doctor’s visits or medical treatment?",
+      "applies_when": "care_recipient.care_needs >= 1",
+      "inputs": [
+        {
+          "key": "appointments_needed",
+          "label": "Time off for appointments or treatment needed?",
+          "type": "single_select",
+          "fields": [
+            "Time Off for Medical Appointments or Treatment"
+          ],
+          "options": [
+            "Yes",
+            "No"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "medical_appointments_details",
+      "prompt": "If time off for appointments is needed, indicate the estimated frequency and the time required for each appointment (including recovery).",
+      "applies_when": "time_off_medical_appointments.appointments_needed == 'Yes'",
+      "inputs": [
+        {
+          "key": "appointments_description",
+          "label": "Describe the appointments and time required (including recovery)",
+          "type": "long_text",
+          "fields": [
+            "treatment and the time required for each appointment including any recovery period"
+          ]
+        },
+        {
+          "key": "appointment_times_count",
+          "label": "Number of times",
+          "fields": [
+            "times per"
+          ]
+        },
+        {
+          "key": "appointment_frequency_period",
+          "label": "Frequency period (number of weeks or months)",
+          "fields": [
+            "weeks_2"
+          ],
+          "help": "Enter the number of weeks or months used in the frequency (e.g., times per 3 week(s) or month(s))"
+        },
+        {
+          "key": "appointment_duration_hours",
+          "label": "Estimated duration in hours per appointment",
+          "fields": [
+            "Duration"
+          ]
+        },
+        {
+          "key": "appointment_duration_days",
+          "label": "Estimated duration in days per appointment",
+          "fields": [
+            "hours or_2"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "family_care_description",
+      "prompt": "When family care leave is needed to care for a seriously‑ill family member, describe the care you will provide, estimate the time period, and give the schedule if leave will be intermittent or reduced.",
+      "applies_when": "caregiver.relationship != ''",
+      "inputs": [
+        {
+          "key": "care_line_1",
+          "label": "Care description — line 1",
+          "type": "long_text",
+          "fields": [
+            "schedule if leave is to be taken intermittently or on a reduced work schedule 1"
+          ]
+        },
+        {
+          "key": "care_line_2",
+          "label": "Care description — line 2",
+          "type": "long_text",
+          "fields": [
+            "schedule if leave is to be taken intermittently or on a reduced work schedule 2"
+          ]
+        },
+        {
+          "key": "care_line_3",
+          "label": "Care description — line 3",
+          "type": "long_text",
+          "fields": [
+            "schedule if leave is to be taken intermittently or on a reduced work schedule 3"
+          ]
+        }
+      ]
+    }
+  ],
+  "skip_fields": [
+    {
+      "field": "DATE",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "DATE_2",
+      "reason": "signed by hand on the printed form"
+    }
+  ]
 }

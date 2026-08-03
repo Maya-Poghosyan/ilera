@@ -4,7 +4,9 @@ from pydantic import BaseModel, Field
 
 
 class CareRecipient(BaseModel):
-    name: str = ""
+    name: str = ""  # first and last together, for prose
+    first_name: str = ""
+    last_name: str = ""
     date_of_birth: str = ""  # ISO date (YYYY-MM-DD)
     age: Optional[int] = None
     gender: str = ""
@@ -24,13 +26,20 @@ class CareRecipient(BaseModel):
 
 
 class Caregiver(BaseModel):
-    name: str = ""
+    name: str = ""  # first and last together, for prose
+    first_name: str = ""
+    last_name: str = ""
     relationship: str = ""
     employment_status: str = ""
     hours_per_week: Optional[int] = None
     phone: str = ""
     email: str = ""
-    address: str = ""
+    address: str = ""  # state and ZIP, as the eligibility agents have always read it
+    street_address: str = ""
+    city: str = ""
+    state: str = "CA"
+    county: str = ""
+    zip_code: str = ""
 
 
 class Household(BaseModel):

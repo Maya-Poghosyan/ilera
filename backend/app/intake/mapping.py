@@ -75,12 +75,10 @@ def _derive_skipped_answers(answers: dict[str, Any]) -> None:
 
     # When caregiver and recipient live together, share location.
     if a.get("caregiver.coresidence") == "Yes":
-        if "recipient.address.state" not in a and "caregiver.address.state" in a:
-            a["recipient.address.state"] = a["caregiver.address.state"]
-        if "recipient.address.zip" not in a and "caregiver.address.zip" in a:
-            a["recipient.address.zip"] = a["caregiver.address.zip"]
-        if "recipient.address.county" not in a and "caregiver.address.county" in a:
-            a["recipient.address.county"] = a["caregiver.address.county"]
+        for part in ("street", "city", "state", "county", "zip"):
+            mine, theirs = f"caregiver.address.{part}", f"recipient.address.{part}"
+            if theirs not in a and mine in a:
+                a[theirs] = a[mine]
 
     # Module B — caregiver.age_18_or_older from caregiver.age
     if "caregiver.age_18_or_older" not in a:
@@ -154,8 +152,11 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
     hh = profile.household
 
     # --- care recipient personal info ----------------------------------------
-    if a.get("recipient.preferred_name"):
-        cr.name = str(a["recipient.preferred_name"])
+    # Forms want the parts, prose wants the whole, so both are kept.
+    cr.first_name = str(a.get("recipient.first_name") or cr.first_name)
+    cr.last_name = str(a.get("recipient.last_name") or cr.last_name)
+    if cr.first_name or cr.last_name:
+        cr.name = f"{cr.first_name} {cr.last_name}".strip()
 
     dob = a.get("recipient.date_of_birth")
     if dob:
@@ -183,6 +184,14 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
     state = a.get("recipient.address.state")
     if state:
         cr.state = str(state)
+
+    street = a.get("recipient.address.street")
+    if street:
+        cr.street_address = str(street)
+
+    city = a.get("recipient.address.city")
+    if city:
+        cr.city = str(city)
 
     # Many programs are county-administered. Prefer what the user told us; a ZIP can
     # straddle a county line, so the lookup is only a fallback.
@@ -216,8 +225,10 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
         cr.care_needs = care_needs
 
     # --- caregiver ----------------------------------------------------------
-    if a.get("caregiver.preferred_name"):
-        cg.name = str(a["caregiver.preferred_name"])
+    cg.first_name = str(a.get("caregiver.first_name") or cg.first_name)
+    cg.last_name = str(a.get("caregiver.last_name") or cg.last_name)
+    if cg.first_name or cg.last_name:
+        cg.name = f"{cg.first_name} {cg.last_name}".strip()
 
     cg_phone = a.get("caregiver.phone")
     if cg_phone:
@@ -227,11 +238,14 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
     if cg_email:
         cg.email = str(cg_email)
 
-    # Build address from state + zip collected in the intake.
-    cg_state = a.get("caregiver.address.state", "")
-    cg_zip = a.get("caregiver.address.zip", "")
-    if cg_state or cg_zip:
-        cg.address = f"{cg_state} {cg_zip}".strip()
+    cg.street_address = str(a.get("caregiver.address.street") or cg.street_address)
+    cg.city = str(a.get("caregiver.address.city") or cg.city)
+    cg.state = str(a.get("caregiver.address.state") or cg.state)
+    cg.zip_code = str(a.get("caregiver.address.zip") or cg.zip_code)
+    if a.get("caregiver.address.county"):
+        cg.county = normalize_county(str(a["caregiver.address.county"]))
+    if cg.state or cg.zip_code:
+        cg.address = f"{cg.state} {cg.zip_code}".strip()
 
     relationship = a.get("caregiver.relationship")
     if relationship:

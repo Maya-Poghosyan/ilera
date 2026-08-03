@@ -7,6 +7,7 @@ and stitching multiple filled PDFs into a single combined document.
 
 import io
 import json
+import re
 from enum import Enum
 from typing import Any, Optional
 
@@ -16,6 +17,15 @@ from pypdf import PdfWriter
 from .config import get_settings
 from .forms.discovery import discover_fields, field_index
 from .forms.filler import load_schema, resolve_fields
+from .forms.groups import (
+    GroupInput,
+    applies,
+    is_profile_path,
+    load_groups,
+    load_skips,
+    parse_condition,
+    pdf_values,
+)
 from .models import CaseProfile
 
 # ---------------------------------------------------------------------------
@@ -81,6 +91,17 @@ class AppQuestion(BaseModel):
     fields: list[str] = Field(default_factory=list)
     option_values: dict[str, str] = Field(default_factory=dict)  # option label -> raw PDF value
     interpret: bool = False
+
+    # Questions sharing a ``group_id`` are one screen: a group asks for one real-world
+    # fact and each of its inputs fills different boxes, so they are answered together.
+    group_id: str = ""
+    group_prompt: str = ""
+    input: str = ""
+    option_fields: dict[str, list[str]] = Field(default_factory=dict)
+    # A "if yes, ..." follow-up: only shown once an earlier answer satisfies this, e.g.
+    # `past_ihss.received_ihss_before == "Yes"`. Conditions the profile can settle are
+    # applied here instead, and the group never reaches the frontend at all.
+    ask_when: str = ""
 
 
 class ApplicationState(BaseModel):
@@ -165,6 +186,8 @@ def _clean_label(text: str) -> str:
         if sep in text and text.lower().startswith("section"):
             text = text.split(sep, 1)[1]
             break
+    # The frontend marks optional fields itself, so a label saying so reads twice.
+    text = re.sub(r"[\s(]*\(?optional\)?[\s)]*$", "", text, flags=re.I)
     return text.strip()
 
 
@@ -200,6 +223,121 @@ _SPEC_TYPE_TO_INTAKE = {
 }
 
 
+def _group_questions(
+    form_id: str, profile: CaseProfile, askable: set[str]
+) -> tuple[list[AppQuestion], set[str]]:
+    """Questions from a form's committed groups, and the fields they account for.
+
+    A group that can't apply to this profile — a second household member's details for a
+    one-person household — is dropped whole, so none of its boxes are ever mentioned.
+    Fields the group pass marked office-use are accounted for without being asked.
+    """
+    schema = load_schema(form_id)
+    covered: set[str] = set(load_skips(schema))
+    questions: list[AppQuestion] = []
+
+    for group in load_groups(schema):
+        targets = {f for f in group.target_fields() if f in askable}
+        if not targets:
+            continue
+        covered |= targets
+        if not applies(group, profile):
+            continue
+        parsed = parse_condition(group.applies_when or "")
+        ask_when = (
+            group.applies_when
+            if parsed and not is_profile_path(parsed[0])
+            else ""
+        )
+        # An input whose every box the profile already fills is not a question.
+        asking = [i for i in group.inputs if set(i.target_fields()) & askable]
+        if not asking:
+            continue
+        if group.opt_in:
+            # A section that is the applicant's choice — naming a representative,
+            # picking a dental plan — costs one yes/no unless they want it.
+            opt_in_id = f"{group.id}_opt_in"
+            questions.append(
+                AppQuestion(
+                    field_id=f"{opt_in_id}.wanted",
+                    text=group.opt_in,
+                    type="single_select",
+                    options=["Yes", "No"],
+                    form_id=form_id,
+                    group_id=opt_in_id,
+                    input="wanted",
+                    ask_when=ask_when,
+                )
+            )
+            ask_when = f'{opt_in_id}.wanted == "Yes"'
+        for inp in asking:
+            questions.append(
+                AppQuestion(
+                    field_id=f"{group.id}.{inp.key}",
+                    text=_clean_label(inp.label),
+                    type=inp.type,
+                    required=inp.required,
+                    options=list(inp.options),
+                    why_this_matters=inp.help or group.help,
+                    form_id=form_id,
+                    fields=list(inp.fields),
+                    option_values=dict(inp.option_values),
+                    option_fields={k: list(v) for k, v in inp.option_fields.items()},
+                    group_id=group.id,
+                    group_prompt=group.prompt,
+                    input=inp.key,
+                    ask_when=ask_when,
+                )
+            )
+    return questions, covered
+
+
+def _merge_question(existing: AppQuestion, addition: AppQuestion) -> None:
+    """Fold a second form's copy of the same question into the one already asked."""
+    existing.fields = list(dict.fromkeys([*existing.fields, *addition.fields]))
+    for label, names in addition.option_fields.items():
+        merged = [*existing.option_fields.get(label, []), *names]
+        existing.option_fields[label] = list(dict.fromkeys(merged))
+    existing.option_values.update(addition.option_values)
+    for label in addition.options:
+        if label not in existing.options:
+            existing.options.append(label)
+    if existing.form_id != addition.form_id:
+        existing.form_id = ""  # it now fills more than one form
+
+
+_WHO = re.compile(r"person\s*(\d+)|(primary contact)", re.I)
+_NOISE = re.compile(
+    r"\([^)]*\)|person\s*\d+|primary contact|\b(this|their|they|the)\b", re.I
+)
+
+
+def _fact(question: AppQuestion) -> tuple[str, str]:
+    """What a question asks, and whom it asks it about.
+
+    A form names the same person two ways — "Person 1" in its table, "the Primary
+    Contact" in its opening — and labels the same box "Middle name" in one place and
+    "Person 1 (Primary Contact) middle name" in another. Both reduce to the same pair.
+    """
+    who = _WHO.search(f"{question.group_prompt} {question.text}")
+    scope = (who.group(1) or "1") if who else ""
+    asked = _NOISE.sub(" ", question.text)
+    return scope, "".join(c for c in asked.lower() if c.isalnum())
+
+
+def _same_fact(
+    question: AppQuestion, asked: list[AppQuestion]
+) -> Optional[AppQuestion]:
+    """The question already on screen that this one repeats, if there is one."""
+    fact = _fact(question)
+    if not fact[1]:
+        return None
+    for other in asked:
+        if other.type == question.type and _fact(other) == fact:
+            return other
+    return None
+
+
 def start_application(
     case_id: str, program: str, profile: CaseProfile
 ) -> dict[str, Any]:
@@ -216,6 +354,7 @@ def start_application(
         }
 
     questions: list[AppQuestion] = []
+    by_question_id: dict[str, AppQuestion] = {}
     total_autofilled = 0
     total_fields = 0
     seen_fields: set[str] = set()
@@ -237,21 +376,44 @@ def start_application(
             len(resolved) + len(needs) + len(missing)
         )
 
+        askable = {q.get("field", "") for q in needs} - {""}
+        grouped, covered = _group_questions(form_id, profile, askable)
+        for question in grouped:
+            seen_fields |= set(question.fields)
+            if question.field_id in existing_answers:
+                continue
+            # Group ids are shared across forms, so one fact asked by two forms in the
+            # same program becomes a single question that fills both.
+            already = by_question_id.get(question.field_id)
+            if already is not None:
+                _merge_question(already, question)
+                continue
+            by_question_id[question.field_id] = question
+            questions.append(question)
+
         info_by_field = field_index(form_id)
         for q in needs:
             field = q.get("field", "")
-            if not field or field in seen_fields or field in existing_answers:
+            if not field or field in covered or field in seen_fields:
+                continue
+            if field in existing_answers:
                 continue
             seen_fields.add(field)
-            questions.append(
-                _build_question(
-                    field_name=field,
-                    label=q.get("label", field),
-                    spec_type=q.get("type", "text"),
-                    form_id=form_id,
-                    info=info_by_field.get(field),
-                )
+            loose = _build_question(
+                field_name=field,
+                label=q.get("label", field),
+                spec_type=q.get("type", "text"),
+                form_id=form_id,
+                info=info_by_field.get(field),
             )
+            # A box no group claimed still asks something, and the something is often
+            # a question already on screen: the form reprints the applicant's middle
+            # name beside a section it belongs to.
+            asked = _same_fact(loose, questions)
+            if asked is not None:
+                _merge_question(asked, loose)
+                continue
+            questions.append(loose)
 
     if state is None:
         state = ApplicationState(
@@ -287,6 +449,22 @@ def _to_pdf_value(question: AppQuestion, raw: Any) -> Optional[str]:
     return str(raw)
 
 
+def _grouped_values(question: AppQuestion, raw: Any) -> dict[str, str]:
+    """Where a grouped answer lands, using the split declared when the group was drafted."""
+    return pdf_values(
+        GroupInput(
+            key=question.input or question.field_id,
+            label=question.text,
+            type=question.type,
+            fields=question.fields,
+            options=question.options,
+            option_fields=question.option_fields,
+            option_values=question.option_values,
+        ),
+        raw,
+    )
+
+
 def submit_answers(
     case_id: str, program: str, answers: dict[str, Any], profile: CaseProfile
 ) -> bytes:
@@ -305,9 +483,17 @@ def submit_answers(
         result = resolve_fields(form_id, profile)
         merged_values = dict(result.get("resolved", {}))
 
+        form_fields = set(load_schema(form_id).get("fields") or {})
         for field_id, raw in state.answers.items():
             question = questions_by_id.get(field_id)
             if question is not None:
+                if question.group_id:
+                    # One answer, several boxes with different values: the group decides
+                    # which. Names are form-specific, so only this form's are written.
+                    for target, value in _grouped_values(question, raw).items():
+                        if target in form_fields:
+                            merged_values[target] = value
+                    continue
                 if question.form_id and question.form_id != form_id:
                     continue
                 pdf_value = _to_pdf_value(question, raw)

@@ -11,102 +11,237 @@
   "fields": {
     "SOC 829 7": {
       "profile_path": null,
-      "label": "Select action (check one): NEW, CHANGE, or CANCEL",
-      "needs_user_input": true
+      "label": "Action requested: check NEW, CHANGE, or CANCEL",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 8": {
       "profile_path": null,
-      "label": "Check if this is a NEW enrollment (authorize direct deposit)",
+      "label": "Check this box to enroll in NEW direct deposit",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 9": {
       "profile_path": null,
-      "label": "Check if this is a CHANGE of direct deposit (authorize change to new account)",
+      "label": "Check this box to CHANGE your direct deposit to a new account",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 10": {
       "profile_path": null,
-      "label": "Check if this is a CANCEL of direct deposit authorization",
+      "label": "Check this box to CANCEL your direct deposit authorization",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 2": {
       "profile_path": "caregiver.name",
       "label": "Provider name (first, middle, last)"
     },
     "SOC 829 3": {
-      "profile_path": null,
-      "label": "Provider street address",
-      "needs_user_input": true
+      "profile_path": "caregiver.street_address",
+      "label": "Street address (number and street) for the provider"
     },
     "SOC 829 4": {
-      "profile_path": null,
-      "label": "Provider city",
-      "needs_user_input": true
+      "profile_path": "caregiver.city",
+      "label": "City for the provider"
     },
     "SOC 829 5": {
-      "profile_path": null,
-      "label": "Provider state",
-      "needs_user_input": true
+      "profile_path": "caregiver.state",
+      "label": "State for the provider"
     },
     "SOC 829 6": {
-      "profile_path": null,
-      "label": "Provider ZIP code",
-      "needs_user_input": true
+      "profile_path": "caregiver.zip_code",
+      "label": "ZIP code for the provider"
     },
     "SOC 829 11": {
       "profile_path": null,
       "label": "Case number",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 12": {
       "profile_path": null,
       "label": "Provider number",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 13": {
       "profile_path": null,
-      "label": "Type of account: Checking (check if checking)",
+      "label": "Type of account: Checking (check only one)",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 14": {
       "profile_path": null,
-      "label": "Type of account: Savings (check if savings)",
+      "label": "Type of account: Savings (check only one)",
       "type": "checkbox",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 15": {
       "profile_path": null,
-      "label": "Bank routing number (must be 9 numbers)",
-      "needs_user_input": true
+      "label": "Bank routing number (9 digits)",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 16": {
       "profile_path": null,
       "label": "Bank account number",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 17": {
       "profile_path": null,
       "label": "Bank name",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 18": {
       "profile_path": null,
-      "label": "Signature of payee (provider)",
-      "needs_user_input": true
+      "label": "Signature of payee (provider) — sign to acknowledge you will not send 100% of funds deposited to another bank outside the US",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 19": {
       "profile_path": null,
-      "label": "Date of signature",
-      "needs_user_input": true
+      "label": "Signature date",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 829 21": {
       "profile_path": null,
       "label": "End of form.",
-      "needs_user_input": true
+      "needs_user_input": true,
+      "confidence": "medium"
     }
-  }
+  },
+  "groups": [
+    {
+      "id": "provider_dd_action",
+      "prompt": "Are you enrolling in, changing, or cancelling direct deposit?",
+      "help": "Check only one option.",
+      "inputs": [
+        {
+          "key": "dd_action",
+          "label": "Select action",
+          "type": "single_select",
+          "fields": [
+            "SOC 829 7"
+          ],
+          "options": [
+            "NEW",
+            "CHANGE",
+            "CANCEL"
+          ],
+          "option_fields": {
+            "NEW": [
+              "SOC 829 8"
+            ],
+            "CHANGE": [
+              "SOC 829 9"
+            ],
+            "CANCEL": [
+              "SOC 829 10"
+            ]
+          },
+          "option_values": {
+            "NEW": "NEW",
+            "CHANGE": "CHANGE",
+            "CANCEL": "CANCEL"
+          }
+        }
+      ]
+    },
+    {
+      "id": "provider_identifiers",
+      "prompt": "What's your case number and provider number?",
+      "inputs": [
+        {
+          "key": "case_number",
+          "label": "Case number",
+          "fields": [
+            "SOC 829 11"
+          ]
+        },
+        {
+          "key": "provider_number",
+          "label": "Provider number",
+          "fields": [
+            "SOC 829 12"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bank_account_type",
+      "prompt": "Is this a checking or savings account?",
+      "applies_when": "provider_dd_action.dd_action != CANCEL",
+      "inputs": [
+        {
+          "key": "account_type",
+          "label": "Type of account",
+          "type": "single_select",
+          "options": [
+            "Checking",
+            "Savings"
+          ],
+          "option_fields": {
+            "Checking": [
+              "SOC 829 13"
+            ],
+            "Savings": [
+              "SOC 829 14"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bank_account",
+      "prompt": "What's your bank routing number, account number, and bank name?",
+      "applies_when": "provider_dd_action.dd_action != CANCEL",
+      "inputs": [
+        {
+          "key": "routing_number",
+          "label": "Routing number (9 digits)",
+          "fields": [
+            "SOC 829 15"
+          ],
+          "help": "Enter the 9-digit bank routing (ABA) number."
+        },
+        {
+          "key": "account_number",
+          "label": "Account number",
+          "fields": [
+            "SOC 829 16"
+          ]
+        },
+        {
+          "key": "bank_name",
+          "label": "Bank name",
+          "fields": [
+            "SOC 829 17"
+          ]
+        }
+      ]
+    }
+  ],
+  "skip_fields": [
+    {
+      "field": "SOC 829 21",
+      "reason": "End of form/footer text — informational only, not a user input; leave blank."
+    },
+    {
+      "field": "SOC 829 18",
+      "reason": "signed by hand on the printed form"
+    },
+    {
+      "field": "SOC 829 19",
+      "reason": "signed by hand on the printed form"
+    }
+  ]
 }
