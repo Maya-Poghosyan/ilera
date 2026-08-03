@@ -559,7 +559,7 @@ export default function CalendarPage() {
             {allSuggested.map((e, idx) => (
               <div
                 key={e.id ?? `suggested-${idx}`}
-                className="flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-white px-3 py-2.5"
+                className="flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-card px-3 py-2.5"
               >
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-sm font-medium text-foreground">{e.title}</p>
@@ -593,7 +593,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Month-view calendar grid */}
-      <div className="overflow-hidden rounded-xl border border-brand-subtle bg-white shadow-xs">
+      <div className="overflow-hidden rounded-xl border border-brand-subtle bg-card shadow-xs">
         <div className="flex items-center justify-between border-b border-brand-subtle bg-brand-subtle/40 px-4 py-3">
           <h2 className="text-lg font-semibold">
             {monthName} {YEAR}
