@@ -6,8 +6,8 @@ official program documentation, then supports them with a care calendar, timekee
 and a document store.
 
 Built for the UC Berkeley AI Hackathon. Tracks: **Band** (multi-agent), **Redis**
-(RAG + agent memory + document store), **Poke / Browserbase** (agentic reminders +
-browser automation), **Devin** (built with Devin).
+(RAG + agent memory + document store), **Poke** (agentic reminders), **Devin**
+(built with Devin).
 
 ## Architecture
 
@@ -19,7 +19,7 @@ Next.js frontend  ──REST──▶  FastAPI backend
                                   │       coordinate in a shared agent space (Band)
                                   ├─ RAG over program docs (RedisVL)
                                   └─ form fill + stitch (pypdf / fillpdf)
-                          integrations: Poke (SMS/email), Browserbase (portal automation)
+                          integrations: Poke (SMS/email)
 ```
 
 The **`CaseProfile`** is the shared spine: every agent reads and writes it.
@@ -53,7 +53,7 @@ Requires **Python ≥ 3.11** (`band-sdk` in `requirements.txt` does not support 
 cd backend
 python3.11 -m venv .venv && source .venv/bin/activate   # or any python ≥3.11
 pip install -r requirements.txt
-cp .env.example .env        # optional: add Redis / LLM / Band / Poke / Browserbase keys
+cp .env.example .env        # optional: add Redis / LLM / Band / Poke keys
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -103,8 +103,8 @@ chat (iMessage, WhatsApp, Telegram, RCS). Set `POKE_API_KEY` in `backend/.env`.
 
 - **Redis:** set `REDIS_URL`; replace the in-memory index in `app/rag/index.py` with a
   RedisVL `SearchIndex`, and back the CaseProfile with the Redis Agent Memory Server.
-- **LLM:** set `OPENAI_API_KEY` (real embeddings) and/or `ANTHROPIC_API_KEY`; replace
-  heuristic `assess()` bodies in `app/agents/specialists.py` with grounded LLM calls.
+- **LLM:** set `OPENAI_API_KEY` (OpenAI or an Azure OpenAI endpoint via `OPENAI_BASE_URL`);
+  replace heuristic `assess()` bodies in `app/agents/specialists.py` with grounded LLM calls.
 - **Band:** wired as a true multi-agent system — **each program group is its own Band agent**
   (IHSS, Medi-Cal, Medicare, PFL, VA, Tax), grounded only in its program's docs, plus a
   routing coordinator. Create a Remote Agent on app.band.ai per group, copy
@@ -112,11 +112,9 @@ chat (iMessage, WhatsApp, Telegram, RCS). Set `POKE_API_KEY` in `backend/.env`.
   UUID + API key. Then `pip install -r requirements-band.txt` and run the worker:
   `python -m app.integrations.band` (it launches every configured agent). Specialists expose
   program-scoped `assesseligibility` + `lookupprogramdocs` tools; the router exposes the
-  cross-program `assesseligibility` + `searchprogramdocs`. With no registry file it falls back
-  to a single coordinator from `BAND_API_KEY` + `BAND_AGENT_ID`. `app/agents/band_space.py`
+  cross-program `assesseligibility` + `searchprogramdocs`. `app/agents/band_space.py`
   still handles in-process coordination for the synchronous HTTP flow.
 - **Poke:** `POKE_API_KEY` is now wired — reminders are delivered. See the Poke section above.
-- **Browserbase:** wire IHSS portal automation.
 - **Forms:** drop fillable government PDFs into `backend/data/` and fill out the field-map JSONs.
 - Run `npx skills add redis/agent-skills` so AI writes Redis code the Redis-expert way.
 ```

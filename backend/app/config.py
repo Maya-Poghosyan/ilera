@@ -24,10 +24,7 @@ class Settings(BaseSettings):
     # Redis (RAG + agent memory + document store)
     redis_url: str = ""
 
-    # LLM
-    llm_provider: str = "anthropic"  # "anthropic" | "openai"
-    anthropic_api_key: str = ""
-    anthropic_model: str = "claude-sonnet-4-5-20250929"
+    # LLM (OpenAI or an OpenAI-compatible endpoint such as Azure OpenAI)
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     # Optional OpenAI-compatible base URL (e.g. an Azure OpenAI v1 endpoint:
@@ -42,8 +39,6 @@ class Settings(BaseSettings):
     fastembed_model: str = "BAAI/bge-small-en-v1.5"
 
     # Multi-agent (Band)
-    band_api_key: str = ""
-    band_agent_id: str = ""
     band_rest_url: str = "https://app.band.ai"
     band_ws_url: str = "wss://app.band.ai/api/v1/socket/websocket"
     # Optional JSON registry mapping program group -> {agent_id, api_key} so each
@@ -58,8 +53,6 @@ class Settings(BaseSettings):
     # Shared secret Poke must present as a bearer token on the /mcp mount.
     # Empty disables the check (local development only).
     mcp_api_key: str = ""
-    browserbase_api_key: str = ""
-    browserbase_project_id: str = ""
 
     @property
     def has_redis(self) -> bool:
@@ -67,13 +60,11 @@ class Settings(BaseSettings):
 
     @property
     def has_llm(self) -> bool:
-        return bool(self.anthropic_api_key or self.openai_api_key)
+        return bool(self.openai_api_key)
 
     @property
     def has_band(self) -> bool:
-        """True if Band is configured via env vars or a registry file."""
-        if self.band_api_key and self.band_agent_id:
-            return True
+        """True if a Band agent registry file is present."""
         import os
         path = self.band_agents_file
         if path and not os.path.isabs(path):
