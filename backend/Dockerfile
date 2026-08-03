@@ -15,4 +15,4 @@ COPY . .
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "if [ -n \"$BAND_AGENTS_JSON\" ]; then printf '%s' \"$BAND_AGENTS_JSON\" > /app/band_agents.json; fi; uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
