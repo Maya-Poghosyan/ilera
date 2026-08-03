@@ -1,6 +1,6 @@
 """Specialist agents for individual benefit programs.
 
-When an LLM key is configured, `SpecialistAgent.assess` uses grounded Claude reasoning
+When an LLM key is configured, `SpecialistAgent.assess` uses grounded LLM reasoning
 (see base.py). These `_heuristic_assess` bodies are the transparent no-key fallback.
 """
 

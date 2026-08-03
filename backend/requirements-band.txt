@@ -1,12 +1,10 @@
 # Optional: only needed to run the Band multi-agent worker
 #   pip install -r requirements.txt -r requirements-band.txt
 #   python -m app.integrations.band
-# Note: band-sdk[anthropic] upgrades `anthropic` to >=0.111 (compatible with app/llm.py).
-# The [pydantic_ai] extra powers the OpenAI/Azure path (LLM_PROVIDER=openai); the
-# Anthropic path (LLM_PROVIDER=anthropic) uses the [anthropic] extra.
-band-sdk[anthropic,pydantic_ai]==1.0.0
+# The [pydantic_ai] extra powers the OpenAI/Azure path (LLM_PROVIDER=openai).
+band-sdk[pydantic_ai]==1.0.0
 # Pin pydantic-ai-slim <2.0: band-sdk 1.0.0 streams via `async for run_stream_events(...)`,
 # which v2 changed to an async context manager; v2 also switches the `openai:` prefix to the
 # Responses API. 1.x keeps Chat Completions + the streaming API band expects.
-pydantic-ai-slim[anthropic,openai]>=1.56,<2.0
+pydantic-ai-slim[openai]>=1.56,<2.0
 openai>=1.0

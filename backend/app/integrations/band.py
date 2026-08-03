@@ -225,8 +225,8 @@ def _to_pai_tool(input_model, handler):
     """Adapt an (InputModel, async handler) tool into a pydantic-ai tool function.
 
     pydantic-ai flattens a single Pydantic-model argument into the tool's parameter
-    schema, so we can reuse the same input models as the Anthropic path. The tool name
-    matches band's convention (model class name minus "Input", lowercased).
+    schema. The tool name matches band's convention (model class name minus "Input",
+    lowercased).
     """
     from band.core.protocols import AgentToolsProtocol
     from band.runtime.custom_tools import get_custom_tool_name
@@ -462,29 +462,15 @@ def _adapter(prompt: str, tools):
         capabilities=frozenset({Capability.CONTACTS, Capability.MEMORY}),
         exclude_tools=_EXCLUDED_AGENT_TOOLS,
     )
-    s = get_settings()
-    if llm.provider() == "openai":
-        _configure_openai_env()
-        pai_tools = [
-            t if callable(t) and not isinstance(t, tuple) else _to_pai_tool(t[0], t[1])
-            for t in tools
-        ]
-        return _filtered_adapter_cls()(
-            model=_openai_model(),
-            custom_section=prompt,
-            additional_tools=pai_tools,
-            features=features,
-        )
-    from band.adapters.anthropic import AnthropicAdapter
-
-    # Anthropic path only supports the (InputModel, handler) CustomToolDef form; native
-    # ctx-aware callables (room-aware submit tools) are openai-only here.
-    tuple_tools = [t for t in tools if isinstance(t, tuple)]
-    return AnthropicAdapter(
-        model=s.anthropic_model,
-        prompt=prompt,
-        provider_key=s.anthropic_api_key,
-        additional_tools=tuple_tools,
+    _configure_openai_env()
+    pai_tools = [
+        t if callable(t) and not isinstance(t, tuple) else _to_pai_tool(t[0], t[1])
+        for t in tools
+    ]
+    return _filtered_adapter_cls()(
+        model=_openai_model(),
+        custom_section=prompt,
+        additional_tools=pai_tools,
         features=features,
     )
 
@@ -662,8 +648,7 @@ def build_agents(*, skip_backlog: bool = False) -> list:
     """
     if not llm.available():
         raise RuntimeError(
-            "Band agents need an LLM key for reasoning "
-            "(ANTHROPIC_API_KEY, or OPENAI_API_KEY with LLM_PROVIDER=openai)"
+            "Band agents need an LLM key for reasoning (OPENAI_API_KEY)"
         )
     registry = load_registry()
     if not registry:

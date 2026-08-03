@@ -24,10 +24,8 @@ class Settings(BaseSettings):
     # Redis (RAG + agent memory + document store)
     redis_url: str = ""
 
-    # LLM
-    llm_provider: str = "anthropic"  # "anthropic" | "openai"
-    anthropic_api_key: str = ""
-    anthropic_model: str = "claude-sonnet-4-5-20250929"
+    # LLM (OpenAI or an OpenAI-compatible endpoint such as Azure OpenAI)
+    llm_provider: str = "openai"  # "openai" | "azure"
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     # Optional OpenAI-compatible base URL (e.g. an Azure OpenAI v1 endpoint:
@@ -65,7 +63,7 @@ class Settings(BaseSettings):
 
     @property
     def has_llm(self) -> bool:
-        return bool(self.anthropic_api_key or self.openai_api_key)
+        return bool(self.openai_api_key)
 
     @property
     def has_band(self) -> bool:

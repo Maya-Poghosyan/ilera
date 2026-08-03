@@ -103,8 +103,8 @@ chat (iMessage, WhatsApp, Telegram, RCS). Set `POKE_API_KEY` in `backend/.env`.
 
 - **Redis:** set `REDIS_URL`; replace the in-memory index in `app/rag/index.py` with a
   RedisVL `SearchIndex`, and back the CaseProfile with the Redis Agent Memory Server.
-- **LLM:** set `OPENAI_API_KEY` (real embeddings) and/or `ANTHROPIC_API_KEY`; replace
-  heuristic `assess()` bodies in `app/agents/specialists.py` with grounded LLM calls.
+- **LLM:** set `OPENAI_API_KEY` (OpenAI or an Azure OpenAI endpoint via `OPENAI_BASE_URL`);
+  replace heuristic `assess()` bodies in `app/agents/specialists.py` with grounded LLM calls.
 - **Band:** wired as a true multi-agent system — **each program group is its own Band agent**
   (IHSS, Medi-Cal, Medicare, PFL, VA, Tax), grounded only in its program's docs, plus a
   routing coordinator. Create a Remote Agent on app.band.ai per group, copy

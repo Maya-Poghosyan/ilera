@@ -93,28 +93,19 @@ class PageMap(BaseModel):
 
 
 def _model() -> Any:
-    """A pydantic-ai model for the configured provider (OpenAI/Azure or Anthropic)."""
+    """A pydantic-ai model for the configured OpenAI/Azure OpenAI endpoint."""
     s = get_settings()
-    provider = (s.llm_provider or "").lower()
-    if provider in ("openai", "azure") or (not provider and s.openai_api_key):
-        from openai import AsyncOpenAI
-        from pydantic_ai.models.openai import OpenAIChatModel
-        from pydantic_ai.providers.openai import OpenAIProvider
+    from openai import AsyncOpenAI
+    from pydantic_ai.models.openai import OpenAIChatModel
+    from pydantic_ai.providers.openai import OpenAIProvider
 
-        client = AsyncOpenAI(
-            api_key=s.openai_api_key,
-            base_url=s.openai_base_url or None,
-            max_retries=6,
-            timeout=180.0,
-        )
-        return OpenAIChatModel(s.openai_model, provider=OpenAIProvider(openai_client=client))
-
-    from pydantic_ai.models.anthropic import AnthropicModel
-    from pydantic_ai.providers.anthropic import AnthropicProvider
-
-    return AnthropicModel(
-        s.anthropic_model, provider=AnthropicProvider(api_key=s.anthropic_api_key)
+    client = AsyncOpenAI(
+        api_key=s.openai_api_key,
+        base_url=s.openai_base_url or None,
+        max_retries=6,
+        timeout=180.0,
     )
+    return OpenAIChatModel(s.openai_model, provider=OpenAIProvider(openai_client=client))
 
 
 def _describe_field(field: dict) -> str:
