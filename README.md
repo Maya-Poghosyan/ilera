@@ -112,8 +112,7 @@ chat (iMessage, WhatsApp, Telegram, RCS). Set `POKE_API_KEY` in `backend/.env`.
   UUID + API key. Then `pip install -r requirements-band.txt` and run the worker:
   `python -m app.integrations.band` (it launches every configured agent). Specialists expose
   program-scoped `assesseligibility` + `lookupprogramdocs` tools; the router exposes the
-  cross-program `assesseligibility` + `searchprogramdocs`. With no registry file it falls back
-  to a single coordinator from `BAND_API_KEY` + `BAND_AGENT_ID`. `app/agents/band_space.py`
+  cross-program `assesseligibility` + `searchprogramdocs`. `app/agents/band_space.py`
   still handles in-process coordination for the synchronous HTTP flow.
 - **Poke:** `POKE_API_KEY` is now wired — reminders are delivered. See the Poke section above.
 - **Forms:** drop fillable government PDFs into `backend/data/` and fill out the field-map JSONs.

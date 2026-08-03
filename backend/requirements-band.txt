@@ -1,7 +1,7 @@
 # Optional: only needed to run the Band multi-agent worker
 #   pip install -r requirements.txt -r requirements-band.txt
 #   python -m app.integrations.band
-# The [pydantic_ai] extra powers the OpenAI/Azure path (LLM_PROVIDER=openai).
+# The [pydantic_ai] extra powers the OpenAI/Azure reasoning path.
 band-sdk[pydantic_ai]==1.0.0
 # Pin pydantic-ai-slim <2.0: band-sdk 1.0.0 streams via `async for run_stream_events(...)`,
 # which v2 changed to an async context manager; v2 also switches the `openai:` prefix to the

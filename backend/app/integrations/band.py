@@ -26,9 +26,6 @@ lets the server post the seed request as the human, so the routing agent is trig
       "tax":       {"agent_id": "...", "api_key": "..."}
     }
 
-For backwards-compat, if no registry file exists but BAND_API_KEY + BAND_AGENT_ID are set,
-a single "routing" coordinator agent is run.
-
 Run the worker:  python -m app.integrations.band
 It is optional: the synchronous HTTP eligibility flow works without Band, and the `band`
 package is only imported when the worker actually starts.
@@ -620,8 +617,7 @@ def _wrap(sync_fn):
 # Registry loading
 # ---------------------------------------------------------------------------
 def load_registry() -> dict[str, dict]:
-    """Return {group_key: {agent_id, api_key}}. Reads the JSON file, else falls back
-    to a single 'routing' agent from BAND_API_KEY/BAND_AGENT_ID."""
+    """Return {group_key: {agent_id, api_key}} read from the JSON registry file."""
     s = get_settings()
     path = s.band_agents_file
     if path and not os.path.isabs(path):
@@ -634,8 +630,6 @@ def load_registry() -> dict[str, dict]:
         for key, entry in raw.items():
             if entry.get("agent_id") and entry.get("api_key"):
                 registry[key] = {"agent_id": entry["agent_id"], "api_key": entry["api_key"]}
-    if "routing" not in registry and s.has_band:
-        registry["routing"] = {"agent_id": s.band_agent_id, "api_key": s.band_api_key}
     return registry
 
 
@@ -653,7 +647,7 @@ def build_agents(*, skip_backlog: bool = False) -> list:
     registry = load_registry()
     if not registry:
         raise RuntimeError(
-            "No Band agents configured. Provide band_agents.json or BAND_API_KEY + BAND_AGENT_ID."
+            "No Band agents configured. Provide band_agents.json."
         )
     agents = []
     for key, creds in registry.items():

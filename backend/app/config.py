@@ -25,7 +25,6 @@ class Settings(BaseSettings):
     redis_url: str = ""
 
     # LLM (OpenAI or an OpenAI-compatible endpoint such as Azure OpenAI)
-    llm_provider: str = "openai"  # "openai" | "azure"
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
     # Optional OpenAI-compatible base URL (e.g. an Azure OpenAI v1 endpoint:
@@ -40,8 +39,6 @@ class Settings(BaseSettings):
     fastembed_model: str = "BAAI/bge-small-en-v1.5"
 
     # Multi-agent (Band)
-    band_api_key: str = ""
-    band_agent_id: str = ""
     band_rest_url: str = "https://app.band.ai"
     band_ws_url: str = "wss://app.band.ai/api/v1/socket/websocket"
     # Optional JSON registry mapping program group -> {agent_id, api_key} so each
@@ -67,9 +64,7 @@ class Settings(BaseSettings):
 
     @property
     def has_band(self) -> bool:
-        """True if Band is configured via env vars or a registry file."""
-        if self.band_api_key and self.band_agent_id:
-            return True
+        """True if a Band agent registry file is present."""
         import os
         path = self.band_agents_file
         if path and not os.path.isabs(path):
