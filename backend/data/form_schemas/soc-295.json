@@ -25,16 +25,19 @@
       "needs_user_input": true
     },
     "SOC 295 4": {
-      "profile_path": "id",
-      "label": "Case Number"
+      "profile_path": null,
+      "label": "Case Number (if known)",
+      "needs_user_input": true
     },
     "SOC 295 7": {
-      "profile_path": "care_recipient.street_address",
-      "label": "Street Address"
+      "profile_path": null,
+      "label": "Street Address",
+      "needs_user_input": true
     },
     "SOC 295 8": {
-      "profile_path": "care_recipient.city",
-      "label": "City"
+      "profile_path": null,
+      "label": "City",
+      "needs_user_input": true
     },
     "SOC 295 9": {
       "profile_path": "care_recipient.state",
@@ -45,16 +48,86 @@
       "label": "Zip Code"
     },
     "SOC 295 11": {
-      "profile_path": "care_recipient.phone",
-      "label": "Telephone"
+      "profile_path": null,
+      "label": "Telephone",
+      "needs_user_input": true
     },
     "SOC 295 12": {
-      "profile_path": "care_recipient.email",
-      "label": "Email"
+      "profile_path": null,
+      "label": "Email",
+      "needs_user_input": true
     },
     "SOC 295 13": {
       "profile_path": "care_recipient.date_of_birth",
       "label": "Date of Birth"
+    },
+    "SOC 295 14": {
+      "profile_path": null,
+      "label": "Sex — Male",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 15": {
+      "profile_path": null,
+      "label": "Sex — Female",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 18": {
+      "profile_path": null,
+      "label": "Gender identity — Female",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 19": {
+      "profile_path": null,
+      "label": "Gender identity — Male",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 20": {
+      "profile_path": null,
+      "label": "Gender identity — Transgender: male to female",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 21": {
+      "profile_path": null,
+      "label": "Gender identity — Transgender: female to male",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 22": {
+      "profile_path": null,
+      "label": "Gender identity — Non-Binary (neither male nor female)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 23": {
+      "profile_path": null,
+      "label": "Gender identity — Another gender identity",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 24": {
+      "profile_path": null,
+      "label": "Gender identity — Decline to state",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 25": {
+      "profile_path": null,
+      "label": "What sex was listed on your original birth certificate? Female",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 26": {
+      "profile_path": null,
+      "label": "What sex was listed on your original birth certificate? Male",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 295 34": {
       "profile_path": "care_recipient.veteran",
@@ -68,28 +141,146 @@
       "type": "checkbox",
       "check_when": false
     },
+    "SOC 295 36": {
+      "profile_path": null,
+      "label": "Are you a Spouse/Child of a Veteran? Yes",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 37": {
+      "profile_path": null,
+      "label": "Are you a Spouse/Child of a Veteran? No",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 38": {
+      "profile_path": null,
+      "label": "If YES, give Veteran name and Claim Number",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 39": {
+      "profile_path": "care_recipient.current_benefits",
+      "label": "Do you receive SSI/SSP benefits? Yes",
+      "type": "checkbox",
+      "check_when": "SSI",
+      "confidence": "medium"
+    },
+    "SOC 295 40": {
+      "profile_path": null,
+      "label": "Do you receive SSI/SSP benefits? No",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 41": {
+      "profile_path": null,
+      "label": "If yes, check your type of living arrangement: Independent Living",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 42": {
+      "profile_path": null,
+      "label": "If yes, check your type of living arrangement: Board and Care",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 43": {
+      "profile_path": null,
+      "label": "If yes, check your type of living arrangement: Home of Another",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
     "SOC 295 44": {
       "profile_path": "care_recipient.care_needs",
       "label": "Services being requested",
       "transform": "join_list"
     },
-    "SOC 295 89": {
+    "SOC 295 45": {
       "profile_path": null,
-      "label": "Ethnic Origin",
-      "type": "choice",
-      "needs_user_input": true
+      "label": "Have you received In-Home Supportive Services (IHSS) in the past? Yes",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
-    "SOC 295 90": {
+    "SOC 295 46": {
       "profile_path": null,
-      "label": "Language - Read",
-      "type": "choice",
-      "needs_user_input": true
+      "label": "Have you received In-Home Supportive Services (IHSS) in the past? No",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
-    "SOC 295 91": {
+    "SOC 295 47": {
       "profile_path": null,
-      "label": "Language - Speak",
-      "type": "choice",
-      "needs_user_input": true
+      "label": "If Yes, date and county where service was last received",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 48": {
+      "profile_path": null,
+      "label": "Total Monthly Hours",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 49": {
+      "profile_path": null,
+      "label": "Name Used (if different from above)",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 27": {
+      "profile_path": null,
+      "label": "How do you describe your sexual orientation? Straight/heterosexual",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 28": {
+      "profile_path": null,
+      "label": "How do you describe your sexual orientation? Gay or lesbian",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 29": {
+      "profile_path": null,
+      "label": "How do you describe your sexual orientation? Bisexual",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 30": {
+      "profile_path": null,
+      "label": "How do you describe your sexual orientation? Queer",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 31": {
+      "profile_path": null,
+      "label": "How do you describe your sexual orientation? Another sexual orientation",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 32": {
+      "profile_path": null,
+      "label": "How do you describe your sexual orientation? Unknown",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 33": {
+      "profile_path": null,
+      "label": "How do you describe your sexual orientation? Decline to state",
+      "type": "checkbox",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 295 50": {
       "profile_path": null,
@@ -98,7 +289,7 @@
     },
     "SOC 295 51": {
       "profile_path": null,
-      "label": "Spouse's Birthdate",
+      "label": "Spouse's birthdate",
       "needs_user_input": true
     },
     "SOC 295 52": {
@@ -106,70 +297,492 @@
       "label": "Spouse's Social Security Number",
       "needs_user_input": true
     },
-    "SOC 295 1041": {
-      "profile_path": "caregiver.relationship",
-      "label": "Representative's Relationship to Applicant"
-    },
-    "SOC 295 39": {
+    "SOC 295 53": {
       "profile_path": null,
-      "label": "SSI/SSP - Yes",
+      "label": "Household member 1 - Is this person a Parent? (check if Parent)",
       "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 40": {
+    "SOC 295 54": {
       "profile_path": null,
-      "label": "SSI/SSP - No",
+      "label": "Household member 1 - Is this person a Child? (check if Child)",
       "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 38": {
+    "SOC 295 55": {
       "profile_path": null,
-      "label": "Veteran name and Claim Number",
-      "needs_user_input": true
-    },
-    "SOC 295 36": {
-      "profile_path": null,
-      "label": "Spouse/Child of Veteran - Yes",
+      "label": "Household member 1 - Is this person an Other Relative? (check if Other Relative)",
       "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 37": {
+    "SOC 295 56": {
       "profile_path": null,
-      "label": "Spouse/Child of Veteran - No",
+      "label": "Household member 1 - Is this person a Non-Relative? (check if Non-Relative)",
       "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 45": {
+    "SOC 295 57": {
       "profile_path": null,
-      "label": "Past IHSS - Yes",
+      "label": "Household member 1 name",
+      "needs_user_input": true
+    },
+    "SOC 295 58": {
+      "profile_path": null,
+      "label": "Household member 1 birthdate",
+      "needs_user_input": true
+    },
+    "SOC 295 59": {
+      "profile_path": null,
+      "label": "Household member 1 Social Security Number",
+      "needs_user_input": true
+    },
+    "SOC 295 60": {
+      "profile_path": null,
+      "label": "Household member 2 - Is this person a Parent? (check if Parent)",
       "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 46": {
+    "SOC 295 61": {
       "profile_path": null,
-      "label": "Past IHSS - No",
+      "label": "Household member 2 - Is this person a Child? (check if Child)",
       "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 47": {
+    "SOC 295 62": {
       "profile_path": null,
-      "label": "Date/county where service was last received",
+      "label": "Household member 2 - Is this person an Other Relative? (check if Other Relative)",
+      "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 48": {
-      "profile_path": "caregiver.hours_per_week",
-      "label": "Total Monthly Hours",
-      "transform": "hours_weekly_to_monthly"
+    "SOC 295 63": {
+      "profile_path": null,
+      "label": "Household member 2 - Is this person a Non-Relative? (check if Non-Relative)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 64": {
+      "profile_path": null,
+      "label": "Household member 2 name",
+      "needs_user_input": true
+    },
+    "SOC 295 65": {
+      "profile_path": null,
+      "label": "Household member 2 birthdate",
+      "needs_user_input": true
+    },
+    "SOC 295 66": {
+      "profile_path": null,
+      "label": "Household member 2 Social Security Number",
+      "needs_user_input": true
+    },
+    "SOC 295 67": {
+      "profile_path": null,
+      "label": "Household member 3 - Is this person a Parent? (check if Parent)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 68": {
+      "profile_path": null,
+      "label": "Household member 3 - Is this person a Child? (check if Child)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 69": {
+      "profile_path": null,
+      "label": "Household member 3 - Is this person an Other Relative? (check if Other Relative)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 70": {
+      "profile_path": null,
+      "label": "Household member 3 - Is this person a Non-Relative? (check if Non-Relative)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 71": {
+      "profile_path": null,
+      "label": "Household member 3 name",
+      "needs_user_input": true
+    },
+    "SOC 295 72": {
+      "profile_path": null,
+      "label": "Household member 3 birthdate",
+      "needs_user_input": true
+    },
+    "SOC 295 73": {
+      "profile_path": null,
+      "label": "Household member 3 Social Security Number",
+      "needs_user_input": true
+    },
+    "SOC 295 74": {
+      "profile_path": null,
+      "label": "Household member 4 - Is this person a Parent? (check if Parent)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 75": {
+      "profile_path": null,
+      "label": "Household member 4 - Is this person a Child? (check if Child)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 76": {
+      "profile_path": null,
+      "label": "Household member 4 - Is this person an Other Relative? (check if Other Relative)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 77": {
+      "profile_path": null,
+      "label": "Household member 4 - Is this person a Non-Relative? (check if Non-Relative)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 78": {
+      "profile_path": null,
+      "label": "Household member 4 name",
+      "needs_user_input": true
+    },
+    "SOC 295 79": {
+      "profile_path": null,
+      "label": "Household member 4 birthdate",
+      "needs_user_input": true
+    },
+    "SOC 295 80": {
+      "profile_path": null,
+      "label": "Household member 4 Social Security Number",
+      "needs_user_input": true
+    },
+    "SOC 295 81": {
+      "profile_path": null,
+      "label": "Household member 5 - Is this person a Parent? (check if Parent)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 82": {
+      "profile_path": null,
+      "label": "Household member 5 - Is this person a Child? (check if Child)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 83": {
+      "profile_path": null,
+      "label": "Household member 5 - Is this person an Other Relative? (check if Other Relative)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 84": {
+      "profile_path": null,
+      "label": "Household member 5 - Is this person a Non-Relative? (check if Non-Relative)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 85": {
+      "profile_path": null,
+      "label": "Household member 5 name",
+      "needs_user_input": true
+    },
+    "SOC 295 86": {
+      "profile_path": null,
+      "label": "Household member 5 birthdate",
+      "needs_user_input": true
+    },
+    "SOC 295 87": {
+      "profile_path": null,
+      "label": "Household member 5 Social Security Number",
+      "needs_user_input": true
+    },
+    "SOC 295 88": {
+      "profile_path": null,
+      "label": "Instruction text shown on the page",
+      "needs_user_input": true,
+      "confidence": "low"
+    },
+    "SOC 295 89": {
+      "profile_path": null,
+      "label": "What is your ethnic origin? (choose one)",
+      "type": "choice",
+      "needs_user_input": true
+    },
+    "SOC 295 90": {
+      "profile_path": null,
+      "label": "What language do you prefer to read? (choose one)",
+      "type": "choice",
+      "needs_user_input": true
+    },
+    "SOC 295 91": {
+      "profile_path": null,
+      "label": "What language do you prefer to speak? (choose one)",
+      "type": "choice",
+      "needs_user_input": true
+    },
+    "SOC 295 94": {
+      "profile_path": null,
+      "label": "I am Blind - Yes",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 95": {
+      "profile_path": null,
+      "label": "I am Blind - No",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 96": {
+      "profile_path": null,
+      "label": "For Notices of Action - No accommodation is needed",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 97": {
+      "profile_path": null,
+      "label": "For Notices of Action - Braille Documents",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 98": {
+      "profile_path": null,
+      "label": "For Notices of Action - Audio CD",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 99": {
+      "profile_path": null,
+      "label": "For Notices of Action - Data CD",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 100": {
+      "profile_path": null,
+      "label": "For Notices of Action - County Support",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 101": {
+      "profile_path": null,
+      "label": "For Notices of Action - If County Support, describe requested support",
+      "needs_user_input": true
+    },
+    "SOC 295 102": {
+      "profile_path": null,
+      "label": "For IHSS Required forms - No accommodation is needed",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 103": {
+      "profile_path": null,
+      "label": "For IHSS Required forms - Braille Documents",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 104": {
+      "profile_path": null,
+      "label": "For IHSS Required forms - Audio CD",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 105": {
+      "profile_path": null,
+      "label": "For IHSS Required forms - Data CD",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 106": {
+      "profile_path": null,
+      "label": "For IHSS Required forms - County Support",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 107": {
+      "profile_path": null,
+      "label": "For IHSS Required forms - If County Support, describe requested support",
+      "needs_user_input": true
+    },
+    "SOC 295 108": {
+      "profile_path": null,
+      "label": "For Timesheets - No accommodation is needed",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 109": {
+      "profile_path": null,
+      "label": "For Timesheets - Telephonic System (choose if you want telephonic timesheet option)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1010": {
+      "profile_path": null,
+      "label": "For Timesheets - Telephonic System 4 Digit RAN (if using telephonic system, enter 4-digit RAN)",
+      "needs_user_input": true
+    },
+    "SOC 295 1011": {
+      "profile_path": null,
+      "label": "For Timesheets - County Support",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1012": {
+      "profile_path": null,
+      "label": "For Timesheets - Electronic Timesheet System (ETS)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1013": {
+      "profile_path": null,
+      "label": "For Timesheets - If County Support, describe requested support",
+      "needs_user_input": true
+    },
+    "SOC 295 1014": {
+      "profile_path": null,
+      "label": "I am Visually Impaired - Yes",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1015": {
+      "profile_path": null,
+      "label": "I am Visually Impaired - No",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1016": {
+      "profile_path": null,
+      "label": "For Notices of Action: No accommodation is needed",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1017": {
+      "profile_path": null,
+      "label": "For Notices of Action: 18 point font documents",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1018": {
+      "profile_path": null,
+      "label": "For Notices of Action: Audio CD",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1019": {
+      "profile_path": null,
+      "label": "For Notices of Action: Data CD",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1020": {
+      "profile_path": null,
+      "label": "For Notices of Action: County Support",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1021": {
+      "profile_path": null,
+      "label": "For Notices of Action (If County Support, describe requested support)",
+      "needs_user_input": true
+    },
+    "SOC 295 1022": {
+      "profile_path": null,
+      "label": "For IHSS Required forms: No accommodation is needed",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1023": {
+      "profile_path": null,
+      "label": "For IHSS Required forms: 18 point font documents",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1024": {
+      "profile_path": null,
+      "label": "For IHSS Required forms: Audio CD",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1025": {
+      "profile_path": null,
+      "label": "For IHSS Required forms: Data CD",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1026": {
+      "profile_path": null,
+      "label": "For IHSS Required forms: County Support",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1027": {
+      "profile_path": null,
+      "label": "For IHSS Required forms (If County Support, describe requested support)",
+      "needs_user_input": true
+    },
+    "SOC 295 1028": {
+      "profile_path": null,
+      "label": "For Timesheets: No accommodation is needed",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1029": {
+      "profile_path": null,
+      "label": "For Timesheets: Telephonic System",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1030": {
+      "profile_path": null,
+      "label": "Telephonic System 4 Digit RAN",
+      "needs_user_input": true
+    },
+    "SOC 295 1031": {
+      "profile_path": null,
+      "label": "For Timesheets: 18 point font documents",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1032": {
+      "profile_path": null,
+      "label": "For Timesheets: County Support",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1033": {
+      "profile_path": null,
+      "label": "For Timesheets: Electronic Timesheet System (ETS)",
+      "type": "checkbox",
+      "needs_user_input": true
+    },
+    "SOC 295 1034": {
+      "profile_path": null,
+      "label": "For Timesheets (If County Support, describe requested support, including blind-only services)",
+      "needs_user_input": true
+    },
+    "SOC 295 1035": {
+      "profile_path": null,
+      "label": "Signature (Affirmation: I affirm that the above information is true to the best of my knowledge and belief)",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 Sig 1": {
+      "profile_path": null,
+      "label": "Signature of applicant",
+      "needs_user_input": true
     },
     "SOC 295 1038": {
       "profile_path": null,
-      "label": "Date (Signature)",
+      "label": "Date (applicant signature)",
+      "needs_user_input": true
+    },
+    "SOC 295 Sig 2": {
+      "profile_path": null,
+      "label": "Signature of applicant’s representative (only if applicable)",
       "needs_user_input": true
     },
     "SOC 295 1040": {
       "profile_path": null,
-      "label": "Date (Representative Signature)",
+      "label": "Date (applicant’s representative signature)",
       "needs_user_input": true
+    },
+    "SOC 295 1041": {
+      "profile_path": "caregiver.relationship",
+      "label": "Representative's Relationship to Applicant"
     },
     "SOC 295 1042": {
       "profile_path": "caregiver.phone",
@@ -179,39 +792,32 @@
       "profile_path": "caregiver.address",
       "label": "Representative's Address"
     },
-    "SOC 295 14": {
-      "profile_path": "care_recipient.gender",
-      "label": "Gender - Male",
-      "type": "checkbox",
-      "check_when": "male"
-    },
-    "SOC 295 15": {
-      "profile_path": "care_recipient.gender",
-      "label": "Gender - Female",
-      "type": "checkbox",
-      "check_when": "female"
-    },
-    "SOC 295 94": {
+    "SOC 295 1044": {
       "profile_path": null,
-      "label": "Blind - Yes",
+      "label": "Fraud reporting information (hotline, email, and website) — informational text",
+      "needs_user_input": true
+    },
+    "SOC 295 1045": {
+      "profile_path": null,
+      "label": "Income eligible — Yes",
       "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 95": {
+    "SOC 295 1046": {
       "profile_path": null,
-      "label": "Blind - No",
+      "label": "Income eligible — No",
       "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 1014": {
+    "SOC 295 1047": {
       "profile_path": null,
-      "label": "Visually Impaired - Yes",
+      "label": "Status eligible — Yes",
       "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 1015": {
+    "SOC 295 1048": {
       "profile_path": null,
-      "label": "Visually Impaired - No",
+      "label": "Status eligible — No",
       "type": "checkbox",
       "needs_user_input": true
     },
@@ -219,90 +825,51 @@
       "profile_path": "care_recipient.insurance",
       "label": "Medi-Cal Aid Code"
     },
-    "SOC 295 49": {
+    "SOC 295 1050": {
       "profile_path": null,
-      "label": "Name Used (if different)",
+      "label": "MAGI eligible recipient — Disabled 12 months or longer",
+      "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 57": {
+    "SOC 295 1051": {
       "profile_path": null,
-      "label": "Household Member 1 Name",
+      "label": "MAGI eligible recipient — At risk without IHSS",
+      "type": "checkbox",
       "needs_user_input": true
     },
-    "SOC 295 58": {
+    "SOC 295 1052": {
       "profile_path": null,
-      "label": "Household Member 1 Birthdate",
-      "needs_user_input": true
-    },
-    "SOC 295 59": {
-      "profile_path": null,
-      "label": "Household Member 1 SSN",
-      "needs_user_input": true
-    },
-    "SOC 295 64": {
-      "profile_path": null,
-      "label": "Household Member 2 Name",
-      "needs_user_input": true
-    },
-    "SOC 295 65": {
-      "profile_path": null,
-      "label": "Household Member 2 Birthdate",
-      "needs_user_input": true
-    },
-    "SOC 295 66": {
-      "profile_path": null,
-      "label": "Household Member 2 SSN",
-      "needs_user_input": true
-    },
-    "SOC 295 71": {
-      "profile_path": null,
-      "label": "Household Member 3 Name",
-      "needs_user_input": true
-    },
-    "SOC 295 72": {
-      "profile_path": null,
-      "label": "Household Member 3 Birthdate",
-      "needs_user_input": true
-    },
-    "SOC 295 73": {
-      "profile_path": null,
-      "label": "Household Member 3 SSN",
-      "needs_user_input": true
-    },
-    "SOC 295 78": {
-      "profile_path": null,
-      "label": "Household Member 4 Name",
-      "needs_user_input": true
-    },
-    "SOC 295 79": {
-      "profile_path": null,
-      "label": "Household Member 4 Birthdate",
-      "needs_user_input": true
-    },
-    "SOC 295 80": {
-      "profile_path": null,
-      "label": "Household Member 4 SSN",
-      "needs_user_input": true
-    },
-    "SOC 295 85": {
-      "profile_path": null,
-      "label": "Household Member 5 Name",
-      "needs_user_input": true
-    },
-    "SOC 295 86": {
-      "profile_path": null,
-      "label": "Household Member 5 Birthdate",
-      "needs_user_input": true
-    },
-    "SOC 295 87": {
-      "profile_path": null,
-      "label": "Household Member 5 SSN",
-      "needs_user_input": true
+      "label": "Verification (agency use)",
+      "needs_user_input": true,
+      "confidence": "medium"
     },
     "SOC 295 1053": {
-      "profile_path": "goals",
-      "label": "Notes",
-      "transform": "join_list"
+      "profile_path": null,
+      "label": "Notes (agency use)",
+      "needs_user_input": true,
+      "confidence": "medium"
+    },
+    "SOC 295 Sig 3": {
+      "profile_path": null,
+      "label": "Signature of social worker or agency representative",
+      "needs_user_input": true
+    },
+    "SOC 295 1055": {
+      "profile_path": null,
+      "label": "Telephone number (social worker or agency representative)",
+      "needs_user_input": true
+    },
+    "SOC 295 1056": {
+      "profile_path": null,
+      "label": "Form control text (page control / browse mode indicator)",
+      "needs_user_input": true,
+      "confidence": "low"
+    },
+    "SOC 295 1057": {
+      "profile_path": null,
+      "label": "Form control text (end of form marker)",
+      "needs_user_input": true,
+      "confidence": "low"
     }
   }
 }
