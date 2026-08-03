@@ -6,9 +6,12 @@ Two backends with the same interface:
 """
 
 import glob
+import heapq
 import json
 import os
 import re
+import threading
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 
 from ..config import get_settings
@@ -65,13 +68,12 @@ def _chunk_text(text: str) -> list[tuple[str, str]]:
     return out
 
 
-def _load_corpus_chunks() -> list[Chunk]:
+def _iter_corpus_chunks() -> Iterator[Chunk]:
     manifest_path = os.path.join(KNOWLEDGE_DIR, "manifest.json")
     if not os.path.exists(manifest_path):
-        return []
+        return
     with open(manifest_path, encoding="utf-8") as fh:
         manifest = json.load(fh)
-    chunks: list[Chunk] = []
     for doc in manifest.get("docs", []):
         path = os.path.join(KNOWLEDGE_DIR, doc["text_path"])
         if not os.path.exists(path):
@@ -79,23 +81,19 @@ def _load_corpus_chunks() -> list[Chunk]:
         with open(path, encoding="utf-8") as fh:
             text = fh.read()
         for n, (piece, page) in enumerate(_chunk_text(text)):
-            chunks.append(
-                Chunk(
-                    id=f"{doc['document_id']}:{n}",
-                    program=doc["program"],
-                    text=piece,
-                    source=doc["document_id"],
-                    title=doc.get("title", ""),
-                    source_url=doc.get("source_url", ""),
-                    document_id=doc["document_id"],
-                    page=str(page),
-                )
+            yield Chunk(
+                id=f"{doc['document_id']}:{n}",
+                program=doc["program"],
+                text=piece,
+                source=doc["document_id"],
+                title=doc.get("title", ""),
+                source_url=doc.get("source_url", ""),
+                document_id=doc["document_id"],
+                page=str(page),
             )
-    return chunks
 
 
-def _load_legacy_chunks() -> list[Chunk]:
-    chunks: list[Chunk] = []
+def _iter_legacy_chunks() -> Iterator[Chunk]:
     for path in glob.glob(os.path.join(DATA_DIR, "*.txt")):
         program = os.path.splitext(os.path.basename(path))[0]
         with open(path, encoding="utf-8") as fh:
@@ -103,16 +101,46 @@ def _load_legacy_chunks() -> list[Chunk]:
         for i in range(0, len(text), CHUNK_CHARS):
             piece = text[i : i + CHUNK_CHARS].strip()
             if piece:
-                chunks.append(
-                    Chunk(id=f"{program}:{i}", program=program, text=piece,
-                          source=os.path.basename(path))
-                )
-    return chunks
+                yield Chunk(id=f"{program}:{i}", program=program, text=piece,
+                            source=os.path.basename(path))
+
+
+def iter_chunks() -> Iterator[Chunk]:
+    """Stream the real knowledge corpus when present, else the bundled sample docs.
+
+    A generator so an index build never holds the whole corpus (documents + chunk text)
+    in memory at once.
+    """
+    corpus = _iter_corpus_chunks()
+    first = next(corpus, None)
+    if first is None:
+        yield from _iter_legacy_chunks()
+        return
+    yield first
+    yield from corpus
 
 
 def load_chunks() -> list[Chunk]:
-    """Real knowledge corpus when present, else the bundled sample docs."""
-    return _load_corpus_chunks() or _load_legacy_chunks()
+    """Materialize the whole corpus. Prefer `iter_chunks` on the indexing path."""
+    return list(iter_chunks())
+
+
+def _embedded_batches() -> Iterator[list[tuple[Chunk, list[float]]]]:
+    """Stream the corpus as (chunk, vector) batches ready to be written to a backend.
+
+    Bounded memory by construction: only `index_write_batch_size` chunks and their vectors
+    exist at a time (and `embed` splits each window into smaller forward passes), instead of
+    holding every chunk, every vector, and a full write payload simultaneously.
+    """
+    size = max(1, get_settings().index_write_batch_size)
+    window: list[Chunk] = []
+    for chunk in iter_chunks():
+        window.append(chunk)
+        if len(window) >= size:
+            yield list(zip(window, embed([c.text for c in window])))
+            window = []
+    if window:
+        yield list(zip(window, embed([c.text for c in window])))
 
 
 def _cosine(a: list[float], b: list[float]) -> float:
@@ -137,10 +165,11 @@ class RagIndex:
         return len(self._chunks)
 
     def build(self) -> int:
-        chunks = load_chunks()
-        if chunks:
-            for c, v in zip(chunks, embed([c.text for c in chunks])):
+        chunks: list[Chunk] = []
+        for batch in _embedded_batches():
+            for c, v in batch:
                 c.vector = v
+                chunks.append(c)
         self._chunks = chunks
         return len(chunks)
 
@@ -217,26 +246,28 @@ class RedisVLIndex:
     def build(self) -> int:
         from redisvl.redis.utils import array_to_buffer
 
-        chunks = load_chunks()
         self._index.create(overwrite=True, drop=True)
-        if chunks:
-            vectors = embed([c.text for c in chunks])
-            data = [
-                {
-                    "id": c.id,
-                    "program": c.program,
-                    "source": c.source,
-                    "title": c.title,
-                    "source_url": c.source_url,
-                    "document_id": c.document_id,
-                    "page": c.page,
-                    "text": c.text,
-                    "vector": array_to_buffer(v, dtype="float32"),
-                }
-                for c, v in zip(chunks, vectors)
-            ]
-            self._index.load(data, id_field="id")
-        self._size = len(chunks)
+        written = 0
+        for batch in _embedded_batches():
+            self._index.load(
+                [
+                    {
+                        "id": c.id,
+                        "program": c.program,
+                        "source": c.source,
+                        "title": c.title,
+                        "source_url": c.source_url,
+                        "document_id": c.document_id,
+                        "page": c.page,
+                        "text": c.text,
+                        "vector": array_to_buffer(v, dtype="float32"),
+                    }
+                    for c, v in batch
+                ],
+                id_field="id",
+            )
+            written += len(batch)
+        self._size = written
         return self._size
 
     def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
@@ -306,12 +337,11 @@ class RedisVectorSetIndex:
         return self.build()
 
     def build(self) -> int:
-        chunks = load_chunks()
         self._r.delete(self.SET_KEY)
-        if chunks:
-            vectors = embed([c.text for c in chunks])
+        written = 0
+        for batch in _embedded_batches():
             pipe = self._r.pipeline(transaction=False)
-            for n, (c, v) in enumerate(zip(chunks, vectors)):
+            for c, v in batch:
                 attrs = json.dumps({
                     "program": c.program, "source": c.source, "text": c.text,
                     "title": c.title, "source_url": c.source_url,
@@ -320,11 +350,9 @@ class RedisVectorSetIndex:
                 pipe.execute_command(
                     "VADD", self.SET_KEY, "VALUES", len(v), *v, c.id, "SETATTR", attrs
                 )
-                if n % 500 == 499:
-                    pipe.execute()
-                    pipe = self._r.pipeline(transaction=False)
             pipe.execute()
-        self._size = len(chunks)
+            written += len(batch)
+        self._size = written
         return self._size
 
     def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
@@ -382,15 +410,15 @@ class RedisKNNIndex:
         return self.build()
 
     def build(self) -> int:
-        chunks = load_chunks()
-        old = self._r.smembers(self._ids_key)
-        pipe = self._r.pipeline()
-        for cid in old:
+        pipe = self._r.pipeline(transaction=False)
+        for cid in self._r.smembers(self._ids_key):
             pipe.delete(f"{KEY_PREFIX}:{cid}")
         pipe.delete(self._ids_key)
-        if chunks:
-            vectors = embed([c.text for c in chunks])
-            for c, v in zip(chunks, vectors):
+        pipe.execute()
+        written = 0
+        for batch in _embedded_batches():
+            pipe = self._r.pipeline(transaction=False)
+            for c, v in batch:
                 pipe.hset(
                     f"{KEY_PREFIX}:{c.id}",
                     mapping={
@@ -405,44 +433,66 @@ class RedisKNNIndex:
                     },
                 )
                 pipe.sadd(self._ids_key, c.id)
-        pipe.execute()
-        self._size = len(chunks)
+            pipe.execute()
+            written += len(batch)
+        self._size = written
         return self._size
 
     def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
-        ids = self._r.smembers(self._ids_key)
+        """Brute-force scan, but only ever holding one batch of rows and the current top k.
+
+        Every scored chunk carries its full text, so materializing the whole corpus per query
+        (and one round trip per chunk) is what makes this backend expensive — with several
+        specialists querying concurrently it dominates the process's memory.
+        """
+        ids = sorted(self._r.smembers(self._ids_key))
         if not ids:
             return []
         qv = embed_one(query)
-        results: list[Retrieved] = []
-        for cid in ids:
-            data = self._r.hgetall(f"{KEY_PREFIX}:{cid}")
-            if not data or (program and data.get("program") != program):
-                continue
-            vec = json.loads(data["vector"])
-            results.append(
-                Retrieved(
-                    text=data.get("text", ""),
-                    program=data.get("program", ""),
-                    source=data.get("source", ""),
-                    score=_cosine(qv, vec),
-                    title=data.get("title", ""),
-                    source_url=data.get("source_url", ""),
-                    document_id=data.get("document_id", ""),
-                    page=data.get("page", ""),
+        batch = max(1, get_settings().index_write_batch_size)
+        best: list[tuple[float, int, Retrieved]] = []
+        seq = 0
+        for start in range(0, len(ids), batch):
+            pipe = self._r.pipeline(transaction=False)
+            for cid in ids[start : start + batch]:
+                pipe.hgetall(f"{KEY_PREFIX}:{cid}")
+            for data in pipe.execute():
+                if not data or (program and data.get("program") != program):
+                    continue
+                score = _cosine(qv, json.loads(data["vector"]))
+                if len(best) == k and score <= best[0][0]:
+                    continue
+                seq += 1
+                heapq.heappush(
+                    best,
+                    (
+                        score,
+                        seq,
+                        Retrieved(
+                            text=data.get("text", ""),
+                            program=data.get("program", ""),
+                            source=data.get("source", ""),
+                            score=score,
+                            title=data.get("title", ""),
+                            source_url=data.get("source_url", ""),
+                            document_id=data.get("document_id", ""),
+                            page=data.get("page", ""),
+                        ),
+                    ),
                 )
-            )
-        results.sort(key=lambda r: r.score, reverse=True)
-        return results[:k]
+                if len(best) > k:
+                    heapq.heappop(best)
+        return [r for _, _, r in sorted(best, key=lambda t: t[0], reverse=True)]
 
 
 _index = None
+# Serializes index construction. Every specialist agent looks documents up through its own
+# worker thread, so an unguarded lazy build let the whole panel start a full corpus embed at
+# the same moment — N concurrent builds, N times the peak memory.
+_index_lock = threading.Lock()
 
 
-def get_index():
-    global _index
-    if _index is not None:
-        return _index
+def _make_index(*, force: bool):
     settings = get_settings()
     if settings.has_redis:
         # Prefer native server-side vector KNN (RediSearch or Redis 8 Vector Sets);
@@ -450,32 +500,40 @@ def get_index():
         for cls in (RedisVLIndex, RedisVectorSetIndex, RedisKNNIndex):
             try:
                 idx = cls(settings.redis_url)
-                idx.ensure()
-                _index = idx
-                return _index
+                if force:
+                    idx.build()
+                else:
+                    idx.ensure()
+                return idx
             except Exception:
                 continue
     idx = RagIndex()
-    idx.ensure()
-    _index = idx
+    if force:
+        idx.build()
+    else:
+        idx.ensure()
+    return idx
+
+
+def current_index():
+    """The already-built index, or None. Never triggers a build — for status endpoints that
+    must not pay for (or allocate) a cold ingest."""
+    return _index
+
+
+def get_index():
+    global _index
+    if _index is not None:
+        return _index
+    with _index_lock:
+        if _index is None:
+            _index = _make_index(force=False)
     return _index
 
 
 def rebuild_index():
     """Force a full re-ingest of the corpus into the active backend."""
     global _index
-    _index = None
-    settings = get_settings()
-    if settings.has_redis:
-        for cls in (RedisVLIndex, RedisVectorSetIndex, RedisKNNIndex):
-            try:
-                idx = cls(settings.redis_url)
-                idx.build()
-                _index = idx
-                return _index
-            except Exception:
-                continue
-    idx = RagIndex()
-    idx.build()
-    _index = idx
+    with _index_lock:
+        _index = _make_index(force=True)
     return _index

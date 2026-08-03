@@ -6,14 +6,18 @@ Usage:
 
 from collections import Counter
 
-from .index import load_chunks, rebuild_index
+from .index import iter_chunks, rebuild_index
 
 
 def main() -> None:
-    chunks = load_chunks()
-    by_program = Counter(c.program for c in chunks)
-    docs = len({c.document_id or c.source for c in chunks})
-    print(f"Loaded {len(chunks)} chunks from {docs} documents")
+    by_program: Counter[str] = Counter()
+    docs: set[str] = set()
+    total = 0
+    for chunk in iter_chunks():
+        by_program[chunk.program] += 1
+        docs.add(chunk.document_id or chunk.source)
+        total += 1
+    print(f"Loaded {total} chunks from {len(docs)} documents")
     for program, n in sorted(by_program.items()):
         print(f"  {program:16} {n:>5} chunks")
     print("Embedding + indexing ...")

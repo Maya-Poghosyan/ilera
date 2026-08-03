@@ -7,6 +7,7 @@
 
 import hashlib
 import re
+from collections.abc import Iterable, Iterator
 
 from ..config import get_settings
 
@@ -32,7 +33,10 @@ def _get_fastembed():
     if _fastembed_model is None:
         from fastembed import TextEmbedding
 
-        _fastembed_model = TextEmbedding(model_name=get_settings().fastembed_model)
+        s = get_settings()
+        _fastembed_model = TextEmbedding(
+            model_name=s.fastembed_model, threads=max(1, s.embedding_threads)
+        )
     return _fastembed_model
 
 
@@ -56,7 +60,7 @@ def provider() -> str:
         return "hash"
 
 
-def embed(texts: list[str]) -> list[list[float]]:
+def _embed_batch(texts: list[str]) -> list[list[float]]:
     s = get_settings()
     if _use_openai():
         from openai import OpenAI
@@ -68,13 +72,38 @@ def embed(texts: list[str]) -> list[list[float]]:
         return [d.embedding for d in resp.data]
     try:
         model = _get_fastembed()
-        return [v.tolist() for v in model.embed(texts)]
+        return [v.tolist() for v in model.embed(texts, batch_size=len(texts))]
     except Exception:
         return [_fallback_embed(t) for t in texts]
 
 
+def embed_iter(texts: Iterable[str]) -> Iterator[list[float]]:
+    """Embed lazily in small batches, yielding one vector at a time.
+
+    Batch size dominates peak memory: transformer attention costs
+    O(batch x heads x seq^2), so embedding a whole corpus in one call at fastembed's
+    default batch of 256 allocates several GB (measured ~8.8 GB peak RSS for this
+    corpus) and OOMs a small container, while a batch of `embedding_batch_size`
+    keeps the build flat. Callers should also consume this lazily so the vectors are
+    written out incrementally instead of all being held at once.
+    """
+    size = max(1, get_settings().embedding_batch_size)
+    batch: list[str] = []
+    for text in texts:
+        batch.append(text)
+        if len(batch) >= size:
+            yield from _embed_batch(batch)
+            batch = []
+    if batch:
+        yield from _embed_batch(batch)
+
+
+def embed(texts: list[str]) -> list[list[float]]:
+    return list(embed_iter(texts))
+
+
 def embed_one(text: str) -> list[float]:
-    return embed([text])[0]
+    return _embed_batch([text])[0]
 
 
 def dim() -> int:
