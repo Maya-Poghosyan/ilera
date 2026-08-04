@@ -31,7 +31,7 @@ frontend/   Next.js 14 + TS + Tailwind + shadcn/ui
 backend/    FastAPI app
   app/
     agents/     routing + specialists + Band shared space
-    rag/        embeddings + vector index (RedisVL-ready, in-memory fallback)
+    rag/        embeddings + vector index (pgvector, RedisVL, in-memory fallback)
     forms/      PDF field-map fill + stitch
     models.py   CaseProfile + EligibilityResult
     main.py     API endpoints
@@ -53,9 +53,25 @@ Requires **Python ≥ 3.11** (`band-sdk` in `requirements.txt` does not support 
 cd backend
 python3.11 -m venv .venv && source .venv/bin/activate   # or any python ≥3.11
 pip install -r requirements.txt
-cp .env.example .env        # optional: add Redis / LLM / Band / Poke keys
+cp .env.example .env        # optional: add Redis / Postgres / LLM / Band / Poke keys
 uvicorn app.main:app --reload --port 8000
 ```
+
+### RAG index (offline)
+
+Embedding the ~3.4k-chunk corpus costs hundreds of MB and several minutes, so it is a
+separate step rather than something the API does on boot — a server that builds on demand
+OOMs a small container. Run it once per store, and again whenever the corpus or the
+embedding model changes:
+
+```bash
+cd backend
+DATABASE_URL=postgresql://... python -m app.rag.ingest   # or REDIS_URL=...
+```
+
+Then set `RAG_ALLOW_RUNTIME_BUILD=false` on the server so it only ever embeds queries. With
+`DATABASE_URL` set (Postgres + `pgvector`) the chunk text and the KNN both live in the
+database; without it, the index falls back to Redis and then to memory.
 
 ### Frontend
 

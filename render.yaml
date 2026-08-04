@@ -23,8 +23,21 @@ services:
         sync: false
       - key: LLM_PROVIDER
         value: openai
+      # Switch to "openai" to stop loading the local ONNX model in this container (~300 MB
+      # resident). Two prerequisites: the Azure embedding deployment needs more than the
+      # default S0 quota (a 700-token request currently 429s), and the corpus must be
+      # re-ingested, since its vectors are 1536-dim and fastembed's are 384-dim.
       - key: EMBEDDING_PROVIDER
         value: fastembed
+      - key: EMBEDDING_MODEL
+        value: text-embedding-3-small
+      # Postgres + pgvector holds the chunks and does the KNN.
+      - key: DATABASE_URL
+        sync: false
+      # Ingest is an offline step (`python -m app.rag.ingest`). A serving container must never
+      # embed the corpus on demand: that costs hundreds of MB and minutes inside a request.
+      - key: RAG_ALLOW_RUNTIME_BUILD
+        value: false
 
   - type: redis
     name: ilera-redis
