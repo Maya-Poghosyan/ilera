@@ -31,7 +31,7 @@ from .intake import INTAKE_SCHEMA, map_answers_to_profile
 from .mcp_server import build_mcp_app
 from .models import BandStatus, CaseProfile, EligibilityResult
 from .rag.embeddings import provider as embedding_provider
-from .rag.index import get_index, rebuild_index
+from .rag.index import current_index, get_index, rebuild_index
 from .reminders import (
     TEMPLATES,
     Reminder,
@@ -136,7 +136,11 @@ async def lifespan(app: FastAPI):
     band_task = None
     # Band is the eligibility engine: keep the routing + specialist agents connected for the
     # life of the server so they react to per-case rooms as they are created.
-    if settings.has_llm and (settings.has_band or _band_registry_exists()):
+    if (
+        settings.band_auto_start
+        and settings.has_llm
+        and (settings.has_band or _band_registry_exists())
+    ):
         band_task = asyncio.create_task(_band_loop())
     yield
     task.cancel()
@@ -211,16 +215,16 @@ app.include_router(auth_router)
 
 @app.get("/healthz")
 def healthz() -> dict:
-    """Liveness only — cheap enough for a platform health check.
-
-    ``/health`` builds the RAG index on first call, which takes minutes cold.
-    """
+    """Liveness only — cheap enough for a platform health check."""
     return {"status": "ok"}
 
 
 @app.get("/health")
 def health() -> dict:
-    index = get_index()
+    """Configuration report. Reports the RAG index only if it is already built: a cold ingest
+    embeds the whole corpus, which is far too expensive (in time and memory) for a status
+    endpoint to trigger."""
+    index = current_index()
     return {
         "status": "ok",
         "redis": settings.has_redis,
@@ -228,8 +232,9 @@ def health() -> dict:
         "band": settings.has_band,
         "poke": poke.available(),
         "embeddings": embedding_provider(),
-        "rag_backend": index.backend,
-        "rag_chunks": index.size,
+        "rag_ready": index is not None,
+        "rag_backend": index.backend if index else "",
+        "rag_chunks": index.size if index else 0,
     }
 
 

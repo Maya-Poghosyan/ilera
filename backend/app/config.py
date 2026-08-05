@@ -37,6 +37,15 @@ class Settings(BaseSettings):
     embedding_provider: str = "auto"
     # Local embedding model used when no OpenAI key is set (fastembed / ONNX, no API needed).
     fastembed_model: str = "BAAI/bge-small-en-v1.5"
+    # Texts embedded per forward pass when indexing the corpus. Peak memory scales with it
+    # (attention is O(batch x seq^2)): fastembed's own default of 256 needs several GB for
+    # this corpus, which OOMs a small container.
+    embedding_batch_size: int = 8
+    # onnxruntime intra-op threads for the local embedding model. Each thread carries its own
+    # activation arena, so keep it at 1 on a memory-constrained instance.
+    embedding_threads: int = 1
+    # Chunks written to the index per round trip when (re)building it.
+    index_write_batch_size: int = 200
 
     # Multi-agent (Band)
     band_rest_url: str = "https://app.band.ai"
@@ -44,9 +53,10 @@ class Settings(BaseSettings):
     # Optional JSON registry mapping program group -> {agent_id, api_key} so each
     # specialist runs as its own Band agent. See band_agents.example.json.
     band_agents_file: str = "band_agents.json"
-    # If true, Band agents auto-start on boot and process backlog (costs LLM credits).
-    # Set false to keep agents offline until explicitly needed.
-    band_auto_start: bool = False
+    # If true, the API process also hosts the Band agents. Set false to run them as their own
+    # process (`python -m app.integrations.band`) so the agents' websockets and the API's
+    # RAG/embedding memory don't share one container's memory limit.
+    band_auto_start: bool = True
 
     # Integrations
     poke_api_key: str = ""
