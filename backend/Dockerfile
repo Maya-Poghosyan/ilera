@@ -8,11 +8,6 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Bake the local embedding model in so the first query doesn't wait on a download. Only
-# needed while EMBEDDING_PROVIDER=fastembed; with hosted embeddings this whole layer (and
-# the onnxruntime dependency) can go.
-RUN python -c "from fastembed import TextEmbedding; TextEmbedding('BAAI/bge-small-en-v1.5')"
-
 COPY . .
 
 EXPOSE 8000

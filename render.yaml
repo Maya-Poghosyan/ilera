@@ -23,12 +23,11 @@ services:
         sync: false
       - key: LLM_PROVIDER
         value: openai
-      # Switch to "openai" to stop loading the local ONNX model in this container (~300 MB
-      # resident). Two prerequisites: the Azure embedding deployment needs more than the
-      # default S0 quota (a 700-token request currently 429s), and the corpus must be
-      # re-ingested, since its vectors are 1536-dim and fastembed's are 384-dim.
+      # Hosted embeddings: no ONNX model is loaded in this container (~300 MB resident saved).
+      # The index must be ingested with the same model — these vectors are 1536-dim, fastembed's
+      # are 384-dim, and nothing detects the mismatch for you.
       - key: EMBEDDING_PROVIDER
-        value: fastembed
+        value: openai
       - key: EMBEDDING_MODEL
         value: text-embedding-3-small
       # Postgres + pgvector holds the chunks and does the KNN.

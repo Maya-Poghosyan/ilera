@@ -23,6 +23,7 @@ from dataclasses import dataclass, field
 
 from ..config import get_settings
 from .embeddings import dim, embed, embed_one
+from .embeddings import provider as embedding_provider
 
 _DATA = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 KNOWLEDGE_DIR = os.path.join(_DATA, "knowledge")
@@ -550,9 +551,27 @@ class PgVectorIndex:
     def ensure(self, allow_build: bool = True) -> int:
         n = self._count()
         if n:
+            self._check_dim()
             self._size = n
             return n
         return self.build() if allow_build else _no_build(self.backend)
+
+    def _check_dim(self) -> None:
+        """An index ingested with a different embedding model is useless, and the only symptom
+        is bad answers, so say so loudly at startup rather than at query time."""
+        with self._pool.connection() as conn:
+            row = conn.execute(
+                "SELECT atttypmod FROM pg_attribute WHERE attrelid = %s::regclass "
+                "AND attname = 'embedding'",
+                (self.TABLE,),
+            ).fetchone()
+        stored = int(row[0]) if row and row[0] and row[0] > 0 else 0
+        if stored and stored != self._dim:
+            logger.error(
+                "RAG index was built with %d-dim vectors but %s produces %d — re-run "
+                "`python -m app.rag.ingest`; searches will fail until you do.",
+                stored, embedding_provider(), self._dim,
+            )
 
     def _create_schema(self, conn) -> None:
         conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
