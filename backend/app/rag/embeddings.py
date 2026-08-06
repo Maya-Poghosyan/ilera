@@ -66,6 +66,18 @@ def provider() -> str:
         return "hash"
 
 
+def model_id() -> str:
+    """The model whose vectors are in the index. Part of a document's fingerprint, so
+    switching models re-embeds the corpus rather than mixing incomparable vectors."""
+    s = get_settings()
+    p = provider()
+    if p == "openai":
+        return s.embedding_model
+    if p == "fastembed":
+        return s.fastembed_model
+    return "hash"
+
+
 def _get_openai_client():
     global _openai_client
     if _openai_client is None:

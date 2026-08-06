@@ -1,35 +1,56 @@
-"""CLI to (re)build the RAG vector index from the committed knowledge corpus.
+"""CLI that syncs the RAG vector index with the committed knowledge corpus.
 
-This is the ONLY place the corpus should be embedded. Run it once against the store
-(`DATABASE_URL` / `REDIS_URL`) after the corpus or the embedding model changes; the serving
-container then only embeds one-line queries.
+This is the ONLY place the corpus is embedded; the serving container embeds one-line queries
+and nothing else. It is incremental and idempotent: each document is stored with a
+fingerprint of its text, the chunking parameters and the embedding model, so a run only
+re-embeds documents whose fingerprint changed and deletes rows for documents that are gone.
+Re-running against an unchanged corpus costs a single query.
 
 Usage:
-    DATABASE_URL=... python -m app.rag.ingest
+    DATABASE_URL=... python -m app.rag.ingest              # sync
+    DATABASE_URL=... python -m app.rag.ingest --rebuild    # drop and re-embed everything
 """
 
+import argparse
 import logging
 from collections import Counter
 
-from .embeddings import batch_size, provider
-from .index import iter_chunks, rebuild_index
+from .embeddings import batch_size, model_id, provider
+from .index import iter_documents, rebuild_index, sync_index
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--rebuild",
+        action="store_true",
+        help="re-embed every document instead of only the changed ones",
+    )
+    args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+
     by_program: Counter[str] = Counter()
-    docs: set[str] = set()
-    total = 0
-    for chunk in iter_chunks():
-        by_program[chunk.program] += 1
-        docs.add(chunk.document_id or chunk.source)
-        total += 1
-    print(f"Loaded {total} chunks from {len(docs)} documents")
+    docs = 0
+    for doc in iter_documents():
+        by_program[doc.program] += 1
+        docs += 1
+    print(f"Corpus: {docs} documents")
     for program, n in sorted(by_program.items()):
-        print(f"  {program:16} {n:>5} chunks")
-    print(f"Embedding + indexing (provider={provider()}, batch={batch_size()}) ...")
-    index = rebuild_index()
-    print(f"Done. backend={index.backend} indexed={index.size}")
+        print(f"  {program:16} {n:>3} documents")
+    print(f"Embedding with {provider()}/{model_id()} (batch={batch_size()}) ...")
+
+    if args.rebuild:
+        index = rebuild_index()
+        print(f"Done. backend={index.backend} rebuilt={index.size} chunks")
+        return
+    index, result = sync_index()
+    if result.changed < 0:  # backend can't diff; it was a full rebuild
+        print(f"Done. backend={index.backend} rebuilt={result.total} chunks")
+        return
+    print(
+        f"Done. backend={index.backend} documents_reindexed={result.changed} "
+        f"documents_removed={result.removed} chunks={result.total}"
+    )
 
 
 if __name__ == "__main__":

@@ -22,19 +22,24 @@ def _reset_settings() -> None:
     get_settings.cache_clear()
 
 
-def test_cold_index_does_not_build_when_runtime_builds_are_disabled() -> None:
-    os.environ["RAG_ALLOW_RUNTIME_BUILD"] = "false"
-    _reset_settings()
-    try:
-        idx = index.RagIndex()
-        calls: list[int] = []
-        idx.build = lambda: calls.append(1) or 0  # type: ignore[method-assign]
-        assert idx.ensure(allow_build=False) == 0
-        assert not calls, "a serving process must never embed the corpus on demand"
-        assert idx.search("ihss hours") == []
-    finally:
-        os.environ.pop("RAG_ALLOW_RUNTIME_BUILD", None)
-        _reset_settings()
+def test_cold_index_reports_empty_instead_of_building() -> None:
+    idx = index.RagIndex()
+    calls: list[int] = []
+    idx.build = lambda: calls.append(1) or 0  # type: ignore[method-assign]
+    assert idx.ensure() == 0
+    assert not calls, "a serving process must never embed the corpus on demand"
+    assert idx.search("ihss hours") == []
+
+
+def test_get_index_never_builds(monkeypatch) -> None:
+    """`build()` is reachable only from the ingest entry point (`rebuild_index`)."""
+    monkeypatch.setattr(index, "_index", None)
+    monkeypatch.setattr(
+        index, "_embedded_batches",
+        lambda: (_ for _ in ()).throw(AssertionError("serving path embedded the corpus")),
+    )
+    idx = index.get_index()
+    assert idx.size == 0
 
 
 def test_embedding_batches_are_bounded(monkeypatch) -> None:
@@ -65,6 +70,30 @@ def test_api_batches_are_larger_than_local_ones() -> None:
 
 def test_vector_literal_round_trips_pgvector_text_format() -> None:
     assert index._vector_literal([1.0, -0.5]) == "[1.0,-0.5]"
+
+
+def _doc(text: str = "hello", **kw) -> index.Document:
+    return index.Document(document_id="D1", program="ihss", text=text, **kw)
+
+
+def test_fingerprint_is_stable_for_unchanged_documents() -> None:
+    """What makes a sync cheap: same document, same fingerprint, no embedding call."""
+    assert _doc().fingerprint() == _doc().fingerprint()
+    assert _doc("hello").fingerprint() != _doc("hello!").fingerprint()
+
+
+def test_fingerprint_tracks_the_embedding_model(monkeypatch) -> None:
+    """Vectors from a different model are incomparable, so a model switch must invalidate
+    every document rather than leaving a silently mixed index."""
+    before = _doc().fingerprint()
+    monkeypatch.setattr(index, "embedding_id", lambda: "text-embedding-3-large")
+    assert _doc().fingerprint() != before
+
+
+def test_fingerprint_tracks_chunking(monkeypatch) -> None:
+    before = _doc().fingerprint()
+    monkeypatch.setattr(index, "CHUNK_CHARS", index.CHUNK_CHARS + 1)
+    assert _doc().fingerprint() != before
 
 
 if __name__ == "__main__":
