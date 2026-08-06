@@ -688,12 +688,6 @@ def _make_index(*, force: bool):
     return idx
 
 
-def current_index():
-    """The already-built index, or None. Never triggers a build — for status endpoints that
-    must not pay for (or allocate) a cold ingest."""
-    return _index
-
-
 def get_index():
     global _index
     if _index is not None:

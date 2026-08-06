@@ -31,7 +31,7 @@ from .intake import INTAKE_SCHEMA, map_answers_to_profile
 from .mcp_server import build_mcp_app
 from .models import BandStatus, CaseProfile, EligibilityResult
 from .rag.embeddings import provider as embedding_provider
-from .rag.index import current_index, get_index
+from .rag.index import get_index
 from .reminders import (
     TEMPLATES,
     Reminder,
@@ -221,10 +221,13 @@ def healthz() -> dict:
 
 @app.get("/health")
 def health() -> dict:
-    """Configuration report. Reports the RAG index only if it is already built: a cold ingest
-    embeds the whole corpus, which is far too expensive (in time and memory) for a status
-    endpoint to trigger."""
-    index = current_index()
+    """Configuration report, including whether RAG can actually serve.
+
+    Attaches to the index rather than waiting for the first query to do it, so a store that is
+    unreachable or was never ingested shows up here instead of as silently empty retrieval.
+    Attaching costs a count query; nothing here can build an index.
+    """
+    index = get_index()
     return {
         "status": "ok",
         "redis": settings.has_redis,
@@ -232,9 +235,9 @@ def health() -> dict:
         "band": settings.has_band,
         "poke": poke.available(),
         "embeddings": embedding_provider(),
-        "rag_ready": index is not None,
-        "rag_backend": index.backend if index else "",
-        "rag_chunks": index.size if index else 0,
+        "rag_ready": index.size > 0,
+        "rag_backend": index.backend,
+        "rag_chunks": index.size,
     }
 
 
