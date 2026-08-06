@@ -1,18 +1,24 @@
 """Embeddings with three tiers, in priority order:
 
-1. OpenAI (if OPENAI_API_KEY set) — strongest, hosted.
-2. fastembed (local ONNX model, no API key) — good semantic quality, default.
+1. OpenAI (if OPENAI_API_KEY set) — strongest, hosted, and keeps no model in this process.
+2. fastembed (local ONNX model, no API key) — good semantic quality, but the model and its
+   activation buffers live in this process's memory.
 3. Hashed bag-of-words — last-resort fallback if fastembed can't load.
 """
 
 import hashlib
+import logging
 import re
+import time
 from collections.abc import Iterable, Iterator
 
 from ..config import get_settings
 
+logger = logging.getLogger(__name__)
+
 FALLBACK_DIM = 256
 _fastembed_model = None
+_openai_client = None
 
 
 def _tokenize(text: str) -> list[str]:
@@ -60,16 +66,62 @@ def provider() -> str:
         return "hash"
 
 
-def _embed_batch(texts: list[str]) -> list[list[float]]:
-    s = get_settings()
-    if _use_openai():
+def _get_openai_client():
+    global _openai_client
+    if _openai_client is None:
         from openai import OpenAI
 
-        client = OpenAI(
-            api_key=s.openai_api_key, base_url=s.openai_base_url or None
+        s = get_settings()
+        _openai_client = OpenAI(
+            api_key=s.openai_api_key,
+            base_url=s.openai_base_url or None,
+            max_retries=s.embedding_max_retries,
+            timeout=s.embedding_timeout_seconds,
         )
-        resp = client.embeddings.create(model=s.embedding_model, input=texts)
-        return [d.embedding for d in resp.data]
+    return _openai_client
+
+
+def _openai_embed(texts: list[str]) -> list[list[float]]:
+    """One embeddings request, retried on transient failures.
+
+    An ingest is thousands of sequential requests, so a single 429/503 must not abort it;
+    the client's own retries cover most of it and this outer loop covers the rest.
+    """
+    s = get_settings()
+    delay = 5.0
+    for attempt in range(s.embedding_max_retries + 1):
+        try:
+            resp = _get_openai_client().embeddings.create(
+                model=s.embedding_model, input=texts
+            )
+            return [d.embedding for d in resp.data]
+        except Exception as exc:
+            if attempt == s.embedding_max_retries:
+                raise
+            wait = max(delay, _retry_after(exc))
+            logger.warning(
+                "Embedding request failed (attempt %d), retrying in %.0fs: %s",
+                attempt + 1, wait, exc,
+            )
+            time.sleep(wait)
+            delay = min(delay * 2, 60.0)
+    raise AssertionError("unreachable")
+
+
+def _retry_after(exc: Exception) -> float:
+    """Seconds the provider asked us to wait. A throttled tier answers 429 with Retry-After
+    (often 60s), which is far longer than a naive backoff would pick."""
+    response = getattr(exc, "response", None)
+    header = getattr(response, "headers", {}).get("retry-after") if response else None
+    try:
+        return float(header) if header else 0.0
+    except ValueError:
+        return 0.0
+
+
+def _embed_batch(texts: list[str]) -> list[list[float]]:
+    if _use_openai():
+        return _openai_embed(texts)
     try:
         model = _get_fastembed()
         return [v.tolist() for v in model.embed(texts, batch_size=len(texts))]
@@ -77,17 +129,23 @@ def _embed_batch(texts: list[str]) -> list[list[float]]:
         return [_fallback_embed(t) for t in texts]
 
 
-def embed_iter(texts: Iterable[str]) -> Iterator[list[float]]:
-    """Embed lazily in small batches, yielding one vector at a time.
+def batch_size() -> int:
+    """Texts per embedding call. The two providers are limited by opposite things: the local
+    model by memory (attention is O(batch x heads x seq^2), so a big batch allocates GBs),
+    the hosted one by request count, where a tiny batch means thousands of round trips."""
+    s = get_settings()
+    size = s.embedding_api_batch_size if _use_openai() else s.embedding_batch_size
+    return max(1, size)
 
-    Batch size dominates peak memory: transformer attention costs
-    O(batch x heads x seq^2), so embedding a whole corpus in one call at fastembed's
-    default batch of 256 allocates several GB (measured ~8.8 GB peak RSS for this
-    corpus) and OOMs a small container, while a batch of `embedding_batch_size`
-    keeps the build flat. Callers should also consume this lazily so the vectors are
-    written out incrementally instead of all being held at once.
+
+def embed_iter(texts: Iterable[str]) -> Iterator[list[float]]:
+    """Embed lazily in batches, yielding one vector at a time.
+
+    Callers should consume this lazily so vectors are written out incrementally rather than
+    all held at once. Embedding a whole corpus in a single call was what OOMed the container:
+    at fastembed's default batch of 256 this corpus peaked at ~8.8 GB RSS.
     """
-    size = max(1, get_settings().embedding_batch_size)
+    size = batch_size()
     batch: list[str] = []
     for text in texts:
         batch.append(text)

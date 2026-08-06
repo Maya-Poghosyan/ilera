@@ -23,8 +23,20 @@ services:
         sync: false
       - key: LLM_PROVIDER
         value: openai
+      # Hosted embeddings: no ONNX model is loaded in this container (~300 MB resident saved).
+      # The index must be ingested with the same model — these vectors are 1536-dim, fastembed's
+      # are 384-dim, and nothing detects the mismatch for you.
       - key: EMBEDDING_PROVIDER
-        value: fastembed
+        value: openai
+      - key: EMBEDDING_MODEL
+        value: text-embedding-3-small
+      # Postgres + pgvector holds the chunks and does the KNN.
+      - key: DATABASE_URL
+        sync: false
+      # Ingest is an offline step (`python -m app.rag.ingest`). A serving container must never
+      # embed the corpus on demand: that costs hundreds of MB and minutes inside a request.
+      - key: RAG_ALLOW_RUNTIME_BUILD
+        value: false
 
   - type: redis
     name: ilera-redis

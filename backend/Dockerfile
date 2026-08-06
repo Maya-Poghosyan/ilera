@@ -8,9 +8,6 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Bake the default embedding model in so the first request doesn't wait on a download.
-RUN python -c "from fastembed import TextEmbedding; TextEmbedding('BAAI/bge-small-en-v1.5')"
-
 COPY . .
 
 EXPOSE 8000

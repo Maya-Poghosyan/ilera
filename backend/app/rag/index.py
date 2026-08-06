@@ -1,13 +1,20 @@
 """RAG index over official program documentation.
 
-Two backends with the same interface:
-- RedisVLIndex: vectors stored in Redis, KNN via RediSearch (used when REDIS_URL is set).
+Several backends with the same interface, tried in this order:
+- PgVectorIndex: chunks + vectors in Postgres, ANN in the database (used when DATABASE_URL is set).
+- RedisVLIndex / RedisVectorSetIndex / RedisKNNIndex: Redis, in decreasing order of how much of
+  the search the server itself can do (RediSearch, Vector Sets, or a Python cosine loop).
 - RagIndex: in-memory cosine fallback (no infrastructure needed).
+
+Building an index means embedding the whole corpus, which is expensive in memory and time;
+it belongs in the offline `app.rag.ingest` step, not in a serving process (see
+`rag_allow_runtime_build`).
 """
 
 import glob
 import heapq
 import json
+import logging
 import os
 import re
 import threading
@@ -16,6 +23,7 @@ from dataclasses import dataclass, field
 
 from ..config import get_settings
 from .embeddings import dim, embed, embed_one
+from .embeddings import provider as embedding_provider
 
 _DATA = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 KNOWLEDGE_DIR = os.path.join(_DATA, "knowledge")
@@ -25,6 +33,8 @@ CHUNK_OVERLAP = 200
 INDEX_NAME = "ilera_docs"
 KEY_PREFIX = "ilera:doc"
 _PAGE_RE = re.compile(r"\[page (\d+)\]")
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -54,6 +64,8 @@ class Retrieved:
 
 def _chunk_text(text: str) -> list[tuple[str, str]]:
     """Split into overlapping windows, tracking the most recent [page N] marker."""
+    # PDF extraction leaves NUL bytes in the corpus, which Postgres text columns reject.
+    text = text.replace("\x00", "")
     out: list[tuple[str, str]] = []
     step = max(1, CHUNK_CHARS - CHUNK_OVERLAP)
     for i in range(0, len(text), step):
@@ -97,7 +109,7 @@ def _iter_legacy_chunks() -> Iterator[Chunk]:
     for path in glob.glob(os.path.join(DATA_DIR, "*.txt")):
         program = os.path.splitext(os.path.basename(path))[0]
         with open(path, encoding="utf-8") as fh:
-            text = fh.read()
+            text = fh.read().replace("\x00", "")
         for i in range(0, len(text), CHUNK_CHARS):
             piece = text[i : i + CHUNK_CHARS].strip()
             if piece:
@@ -152,6 +164,20 @@ def _cosine(a: list[float], b: list[float]) -> float:
     return dot / (na * nb)
 
 
+def _no_build(backend: str) -> int:
+    """Report an empty index instead of embedding the corpus on the spot.
+
+    Ingest is an offline step: a serving process that builds on demand pays hundreds of MB
+    and minutes of latency inside a request, which is what OOMed the container.
+    """
+    logger.warning(
+        "RAG index (%s) is empty and runtime builds are disabled — retrieval will return "
+        "nothing until `python -m app.rag.ingest` has been run against this store.",
+        backend,
+    )
+    return 0
+
+
 class RagIndex:
     """In-memory vector index."""
 
@@ -173,8 +199,10 @@ class RagIndex:
         self._chunks = chunks
         return len(chunks)
 
-    def ensure(self) -> int:
-        return self.build() if not self._chunks else len(self._chunks)
+    def ensure(self, allow_build: bool = True) -> int:
+        if self._chunks:
+            return len(self._chunks)
+        return self.build() if allow_build else _no_build(self.backend)
 
     def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
         if not self._chunks:
@@ -233,7 +261,7 @@ class RedisVLIndex:
     def size(self) -> int:
         return self._size
 
-    def ensure(self) -> int:
+    def ensure(self, allow_build: bool = True) -> int:
         try:
             n = int(self._index.info().get("num_docs", 0))
         except Exception:
@@ -241,7 +269,7 @@ class RedisVLIndex:
         if n:
             self._size = n
             return n
-        return self.build()
+        return self.build() if allow_build else _no_build(self.backend)
 
     def build(self) -> int:
         from redisvl.redis.utils import array_to_buffer
@@ -329,12 +357,12 @@ class RedisVectorSetIndex:
     def size(self) -> int:
         return self._size
 
-    def ensure(self) -> int:
+    def ensure(self, allow_build: bool = True) -> int:
         n = int(self._r.execute_command("VCARD", self.SET_KEY)) if self._r.exists(self.SET_KEY) else 0
         if n:
             self._size = n
             return n
-        return self.build()
+        return self.build() if allow_build else _no_build(self.backend)
 
     def build(self) -> int:
         self._r.delete(self.SET_KEY)
@@ -402,12 +430,12 @@ class RedisKNNIndex:
     def size(self) -> int:
         return self._size
 
-    def ensure(self) -> int:
+    def ensure(self, allow_build: bool = True) -> int:
         n = int(self._r.scard(self._ids_key) or 0)
         if n:
             self._size = n
             return n
-        return self.build()
+        return self.build() if allow_build else _no_build(self.backend)
 
     def build(self) -> int:
         pipe = self._r.pipeline(transaction=False)
@@ -485,6 +513,143 @@ class RedisKNNIndex:
         return [r for _, _, r in sorted(best, key=lambda t: t[0], reverse=True)]
 
 
+class PgVectorIndex:
+    """Chunks + vectors in Postgres; KNN in the database via pgvector.
+
+    Preferred backend: the chunk text lives in a column instead of this process's heap, the
+    ANN search runs server-side and returns only the k rows asked for, and the corpus is
+    ingested once (offline) rather than rebuilt whenever the store comes up empty.
+    """
+
+    backend = "pgvector"
+    TABLE = "rag_chunks"
+
+    def __init__(self, dsn: str) -> None:
+        from psycopg_pool import ConnectionPool
+
+        self._dim = dim()
+        # Searches arrive from several agent worker threads at once, so hand each one its own
+        # connection rather than sharing (a psycopg connection is not concurrently usable).
+        self._pool = ConnectionPool(dsn, min_size=1, max_size=4, open=True, timeout=15)
+        self._size = 0
+
+    @property
+    def size(self) -> int:
+        return self._size
+
+    def _count(self) -> int:
+        with self._pool.connection() as conn:
+            row = conn.execute(
+                "SELECT count(*) FROM information_schema.tables WHERE table_name = %s",
+                (self.TABLE,),
+            ).fetchone()
+            if not row or not row[0]:
+                return 0
+            row = conn.execute(f"SELECT count(*) FROM {self.TABLE}").fetchone()  # noqa: S608
+            return int(row[0]) if row else 0
+
+    def ensure(self, allow_build: bool = True) -> int:
+        n = self._count()
+        if n:
+            self._check_dim()
+            self._size = n
+            return n
+        return self.build() if allow_build else _no_build(self.backend)
+
+    def _check_dim(self) -> None:
+        """An index ingested with a different embedding model is useless, and the only symptom
+        is bad answers, so say so loudly at startup rather than at query time."""
+        with self._pool.connection() as conn:
+            row = conn.execute(
+                "SELECT atttypmod FROM pg_attribute WHERE attrelid = %s::regclass "
+                "AND attname = 'embedding'",
+                (self.TABLE,),
+            ).fetchone()
+        stored = int(row[0]) if row and row[0] and row[0] > 0 else 0
+        if stored and stored != self._dim:
+            logger.error(
+                "RAG index was built with %d-dim vectors but %s produces %d — re-run "
+                "`python -m app.rag.ingest`; searches will fail until you do.",
+                stored, embedding_provider(), self._dim,
+            )
+
+    def _create_schema(self, conn) -> None:
+        conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
+        conn.execute(f"DROP TABLE IF EXISTS {self.TABLE}")  # noqa: S608
+        conn.execute(
+            f"""
+            CREATE TABLE {self.TABLE} (
+                id          text PRIMARY KEY,
+                program     text NOT NULL,
+                source      text NOT NULL DEFAULT '',
+                title       text NOT NULL DEFAULT '',
+                source_url  text NOT NULL DEFAULT '',
+                document_id text NOT NULL DEFAULT '',
+                page        text NOT NULL DEFAULT '',
+                text        text NOT NULL,
+                embedding   vector({self._dim}) NOT NULL
+            )
+            """  # noqa: S608
+        )
+
+    def build(self) -> int:
+        written = 0
+        with self._pool.connection() as conn:
+            self._create_schema(conn)
+            with conn.cursor() as cur:
+                for batch in _embedded_batches():
+                    cur.executemany(
+                        f"INSERT INTO {self.TABLE} (id, program, source, title, source_url, "  # noqa: S608
+                        "document_id, page, text, embedding) "
+                        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                        [
+                            (
+                                c.id, c.program, c.source, c.title, c.source_url,
+                                c.document_id, c.page, c.text, _vector_literal(v),
+                            )
+                            for c, v in batch
+                        ],
+                    )
+                    written += len(batch)
+            # Built after the load: an HNSW graph is cheaper to construct in one pass than to
+            # maintain across thousands of inserts.
+            conn.execute(
+                f"CREATE INDEX ON {self.TABLE} USING hnsw (embedding vector_cosine_ops)"  # noqa: S608
+            )
+            conn.execute(f"CREATE INDEX ON {self.TABLE} (program)")  # noqa: S608
+        self._size = written
+        return self._size
+
+    def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
+        if not self._size:
+            return []  # never ingested: the table may not even exist
+        qv = _vector_literal(embed_one(query))
+        sql = (
+            "SELECT text, program, source, title, source_url, document_id, page, "
+            f"1 - (embedding <=> %s::vector) AS score FROM {self.TABLE} "  # noqa: S608
+        )
+        params: list[object] = [qv]
+        if program:
+            sql += "WHERE program = %s "
+            params.append(program)
+        sql += "ORDER BY embedding <=> %s::vector LIMIT %s"
+        params += [qv, k]
+        with self._pool.connection() as conn:
+            rows = conn.execute(sql, params).fetchall()
+        return [
+            Retrieved(
+                text=r[0], program=r[1], source=r[2], title=r[3], source_url=r[4],
+                document_id=r[5], page=r[6], score=float(r[7]),
+            )
+            for r in rows
+        ]
+
+
+def _vector_literal(vector: list[float]) -> str:
+    """pgvector's text input format, so no extra client-side type adapter is needed."""
+    return "[" + ",".join(repr(float(x)) for x in vector) + "]"
+
+
 _index = None
 # Serializes index construction. Every specialist agent looks documents up through its own
 # worker thread, so an unguarded lazy build let the whole panel start a full corpus embed at
@@ -494,6 +659,19 @@ _index_lock = threading.Lock()
 
 def _make_index(*, force: bool):
     settings = get_settings()
+    allow_build = force or settings.rag_allow_runtime_build
+    if settings.has_postgres:
+        if force:
+            # An explicit ingest must not quietly land somewhere else.
+            idx = PgVectorIndex(settings.database_url)
+            idx.build()
+            return idx
+        try:
+            idx = PgVectorIndex(settings.database_url)
+            idx.ensure(allow_build)
+            return idx
+        except Exception:
+            logger.exception("pgvector index unavailable — falling back")
     if settings.has_redis:
         # Prefer native server-side vector KNN (RediSearch or Redis 8 Vector Sets);
         # fall back to a Redis-backed brute-force index if neither module is present.
@@ -503,7 +681,7 @@ def _make_index(*, force: bool):
                 if force:
                     idx.build()
                 else:
-                    idx.ensure()
+                    idx.ensure(allow_build)
                 return idx
             except Exception:
                 continue
@@ -511,7 +689,7 @@ def _make_index(*, force: bool):
     if force:
         idx.build()
     else:
-        idx.ensure()
+        idx.ensure(allow_build)
     return idx
 
 

@@ -41,11 +41,23 @@ class Settings(BaseSettings):
     # (attention is O(batch x seq^2)): fastembed's own default of 256 needs several GB for
     # this corpus, which OOMs a small container.
     embedding_batch_size: int = 8
+    # Texts per request when embedding through the hosted API, where the limit is round trips
+    # rather than memory.
+    embedding_api_batch_size: int = 128
+    embedding_max_retries: int = 5
+    embedding_timeout_seconds: float = 60.0
     # onnxruntime intra-op threads for the local embedding model. Each thread carries its own
     # activation arena, so keep it at 1 on a memory-constrained instance.
     embedding_threads: int = 1
     # Chunks written to the index per round trip when (re)building it.
     index_write_batch_size: int = 200
+    # Postgres + pgvector connection string. When set it is the RAG backend: the database does
+    # the KNN and holds the chunk text, so this process only embeds one-line queries.
+    database_url: str = ""
+    # Whether the process may embed the whole corpus on demand when it finds an empty index.
+    # False in a serving container: ingest is an offline step (`python -m app.rag.ingest`), and
+    # a cold build inside the API costs hundreds of MB and minutes of latency.
+    rag_allow_runtime_build: bool = True
 
     # Multi-agent (Band)
     band_rest_url: str = "https://app.band.ai"
@@ -67,6 +79,10 @@ class Settings(BaseSettings):
     @property
     def has_redis(self) -> bool:
         return bool(self.redis_url)
+
+    @property
+    def has_postgres(self) -> bool:
+        return bool(self.database_url)
 
     @property
     def has_llm(self) -> bool:
