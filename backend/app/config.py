@@ -54,10 +54,6 @@ class Settings(BaseSettings):
     # Postgres + pgvector connection string. When set it is the RAG backend: the database does
     # the KNN and holds the chunk text, so this process only embeds one-line queries.
     database_url: str = ""
-    # Whether the process may embed the whole corpus on demand when it finds an empty index.
-    # False in a serving container: ingest is an offline step (`python -m app.rag.ingest`), and
-    # a cold build inside the API costs hundreds of MB and minutes of latency.
-    rag_allow_runtime_build: bool = True
 
     # Multi-agent (Band)
     band_rest_url: str = "https://app.band.ai"

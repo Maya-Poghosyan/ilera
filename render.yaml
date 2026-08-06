@@ -33,10 +33,6 @@ services:
       # Postgres + pgvector holds the chunks and does the KNN.
       - key: DATABASE_URL
         sync: false
-      # Ingest is an offline step (`python -m app.rag.ingest`). A serving container must never
-      # embed the corpus on demand: that costs hundreds of MB and minutes inside a request.
-      - key: RAG_ALLOW_RUNTIME_BUILD
-        value: false
 
   - type: redis
     name: ilera-redis

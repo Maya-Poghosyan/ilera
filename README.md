@@ -59,19 +59,19 @@ uvicorn app.main:app --reload --port 8000
 
 ### RAG index (offline)
 
-Embedding the ~3.4k-chunk corpus costs hundreds of MB and several minutes, so it is a
-separate step rather than something the API does on boot — a server that builds on demand
-OOMs a small container. Run it once per store, and again whenever the corpus or the
-embedding model changes:
+Embedding the ~3.4k-chunk corpus costs hundreds of MB and several minutes, so this is the
+only place it happens — the server never builds an index, it attaches to one. Run it once
+per store, and again whenever the corpus or the embedding model changes:
 
 ```bash
 cd backend
 DATABASE_URL=postgresql://... python -m app.rag.ingest   # or REDIS_URL=...
 ```
 
-Then set `RAG_ALLOW_RUNTIME_BUILD=false` on the server so it only ever embeds queries. With
-`DATABASE_URL` set (Postgres + `pgvector`) the chunk text and the KNN both live in the
-database; without it, the index falls back to Redis and then to memory.
+With `DATABASE_URL` set (Postgres + `pgvector`) the chunk text and the KNN both live in the
+database; without it, the index falls back to Redis and then to memory. If you deploy before
+ingesting, the server logs an error and retrieval returns nothing — check `rag_chunks` on
+`/health`.
 
 ### Frontend
 

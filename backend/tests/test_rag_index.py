@@ -22,19 +22,24 @@ def _reset_settings() -> None:
     get_settings.cache_clear()
 
 
-def test_cold_index_does_not_build_when_runtime_builds_are_disabled() -> None:
-    os.environ["RAG_ALLOW_RUNTIME_BUILD"] = "false"
-    _reset_settings()
-    try:
-        idx = index.RagIndex()
-        calls: list[int] = []
-        idx.build = lambda: calls.append(1) or 0  # type: ignore[method-assign]
-        assert idx.ensure(allow_build=False) == 0
-        assert not calls, "a serving process must never embed the corpus on demand"
-        assert idx.search("ihss hours") == []
-    finally:
-        os.environ.pop("RAG_ALLOW_RUNTIME_BUILD", None)
-        _reset_settings()
+def test_cold_index_reports_empty_instead_of_building() -> None:
+    idx = index.RagIndex()
+    calls: list[int] = []
+    idx.build = lambda: calls.append(1) or 0  # type: ignore[method-assign]
+    assert idx.ensure() == 0
+    assert not calls, "a serving process must never embed the corpus on demand"
+    assert idx.search("ihss hours") == []
+
+
+def test_get_index_never_builds(monkeypatch) -> None:
+    """`build()` is reachable only from the ingest entry point (`rebuild_index`)."""
+    monkeypatch.setattr(index, "_index", None)
+    monkeypatch.setattr(
+        index, "_embedded_batches",
+        lambda: (_ for _ in ()).throw(AssertionError("serving path embedded the corpus")),
+    )
+    idx = index.get_index()
+    assert idx.size == 0
 
 
 def test_embedding_batches_are_bounded(monkeypatch) -> None:

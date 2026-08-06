@@ -31,7 +31,7 @@ from .intake import INTAKE_SCHEMA, map_answers_to_profile
 from .mcp_server import build_mcp_app
 from .models import BandStatus, CaseProfile, EligibilityResult
 from .rag.embeddings import provider as embedding_provider
-from .rag.index import current_index, get_index, rebuild_index
+from .rag.index import current_index, get_index
 from .reminders import (
     TEMPLATES,
     Reminder,
@@ -539,12 +539,6 @@ def rag_search(q: RagQuery) -> dict:
             for h in hits
         ]
     }
-
-
-@app.post("/api/rag/rebuild")
-def rag_rebuild() -> dict:
-    index = rebuild_index()
-    return {"backend": index.backend, "indexed": index.size}
 
 
 @app.get("/api/forms")

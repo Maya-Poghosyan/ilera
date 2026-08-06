@@ -6,9 +6,10 @@ Several backends with the same interface, tried in this order:
   the search the server itself can do (RediSearch, Vector Sets, or a Python cosine loop).
 - RagIndex: in-memory cosine fallback (no infrastructure needed).
 
-Building an index means embedding the whole corpus, which is expensive in memory and time;
-it belongs in the offline `app.rag.ingest` step, not in a serving process (see
-`rag_allow_runtime_build`).
+Building an index means embedding the whole corpus, which is expensive in memory and time, so
+it happens only in the offline `app.rag.ingest` step. A serving process attaches to whatever
+the ingest already wrote and never builds: `ensure()` reports an empty index rather than
+embedding on demand, and `build()` is reachable only through `rebuild_index()`.
 """
 
 import glob
@@ -170,9 +171,9 @@ def _no_build(backend: str) -> int:
     Ingest is an offline step: a serving process that builds on demand pays hundreds of MB
     and minutes of latency inside a request, which is what OOMed the container.
     """
-    logger.warning(
-        "RAG index (%s) is empty and runtime builds are disabled — retrieval will return "
-        "nothing until `python -m app.rag.ingest` has been run against this store.",
+    logger.error(
+        "RAG index (%s) is empty — retrieval will return nothing until "
+        "`python -m app.rag.ingest` has been run against this store.",
         backend,
     )
     return 0
@@ -199,10 +200,10 @@ class RagIndex:
         self._chunks = chunks
         return len(chunks)
 
-    def ensure(self, allow_build: bool = True) -> int:
+    def ensure(self) -> int:
         if self._chunks:
             return len(self._chunks)
-        return self.build() if allow_build else _no_build(self.backend)
+        return _no_build(self.backend)
 
     def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
         if not self._chunks:
@@ -261,7 +262,7 @@ class RedisVLIndex:
     def size(self) -> int:
         return self._size
 
-    def ensure(self, allow_build: bool = True) -> int:
+    def ensure(self) -> int:
         try:
             n = int(self._index.info().get("num_docs", 0))
         except Exception:
@@ -269,7 +270,7 @@ class RedisVLIndex:
         if n:
             self._size = n
             return n
-        return self.build() if allow_build else _no_build(self.backend)
+        return _no_build(self.backend)
 
     def build(self) -> int:
         from redisvl.redis.utils import array_to_buffer
@@ -357,12 +358,12 @@ class RedisVectorSetIndex:
     def size(self) -> int:
         return self._size
 
-    def ensure(self, allow_build: bool = True) -> int:
+    def ensure(self) -> int:
         n = int(self._r.execute_command("VCARD", self.SET_KEY)) if self._r.exists(self.SET_KEY) else 0
         if n:
             self._size = n
             return n
-        return self.build() if allow_build else _no_build(self.backend)
+        return _no_build(self.backend)
 
     def build(self) -> int:
         self._r.delete(self.SET_KEY)
@@ -430,12 +431,12 @@ class RedisKNNIndex:
     def size(self) -> int:
         return self._size
 
-    def ensure(self, allow_build: bool = True) -> int:
+    def ensure(self) -> int:
         n = int(self._r.scard(self._ids_key) or 0)
         if n:
             self._size = n
             return n
-        return self.build() if allow_build else _no_build(self.backend)
+        return _no_build(self.backend)
 
     def build(self) -> int:
         pipe = self._r.pipeline(transaction=False)
@@ -548,13 +549,13 @@ class PgVectorIndex:
             row = conn.execute(f"SELECT count(*) FROM {self.TABLE}").fetchone()  # noqa: S608
             return int(row[0]) if row else 0
 
-    def ensure(self, allow_build: bool = True) -> int:
+    def ensure(self) -> int:
         n = self._count()
         if n:
             self._check_dim()
             self._size = n
             return n
-        return self.build() if allow_build else _no_build(self.backend)
+        return _no_build(self.backend)
 
     def _check_dim(self) -> None:
         """An index ingested with a different embedding model is useless, and the only symptom
@@ -658,8 +659,8 @@ _index_lock = threading.Lock()
 
 
 def _make_index(*, force: bool):
+    """Attach to the store the ingest wrote to. `force` (ingest only) rebuilds it in place."""
     settings = get_settings()
-    allow_build = force or settings.rag_allow_runtime_build
     if settings.has_postgres:
         if force:
             # An explicit ingest must not quietly land somewhere else.
@@ -668,7 +669,7 @@ def _make_index(*, force: bool):
             return idx
         try:
             idx = PgVectorIndex(settings.database_url)
-            idx.ensure(allow_build)
+            idx.ensure()
             return idx
         except Exception:
             logger.exception("pgvector index unavailable — falling back")
@@ -678,18 +679,12 @@ def _make_index(*, force: bool):
         for cls in (RedisVLIndex, RedisVectorSetIndex, RedisKNNIndex):
             try:
                 idx = cls(settings.redis_url)
-                if force:
-                    idx.build()
-                else:
-                    idx.ensure(allow_build)
+                idx.build() if force else idx.ensure()
                 return idx
             except Exception:
                 continue
     idx = RagIndex()
-    if force:
-        idx.build()
-    else:
-        idx.ensure(allow_build)
+    idx.build() if force else idx.ensure()
     return idx
 
 
