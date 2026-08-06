@@ -72,6 +72,30 @@ def test_vector_literal_round_trips_pgvector_text_format() -> None:
     assert index._vector_literal([1.0, -0.5]) == "[1.0,-0.5]"
 
 
+def _doc(text: str = "hello", **kw) -> index.Document:
+    return index.Document(document_id="D1", program="ihss", text=text, **kw)
+
+
+def test_fingerprint_is_stable_for_unchanged_documents() -> None:
+    """What makes a sync cheap: same document, same fingerprint, no embedding call."""
+    assert _doc().fingerprint() == _doc().fingerprint()
+    assert _doc("hello").fingerprint() != _doc("hello!").fingerprint()
+
+
+def test_fingerprint_tracks_the_embedding_model(monkeypatch) -> None:
+    """Vectors from a different model are incomparable, so a model switch must invalidate
+    every document rather than leaving a silently mixed index."""
+    before = _doc().fingerprint()
+    monkeypatch.setattr(index, "embedding_id", lambda: "text-embedding-3-large")
+    assert _doc().fingerprint() != before
+
+
+def test_fingerprint_tracks_chunking(monkeypatch) -> None:
+    before = _doc().fingerprint()
+    monkeypatch.setattr(index, "CHUNK_CHARS", index.CHUNK_CHARS + 1)
+    assert _doc().fingerprint() != before
+
+
 if __name__ == "__main__":
     import pytest
 
