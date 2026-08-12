@@ -116,12 +116,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateUser = useCallback(
     async (updates: Partial<Pick<AuthUser, "case_id" | "name">>) => {
-      if (!token) return;
+      // Fall back to storage so a caller that signs up and updates in the same
+      // tick still sees a token (state hasn't re-rendered into this closure yet).
+      const active = token ?? localStorage.getItem(TOKEN_KEY);
+      if (!active) return;
       const res = await fetch(`${BASE}/api/auth/me`, {
         method: "PATCH",
         headers: {
           "content-type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${active}`,
         },
         body: JSON.stringify(updates),
       });

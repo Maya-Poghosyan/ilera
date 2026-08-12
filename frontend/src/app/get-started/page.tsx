@@ -2,8 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -14,26 +13,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
-import { useAuth } from "@/lib/auth-context";
 
 const POKE_RECIPE_URL = "https://poke.com/r/DsatCoA1all";
 
 type Step = "poke" | "done";
 
 export default function GetStartedPage() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
   const [step, setStep] = useState<Step>("poke");
-
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/signup");
-    }
-  }, [loading, user, router]);
-
-  if (loading || !user) {
-    return null;
-  }
 
   return (
     <main className="flex flex-1 flex-col">
@@ -46,11 +32,11 @@ export default function GetStartedPage() {
       <section className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
         {/* Progress indicators */}
         <div className="flex items-center gap-3">
-          <StepDot active={false} done={true} label="1" />
+          <StepDot active={step === "poke"} done={step === "done"} label="1" />
           <div className="h-px w-8 bg-border" />
-          <StepDot active={step === "poke"} done={step === "done"} label="2" />
+          <StepDot active={step === "done"} done={false} label="2" />
           <div className="h-px w-8 bg-border" />
-          <StepDot active={step === "done"} done={false} label="3" />
+          <StepDot active={false} done={false} label="3" />
         </div>
 
         {/* Step: Connect Poke */}
@@ -128,7 +114,8 @@ export default function GetStartedPage() {
               </div>
               <CardTitle className="text-2xl">You&apos;re all set!</CardTitle>
               <p className="text-base text-muted-foreground">
-                Welcome, {user.name}. Now let&apos;s figure out which benefits you qualify for.
+                Now let&apos;s figure out which benefits you qualify for. No account needed
+                yet — you&apos;ll create one at the end to save your results.
               </p>
             </CardHeader>
             <CardContent>

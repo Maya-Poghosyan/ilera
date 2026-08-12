@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -11,15 +11,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
+import { clearPendingCaseId, getPendingCaseId } from "@/lib/pending-case";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signup } = useAuth();
+  const { signup, updateUser } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [hasPendingCase, setHasPendingCase] = useState(false);
+
+  useEffect(() => {
+    setHasPendingCase(getPendingCaseId() !== null);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +37,14 @@ export default function SignupPage() {
     setSubmitting(true);
     try {
       await signup(name, email, password);
-      router.push("/get-started");
+      const pending = getPendingCaseId();
+      if (pending) {
+        await updateUser({ case_id: pending });
+        clearPendingCaseId();
+        router.push(`/eligibility/${pending}`);
+      } else {
+        router.push("/get-started");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed");
     } finally {
@@ -52,7 +65,9 @@ export default function SignupPage() {
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Create your account</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Set up your Ilera caregiver profile to get started.
+              {hasPendingCase
+                ? "Save your answers and see the programs you qualify for."
+                : "Set up your Ilera caregiver profile to get started."}
             </p>
           </CardHeader>
           <CardContent>

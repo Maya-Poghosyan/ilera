@@ -6,9 +6,9 @@ import { QuestionField } from "@/components/intake/question-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { RequireAuth } from "@/components/require-auth";
 import { useAuth } from "@/lib/auth-context";
 import { getIntakeSchema, lookupCounty, submitIntakeAnswers } from "@/lib/api";
+import { setPendingCaseId } from "@/lib/pending-case";
 import {
   type Answers,
   type AnswerValue,
@@ -163,16 +163,8 @@ function renderQuestions(
 }
 
 export default function IntakePage() {
-  return (
-    <RequireAuth>
-      <IntakeContent />
-    </RequireAuth>
-  );
-}
-
-function IntakeContent() {
   const router = useRouter();
-  const { updateUser } = useAuth();
+  const { user, updateUser } = useAuth();
   const [schema, setSchema] = useState<IntakeSchema | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [started, setStarted] = useState(false);
@@ -390,8 +382,13 @@ function IntakeContent() {
       const created = await submitIntakeAnswers(answers);
       localStorage.removeItem(DRAFT_KEY);
       localStorage.setItem("ilera_case_id", created.id);
-      await updateUser({ case_id: created.id });
-      router.push(`/eligibility/${created.id}`);
+      if (user) {
+        await updateUser({ case_id: created.id });
+        router.push(`/eligibility/${created.id}`);
+      } else {
+        setPendingCaseId(created.id);
+        router.push("/signup");
+      }
     } catch {
       submittingRef.current = false;
       setSubmitting(false);
