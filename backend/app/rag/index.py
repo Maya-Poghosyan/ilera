@@ -6,12 +6,14 @@ Several backends with the same interface, tried in this order:
   the search the server itself can do (RediSearch, Vector Sets, or a Python cosine loop).
 - RagIndex: in-memory cosine fallback (no infrastructure needed).
 
-Building an index means embedding the whole corpus, which is expensive in memory and time;
-it belongs in the offline `app.rag.ingest` step, not in a serving process (see
-`rag_allow_runtime_build`).
+Building an index means embedding the whole corpus, which is expensive in memory and time, so
+it happens only in the offline `app.rag.ingest` step. A serving process attaches to whatever
+the ingest already wrote and never builds: `ensure()` reports an empty index rather than
+embedding on demand, and `build()` is reachable only through `rebuild_index()`.
 """
 
 import glob
+import hashlib
 import heapq
 import json
 import logging
@@ -23,6 +25,7 @@ from dataclasses import dataclass, field
 
 from ..config import get_settings
 from .embeddings import dim, embed, embed_one
+from .embeddings import model_id as embedding_id
 from .embeddings import provider as embedding_provider
 
 _DATA = os.path.join(os.path.dirname(__file__), "..", "..", "data")
@@ -48,6 +51,55 @@ class Chunk:
     document_id: str = ""
     page: str = ""
     vector: list[float] = field(default_factory=list)
+
+
+@dataclass
+class Document:
+    """One source document, the unit the corpus is versioned and re-embedded in."""
+
+    document_id: str
+    program: str
+    text: str
+    title: str = ""
+    source_url: str = ""
+    legacy: bool = False
+
+    def chunks(self) -> list[Chunk]:
+        if self.legacy:
+            text = self.text.replace("\x00", "")
+            return [
+                Chunk(id=f"{self.program}:{i}", program=self.program, text=piece,
+                      source=self.document_id, document_id=self.document_id)
+                for i in range(0, len(text), CHUNK_CHARS)
+                if (piece := text[i : i + CHUNK_CHARS].strip())
+            ]
+        return [
+            Chunk(
+                id=f"{self.document_id}:{n}",
+                program=self.program,
+                text=piece,
+                source=self.document_id,
+                title=self.title,
+                source_url=self.source_url,
+                document_id=self.document_id,
+                page=str(page),
+            )
+            for n, (piece, page) in enumerate(_chunk_text(self.text))
+        ]
+
+    def fingerprint(self) -> str:
+        """Identifies the *indexed form* of this document, not just its bytes.
+
+        Chunking parameters and the embedding model are part of it, so changing either
+        invalidates every document and the next ingest re-embeds the corpus instead of
+        leaving vectors that silently can't be compared.
+        """
+        h = hashlib.sha256()
+        for part in (self.text, self.program, self.title, self.source_url,
+                     str(CHUNK_CHARS), str(CHUNK_OVERLAP), embedding_provider(), embedding_id()):
+            h.update(part.encode("utf-8"))
+            h.update(b"\x1f")
+        return h.hexdigest()
 
 
 @dataclass
@@ -80,7 +132,7 @@ def _chunk_text(text: str) -> list[tuple[str, str]]:
     return out
 
 
-def _iter_corpus_chunks() -> Iterator[Chunk]:
+def _iter_corpus_documents() -> Iterator[Document]:
     manifest_path = os.path.join(KNOWLEDGE_DIR, "manifest.json")
     if not os.path.exists(manifest_path):
         return
@@ -92,44 +144,42 @@ def _iter_corpus_chunks() -> Iterator[Chunk]:
             continue
         with open(path, encoding="utf-8") as fh:
             text = fh.read()
-        for n, (piece, page) in enumerate(_chunk_text(text)):
-            yield Chunk(
-                id=f"{doc['document_id']}:{n}",
-                program=doc["program"],
-                text=piece,
-                source=doc["document_id"],
-                title=doc.get("title", ""),
-                source_url=doc.get("source_url", ""),
-                document_id=doc["document_id"],
-                page=str(page),
-            )
+        yield Document(
+            document_id=doc["document_id"],
+            program=doc["program"],
+            text=text,
+            title=doc.get("title", ""),
+            source_url=doc.get("source_url", ""),
+        )
 
 
-def _iter_legacy_chunks() -> Iterator[Chunk]:
+def _iter_legacy_documents() -> Iterator[Document]:
     for path in glob.glob(os.path.join(DATA_DIR, "*.txt")):
         program = os.path.splitext(os.path.basename(path))[0]
         with open(path, encoding="utf-8") as fh:
-            text = fh.read().replace("\x00", "")
-        for i in range(0, len(text), CHUNK_CHARS):
-            piece = text[i : i + CHUNK_CHARS].strip()
-            if piece:
-                yield Chunk(id=f"{program}:{i}", program=program, text=piece,
-                            source=os.path.basename(path))
+            yield Document(
+                document_id=os.path.basename(path), program=program, text=fh.read(), legacy=True
+            )
 
 
-def iter_chunks() -> Iterator[Chunk]:
+def iter_documents() -> Iterator[Document]:
     """Stream the real knowledge corpus when present, else the bundled sample docs.
 
-    A generator so an index build never holds the whole corpus (documents + chunk text)
-    in memory at once.
+    A generator, so indexing holds one document (and its chunks) at a time rather than the
+    whole corpus.
     """
-    corpus = _iter_corpus_chunks()
+    corpus = _iter_corpus_documents()
     first = next(corpus, None)
     if first is None:
-        yield from _iter_legacy_chunks()
+        yield from _iter_legacy_documents()
         return
     yield first
     yield from corpus
+
+
+def iter_chunks() -> Iterator[Chunk]:
+    for doc in iter_documents():
+        yield from doc.chunks()
 
 
 def load_chunks() -> list[Chunk]:
@@ -155,6 +205,14 @@ def _embedded_batches() -> Iterator[list[tuple[Chunk, list[float]]]]:
         yield list(zip(window, embed([c.text for c in window])))
 
 
+def _embedded(chunks: list[Chunk]) -> Iterator[list[tuple[Chunk, list[float]]]]:
+    """Same, for the chunks of a single document (the unit an incremental sync rewrites)."""
+    size = max(1, get_settings().index_write_batch_size)
+    for i in range(0, len(chunks), size):
+        window = chunks[i : i + size]
+        yield list(zip(window, embed([c.text for c in window])))
+
+
 def _cosine(a: list[float], b: list[float]) -> float:
     if not a or not b:
         return 0.0
@@ -164,15 +222,22 @@ def _cosine(a: list[float], b: list[float]) -> float:
     return dot / (na * nb)
 
 
+@dataclass
+class SyncResult:
+    changed: int
+    removed: int
+    total: int
+
+
 def _no_build(backend: str) -> int:
     """Report an empty index instead of embedding the corpus on the spot.
 
     Ingest is an offline step: a serving process that builds on demand pays hundreds of MB
     and minutes of latency inside a request, which is what OOMed the container.
     """
-    logger.warning(
-        "RAG index (%s) is empty and runtime builds are disabled — retrieval will return "
-        "nothing until `python -m app.rag.ingest` has been run against this store.",
+    logger.error(
+        "RAG index (%s) is empty — retrieval will return nothing until "
+        "`python -m app.rag.ingest` has been run against this store.",
         backend,
     )
     return 0
@@ -199,10 +264,10 @@ class RagIndex:
         self._chunks = chunks
         return len(chunks)
 
-    def ensure(self, allow_build: bool = True) -> int:
+    def ensure(self) -> int:
         if self._chunks:
             return len(self._chunks)
-        return self.build() if allow_build else _no_build(self.backend)
+        return _no_build(self.backend)
 
     def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
         if not self._chunks:
@@ -261,7 +326,7 @@ class RedisVLIndex:
     def size(self) -> int:
         return self._size
 
-    def ensure(self, allow_build: bool = True) -> int:
+    def ensure(self) -> int:
         try:
             n = int(self._index.info().get("num_docs", 0))
         except Exception:
@@ -269,7 +334,7 @@ class RedisVLIndex:
         if n:
             self._size = n
             return n
-        return self.build() if allow_build else _no_build(self.backend)
+        return _no_build(self.backend)
 
     def build(self) -> int:
         from redisvl.redis.utils import array_to_buffer
@@ -357,12 +422,12 @@ class RedisVectorSetIndex:
     def size(self) -> int:
         return self._size
 
-    def ensure(self, allow_build: bool = True) -> int:
+    def ensure(self) -> int:
         n = int(self._r.execute_command("VCARD", self.SET_KEY)) if self._r.exists(self.SET_KEY) else 0
         if n:
             self._size = n
             return n
-        return self.build() if allow_build else _no_build(self.backend)
+        return _no_build(self.backend)
 
     def build(self) -> int:
         self._r.delete(self.SET_KEY)
@@ -430,12 +495,12 @@ class RedisKNNIndex:
     def size(self) -> int:
         return self._size
 
-    def ensure(self, allow_build: bool = True) -> int:
+    def ensure(self) -> int:
         n = int(self._r.scard(self._ids_key) or 0)
         if n:
             self._size = n
             return n
-        return self.build() if allow_build else _no_build(self.backend)
+        return _no_build(self.backend)
 
     def build(self) -> int:
         pipe = self._r.pipeline(transaction=False)
@@ -548,13 +613,13 @@ class PgVectorIndex:
             row = conn.execute(f"SELECT count(*) FROM {self.TABLE}").fetchone()  # noqa: S608
             return int(row[0]) if row else 0
 
-    def ensure(self, allow_build: bool = True) -> int:
+    def ensure(self) -> int:
         n = self._count()
         if n:
             self._check_dim()
             self._size = n
             return n
-        return self.build() if allow_build else _no_build(self.backend)
+        return _no_build(self.backend)
 
     def _check_dim(self) -> None:
         """An index ingested with a different embedding model is useless, and the only symptom
@@ -573,6 +638,14 @@ class PgVectorIndex:
                 stored, embedding_provider(), self._dim,
             )
 
+    def _stored_dim(self, conn) -> int:
+        row = conn.execute(
+            "SELECT atttypmod FROM pg_attribute WHERE attrelid = to_regclass(%s) "
+            "AND attname = 'embedding'",
+            (self.TABLE,),
+        ).fetchone()
+        return int(row[0]) if row and row[0] and row[0] > 0 else 0
+
     def _create_schema(self, conn) -> None:
         conn.execute("CREATE EXTENSION IF NOT EXISTS vector")
         conn.execute(f"DROP TABLE IF EXISTS {self.TABLE}")  # noqa: S608
@@ -586,39 +659,92 @@ class PgVectorIndex:
                 source_url  text NOT NULL DEFAULT '',
                 document_id text NOT NULL DEFAULT '',
                 page        text NOT NULL DEFAULT '',
+                doc_hash    text NOT NULL DEFAULT '',
                 text        text NOT NULL,
                 embedding   vector({self._dim}) NOT NULL
             )
             """  # noqa: S608
         )
+        # HNSW is cheaper to build in one pass than to maintain across thousands of inserts,
+        # but a sync writes a handful of documents into an existing table, so it has to exist
+        # up front rather than being created after the load.
+        conn.execute(
+            f"CREATE INDEX ON {self.TABLE} USING hnsw (embedding vector_cosine_ops)"  # noqa: S608
+        )
+        conn.execute(f"CREATE INDEX ON {self.TABLE} (program)")  # noqa: S608
+        conn.execute(f"CREATE INDEX ON {self.TABLE} (document_id)")  # noqa: S608
+
+    def _write_document(self, conn, doc: Document, fingerprint: str) -> int:
+        """Replace one document's rows. Delete-then-insert so removed chunks don't linger."""
+        conn.execute(f"DELETE FROM {self.TABLE} WHERE document_id = %s", (doc.document_id,))  # noqa: S608
+        written = 0
+        with conn.cursor() as cur:
+            for batch in _embedded(doc.chunks()):
+                cur.executemany(
+                    f"INSERT INTO {self.TABLE} (id, program, source, title, source_url, "  # noqa: S608
+                    "document_id, page, doc_hash, text, embedding) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    [
+                        (
+                            c.id, c.program, c.source, c.title, c.source_url,
+                            c.document_id, c.page, fingerprint, c.text, _vector_literal(v),
+                        )
+                        for c, v in batch
+                    ],
+                )
+                written += len(batch)
+        return written
 
     def build(self) -> int:
-        written = 0
         with self._pool.connection() as conn:
             self._create_schema(conn)
-            with conn.cursor() as cur:
-                for batch in _embedded_batches():
-                    cur.executemany(
-                        f"INSERT INTO {self.TABLE} (id, program, source, title, source_url, "  # noqa: S608
-                        "document_id, page, text, embedding) "
-                        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                        [
-                            (
-                                c.id, c.program, c.source, c.title, c.source_url,
-                                c.document_id, c.page, c.text, _vector_literal(v),
-                            )
-                            for c, v in batch
-                        ],
-                    )
-                    written += len(batch)
-            # Built after the load: an HNSW graph is cheaper to construct in one pass than to
-            # maintain across thousands of inserts.
-            conn.execute(
-                f"CREATE INDEX ON {self.TABLE} USING hnsw (embedding vector_cosine_ops)"  # noqa: S608
-            )
-            conn.execute(f"CREATE INDEX ON {self.TABLE} (program)")  # noqa: S608
-        self._size = written
+            for doc in iter_documents():
+                self._write_document(conn, doc, doc.fingerprint())
+        self._size = self._count()
         return self._size
+
+    def sync(self) -> "SyncResult":
+        """Bring the store in line with the corpus, embedding only what changed.
+
+        Documents carry the fingerprint they were indexed under, so an unchanged corpus costs
+        one query and no embedding calls — which is what makes it safe to run this on every
+        merge rather than hand-triggering a 17-minute rebuild.
+        """
+        with self._pool.connection() as conn:
+            stored_dim = self._stored_dim(conn)
+            if stored_dim and stored_dim != self._dim:
+                # A different-width vector column can't be written into or compared against.
+                logger.warning(
+                    "Index holds %d-dim vectors but %s produces %d — rebuilding from scratch",
+                    stored_dim, embedding_id(), self._dim,
+                )
+                stored_dim = 0
+            if not stored_dim:
+                self._create_schema(conn)
+                existing: dict[str, str] = {}
+            else:
+                existing = dict(
+                    conn.execute(
+                        f"SELECT document_id, min(doc_hash) FROM {self.TABLE} GROUP BY 1"  # noqa: S608
+                    ).fetchall()
+                )
+            changed = 0
+            seen: set[str] = set()
+            for doc in iter_documents():
+                seen.add(doc.document_id)
+                fingerprint = doc.fingerprint()
+                if existing.get(doc.document_id) == fingerprint:
+                    continue
+                logger.info("Indexing %s", doc.document_id)
+                self._write_document(conn, doc, fingerprint)
+                changed += 1
+            removed = sorted(set(existing) - seen)
+            if removed:
+                conn.execute(
+                    f"DELETE FROM {self.TABLE} WHERE document_id = ANY(%s)", (removed,)  # noqa: S608
+                )
+        self._size = self._count()
+        return SyncResult(changed=changed, removed=len(removed), total=self._size)
 
     def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
         if not self._size:
@@ -658,8 +784,8 @@ _index_lock = threading.Lock()
 
 
 def _make_index(*, force: bool):
+    """Attach to the store the ingest wrote to. `force` (ingest only) rebuilds it in place."""
     settings = get_settings()
-    allow_build = force or settings.rag_allow_runtime_build
     if settings.has_postgres:
         if force:
             # An explicit ingest must not quietly land somewhere else.
@@ -668,7 +794,7 @@ def _make_index(*, force: bool):
             return idx
         try:
             idx = PgVectorIndex(settings.database_url)
-            idx.ensure(allow_build)
+            idx.ensure()
             return idx
         except Exception:
             logger.exception("pgvector index unavailable — falling back")
@@ -678,25 +804,13 @@ def _make_index(*, force: bool):
         for cls in (RedisVLIndex, RedisVectorSetIndex, RedisKNNIndex):
             try:
                 idx = cls(settings.redis_url)
-                if force:
-                    idx.build()
-                else:
-                    idx.ensure(allow_build)
+                idx.build() if force else idx.ensure()
                 return idx
             except Exception:
                 continue
     idx = RagIndex()
-    if force:
-        idx.build()
-    else:
-        idx.ensure(allow_build)
+    idx.build() if force else idx.ensure()
     return idx
-
-
-def current_index():
-    """The already-built index, or None. Never triggers a build — for status endpoints that
-    must not pay for (or allocate) a cold ingest."""
-    return _index
 
 
 def get_index():
@@ -715,3 +829,22 @@ def rebuild_index():
     with _index_lock:
         _index = _make_index(force=True)
     return _index
+
+
+def sync_index() -> tuple[object, SyncResult]:
+    """Bring the active backend in line with the corpus, re-embedding only what changed.
+
+    Only pgvector tracks per-document fingerprints; the Redis and in-memory backends have no
+    way to tell what changed, so for them this is a full rebuild.
+    """
+    global _index
+    with _index_lock:
+        settings = get_settings()
+        if settings.has_postgres:
+            idx = PgVectorIndex(settings.database_url)
+            result = idx.sync()
+        else:
+            idx = _make_index(force=True)
+            result = SyncResult(changed=-1, removed=0, total=idx.size)
+        _index = idx
+    return idx, result
