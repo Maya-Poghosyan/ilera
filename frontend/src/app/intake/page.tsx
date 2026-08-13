@@ -3,11 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QuestionField } from "@/components/intake/question-field";
+import { LoadFailure } from "@/components/load-failure";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/lib/auth-context";
-import { getIntakeSchema, lookupCounty, submitIntakeAnswers } from "@/lib/api";
+import { ApiError, getIntakeSchema, lookupCounty, submitIntakeAnswers } from "@/lib/api";
 import { setPendingCaseId } from "@/lib/pending-case";
 import {
   type Answers,
@@ -167,6 +168,7 @@ export default function IntakePage() {
   const { user, updateUser } = useAuth();
   const [schema, setSchema] = useState<IntakeSchema | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [started, setStarted] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
@@ -209,6 +211,7 @@ export default function IntakePage() {
   useEffect(() => {
     getIntakeSchema()
       .then((loaded) => {
+        setLoadError(null);
         // Resume an interrupted intake. Restored alongside the schema so the first
         // render with questions already has the draft in hand.
         const draft = readDraft();
@@ -219,8 +222,8 @@ export default function IntakePage() {
         }
         setSchema(loaded);
       })
-      .catch(() => setLoadError("Could not load the intake form. Please try again in a moment."));
-  }, []);
+      .catch(() => setLoadError("We couldn't load the intake questions just now."));
+  }, [loadAttempt]);
 
   useEffect(() => {
     if (!started) return;
@@ -267,9 +270,7 @@ export default function IntakePage() {
 
   if (loadError) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-20 text-center">
-        <p className="text-muted-foreground">{loadError}</p>
-      </main>
+      <LoadFailure message={loadError} onRetry={() => setLoadAttempt((n) => n + 1)} />
     );
   }
 
@@ -389,10 +390,17 @@ export default function IntakePage() {
         setPendingCaseId(created.id);
         router.push("/signup");
       }
-    } catch {
+    } catch (err) {
+      // The draft is still in localStorage, so nothing they typed is lost — the button just
+      // becomes pressable again.
       submittingRef.current = false;
       setSubmitting(false);
-      alert("Could not save your answers. Please try again in a moment.");
+      const transient = err instanceof ApiError && err.isTransient;
+      alert(
+        transient
+          ? "We couldn't save your answers just now — your place is saved, so please try again in a moment."
+          : "Something went wrong saving your answers. Your place is saved, so please try again.",
+      );
     }
   }
 

@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LoadFailure } from "@/components/load-failure";
 import { Logo } from "@/components/logo";
 import { determineEligibility, getEligibility } from "@/lib/api";
 import type { EligibilityResponse, MatchLevel } from "@/lib/types";
@@ -36,28 +37,40 @@ const LOADING_MESSAGES = [
 ];
 
 const POLL_MS = 3000;
+// A Band run takes a while, so a poll that fails mid-run shouldn't discard it — the analysis
+// keeps going server-side. Give up only once the API has been unreachable for this many polls.
+const MAX_POLL_FAILURES = 5;
 
 export default function EligibilityPage() {
   const { caseId } = useParams<{ caseId: string }>();
   const [data, setData] = useState<EligibilityResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [messageIndex, setMessageIndex] = useState(0);
+  const [attempt, setAttempt] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     let active = true;
+    let failures = 0;
 
     const poll = () => {
       getEligibility(caseId)
         .then((res) => {
           if (!active) return;
+          failures = 0;
           setData(res);
           if (res.status === "idle" || res.status === "processing") {
             timer.current = setTimeout(poll, POLL_MS);
           }
         })
         .catch(() => {
-          if (active) setError("Could not reach the API.");
+          if (!active) return;
+          failures++;
+          if (failures >= MAX_POLL_FAILURES) {
+            setError("We lost contact while reviewing your programs.");
+          } else {
+            timer.current = setTimeout(poll, POLL_MS);
+          }
         });
     };
 
@@ -65,20 +78,21 @@ export default function EligibilityPage() {
     determineEligibility(caseId)
       .then((res) => {
         if (!active) return;
+        setError(null);
         setData(res);
         if (res.status === "idle" || res.status === "processing") {
           timer.current = setTimeout(poll, POLL_MS);
         }
       })
       .catch(() => {
-        if (active) setError("Could not reach the API.");
+        if (active) setError("We couldn't start reviewing your programs just now.");
       });
 
     return () => {
       active = false;
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [caseId]);
+  }, [caseId, attempt]);
 
   const processing = !data || data.status === "idle" || data.status === "processing";
 
@@ -92,9 +106,7 @@ export default function EligibilityPage() {
 
   if (error) {
     return (
-      <main className="mx-auto max-w-xl px-6 py-20 text-center">
-        <p className="text-muted-foreground">{error} Please try again in a moment.</p>
-      </main>
+      <LoadFailure message={error} onRetry={() => setAttempt((n) => n + 1)} />
     );
   }
 
