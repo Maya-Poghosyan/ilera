@@ -13,8 +13,10 @@ Usage:
 
 import argparse
 import logging
+import sys
 from collections import Counter
 
+from ..config import get_settings
 from .embeddings import batch_size, model_id, provider
 from .index import iter_documents, rebuild_index, sync_index
 
@@ -28,6 +30,11 @@ def main() -> None:
     )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+
+    if not get_settings().has_postgres:
+        # Otherwise the corpus is embedded into an in-memory index that dies with this
+        # process — minutes of embedding, and the reported success writes nothing.
+        sys.exit("DATABASE_URL is not set; there is nowhere to write the index.")
 
     by_program: Counter[str] = Counter()
     docs = 0

@@ -84,9 +84,17 @@ def _get_openai_client():
         from openai import OpenAI
 
         s = get_settings()
+        base_url = s.openai_base_url
+        if base_url and not base_url.startswith(("http://", "https://")):
+            # httpx rejects a schemeless URL only once a request is in flight, which reads as a
+            # connection error and gets retried for minutes before surfacing.
+            raise ValueError(
+                f"OPENAI_BASE_URL must include a scheme, got {base_url!r} "
+                f"(try https://{base_url})"
+            )
         _openai_client = OpenAI(
             api_key=s.openai_api_key,
-            base_url=s.openai_base_url or None,
+            base_url=base_url or None,
             max_retries=s.embedding_max_retries,
             timeout=s.embedding_timeout_seconds,
         )
@@ -100,12 +108,11 @@ def _openai_embed(texts: list[str]) -> list[list[float]]:
     the client's own retries cover most of it and this outer loop covers the rest.
     """
     s = get_settings()
+    client = _get_openai_client()  # a misconfigured client is not worth retrying
     delay = 5.0
     for attempt in range(s.embedding_max_retries + 1):
         try:
-            resp = _get_openai_client().embeddings.create(
-                model=s.embedding_model, input=texts
-            )
+            resp = client.embeddings.create(model=s.embedding_model, input=texts)
             return [d.embedding for d in resp.data]
         except Exception as exc:
             if attempt == s.embedding_max_retries:
