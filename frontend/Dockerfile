@@ -6,8 +6,9 @@ RUN npm ci
 FROM node:22-alpine AS builder
 WORKDIR /app
 # NEXT_PUBLIC_* values are inlined into the client bundle at build time, so this
-# must be set here rather than in the runner stage.
-ARG NEXT_PUBLIC_API_URL
+# must be set here rather than in the runner stage. The default matters: an unset build arg
+# inlines an empty string, which points every request at the frontend's own origin.
+ARG NEXT_PUBLIC_API_URL=https://api.ileracare.app
 ENV NEXT_TELEMETRY_DISABLED=1 \
     NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 COPY --from=deps /app/node_modules ./node_modules
