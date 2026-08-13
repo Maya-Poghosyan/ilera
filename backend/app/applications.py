@@ -1,12 +1,11 @@
 """Application completion engine.
 
 Manages the lifecycle of benefit applications: program->form-set mapping,
-application status persistence (Redis / in-memory), autofill + Q&A resolution,
+application status persistence (Postgres / in-memory), autofill + Q&A resolution,
 and stitching multiple filled PDFs into a single combined document.
 """
 
 import io
-import json
 import re
 from enum import Enum
 from typing import Any, Optional
@@ -14,7 +13,7 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field
 from pypdf import PdfWriter
 
-from .config import get_settings
+from . import db
 from .forms.discovery import discover_fields, field_index
 from .forms.filler import load_schema, resolve_fields
 from .forms.groups import (
@@ -112,65 +111,24 @@ class ApplicationState(BaseModel):
     questions: list[AppQuestion] = Field(default_factory=list)
 
 
-_memory: dict[str, str] = {}
-_REDIS_PREFIX = "ilera:app:"
+_store = db.JsonStore("applications", keys=("case_id", "program"))
 
 
-def _redis():
-    settings = get_settings()
-    if not settings.has_redis:
-        return None
-    import redis
-
-    return redis.from_url(settings.redis_url, decode_responses=True)
-
-
-def _key(case_id: str, program: str) -> str:
-    slug = program.lower().replace(" ", "_").replace("/", "_")
-    return f"{_REDIS_PREFIX}{case_id}:{slug}"
-
-
-def _mem_key(case_id: str, program: str) -> str:
-    slug = program.lower().replace(" ", "_").replace("/", "_")
-    return f"{case_id}:{slug}"
+def _slug(program: str) -> str:
+    return program.lower().replace(" ", "_").replace("/", "_")
 
 
 def save_app_state(state: ApplicationState) -> None:
-    payload = state.model_dump_json()
-    client = _redis()
-    if client is not None:
-        client.set(_key(state.case_id, state.program), payload)
-    else:
-        _memory[_mem_key(state.case_id, state.program)] = payload
+    _store.put((state.case_id, _slug(state.program)), state.model_dump_json())
 
 
 def get_app_state(case_id: str, program: str) -> Optional[ApplicationState]:
-    client = _redis()
-    k = _key(case_id, program) if client is not None else _mem_key(case_id, program)
-    raw = client.get(k) if client is not None else _memory.get(k)
-    if not raw:
-        return None
-    return ApplicationState.model_validate(json.loads(raw))
+    doc = _store.get((case_id, _slug(program)))
+    return ApplicationState.model_validate(doc) if doc else None
 
 
 def list_app_states(case_id: str) -> list[ApplicationState]:
-    client = _redis()
-    if client is not None:
-        pattern = f"{_REDIS_PREFIX}{case_id}:*"
-        keys = client.keys(pattern)
-        if not keys:
-            return []
-        pipe = client.pipeline()
-        for k in keys:
-            pipe.get(k)
-        results = pipe.execute()
-        return [ApplicationState.model_validate(json.loads(r)) for r in results if r]
-    prefix = f"{case_id}:"
-    return [
-        ApplicationState.model_validate(json.loads(v))
-        for k, v in _memory.items()
-        if k.startswith(prefix)
-    ]
+    return [ApplicationState.model_validate(doc) for doc in _store.list(case_id)]
 
 
 # ---------------------------------------------------------------------------

@@ -1,10 +1,9 @@
-"""Reminder scheduling — model, persistence (Redis / in-memory), and templates.
+"""Reminder scheduling — model, persistence (Postgres / in-memory), and templates.
 
 A Reminder fires a Poke message on a schedule (daily, weekly, once).
 Persistence mirrors the CaseProfile pattern in store.py.
 """
 
-import json
 import uuid
 from datetime import date, datetime, time, timedelta, timezone
 from enum import Enum
@@ -13,6 +12,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, Field
 
+from . import db
 from .config import get_settings
 
 # ---------------------------------------------------------------------------
@@ -114,70 +114,27 @@ def advance_next_run(reminder: Reminder) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Persistence (Redis / in-memory)
+# Persistence (Postgres / in-memory)
 # ---------------------------------------------------------------------------
 
-_memory: dict[str, str] = {}
-_REDIS_PREFIX = "ilera:reminder:"
-
-
-def _redis():
-    settings = get_settings()
-    if not settings.has_redis:
-        return None
-    import redis
-
-    return redis.from_url(settings.redis_url, decode_responses=True)
-
-
-def _key(reminder_id: str) -> str:
-    return f"{_REDIS_PREFIX}{reminder_id}"
+_store = db.JsonStore("reminders")
 
 
 def save_reminder(reminder: Reminder) -> None:
-    payload = reminder.model_dump_json()
-    client = _redis()
-    if client is not None:
-        client.set(_key(reminder.id), payload)
-    else:
-        _memory[reminder.id] = payload
+    _store.put(reminder.id, reminder.model_dump_json())
 
 
 def get_reminder(reminder_id: str) -> Optional[Reminder]:
-    client = _redis()
-    raw = (
-        client.get(_key(reminder_id))
-        if client is not None
-        else _memory.get(reminder_id)
-    )
-    if not raw:
-        return None
-    return Reminder.model_validate(json.loads(raw))
+    doc = _store.get(reminder_id)
+    return Reminder.model_validate(doc) if doc else None
 
 
 def list_reminders() -> list[Reminder]:
-    client = _redis()
-    if client is not None:
-        keys = client.keys(f"{_REDIS_PREFIX}*")
-        if not keys:
-            return []
-        pipe = client.pipeline()
-        for k in keys:
-            pipe.get(k)
-        results = pipe.execute()
-        return [
-            Reminder.model_validate(json.loads(r)) for r in results if r
-        ]
-    return [
-        Reminder.model_validate(json.loads(v)) for v in _memory.values()
-    ]
+    return [Reminder.model_validate(doc) for doc in _store.list()]
 
 
 def delete_reminder(reminder_id: str) -> bool:
-    client = _redis()
-    if client is not None:
-        return client.delete(_key(reminder_id)) > 0
-    return _memory.pop(reminder_id, None) is not None
+    return _store.delete(reminder_id)
 
 
 # ---------------------------------------------------------------------------

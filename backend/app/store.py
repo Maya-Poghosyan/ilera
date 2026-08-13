@@ -1,37 +1,18 @@
-"""CaseProfile persistence. Uses Redis when configured, else an in-memory dict.
+"""CaseProfile persistence. Uses Postgres when configured, else an in-memory dict.
 
-The Redis path stores the profile as JSON under `ilera:case:{id}`. Swap this for the
-Redis Agent Memory Server when wiring long-term memory.
+The Postgres path stores the profile whole as `jsonb` in the `cases` table.
 """
 
-import json
 from datetime import datetime, timezone
 from typing import Optional
 
-from .config import get_settings
+from . import db
 from .models import CaseProfile, EligibilityResult, MatchLevel, SpecialistFinding
 
-_memory: dict[str, str] = {}
-# Fallback (no-Redis) room_id -> case_id map. With Redis, both API and Band worker
+_cases = db.JsonStore("cases")
+# Fallback (no-database) room_id -> case_id map. With Postgres, both API and Band worker
 # processes share the mapping; in-memory only works single-process.
 _room_map: dict[str, str] = {}
-
-
-def _redis():
-    settings = get_settings()
-    if not settings.has_redis:
-        return None
-    import redis  # local import so the app boots without redis configured
-
-    return redis.from_url(settings.redis_url, decode_responses=True)
-
-
-def _key(case_id: str) -> str:
-    return f"ilera:case:{case_id}"
-
-
-def _room_key(room_id: str) -> str:
-    return f"ilera:band:room:{room_id}"
 
 
 # ---------------------------------------------------------------------------
@@ -39,21 +20,28 @@ def _room_key(room_id: str) -> str:
 #
 # A Band specialist tool only knows the room it is running in (ctx.deps.room_id).
 # This mapping lets the tool resolve the room back to the owning case and persist
-# its structured finding. Redis is the shared bus between the API and worker.
+# its structured finding. The database is the shared bus between the API and worker.
 # ---------------------------------------------------------------------------
 def map_room_to_case(room_id: str, case_id: str) -> None:
-    client = _redis()
-    if client is not None:
-        client.set(_room_key(room_id), case_id)
-    else:
+    if not db.available():
         _room_map[room_id] = case_id
+        return
+    with db.connection() as conn:
+        conn.execute(
+            "INSERT INTO band_rooms (room_id, case_id) VALUES (%s, %s) "
+            "ON CONFLICT (room_id) DO UPDATE SET case_id = EXCLUDED.case_id",
+            (room_id, case_id),
+        )
 
 
 def get_case_for_room(room_id: str) -> Optional[str]:
-    client = _redis()
-    if client is not None:
-        return client.get(_room_key(room_id))
-    return _room_map.get(room_id)
+    if not db.available():
+        return _room_map.get(room_id)
+    with db.connection() as conn:
+        row = conn.execute(
+            "SELECT case_id FROM band_rooms WHERE room_id = %s", (room_id,)
+        ).fetchone()
+    return row[0] if row else None
 
 
 # ---------------------------------------------------------------------------
@@ -133,17 +121,9 @@ def record_strategy(room_id: str, strategy: str) -> Optional[str]:
 
 
 def save_profile(profile: CaseProfile) -> None:
-    payload = profile.model_dump_json()
-    client = _redis()
-    if client is not None:
-        client.set(_key(profile.id), payload)
-    else:
-        _memory[profile.id] = payload
+    _cases.put(profile.id, profile.model_dump_json())
 
 
 def get_profile(case_id: str) -> Optional[CaseProfile]:
-    client = _redis()
-    raw = client.get(_key(case_id)) if client is not None else _memory.get(case_id)
-    if not raw:
-        return None
-    return CaseProfile.model_validate(json.loads(raw))
+    doc = _cases.get(case_id)
+    return CaseProfile.model_validate(doc) if doc else None

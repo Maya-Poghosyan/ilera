@@ -10,7 +10,6 @@ Runs against the in-memory store (no services). Run directly or via pytest.
 import os
 import sys
 
-os.environ.pop("REDIS_URL", None)  # force the in-memory store fallback
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import applications  # noqa: E402

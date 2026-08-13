@@ -23,6 +23,7 @@ from .applications import (
     submit_answers,
     ApplicationState,
 )
+from . import db
 from .config import get_settings
 from .forms.filler import fill_pdf, list_schemas, resolve_fields
 from .geo import normalize_county, zip_to_county
@@ -230,7 +231,7 @@ def health() -> dict:
     index = get_index()
     return {
         "status": "ok",
-        "redis": settings.has_redis,
+        "postgres": db.ready(),
         "llm": settings.has_llm,
         "band": settings.has_band,
         "poke": poke.available(),

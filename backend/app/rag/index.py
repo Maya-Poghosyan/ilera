@@ -1,9 +1,7 @@
 """RAG index over official program documentation.
 
-Several backends with the same interface, tried in this order:
+Two backends with the same interface:
 - PgVectorIndex: chunks + vectors in Postgres, ANN in the database (used when DATABASE_URL is set).
-- RedisVLIndex / RedisVectorSetIndex / RedisKNNIndex: Redis, in decreasing order of how much of
-  the search the server itself can do (RediSearch, Vector Sets, or a Python cosine loop).
 - RagIndex: in-memory cosine fallback (no infrastructure needed).
 
 Building an index means embedding the whole corpus, which is expensive in memory and time, so
@@ -14,7 +12,6 @@ embedding on demand, and `build()` is reachable only through `rebuild_index()`.
 
 import glob
 import hashlib
-import heapq
 import json
 import logging
 import os
@@ -33,8 +30,6 @@ KNOWLEDGE_DIR = os.path.join(_DATA, "knowledge")
 DATA_DIR = os.path.join(_DATA, "program_docs")  # legacy sample docs (fallback)
 CHUNK_CHARS = 1400
 CHUNK_OVERLAP = 200
-INDEX_NAME = "ilera_docs"
-KEY_PREFIX = "ilera:doc"
 _PAGE_RE = re.compile(r"\[page (\d+)\]")
 
 logger = logging.getLogger(__name__)
@@ -285,298 +280,6 @@ class RagIndex:
         return results[:k]
 
 
-class RedisVLIndex:
-    """Vectors stored in Redis; KNN via RediSearch (the 'Best Use of Redis' path)."""
-
-    backend = "redis"
-
-    def __init__(self, redis_url: str) -> None:
-        from redisvl.index import SearchIndex
-        from redisvl.schema import IndexSchema
-
-        self._dim = dim()
-        schema = IndexSchema.from_dict(
-            {
-                "index": {"name": INDEX_NAME, "prefix": KEY_PREFIX, "storage_type": "hash"},
-                "fields": [
-                    {"name": "program", "type": "tag"},
-                    {"name": "source", "type": "text"},
-                    {"name": "title", "type": "text"},
-                    {"name": "source_url", "type": "text"},
-                    {"name": "document_id", "type": "tag"},
-                    {"name": "page", "type": "text"},
-                    {"name": "text", "type": "text"},
-                    {
-                        "name": "vector",
-                        "type": "vector",
-                        "attrs": {
-                            "dims": self._dim,
-                            "distance_metric": "cosine",
-                            "algorithm": "hnsw",
-                            "datatype": "float32",
-                        },
-                    },
-                ],
-            }
-        )
-        self._index = SearchIndex(schema, redis_url=redis_url)
-        self._size = 0
-
-    @property
-    def size(self) -> int:
-        return self._size
-
-    def ensure(self) -> int:
-        try:
-            n = int(self._index.info().get("num_docs", 0))
-        except Exception:
-            n = 0
-        if n:
-            self._size = n
-            return n
-        return _no_build(self.backend)
-
-    def build(self) -> int:
-        from redisvl.redis.utils import array_to_buffer
-
-        self._index.create(overwrite=True, drop=True)
-        written = 0
-        for batch in _embedded_batches():
-            self._index.load(
-                [
-                    {
-                        "id": c.id,
-                        "program": c.program,
-                        "source": c.source,
-                        "title": c.title,
-                        "source_url": c.source_url,
-                        "document_id": c.document_id,
-                        "page": c.page,
-                        "text": c.text,
-                        "vector": array_to_buffer(v, dtype="float32"),
-                    }
-                    for c, v in batch
-                ],
-                id_field="id",
-            )
-            written += len(batch)
-        self._size = written
-        return self._size
-
-    def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
-        from redisvl.query import VectorQuery
-        from redisvl.query.filter import Tag
-
-        qv = embed_one(query)
-        vq = VectorQuery(
-            vector=qv,
-            vector_field_name="vector",
-            return_fields=["program", "source", "title", "source_url", "document_id", "page", "text"],
-            num_results=k,
-            dtype="float32",
-        )
-        if program:
-            vq.set_filter(Tag("program") == program)
-        rows = self._index.query(vq)
-        out: list[Retrieved] = []
-        for r in rows:
-            # redisvl returns cosine distance; convert to similarity.
-            dist = float(r.get("vector_distance", 0.0))
-            out.append(
-                Retrieved(
-                    text=r.get("text", ""),
-                    program=r.get("program", ""),
-                    source=r.get("source", ""),
-                    score=1.0 - dist,
-                    title=r.get("title", ""),
-                    source_url=r.get("source_url", ""),
-                    document_id=r.get("document_id", ""),
-                    page=r.get("page", ""),
-                )
-            )
-        return out
-
-
-class RedisVectorSetIndex:
-    """Native Redis 8 Vector Sets (VADD/VSIM) — server-side vector KNN.
-
-    Used when the DB has the `vectorset` module (Redis >= 8) but not RediSearch.
-    Each chunk is one vector-set element; program/source/text live in its JSON attributes,
-    and program filtering uses VSIM's FILTER expression.
-    """
-
-    backend = "redis-vectorset"
-    SET_KEY = f"{KEY_PREFIX}:vset"
-
-    def __init__(self, redis_url: str) -> None:
-        import redis
-
-        self._r = redis.from_url(redis_url, decode_responses=True, socket_timeout=8)
-        # Fail fast if the vectorset module is missing so get_index() can fall back.
-        names = {m[1] for m in self._r.execute_command("MODULE", "LIST")}
-        if "vectorset" not in names:
-            raise RuntimeError("vectorset module not available")
-        self._size = 0
-
-    @property
-    def size(self) -> int:
-        return self._size
-
-    def ensure(self) -> int:
-        n = int(self._r.execute_command("VCARD", self.SET_KEY)) if self._r.exists(self.SET_KEY) else 0
-        if n:
-            self._size = n
-            return n
-        return _no_build(self.backend)
-
-    def build(self) -> int:
-        self._r.delete(self.SET_KEY)
-        written = 0
-        for batch in _embedded_batches():
-            pipe = self._r.pipeline(transaction=False)
-            for c, v in batch:
-                attrs = json.dumps({
-                    "program": c.program, "source": c.source, "text": c.text,
-                    "title": c.title, "source_url": c.source_url,
-                    "document_id": c.document_id, "page": c.page,
-                })
-                pipe.execute_command(
-                    "VADD", self.SET_KEY, "VALUES", len(v), *v, c.id, "SETATTR", attrs
-                )
-            pipe.execute()
-            written += len(batch)
-        self._size = written
-        return self._size
-
-    def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
-        if not self._r.exists(self.SET_KEY):
-            return []
-        qv = embed_one(query)
-        args = ["VSIM", self.SET_KEY, "VALUES", len(qv), *qv, "WITHSCORES", "COUNT", k]
-        if program:
-            args += ["FILTER", f'.program=="{program}"']
-        rows = self._r.execute_command(*args)
-        out: list[Retrieved] = []
-        for i in range(0, len(rows), 2):
-            element, score = rows[i], float(rows[i + 1])
-            attrs = json.loads(self._r.execute_command("VGETATTR", self.SET_KEY, element) or "{}")
-            out.append(
-                Retrieved(
-                    text=attrs.get("text", ""),
-                    program=attrs.get("program", ""),
-                    source=attrs.get("source", ""),
-                    score=score,
-                    title=attrs.get("title", ""),
-                    source_url=attrs.get("source_url", ""),
-                    document_id=attrs.get("document_id", ""),
-                    page=attrs.get("page", ""),
-                )
-            )
-        return out
-
-
-class RedisKNNIndex:
-    """Vectors + metadata stored in Redis hashes; cosine ranking in Python.
-
-    Works on any Redis (no special module required). Last-resort Redis backend when neither
-    RediSearch nor Vector Sets are available.
-    """
-
-    backend = "redis-knn"
-
-    def __init__(self, redis_url: str) -> None:
-        import redis
-
-        self._r = redis.from_url(redis_url, decode_responses=True, socket_timeout=8)
-        self._ids_key = f"{KEY_PREFIX}:ids"
-        self._size = 0
-
-    @property
-    def size(self) -> int:
-        return self._size
-
-    def ensure(self) -> int:
-        n = int(self._r.scard(self._ids_key) or 0)
-        if n:
-            self._size = n
-            return n
-        return _no_build(self.backend)
-
-    def build(self) -> int:
-        pipe = self._r.pipeline(transaction=False)
-        for cid in self._r.smembers(self._ids_key):
-            pipe.delete(f"{KEY_PREFIX}:{cid}")
-        pipe.delete(self._ids_key)
-        pipe.execute()
-        written = 0
-        for batch in _embedded_batches():
-            pipe = self._r.pipeline(transaction=False)
-            for c, v in batch:
-                pipe.hset(
-                    f"{KEY_PREFIX}:{c.id}",
-                    mapping={
-                        "program": c.program,
-                        "source": c.source,
-                        "title": c.title,
-                        "source_url": c.source_url,
-                        "document_id": c.document_id,
-                        "page": c.page,
-                        "text": c.text,
-                        "vector": json.dumps(v),
-                    },
-                )
-                pipe.sadd(self._ids_key, c.id)
-            pipe.execute()
-            written += len(batch)
-        self._size = written
-        return self._size
-
-    def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
-        """Brute-force scan, but only ever holding one batch of rows and the current top k.
-
-        Every scored chunk carries its full text, so materializing the whole corpus per query
-        (and one round trip per chunk) is what makes this backend expensive — with several
-        specialists querying concurrently it dominates the process's memory.
-        """
-        ids = sorted(self._r.smembers(self._ids_key))
-        if not ids:
-            return []
-        qv = embed_one(query)
-        batch = max(1, get_settings().index_write_batch_size)
-        best: list[tuple[float, int, Retrieved]] = []
-        seq = 0
-        for start in range(0, len(ids), batch):
-            pipe = self._r.pipeline(transaction=False)
-            for cid in ids[start : start + batch]:
-                pipe.hgetall(f"{KEY_PREFIX}:{cid}")
-            for data in pipe.execute():
-                if not data or (program and data.get("program") != program):
-                    continue
-                score = _cosine(qv, json.loads(data["vector"]))
-                if len(best) == k and score <= best[0][0]:
-                    continue
-                seq += 1
-                heapq.heappush(
-                    best,
-                    (
-                        score,
-                        seq,
-                        Retrieved(
-                            text=data.get("text", ""),
-                            program=data.get("program", ""),
-                            source=data.get("source", ""),
-                            score=score,
-                            title=data.get("title", ""),
-                            source_url=data.get("source_url", ""),
-                            document_id=data.get("document_id", ""),
-                            page=data.get("page", ""),
-                        ),
-                    ),
-                )
-                if len(best) > k:
-                    heapq.heappop(best)
-        return [r for _, _, r in sorted(best, key=lambda t: t[0], reverse=True)]
-
 
 class PgVectorIndex:
     """Chunks + vectors in Postgres; KNN in the database via pgvector.
@@ -798,16 +501,6 @@ def _make_index(*, force: bool):
             return idx
         except Exception:
             logger.exception("pgvector index unavailable — falling back")
-    if settings.has_redis:
-        # Prefer native server-side vector KNN (RediSearch or Redis 8 Vector Sets);
-        # fall back to a Redis-backed brute-force index if neither module is present.
-        for cls in (RedisVLIndex, RedisVectorSetIndex, RedisKNNIndex):
-            try:
-                idx = cls(settings.redis_url)
-                idx.build() if force else idx.ensure()
-                return idx
-            except Exception:
-                continue
     idx = RagIndex()
     idx.build() if force else idx.ensure()
     return idx
@@ -834,8 +527,8 @@ def rebuild_index():
 def sync_index() -> tuple[object, SyncResult]:
     """Bring the active backend in line with the corpus, re-embedding only what changed.
 
-    Only pgvector tracks per-document fingerprints; the Redis and in-memory backends have no
-    way to tell what changed, so for them this is a full rebuild.
+    Only pgvector tracks per-document fingerprints; the in-memory backend has no way to tell
+    what changed, so for it this is a full rebuild.
     """
     global _index
     with _index_lock:

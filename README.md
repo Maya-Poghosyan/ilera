@@ -5,19 +5,18 @@ Ilera helps unpaid caregivers discover, optimize, and apply for state/federal be
 official program documentation, then supports them with a care calendar, timekeeping,
 and a document store.
 
-Built for the UC Berkeley AI Hackathon. Tracks: **Band** (multi-agent), **Redis**
-(RAG + agent memory + document store), **Poke** (agentic reminders), **Devin**
-(built with Devin).
+Built for the UC Berkeley AI Hackathon. Tracks: **Band** (multi-agent), **Poke**
+(agentic reminders), **Devin** (built with Devin).
 
 ## Architecture
 
 ```
 Next.js frontend  ──REST──▶  FastAPI backend
-  intake wizard                 CaseProfile (Redis / in-memory)
+  intake wizard                 accounts, CaseProfile, records (Postgres / in-memory)
   eligibility cards               │
   dashboard                       ├─ Routing Agent ──▶ specialist agents (IHSS, Medi-Cal, PFL, VA)
                                   │       coordinate in a shared agent space (Band)
-                                  ├─ RAG over program docs (RedisVL)
+                                  ├─ RAG over program docs (pgvector)
                                   └─ form fill + stitch (pypdf / fillpdf)
                           integrations: Poke (SMS/email)
 ```
@@ -31,7 +30,7 @@ frontend/   Next.js 14 + TS + Tailwind + shadcn/ui
 backend/    FastAPI app
   app/
     agents/     routing + specialists + Band shared space
-    rag/        embeddings + vector index (pgvector, RedisVL, in-memory fallback)
+    rag/        embeddings + vector index (pgvector, in-memory fallback)
     forms/      PDF field-map fill + stitch
     models.py   CaseProfile + EligibilityResult
     main.py     API endpoints
@@ -53,7 +52,7 @@ Requires **Python ≥ 3.11** (`band-sdk` in `requirements.txt` does not support 
 cd backend
 python3.11 -m venv .venv && source .venv/bin/activate   # or any python ≥3.11
 pip install -r requirements.txt
-cp .env.example .env        # optional: add Redis / Postgres / LLM / Band / Poke keys
+cp .env.example .env        # optional: add Postgres / LLM / Band / Poke keys
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -64,7 +63,7 @@ only place it happens — the server never builds an index, it attaches to one.
 
 ```bash
 cd backend
-DATABASE_URL=postgresql://... python -m app.rag.ingest   # or REDIS_URL=...
+DATABASE_URL=postgresql://... python -m app.rag.ingest
 ```
 
 The ingest is incremental and safe to re-run: every document is stored with a fingerprint of
@@ -79,9 +78,9 @@ push to `main`. It needs the `DATABASE_URL` and `OPENAI_API_KEY` repository secr
 runners.
 
 With `DATABASE_URL` set (Postgres + `pgvector`) the chunk text and the KNN both live in the
-database; without it, the index falls back to Redis and then to memory (neither tracks
-fingerprints, so for those a sync is a full rebuild). If you deploy before ingesting, the
-server logs an error and retrieval returns nothing — `/health` reports `rag_chunks: 0`.
+database; without it, the index falls back to memory (which tracks no fingerprints, so there a
+sync is a full rebuild). If you deploy before ingesting, the server logs an error and retrieval
+returns nothing — `/health` reports `rag_chunks: 0`.
 
 ### Frontend
 
@@ -98,7 +97,7 @@ Then open http://localhost:3000 → **Start intake** → eligibility results →
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/health` | status + whether Redis/LLM are configured + RAG chunk count |
+| GET | `/health` | status + whether Postgres/LLM are configured + RAG chunk count |
 | POST | `/api/intake` | create/update a CaseProfile |
 | GET | `/api/case/{id}` | fetch a CaseProfile |
 | POST | `/api/eligibility/{id}` | run routing + specialists, return ranked results |
@@ -127,8 +126,10 @@ chat (iMessage, WhatsApp, Telegram, RCS). Set `POKE_API_KEY` in `backend/.env`.
 
 ## Next steps (wiring real services)
 
-- **Redis:** set `REDIS_URL`; replace the in-memory index in `app/rag/index.py` with a
-  RedisVL `SearchIndex`, and back the CaseProfile with the Redis Agent Memory Server.
+- **Postgres:** set `DATABASE_URL` and every store persists — `users`, `cases`, `band_rooms`,
+  `reminders`, `timekeeping`, `journal`, `renewals`, `applications`, `preferences`,
+  `suggested_events` (all created on first use) — and the same database serves the pgvector
+  RAG index. Without it, each store falls back to an in-process dict.
 - **LLM:** set `OPENAI_API_KEY` (OpenAI or an Azure OpenAI endpoint via `OPENAI_BASE_URL`);
   replace heuristic `assess()` bodies in `app/agents/specialists.py` with grounded LLM calls.
 - **Band:** wired as a true multi-agent system — **each program group is its own Band agent**
@@ -142,5 +143,4 @@ chat (iMessage, WhatsApp, Telegram, RCS). Set `POKE_API_KEY` in `backend/.env`.
   still handles in-process coordination for the synchronous HTTP flow.
 - **Poke:** `POKE_API_KEY` is now wired — reminders are delivered. See the Poke section above.
 - **Forms:** drop fillable government PDFs into `backend/data/` and fill out the field-map JSONs.
-- Run `npx skills add redis/agent-skills` so AI writes Redis code the Redis-expert way.
 ```

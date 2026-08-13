@@ -21,9 +21,6 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_hours: int = 72
 
-    # Redis (RAG + agent memory + document store)
-    redis_url: str = ""
-
     # LLM (OpenAI or an OpenAI-compatible endpoint such as Azure OpenAI)
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
@@ -51,8 +48,9 @@ class Settings(BaseSettings):
     embedding_threads: int = 1
     # Chunks written to the index per round trip when (re)building it.
     index_write_batch_size: int = 200
-    # Postgres + pgvector connection string. When set it is the RAG backend: the database does
-    # the KNN and holds the chunk text, so this process only embeds one-line queries.
+    # Postgres + pgvector connection string. The store of record for accounts, cases, and every
+    # other record (see db.py). Also the RAG backend: the database does the KNN and holds the
+    # chunk text, so this process only embeds one-line queries.
     database_url: str = ""
 
     # Multi-agent (Band)
@@ -71,10 +69,6 @@ class Settings(BaseSettings):
     # Shared secret Poke must present as a bearer token on the /mcp mount.
     # Empty disables the check (local development only).
     mcp_api_key: str = ""
-
-    @property
-    def has_redis(self) -> bool:
-        return bool(self.redis_url)
 
     @property
     def has_postgres(self) -> bool:
