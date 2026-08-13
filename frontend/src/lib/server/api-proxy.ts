@@ -51,7 +51,10 @@ const PASS_THROUGH = ["content-type", "content-disposition", "cache-control"];
 
 /** Forward a browser request to the backend and relay the reply verbatim.
  *
- * The body is streamed rather than parsed so filled PDFs pass through as bytes. */
+ * The body is streamed rather than parsed so filled PDFs pass through as bytes.
+ *
+ * A backend that can't be reached answers 502 with a reason: an unhandled fetch rejection here
+ * would surface as a blank 500, indistinguishable from a bug in this app. */
 export async function proxyToApi(
   request: NextRequest,
   path: string,
@@ -59,11 +62,20 @@ export async function proxyToApi(
   const search = request.nextUrl.search;
   const hasBody = request.method !== "GET" && request.method !== "HEAD";
   const contentType = request.headers.get("content-type");
-  const upstream = await callApi(`${path}${search}`, {
-    method: request.method,
-    headers: contentType ? { "content-type": contentType } : undefined,
-    body: hasBody ? await request.text() : undefined,
-  });
+  let upstream: Response;
+  try {
+    upstream = await callApi(`${path}${search}`, {
+      method: request.method,
+      headers: contentType ? { "content-type": contentType } : undefined,
+      body: hasBody ? await request.text() : undefined,
+    });
+  } catch (err) {
+    console.error(`api proxy: ${request.method} ${path} -> ${apiUrl()} failed`, err);
+    return Response.json(
+      { detail: "The API is unreachable." },
+      { status: 502 },
+    );
+  }
   const headers = new Headers();
   for (const name of PASS_THROUGH) {
     const value = upstream.headers.get(name);

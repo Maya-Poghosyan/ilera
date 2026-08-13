@@ -33,12 +33,18 @@ export async function startSession(
   request: NextRequest,
   path: "/api/auth/signup" | "/api/auth/login",
 ): Promise<Response> {
-  const upstream = await callApi(path, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: await request.text(),
-    token: null,
-  });
+  let upstream: Response;
+  try {
+    upstream = await callApi(path, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: await request.text(),
+      token: null,
+    });
+  } catch (err) {
+    console.error(`api proxy: POST ${path} failed`, err);
+    return Response.json({ detail: "The API is unreachable." }, { status: 502 });
+  }
   const body = await upstream.json().catch(() => null);
   if (!upstream.ok) {
     return Response.json(body ?? { detail: "Authentication failed" }, {
