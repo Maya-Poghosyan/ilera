@@ -13,7 +13,7 @@ Built for the UC Berkeley AI Hackathon. Tracks: **Band** (multi-agent), **Redis*
 
 ```
 Next.js frontend  ──REST──▶  FastAPI backend
-  intake wizard                 accounts + CaseProfile (Postgres / in-memory)
+  intake wizard                 accounts, CaseProfile, records (Postgres / in-memory)
   eligibility cards               │
   dashboard                       ├─ Routing Agent ──▶ specialist agents (IHSS, Medi-Cal, PFL, VA)
                                   │       coordinate in a shared agent space (Band)
@@ -127,11 +127,11 @@ chat (iMessage, WhatsApp, Telegram, RCS). Set `POKE_API_KEY` in `backend/.env`.
 
 ## Next steps (wiring real services)
 
-- **Postgres:** set `DATABASE_URL`; accounts, CaseProfiles, and the Band room map move out of
-  memory into the `users`, `cases`, and `band_rooms` tables (created on first use), and the
-  same database serves the pgvector RAG index.
-- **Redis:** set `REDIS_URL` to persist reminders, care records, and application state; it is
-  also the RAG index fallback when `DATABASE_URL` is unset.
+- **Postgres:** set `DATABASE_URL` and every store persists — `users`, `cases`, `band_rooms`,
+  `reminders`, `timekeeping`, `journal`, `renewals`, `applications`, `preferences`,
+  `suggested_events` (all created on first use) — and the same database serves the pgvector
+  RAG index. Without it, each store falls back to an in-process dict.
+- **Redis:** only the RAG index fallback for when `DATABASE_URL` is unset.
 - **LLM:** set `OPENAI_API_KEY` (OpenAI or an Azure OpenAI endpoint via `OPENAI_BASE_URL`);
   replace heuristic `assess()` bodies in `app/agents/specialists.py` with grounded LLM calls.
 - **Band:** wired as a true multi-agent system — **each program group is its own Band agent**

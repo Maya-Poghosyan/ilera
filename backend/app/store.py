@@ -3,14 +3,13 @@
 The Postgres path stores the profile whole as `jsonb` in the `cases` table.
 """
 
-import json
 from datetime import datetime, timezone
 from typing import Optional
 
 from . import db
 from .models import CaseProfile, EligibilityResult, MatchLevel, SpecialistFinding
 
-_memory: dict[str, str] = {}
+_cases = db.JsonStore("cases")
 # Fallback (no-database) room_id -> case_id map. With Postgres, both API and Band worker
 # processes share the mapping; in-memory only works single-process.
 _room_map: dict[str, str] = {}
@@ -122,29 +121,9 @@ def record_strategy(room_id: str, strategy: str) -> Optional[str]:
 
 
 def save_profile(profile: CaseProfile) -> None:
-    payload = profile.model_dump_json()
-    if not db.available():
-        _memory[profile.id] = payload
-        return
-    with db.connection() as conn:
-        conn.execute(
-            "INSERT INTO cases (id, profile) VALUES (%s, %s::jsonb) "
-            "ON CONFLICT (id) DO UPDATE SET profile = EXCLUDED.profile, updated_at = now()",
-            (profile.id, payload),
-        )
+    _cases.put(profile.id, profile.model_dump_json())
 
 
 def get_profile(case_id: str) -> Optional[CaseProfile]:
-    if db.available():
-        with db.connection() as conn:
-            row = conn.execute(
-                "SELECT profile FROM cases WHERE id = %s", (case_id,)
-            ).fetchone()
-        if not row:
-            return None
-        raw = row[0]
-        return CaseProfile.model_validate(raw if isinstance(raw, dict) else json.loads(raw))
-    raw = _memory.get(case_id)
-    if not raw:
-        return None
-    return CaseProfile.model_validate(json.loads(raw))
+    doc = _cases.get(case_id)
+    return CaseProfile.model_validate(doc) if doc else None
