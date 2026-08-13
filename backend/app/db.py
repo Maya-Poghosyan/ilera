@@ -27,15 +27,36 @@ CREATE TABLE IF NOT EXISTS users (
     name            text NOT NULL,
     email           text NOT NULL UNIQUE,
     hashed_password text NOT NULL,
-    case_id         text,
     created_at      text NOT NULL DEFAULT ''
 );
 
+-- owner_user_id is nullable because intake runs before there is an account: a case starts
+-- unowned, reachable only by whoever holds its id, and is claimed at signup. The foreign key
+-- makes an owner that isn't a real user impossible; ownership checks are enforced in access.py.
 CREATE TABLE IF NOT EXISTS cases (
-    id         text PRIMARY KEY,
-    doc        jsonb NOT NULL,
-    updated_at timestamptz NOT NULL DEFAULT now()
+    id            text PRIMARY KEY,
+    owner_user_id text REFERENCES users (id) ON DELETE CASCADE,
+    doc           jsonb NOT NULL,
+    updated_at    timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE cases ADD COLUMN IF NOT EXISTS owner_user_id text REFERENCES users (id) ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS cases_owner_idx ON cases (owner_user_id);
+
+-- Ownership used to be a users.case_id pointer, which allowed two users to name the same case
+-- and let a case outlive any claim to it. Adopt those pointers as ownership, then drop them so
+-- cases.owner_user_id is the only answer to "whose case is this".
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'users' AND column_name = 'case_id'
+    ) THEN
+        UPDATE cases c SET owner_user_id = u.id
+          FROM users u
+         WHERE u.case_id = c.id AND c.owner_user_id IS NULL;
+        ALTER TABLE users DROP COLUMN case_id;
+    END IF;
+END $$;
 
 -- A Band specialist tool only knows the room it runs in, so it resolves the room back
 -- to the owning case through here. Shared by the API and the Band worker process.

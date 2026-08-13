@@ -5,11 +5,13 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from pydantic import BaseModel
 
+from .access import authorize_case, require_case_access
+from .auth import User, get_optional_user
 from .auth import router as auth_router
 from .applications import (
     AppStatus,
@@ -60,7 +62,7 @@ from .records import (
     save_timekeeping,
 )
 from .preferences import Preferences, get_preferences, save_preferences
-from .store import get_profile, save_profile
+from .store import get_profile, purge_unclaimed_cases, save_profile
 from .suggested_events import (
     SuggestedEvent,
     delete_suggested_event,
@@ -131,9 +133,29 @@ async def _scheduler_loop() -> None:
             logger.exception("Scheduler tick error")
 
 
+_PURGE_INTERVAL = 24 * 60 * 60  # seconds between unclaimed-case sweeps
+
+
+async def _purge_loop() -> None:
+    """Drop cases whose intake was abandoned before anyone signed up."""
+    while True:
+        try:
+            await asyncio.sleep(_PURGE_INTERVAL)
+            deleted = await asyncio.to_thread(
+                purge_unclaimed_cases, settings.unclaimed_case_ttl_days
+            )
+            if deleted:
+                logger.info("Purged %d unclaimed case(s)", deleted)
+        except asyncio.CancelledError:
+            break
+        except Exception:
+            logger.exception("Unclaimed-case purge failed")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     task = asyncio.create_task(_scheduler_loop())
+    purge_task = asyncio.create_task(_purge_loop())
     band_task = None
     # Band is the eligibility engine: keep the routing + specialist agents connected for the
     # life of the server so they react to per-case rooms as they are created.
@@ -145,12 +167,14 @@ async def lifespan(app: FastAPI):
         band_task = asyncio.create_task(_band_loop())
     yield
     task.cancel()
+    purge_task.cancel()
     if band_task:
         band_task.cancel()
-    try:
-        await task
-    except asyncio.CancelledError:
-        pass
+    for background in (task, purge_task):
+        try:
+            await background
+        except asyncio.CancelledError:
+            pass
     if band_task:
         try:
             await band_task
@@ -274,7 +298,7 @@ async def submit_intake(req: IntakeRequest) -> CaseProfile:
 
 
 @app.get("/api/case/{case_id}", response_model=CaseProfile)
-def read_case(case_id: str) -> CaseProfile:
+def read_case(case_id: str, _: str = Depends(require_case_access)) -> CaseProfile:
     profile = get_profile(case_id)
     if profile is None:
         raise HTTPException(status_code=404, detail="case not found")
@@ -483,7 +507,9 @@ def _eligibility_response(profile: CaseProfile) -> EligibilityResponse:
 
 
 @app.post("/api/eligibility/{case_id}", response_model=EligibilityResponse)
-def determine_eligibility(case_id: str) -> EligibilityResponse:
+def determine_eligibility(
+    case_id: str, _: str = Depends(require_case_access)
+) -> EligibilityResponse:
     """Start (idempotently) the Band eligibility run for a case and return current status.
     Band is the sole engine — poll GET /api/eligibility/{case_id} until status is complete."""
     profile = _ensure_eligibility_started(case_id)
@@ -496,7 +522,9 @@ def determine_eligibility(case_id: str) -> EligibilityResponse:
 
 
 @app.get("/api/eligibility/{case_id}", response_model=EligibilityResponse)
-def get_eligibility(case_id: str) -> EligibilityResponse:
+def get_eligibility(
+    case_id: str, _: str = Depends(require_case_access)
+) -> EligibilityResponse:
     """Read the current eligibility status/results/strategy for a case (safe to poll)."""
     profile = get_profile(case_id)
     if profile is None:
@@ -552,7 +580,7 @@ def list_forms() -> dict:
 
 
 @app.get("/api/forms/{form_id}/{case_id}")
-def form_fields(form_id: str, case_id: str) -> dict:
+def form_fields(form_id: str, case_id: str, _: str = Depends(require_case_access)) -> dict:
     """Resolve field values for a form against a CaseProfile."""
     profile = get_profile(case_id)
     if profile is None:
@@ -561,7 +589,9 @@ def form_fields(form_id: str, case_id: str) -> dict:
 
 
 @app.get("/api/forms/{form_id}/{case_id}/download")
-def download_filled_form(form_id: str, case_id: str) -> Response:
+def download_filled_form(
+    form_id: str, case_id: str, _: str = Depends(require_case_access)
+) -> Response:
     """Stream a filled PDF for the given form and case."""
     profile = get_profile(case_id)
     if profile is None:
@@ -619,7 +649,11 @@ def api_list_reminders() -> list[Reminder]:
 
 
 @app.post("/api/reminders", status_code=201)
-def api_create_reminder(body: ReminderCreate) -> Reminder:
+def api_create_reminder(
+    body: ReminderCreate, user: Optional[User] = Depends(get_optional_user)
+) -> Reminder:
+    if body.case_id:
+        authorize_case(body.case_id, user)
     reminder = Reminder(
         case_id=body.case_id,
         kind=body.kind,
@@ -706,7 +740,7 @@ def api_list_programs() -> dict:
 
 
 @app.get("/api/applications/{case_id}")
-def api_list_applications(case_id: str) -> dict:
+def api_list_applications(case_id: str, _: str = Depends(require_case_access)) -> dict:
     """List application states for a case, seeded from eligibility results."""
     profile = get_profile(case_id)
     if profile is None:
@@ -739,7 +773,12 @@ class StatusUpdate(BaseModel):
 
 
 @app.patch("/api/applications/{case_id}/{program}")
-def api_update_app_status(case_id: str, program: str, body: StatusUpdate) -> dict:
+def api_update_app_status(
+    case_id: str,
+    program: str,
+    body: StatusUpdate,
+    _: str = Depends(require_case_access),
+) -> dict:
     """Update the status of an application."""
     state = get_app_state(case_id, program)
     if state is None:
@@ -750,7 +789,9 @@ def api_update_app_status(case_id: str, program: str, body: StatusUpdate) -> dic
 
 
 @app.post("/api/applications/{case_id}/{program}/start")
-def api_start_application(case_id: str, program: str) -> dict:
+def api_start_application(
+    case_id: str, program: str, _: str = Depends(require_case_access)
+) -> dict:
     """Start an application: autofill forms and return missing questions."""
     profile = get_profile(case_id)
     if profile is None:
@@ -763,7 +804,12 @@ class AnswersSubmit(BaseModel):
 
 
 @app.post("/api/applications/{case_id}/{program}/submit")
-def api_submit_answers(case_id: str, program: str, body: AnswersSubmit) -> Response:
+def api_submit_answers(
+    case_id: str,
+    program: str,
+    body: AnswersSubmit,
+    _: str = Depends(require_case_access),
+) -> Response:
     """Submit answers and return the stitched filled PDF."""
     profile = get_profile(case_id)
     if profile is None:
@@ -778,14 +824,21 @@ def api_submit_answers(case_id: str, program: str, body: AnswersSubmit) -> Respo
 
 
 @app.post("/api/applications/{case_id}/{program}/complete")
-def api_complete_application(case_id: str, program: str) -> dict:
+def api_complete_application(
+    case_id: str, program: str, _: str = Depends(require_case_access)
+) -> dict:
     """Mark application as completed."""
     complete_application(case_id, program)
     return {"program": program, "status": "completed"}
 
 
 @app.post("/api/applications/{case_id}/{program}/preview")
-def api_preview_stitched(case_id: str, program: str, body: AnswersSubmit) -> Response:
+def api_preview_stitched(
+    case_id: str,
+    program: str,
+    body: AnswersSubmit,
+    _: str = Depends(require_case_access),
+) -> Response:
     """Preview the stitched PDF without marking as completed."""
     profile = get_profile(case_id)
     if profile is None:
@@ -803,7 +856,7 @@ def api_preview_stitched(case_id: str, program: str, body: AnswersSubmit) -> Res
 
 
 @app.get("/api/preferences/{case_id}")
-def api_get_preferences(case_id: str) -> Preferences:
+def api_get_preferences(case_id: str, _: str = Depends(require_case_access)) -> Preferences:
     return get_preferences(case_id)
 
 
@@ -812,7 +865,9 @@ class PreferencesUpdate(BaseModel):
 
 
 @app.put("/api/preferences/{case_id}")
-def api_set_preferences(case_id: str, body: PreferencesUpdate) -> Preferences:
+def api_set_preferences(
+    case_id: str, body: PreferencesUpdate, _: str = Depends(require_case_access)
+) -> Preferences:
     prefs = get_preferences(case_id)
     prefs.monitor_inboxes = body.monitor_inboxes
     prefs.monitor_inboxes_updated_at = datetime.now(timezone.utc).isoformat()
@@ -820,7 +875,9 @@ def api_set_preferences(case_id: str, body: PreferencesUpdate) -> Preferences:
 
 
 @app.post("/api/poke/scan")
-def poke_scan_events(case_id: str | None = None) -> dict:
+def poke_scan_events(
+    case_id: str | None = None, user: Optional[User] = Depends(get_optional_user)
+) -> dict:
     """Ask Poke to scan the user's messages/emails for medical events.
 
     Requires inbox monitoring to be switched on for the case: that toggle is
@@ -831,6 +888,8 @@ def poke_scan_events(case_id: str | None = None) -> dict:
     queued — clients should poll ``/api/suggested-events`` for results.
     """
     resolved_case = case_id or settings.default_case_id
+    if case_id:
+        authorize_case(case_id, user)
     if not get_preferences(resolved_case).monitor_inboxes:
         raise HTTPException(status_code=403, detail="Inbox monitoring is turned off")
     if not poke.available():
@@ -889,12 +948,17 @@ class RenewalUpdate(BaseModel):
 
 
 @app.get("/api/records/timekeeping/{case_id}")
-def api_list_timekeeping(case_id: str) -> list[TimekeepingEntry]:
+def api_list_timekeeping(
+    case_id: str, _: str = Depends(require_case_access)
+) -> list[TimekeepingEntry]:
     return list_timekeeping(case_id)
 
 
 @app.post("/api/records/timekeeping", status_code=201)
-def api_create_timekeeping(body: TimekeepingCreate) -> TimekeepingEntry:
+def api_create_timekeeping(
+    body: TimekeepingCreate, user: Optional[User] = Depends(get_optional_user)
+) -> TimekeepingEntry:
+    authorize_case(body.case_id, user)
     entry = TimekeepingEntry(
         case_id=body.case_id,
         date=body.date,
@@ -910,19 +974,26 @@ def api_create_timekeeping(body: TimekeepingCreate) -> TimekeepingEntry:
 
 
 @app.delete("/api/records/timekeeping/{entry_id}")
-def api_delete_timekeeping(entry_id: str, case_id: str) -> dict:
+def api_delete_timekeeping(
+    entry_id: str, case_id: str, _: str = Depends(require_case_access)
+) -> dict:
     if not delete_timekeeping(entry_id, case_id):
         raise HTTPException(status_code=404, detail="timekeeping entry not found")
     return {"deleted": True}
 
 
 @app.get("/api/records/journal/{case_id}")
-def api_list_journal(case_id: str) -> list[JournalEntry]:
+def api_list_journal(
+    case_id: str, _: str = Depends(require_case_access)
+) -> list[JournalEntry]:
     return list_journal(case_id)
 
 
 @app.post("/api/records/journal", status_code=201)
-def api_create_journal(body: JournalCreate) -> JournalEntry:
+def api_create_journal(
+    body: JournalCreate, user: Optional[User] = Depends(get_optional_user)
+) -> JournalEntry:
+    authorize_case(body.case_id, user)
     entry = JournalEntry(
         case_id=body.case_id,
         date=body.date,
@@ -934,14 +1005,16 @@ def api_create_journal(body: JournalCreate) -> JournalEntry:
 
 
 @app.delete("/api/records/journal/{entry_id}")
-def api_delete_journal(entry_id: str, case_id: str) -> dict:
+def api_delete_journal(
+    entry_id: str, case_id: str, _: str = Depends(require_case_access)
+) -> dict:
     if not delete_journal(entry_id, case_id):
         raise HTTPException(status_code=404, detail="journal entry not found")
     return {"deleted": True}
 
 
 @app.get("/api/records/renewal/{case_id}")
-def api_get_renewal(case_id: str) -> RenewalInfo:
+def api_get_renewal(case_id: str, _: str = Depends(require_case_access)) -> RenewalInfo:
     info = get_renewal(case_id)
     if info is None:
         return RenewalInfo(case_id=case_id)
@@ -949,7 +1022,9 @@ def api_get_renewal(case_id: str) -> RenewalInfo:
 
 
 @app.put("/api/records/renewal/{case_id}")
-def api_put_renewal(case_id: str, body: RenewalUpdate) -> RenewalInfo:
+def api_put_renewal(
+    case_id: str, body: RenewalUpdate, _: str = Depends(require_case_access)
+) -> RenewalInfo:
     existing = get_renewal(case_id)
     if existing is None:
         existing = RenewalInfo(case_id=case_id)
@@ -964,7 +1039,7 @@ def api_put_renewal(case_id: str, body: RenewalUpdate) -> RenewalInfo:
 
 
 @app.get("/api/records/{case_id}")
-def api_records_summary(case_id: str) -> dict:
+def api_records_summary(case_id: str, _: str = Depends(require_case_access)) -> dict:
     """Combined summary: timekeeping + journal + renewal + fall_flag."""
     timekeeping = list_timekeeping(case_id)
     journal = list_journal(case_id)

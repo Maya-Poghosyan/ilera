@@ -10,7 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel
 
-from . import db
+from . import db, store
 from .config import get_settings
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -27,7 +27,6 @@ class User(BaseModel):
     name: str
     email: str
     hashed_password: str
-    case_id: Optional[str] = None
     created_at: str = ""
 
 
@@ -35,8 +34,20 @@ class UserPublic(BaseModel):
     id: str
     name: str
     email: str
+    # Derived from cases.owner_user_id rather than stored on the user, so there is one
+    # answer to who owns a case.
     case_id: Optional[str] = None
     created_at: str = ""
+
+
+def _public(user: User) -> UserPublic:
+    return UserPublic(
+        id=user.id,
+        name=user.name,
+        email=user.email,
+        case_id=store.get_case_id_for_user(user.id),
+        created_at=user.created_at,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -45,7 +56,7 @@ class UserPublic(BaseModel):
 
 _memory: dict[str, User] = {}
 
-_COLUMNS = "id, name, email, hashed_password, case_id, created_at"
+_COLUMNS = "id, name, email, hashed_password, created_at"
 
 
 def _row_to_user(row) -> User:
@@ -54,8 +65,7 @@ def _row_to_user(row) -> User:
         name=row[1],
         email=row[2],
         hashed_password=row[3],
-        case_id=row[4],
-        created_at=row[5],
+        created_at=row[4],
     )
 
 
@@ -66,19 +76,17 @@ def _save_user(user: User) -> None:
     with db.connection() as conn:
         conn.execute(
             f"""
-            INSERT INTO users ({_COLUMNS}) VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO users ({_COLUMNS}) VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (id) DO UPDATE SET
                 name = EXCLUDED.name,
                 email = EXCLUDED.email,
-                hashed_password = EXCLUDED.hashed_password,
-                case_id = EXCLUDED.case_id
+                hashed_password = EXCLUDED.hashed_password
             """,
             (
                 user.id,
                 user.name,
                 user.email.lower(),
                 user.hashed_password,
-                user.case_id,
                 user.created_at,
             ),
         )
@@ -225,17 +233,7 @@ def signup(req: SignupRequest) -> AuthResponse:
     )
     _save_user(user)
 
-    token = _create_token(user.id)
-    return AuthResponse(
-        token=token,
-        user=UserPublic(
-            id=user.id,
-            name=user.name,
-            email=user.email,
-            case_id=user.case_id,
-            created_at=user.created_at,
-        ),
-    )
+    return AuthResponse(token=_create_token(user.id), user=_public(user))
 
 
 @router.post("/login", response_model=AuthResponse)
@@ -244,45 +242,30 @@ def login(req: LoginRequest) -> AuthResponse:
     if user is None or not _verify_password(req.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    token = _create_token(user.id)
-    return AuthResponse(
-        token=token,
-        user=UserPublic(
-            id=user.id,
-            name=user.name,
-            email=user.email,
-            case_id=user.case_id,
-            created_at=user.created_at,
-        ),
-    )
+    return AuthResponse(token=_create_token(user.id), user=_public(user))
 
 
 @router.get("/me", response_model=UserPublic)
 def me(user: User = Depends(get_current_user)) -> UserPublic:
-    return UserPublic(
-        id=user.id,
-        name=user.name,
-        email=user.email,
-        case_id=user.case_id,
-        created_at=user.created_at,
-    )
+    return _public(user)
+
+
+class UpdateMeRequest(BaseModel):
+    name: Optional[str] = None
+    # The case the caller finished anonymously, to claim now that they have an account.
+    case_id: Optional[str] = None
 
 
 @router.patch("/me", response_model=UserPublic)
 def update_me(
-    body: dict,
+    body: UpdateMeRequest,
     user: User = Depends(get_current_user),
 ) -> UserPublic:
-    """Update the current user's case_id (links their profile to a case)."""
-    if "case_id" in body:
-        user.case_id = body["case_id"]
-    if "name" in body:
-        user.name = body["name"]
-    _save_user(user)
-    return UserPublic(
-        id=user.id,
-        name=user.name,
-        email=user.email,
-        case_id=user.case_id,
-        created_at=user.created_at,
-    )
+    """Rename the account, and/or claim the case whose intake was completed anonymously."""
+    if body.name is not None:
+        user.name = body.name
+        _save_user(user)
+    if body.case_id and not store.claim_case(body.case_id, user.id):
+        # Unowned cases are claimable; anything else is either gone or somebody's already.
+        raise HTTPException(status_code=404, detail="case not found")
+    return _public(user)

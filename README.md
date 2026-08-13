@@ -93,13 +93,23 @@ npm run dev                 # http://localhost:3000
 
 Then open http://localhost:3000 → **Start intake** → eligibility results → dashboard.
 
+## Case ownership
+
+Intake is anonymous — a case exists before its caregiver has an account — so `cases.owner_user_id`
+is nullable, with a foreign key to `users`. An unowned case is reachable by whoever holds its id;
+signing up (or logging in) claims it, and a claim is permanent, so a stranger who guesses a case
+id can neither read it nor attach it to their own account. Every case-scoped route enforces this
+(`app/access.py`) and answers 404 rather than 403, which would confirm the case exists. Cases that
+are never claimed are deleted after `UNCLAIMED_CASE_TTL_DAYS`.
+
 ## API
 
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/health` | status + whether Postgres/LLM are configured + RAG chunk count |
-| POST | `/api/intake` | create/update a CaseProfile |
-| GET | `/api/case/{id}` | fetch a CaseProfile |
+| POST | `/api/intake` | create/update a CaseProfile (no account needed) |
+| PATCH | `/api/auth/me` | rename the account, and/or claim the case from an anonymous intake |
+| GET | `/api/case/{id}` | fetch a CaseProfile (owner only, once claimed) |
 | POST | `/api/eligibility/{id}` | run routing + specialists, return ranked results |
 | POST | `/api/rag/search` | semantic search over program docs |
 | GET | `/api/forms/{program}/{id}` | resolved PDF fields + what's still missing |

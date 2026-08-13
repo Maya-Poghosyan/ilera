@@ -28,12 +28,18 @@ export default function LoginPage() {
     try {
       await login(email, password);
       const pending = getPendingCaseId();
-      if (pending) {
-        await updateUser({ case_id: pending });
-        clearPendingCaseId();
-        router.push(`/eligibility/${pending}`);
-      } else {
+      if (!pending) {
         router.push("/dashboard");
+        return;
+      }
+      // Claiming can fail if the case is already owned — the account's own case still works.
+      try {
+        await updateUser({ case_id: pending });
+        router.push(`/eligibility/${pending}`);
+      } catch {
+        router.push("/dashboard");
+      } finally {
+        clearPendingCaseId();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
