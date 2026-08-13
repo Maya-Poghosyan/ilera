@@ -6,11 +6,6 @@ services:
     dockerContext: ./backend
     healthCheckPath: /healthz
     envVars:
-      - key: REDIS_URL
-        fromService:
-          name: ilera-redis
-          type: redis
-          property: connectionString
       - key: CORS_ORIGINS
         sync: false
       - key: JWT_SECRET
@@ -33,8 +28,3 @@ services:
       # Postgres + pgvector holds the chunks and does the KNN.
       - key: DATABASE_URL
         sync: false
-
-  - type: redis
-    name: ilera-redis
-    ipAllowList: []
-    plan: free

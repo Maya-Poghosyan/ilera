@@ -1,12 +1,11 @@
 """Targeted tests for the Band eligibility store layer and match-level projection.
 
-Runs against the in-memory (no-Redis) store fallback, so it needs no services.
+Runs against the in-memory (no-database) store fallback, so it needs no services.
 Run directly (`python tests/test_band_store.py`) or via pytest if installed.
 """
 import os
 import sys
 
-os.environ.pop("REDIS_URL", None)  # force the in-memory store fallback
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import store  # noqa: E402

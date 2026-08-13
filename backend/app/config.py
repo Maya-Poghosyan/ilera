@@ -21,9 +21,6 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_hours: int = 72
 
-    # Redis. RAG index fallback for when DATABASE_URL is unset; nothing else uses it.
-    redis_url: str = ""
-
     # LLM (OpenAI or an OpenAI-compatible endpoint such as Azure OpenAI)
     openai_api_key: str = ""
     openai_model: str = "gpt-4o-mini"
@@ -72,10 +69,6 @@ class Settings(BaseSettings):
     # Shared secret Poke must present as a bearer token on the /mcp mount.
     # Empty disables the check (local development only).
     mcp_api_key: str = ""
-
-    @property
-    def has_redis(self) -> bool:
-        return bool(self.redis_url)
 
     @property
     def has_postgres(self) -> bool:

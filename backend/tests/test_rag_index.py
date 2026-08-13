@@ -10,7 +10,6 @@ Runs with no services. Run directly or via pytest.
 import os
 import sys
 
-os.environ.pop("REDIS_URL", None)
 os.environ.pop("DATABASE_URL", None)
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

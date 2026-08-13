@@ -231,7 +231,6 @@ def health() -> dict:
     index = get_index()
     return {
         "status": "ok",
-        "redis": settings.has_redis,
         "postgres": db.ready(),
         "llm": settings.has_llm,
         "band": settings.has_band,
