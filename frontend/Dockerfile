@@ -5,19 +5,18 @@ RUN npm ci
 
 FROM node:22-alpine AS builder
 WORKDIR /app
-# NEXT_PUBLIC_* values are inlined into the client bundle at build time, so this
-# must be set here rather than in the runner stage.
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_TELEMETRY_DISABLED=1 \
-    NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
+# The backend's URL is read per request by the route handlers in app/api, so it belongs to the
+# running container, not the build. Override it here rather than rebuilding the image.
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
+    API_URL=https://api.ileracare.app \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 RUN addgroup -g 1001 -S nodejs && adduser -u 1001 -S nextjs -G nodejs

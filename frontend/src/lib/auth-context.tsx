@@ -10,8 +10,6 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-
 export type AuthUser = {
   id: string;
   name: string;
@@ -22,7 +20,6 @@ export type AuthUser = {
 
 type AuthContextValue = {
   user: AuthUser | null;
-  token: string | null;
   loading: boolean;
   signup: (name: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
@@ -32,113 +29,78 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const TOKEN_KEY = "ilera_token";
-
+/** The session lives in an httpOnly cookie set by /api/auth/{signup,login}, so it travels with
+ * every request automatically and there is no token for this code to hold or hand out. */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const persist = useCallback((t: string, u: AuthUser) => {
-    localStorage.setItem(TOKEN_KEY, t);
-    setToken(t);
-    setUser(u);
-  }, []);
+  const authenticate = useCallback(
+    async (path: string, body: unknown, fallbackError: string) => {
+      const res = await fetch(path, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const detail = await res.json().catch(() => null);
+        throw new Error(detail?.detail ?? fallbackError);
+      }
+      setUser((await res.json()) as AuthUser);
+    },
+    [],
+  );
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
-    setToken(null);
     setUser(null);
+    void fetch("/api/auth/logout", { method: "POST" });
   }, []);
 
-  // On mount, try to restore session from localStorage
+  // Restore the session on mount: whether the cookie is still valid is the server's call.
   useEffect(() => {
     let cancelled = false;
-    const stored = localStorage.getItem(TOKEN_KEY);
-    if (!stored) {
-      // Use microtask to avoid synchronous setState in effect
-      queueMicrotask(() => { if (!cancelled) setLoading(false); });
-      return () => { cancelled = true; };
-    }
-    fetch(`${BASE}/api/auth/me`, {
-      headers: { Authorization: `Bearer ${stored}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("expired");
-        return res.json();
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((u: AuthUser | null) => {
+        if (!cancelled && u) setUser(u);
       })
-      .then((u: AuthUser) => {
-        if (!cancelled) {
-          setToken(stored);
-          setUser(u);
-        }
-      })
-      .catch(() => {
-        localStorage.removeItem(TOKEN_KEY);
-      })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const signup = useCallback(
-    async (name: string, email: string, password: string) => {
-      const res = await fetch(`${BASE}/api/auth/signup`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(body?.detail ?? "Signup failed");
-      }
-      const data = await res.json();
-      persist(data.token, data.user);
-    },
-    [persist],
+    (name: string, email: string, password: string) =>
+      authenticate("/api/auth/signup", { name, email, password }, "Signup failed"),
+    [authenticate],
   );
 
   const login = useCallback(
-    async (email: string, password: string) => {
-      const res = await fetch(`${BASE}/api/auth/login`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(body?.detail ?? "Invalid email or password");
-      }
-      const data = await res.json();
-      persist(data.token, data.user);
-    },
-    [persist],
+    (email: string, password: string) =>
+      authenticate("/api/auth/login", { email, password }, "Invalid email or password"),
+    [authenticate],
   );
 
   const updateUser = useCallback(
     async (updates: Partial<Pick<AuthUser, "case_id" | "name">>) => {
-      // Fall back to storage so a caller that signs up and updates in the same
-      // tick still sees a token (state hasn't re-rendered into this closure yet).
-      const active = token ?? localStorage.getItem(TOKEN_KEY);
-      if (!active) return;
-      const res = await fetch(`${BASE}/api/auth/me`, {
+      const res = await fetch("/api/auth/me", {
         method: "PATCH",
-        headers: {
-          "content-type": "application/json",
-          Authorization: `Bearer ${active}`,
-        },
+        headers: { "content-type": "application/json" },
         body: JSON.stringify(updates),
       });
-      if (res.ok) {
-        const u = await res.json();
-        setUser(u);
-      }
+      if (!res.ok) throw new Error(`Update failed: ${res.status}`);
+      setUser((await res.json()) as AuthUser);
     },
-    [token],
+    [],
   );
 
   const value = useMemo(
-    () => ({ user, token, loading, signup, login, logout, updateUser }),
-    [user, token, loading, signup, login, logout, updateUser],
+    () => ({ user, loading, signup, login, logout, updateUser }),
+    [user, loading, signup, login, logout, updateUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
