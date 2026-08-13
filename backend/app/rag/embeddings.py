@@ -17,6 +17,7 @@ from ..config import get_settings
 logger = logging.getLogger(__name__)
 
 FALLBACK_DIM = 256
+OPENAI_API_BASE_URL = "https://api.openai.com/v1"
 _fastembed_model = None
 _openai_client = None
 
@@ -84,8 +85,11 @@ def _get_openai_client():
         from openai import OpenAI
 
         s = get_settings()
-        base_url = s.openai_base_url
-        if base_url and not base_url.startswith(("http://", "https://")):
+        # Passing base_url=None makes the SDK read OPENAI_BASE_URL itself, and it accepts an
+        # empty value as the base URL — which every request then fails on. CI exports the
+        # variable unconditionally, so "unset" arrives as "": resolve the default here instead.
+        base_url = s.openai_base_url or OPENAI_API_BASE_URL
+        if not base_url.startswith(("http://", "https://")):
             # httpx rejects a schemeless URL only once a request is in flight, which reads as a
             # connection error and gets retried for minutes before surfacing.
             raise ValueError(
@@ -94,7 +98,7 @@ def _get_openai_client():
             )
         _openai_client = OpenAI(
             api_key=s.openai_api_key,
-            base_url=base_url or None,
+            base_url=base_url,
             max_retries=s.embedding_max_retries,
             timeout=s.embedding_timeout_seconds,
         )
