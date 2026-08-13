@@ -87,11 +87,24 @@ returns nothing — `/health` reports `rag_chunks: 0`.
 ```bash
 cd frontend
 npm install
-cp .env.local.example .env.local
+cp .env.local.example .env.local     # API_URL, server-side only
 npm run dev                 # http://localhost:3000
 ```
 
 Then open http://localhost:3000 → **Start intake** → eligibility results → dashboard.
+
+## Talking to the API
+
+The browser only ever calls the frontend's own origin. `src/app/api/[...path]/route.ts` forwards
+`/api/*` to `API_URL`, so the backend's address is a runtime server variable rather than a
+`NEXT_PUBLIC_*` value frozen into the bundle at build time — one image runs against any backend,
+and a missing value can't silently turn every request into a same-origin 404. Modules holding it
+import `server-only`, so leaking it into a client component fails the build instead of shipping.
+
+The session token follows the same rule: `/api/auth/{signup,login}` keep it server-side and hand
+the browser an httpOnly cookie, which the proxy turns back into an `Authorization` header. Client
+code never holds a token, so an XSS bug has nothing to steal. Cross-origin requests disappear
+with it, making `CORS_ORIGINS` unnecessary for the app itself.
 
 ## Case ownership
 

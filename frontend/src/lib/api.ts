@@ -1,21 +1,12 @@
 import type { Answers, AnswerValue, IntakeSchema } from "./intake-schema";
 import type { AppStatus, ApplicationEntry, CaseProfile, EligibilityResponse, FormSchema, JournalCreate, JournalEntry, RecordsSummary, Reminder, ReminderCreate, ReminderUpdate, ReminderTemplates, RenewalInfo, RenewalUpdate, StartApplicationResult, TimekeepingCreate, TimekeepingEntry } from "./types";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "https://api.ileracare.app";
-
-function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("ilera_token");
-}
-
+// Paths stay relative: `/api/*` is served by this app's own route handlers, which forward to the
+// backend and attach the session cookie as a bearer token. Nothing here knows the API's URL, and
+// no token is reachable from client JavaScript.
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = getToken();
-  const headers: Record<string, string> = {
-    "content-type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-  const res = await fetch(`${BASE}${path}`, {
-    headers,
+  const res = await fetch(path, {
+    headers: { "content-type": "application/json" },
     ...init,
   });
   if (!res.ok) {
@@ -230,7 +221,7 @@ export function getFormFields(formId: string, caseId: string) {
 }
 
 export function getFormDownloadUrl(formId: string, caseId: string): string {
-  return `${BASE}/api/forms/${formId}/${caseId}/download`;
+  return `/api/forms/${formId}/${caseId}/download`;
 }
 
 // ---------------------------------------------------------------------------
@@ -268,7 +259,7 @@ export async function submitApplicationAnswers(
   answers: Record<string, AnswerValue>
 ): Promise<Blob> {
   const res = await fetch(
-    `${BASE}/api/applications/${caseId}/${encodeURIComponent(program)}/submit`,
+    `/api/applications/${caseId}/${encodeURIComponent(program)}/submit`,
     {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -285,7 +276,7 @@ export async function previewApplication(
   answers: Record<string, AnswerValue>
 ): Promise<Blob> {
   const res = await fetch(
-    `${BASE}/api/applications/${caseId}/${encodeURIComponent(program)}/preview`,
+    `/api/applications/${caseId}/${encodeURIComponent(program)}/preview`,
     {
       method: "POST",
       headers: { "content-type": "application/json" },
