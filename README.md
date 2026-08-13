@@ -13,7 +13,7 @@ Built for the UC Berkeley AI Hackathon. Tracks: **Band** (multi-agent), **Redis*
 
 ```
 Next.js frontend  ──REST──▶  FastAPI backend
-  intake wizard                 CaseProfile (Redis / in-memory)
+  intake wizard                 accounts + CaseProfile (Postgres / in-memory)
   eligibility cards               │
   dashboard                       ├─ Routing Agent ──▶ specialist agents (IHSS, Medi-Cal, PFL, VA)
                                   │       coordinate in a shared agent space (Band)
@@ -98,7 +98,7 @@ Then open http://localhost:3000 → **Start intake** → eligibility results →
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/health` | status + whether Redis/LLM are configured + RAG chunk count |
+| GET | `/health` | status + whether Postgres/Redis/LLM are configured + RAG chunk count |
 | POST | `/api/intake` | create/update a CaseProfile |
 | GET | `/api/case/{id}` | fetch a CaseProfile |
 | POST | `/api/eligibility/{id}` | run routing + specialists, return ranked results |
@@ -127,8 +127,11 @@ chat (iMessage, WhatsApp, Telegram, RCS). Set `POKE_API_KEY` in `backend/.env`.
 
 ## Next steps (wiring real services)
 
-- **Redis:** set `REDIS_URL`; replace the in-memory index in `app/rag/index.py` with a
-  RedisVL `SearchIndex`, and back the CaseProfile with the Redis Agent Memory Server.
+- **Postgres:** set `DATABASE_URL`; accounts, CaseProfiles, and the Band room map move out of
+  memory into the `users`, `cases`, and `band_rooms` tables (created on first use), and the
+  same database serves the pgvector RAG index.
+- **Redis:** set `REDIS_URL` to persist reminders, care records, and application state; it is
+  also the RAG index fallback when `DATABASE_URL` is unset.
 - **LLM:** set `OPENAI_API_KEY` (OpenAI or an Azure OpenAI endpoint via `OPENAI_BASE_URL`);
   replace heuristic `assess()` bodies in `app/agents/specialists.py` with grounded LLM calls.
 - **Band:** wired as a true multi-agent system — **each program group is its own Band agent**

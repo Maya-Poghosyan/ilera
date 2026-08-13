@@ -1,6 +1,5 @@
 """Authentication: signup, login, JWT tokens, and user persistence."""
 
-import json
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -9,8 +8,9 @@ import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
+from . import db
 from .config import get_settings
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -40,60 +40,69 @@ class UserPublic(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Persistence (Redis when available, else in-memory)
+# Persistence (Postgres when available, else in-memory)
 # ---------------------------------------------------------------------------
 
-_memory: dict[str, str] = {}
+_memory: dict[str, User] = {}
+
+_COLUMNS = "id, name, email, hashed_password, case_id, created_at"
 
 
-def _redis():
-    settings = get_settings()
-    if not settings.has_redis:
-        return None
-    import redis
-
-    return redis.from_url(settings.redis_url, decode_responses=True)
-
-
-def _user_key(user_id: str) -> str:
-    return f"ilera:user:{user_id}"
-
-
-def _email_key(email: str) -> str:
-    return f"ilera:user_email:{email.lower()}"
+def _row_to_user(row) -> User:
+    return User(
+        id=row[0],
+        name=row[1],
+        email=row[2],
+        hashed_password=row[3],
+        case_id=row[4],
+        created_at=row[5],
+    )
 
 
 def _save_user(user: User) -> None:
-    payload = user.model_dump_json()
-    client = _redis()
-    if client is not None:
-        client.set(_user_key(user.id), payload)
-        client.set(_email_key(user.email), user.id)
-    else:
-        _memory[user.id] = payload
-        _memory[f"email:{user.email.lower()}"] = user.id
+    if not db.available():
+        _memory[user.id] = user
+        return
+    with db.connection() as conn:
+        conn.execute(
+            f"""
+            INSERT INTO users ({_COLUMNS}) VALUES (%s, %s, %s, %s, %s, %s)
+            ON CONFLICT (id) DO UPDATE SET
+                name = EXCLUDED.name,
+                email = EXCLUDED.email,
+                hashed_password = EXCLUDED.hashed_password,
+                case_id = EXCLUDED.case_id
+            """,
+            (
+                user.id,
+                user.name,
+                user.email.lower(),
+                user.hashed_password,
+                user.case_id,
+                user.created_at,
+            ),
+        )
 
 
 def _get_user_by_id(user_id: str) -> Optional[User]:
-    client = _redis()
-    if client is not None:
-        raw = client.get(_user_key(user_id))
-    else:
-        raw = _memory.get(user_id)
-    if not raw:
-        return None
-    return User.model_validate(json.loads(raw))
+    if not db.available():
+        return _memory.get(user_id)
+    with db.connection() as conn:
+        row = conn.execute(
+            f"SELECT {_COLUMNS} FROM users WHERE id = %s", (user_id,)
+        ).fetchone()
+    return _row_to_user(row) if row else None
 
 
 def _get_user_by_email(email: str) -> Optional[User]:
-    client = _redis()
-    if client is not None:
-        user_id = client.get(_email_key(email))
-    else:
-        user_id = _memory.get(f"email:{email.lower()}")
-    if not user_id:
-        return None
-    return _get_user_by_id(user_id)
+    if not db.available():
+        target = email.strip().lower()
+        return next((u for u in _memory.values() if u.email.lower() == target), None)
+    with db.connection() as conn:
+        row = conn.execute(
+            f"SELECT {_COLUMNS} FROM users WHERE email = %s", (email.strip().lower(),)
+        ).fetchone()
+    return _row_to_user(row) if row else None
 
 
 # ---------------------------------------------------------------------------
