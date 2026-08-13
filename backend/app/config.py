@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     jwt_expire_hours: int = 72
     # Intake runs before signup, so an abandoned intake leaves a case nobody ever claims —
     # household data belonging to no account. Deleted after this many days; 0 keeps them.
-    unclaimed_case_ttl_days: int = 30
+    unclaimed_case_ttl_days: int = 5
 
     # LLM (OpenAI or an OpenAI-compatible endpoint such as Azure OpenAI)
     openai_api_key: str = ""
