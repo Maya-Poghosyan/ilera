@@ -13,6 +13,76 @@ _cases = db.JsonStore("cases")
 # Fallback (no-database) room_id -> case_id map. With Postgres, both API and Band worker
 # processes share the mapping; in-memory only works single-process.
 _room_map: dict[str, str] = {}
+# Fallback (no-database) case_id -> owning user id; the column does this with Postgres.
+_owners: dict[str, str] = {}
+
+
+# ---------------------------------------------------------------------------
+# Ownership
+#
+# Intake is anonymous, so a case is born unowned and is claimed when its creator signs up
+# or logs in. A claim is permanent: once a case has an owner, no other account can take it,
+# which is what stops a stranger who guesses a case id from attaching it to themselves.
+# ---------------------------------------------------------------------------
+def get_case_owner(case_id: str) -> Optional[str]:
+    """The owning user's id, or None for a case nobody has claimed yet."""
+    if not db.available():
+        return _owners.get(case_id)
+    with db.connection() as conn:
+        row = conn.execute(
+            "SELECT owner_user_id FROM cases WHERE id = %s", (case_id,)
+        ).fetchone()
+    return row[0] if row else None
+
+
+def claim_case(case_id: str, user_id: str) -> bool:
+    """Give an unclaimed case to a user. False if the case is gone or already someone else's.
+
+    The guard is in the UPDATE rather than a read-then-write so two simultaneous claims can't
+    both succeed.
+    """
+    if not db.available():
+        if _cases.get(case_id) is None:
+            return False
+        if _owners.setdefault(case_id, user_id) != user_id:
+            return False
+        return True
+    with db.connection() as conn:
+        cur = conn.execute(
+            "UPDATE cases SET owner_user_id = %s "
+            "WHERE id = %s AND (owner_user_id IS NULL OR owner_user_id = %s)",
+            (user_id, case_id, user_id),
+        )
+    return cur.rowcount > 0
+
+
+def get_case_id_for_user(user_id: str) -> Optional[str]:
+    """The user's case. Most recently touched one, if they somehow own several."""
+    if not db.available():
+        owned = [c for c, owner in _owners.items() if owner == user_id]
+        return owned[-1] if owned else None
+    with db.connection() as conn:
+        row = conn.execute(
+            "SELECT id FROM cases WHERE owner_user_id = %s ORDER BY updated_at DESC LIMIT 1",
+            (user_id,),
+        ).fetchone()
+    return row[0] if row else None
+
+
+def purge_unclaimed_cases(older_than_days: int) -> int:
+    """Delete cases nobody claimed within the window. An abandoned intake is otherwise kept
+    forever, and it holds the household data of someone who never made an account."""
+    if older_than_days <= 0:
+        return 0
+    if not db.available():
+        return 0
+    with db.connection() as conn:
+        cur = conn.execute(
+            "DELETE FROM cases WHERE owner_user_id IS NULL "
+            "AND updated_at < now() - make_interval(days => %s)",
+            (older_than_days,),
+        )
+    return cur.rowcount
 
 
 # ---------------------------------------------------------------------------

@@ -13,7 +13,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 os.environ["DATABASE_URL"] = os.environ.get("TEST_DATABASE_URL", "")
 
-from app import applications, auth, preferences, records, reminders, store  # noqa: E402
+from fastapi import HTTPException  # noqa: E402
+
+from app import access, applications, auth, preferences, records, reminders, store  # noqa: E402
 from app import suggested_events as events  # noqa: E402
 from app.models import CaseProfile  # noqa: E402
 
@@ -37,13 +39,53 @@ def test_user_roundtrip_and_email_lookup():
     assert found is not None and found.id == user.id
 
 
-def test_user_case_link_is_updated_in_place():
-    user = _user(f"link+{uuid.uuid4().hex}@example.com")
+def _case() -> str:
+    case_id = f"case-{uuid.uuid4().hex}"
+    store.save_profile(CaseProfile(id=case_id))
+    return case_id
+
+
+def test_a_case_starts_unowned_and_is_claimed_once():
+    user = _user(f"owner+{uuid.uuid4().hex}@example.com")
     auth._save_user(user)
-    user.case_id = "case-123"
+    case_id = _case()
+    # Anonymous intake: nobody owns it yet, so holding the id is enough.
+    assert store.get_case_owner(case_id) is None
+
+    assert store.claim_case(case_id, user.id) is True
+    assert store.get_case_owner(case_id) == user.id
+    assert store.get_case_id_for_user(user.id) == case_id
+    # Idempotent for the owner, refused for everyone else — a guessed id can't be adopted.
+    assert store.claim_case(case_id, user.id) is True
+    other = _user(f"thief+{uuid.uuid4().hex}@example.com")
+    auth._save_user(other)
+    assert store.claim_case(case_id, other.id) is False
+    assert store.get_case_owner(case_id) == user.id
+    assert store.get_case_id_for_user(other.id) is None
+
+
+def test_claiming_a_case_that_does_not_exist_fails():
+    user = _user(f"noc+{uuid.uuid4().hex}@example.com")
     auth._save_user(user)
-    stored = auth._get_user_by_id(user.id)
-    assert stored is not None and stored.case_id == "case-123"
+    assert store.claim_case(f"case-{uuid.uuid4().hex}", user.id) is False
+
+
+def test_case_access_allows_unowned_and_the_owner_only():
+    owner = _user(f"acc+{uuid.uuid4().hex}@example.com")
+    stranger = _user(f"str+{uuid.uuid4().hex}@example.com")
+    auth._save_user(owner)
+    auth._save_user(stranger)
+    case_id = _case()
+
+    access.authorize_case(case_id, None)  # unowned: the anonymous creator can still work
+    store.claim_case(case_id, owner.id)
+    access.authorize_case(case_id, owner)
+    for caller in (None, stranger):
+        try:
+            access.authorize_case(case_id, caller)
+            raise AssertionError(f"{caller} should not reach a claimed case")
+        except HTTPException as exc:
+            assert exc.status_code == 404
 
 
 def test_case_profile_roundtrip():
