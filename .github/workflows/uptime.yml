@@ -1,0 +1,85 @@
+name: Uptime
+
+# Finding out from a caregiver's browser that the site is down is too late. This checks the
+# public endpoints on a schedule and files one issue per outage (GitHub emails you on it), then
+# closes it once things recover, so an outage is loud but a flap doesn't spam.
+#
+# GitHub's cron is best-effort and often runs late, so treat this as "you'll know within ~15
+# minutes", not as a second-by-second monitor.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+env:
+  ISSUE_TITLE: "Uptime check failing"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - id: probe
+        name: Probe the public endpoints
+        run: |
+          set -uo pipefail
+          failures=""
+          for url in \
+            https://ileracare.app/healthz \
+            https://api.ileracare.app/healthz \
+            https://api.ileracare.app/readyz \
+            https://ileracare.app/api/intake/schema
+          do
+            # Two attempts, because a single dropped connection is not an outage.
+            code=""
+            for _ in 1 2; do
+              code=$(curl -sS -o /dev/null -m 20 -w '%{http_code}' "$url" || echo 000)
+              [ "$code" = 200 ] && break
+              sleep 5
+            done
+            echo "$url -> $code"
+            [ "$code" = 200 ] || failures="$failures$url -> HTTP $code"$'\n'
+          done
+          {
+            echo "failures<<EOF"
+            echo "$failures"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open or update the outage issue
+        if: steps.probe.outputs.failures != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FAILURES: ${{ steps.probe.outputs.failures }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          existing=$(gh issue list --state open --label uptime --search "$ISSUE_TITLE in:title" \
+            --json number --jq '.[0].number // empty')
+          body=$(printf '%s\n%s\n' "$FAILURES" "$RUN_URL")
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "Still failing:"$'\n\n'"$body"
+          else
+            gh label create uptime --color B60205 --description "Production availability" 2>/dev/null || true
+            gh issue create --title "$ISSUE_TITLE" --label uptime \
+              --body "The scheduled check could not reach:"$'\n\n'"$body"
+          fi
+          exit 1
+
+      - name: Close the outage issue once everything answers
+        if: steps.probe.outputs.failures == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          existing=$(gh issue list --state open --label uptime --search "$ISSUE_TITLE in:title" \
+            --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue close "$existing" --comment "Recovered: all endpoints answering 200."
+          fi
