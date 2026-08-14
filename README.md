@@ -116,7 +116,7 @@ An outage should be a delay, not a dead end. Four things arranged in order of ho
    switches both apps to HTTP probes and keeps one replica warm:
 
    ```bash
-   export RESOURCE_GROUP=<your resource group>
+   export RESOURCE_GROUP=Ilera
    deploy/azure/configure_availability.py ilera-api --readiness-path /readyz --dry-run
    deploy/azure/configure_availability.py ilera-api --readiness-path /readyz
    deploy/azure/configure_availability.py ilera-web
@@ -151,18 +151,18 @@ site.
 
 One-time setup. Repository variables (Settings → Secrets and variables → Actions → Variables):
 
-| Variable | Example |
+| Variable | Value |
 | --- | --- |
-| `AZURE_RESOURCE_GROUP` | `ilera-rg` |
-| `AZURE_REGISTRY` | `ileraacr` (name only, no `.azurecr.io`) |
-| `API_APP` / `WEB_APP` | `ilera-api` / `ilera-web` |
+| `AZURE_RESOURCE_GROUP` | `Ilera` |
+| `AZURE_REGISTRY` | `caff3fa0d6e7acr` (name only, no `.azurecr.io`) |
+| `API_APP` / `WEB_APP` | the two container app names, e.g. `ilera-api` / `ilera-web` |
 | `API_HOST` / `WEB_HOST` | `api.ileracare.app` / `ileracare.app` |
 
 Then federated credentials, so GitHub authenticates with a short-lived token and no password is
 stored anywhere:
 
 ```bash
-RG=<resource group>; SUB=$(az account show --query id -o tsv); REPO=Maya-Poghosyan/ilera
+RG=Ilera; SUB=$(az account show --query id -o tsv); REPO=Maya-Poghosyan/ilera
 app=$(az ad app create --display-name ilera-deploy --query appId -o tsv)
 az ad sp create --id "$app"
 az role assignment create --assignee "$app" --role Contributor \

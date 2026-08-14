@@ -17,7 +17,7 @@ call.
 Run it with --dry-run first: it prints the definition it would submit and changes nothing.
 
 Usage:
-    export RESOURCE_GROUP=<your resource group>
+    export RESOURCE_GROUP=Ilera
     deploy/azure/configure_availability.py ilera-api --readiness-path /readyz
     deploy/azure/configure_availability.py ilera-web
     # add --dry-run to print what would change and apply nothing
