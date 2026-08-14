@@ -219,7 +219,7 @@ export default function IntakePage() {
         }
         setSchema(loaded);
       })
-      .catch(() => setLoadError("Could not load the intake form. Is the backend running on :8000?"));
+      .catch(() => setLoadError("Could not load the intake form. Please try again in a moment."));
   }, []);
 
   useEffect(() => {
@@ -392,7 +392,7 @@ export default function IntakePage() {
     } catch {
       submittingRef.current = false;
       setSubmitting(false);
-      alert("Could not reach the API. Is the backend running on :8000?");
+      alert("Could not save your answers. Please try again in a moment.");
     }
   }
 

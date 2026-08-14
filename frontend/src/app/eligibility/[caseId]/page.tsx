@@ -93,7 +93,7 @@ export default function EligibilityPage() {
   if (error) {
     return (
       <main className="mx-auto max-w-xl px-6 py-20 text-center">
-        <p className="text-muted-foreground">{error} Is the backend running on :8000?</p>
+        <p className="text-muted-foreground">{error} Please try again in a moment.</p>
       </main>
     );
   }
