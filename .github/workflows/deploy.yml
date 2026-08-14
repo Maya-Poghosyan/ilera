@@ -106,6 +106,7 @@ jobs:
           RG: ${{ vars.AZURE_RESOURCE_GROUP }}
           REGISTRY: ${{ vars.AZURE_REGISTRY }}
           APP: ${{ matrix.app == 'api' && vars.API_APP || vars.WEB_APP }}
+          HOST: ${{ matrix.app == 'api' && vars.API_HOST || vars.WEB_HOST }}
         run: |
           set -euo pipefail
           tag="${{ matrix.image }}:${GITHUB_SHA::12}"
@@ -113,6 +114,12 @@ jobs:
           previous=$(az containerapp show -n "$APP" -g "$RG" \
             --query "properties.template.containers[0].image" -o tsv)
           echo "previous=$previous" >> "$GITHUB_OUTPUT"
+          # Whether that image was serving decides if reverting to it is an improvement. Rolling
+          # back onto an image that was already down turns a failed deploy into a worse outage,
+          # which is exactly what happened the first time this ran.
+          code=$(curl -sS -o /dev/null -m 10 -w '%{http_code}' "https://$HOST/healthz" || true)
+          echo "was_serving=$([ "$code" = 200 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "before deploy https://$HOST/healthz -> ${code:-000}"
           # Built by ACR itself: no docker credentials in CI, and the app pulls from the same
           # registry it was built in.
           az acr build --registry "$REGISTRY" --image "$tag" "${{ matrix.context }}"
@@ -129,22 +136,24 @@ jobs:
           # is reachable from the new revision.
           paths="/healthz"
           [ "${{ matrix.app }}" = api ] && paths="/healthz /readyz"
-          deadline=$((SECONDS + 240))
+          # Generous, because it covers an image pull, the startup probe's own grace period and
+          # the ingress moving traffic onto the new revision — four minutes proved too short.
+          deadline=$((SECONDS + 600))
           for path in $paths; do
             until code=$(curl -sS -o /dev/null -m 10 -w '%{http_code}' "https://$HOST$path") \
               && [ "$code" = 200 ]; do
               if [ $SECONDS -ge $deadline ]; then
                 # curl reports 000 when it never got a response at all.
                 case "${code:-000}" in 000) detail="never answered" ;; *) detail="answered $code" ;; esac
-                echo "::error::https://$HOST$path $detail for 4 minutes"
+                echo "::error::https://$HOST$path $detail for 10 minutes"
                 exit 1
               fi
-              sleep 10
+              sleep 5
             done
             echo "https://$HOST$path -> 200"
           done
 
-      - if: failure() && steps.deploy.outputs.previous != ''
+      - if: failure() && steps.deploy.outputs.was_serving == 'true'
         name: Roll back to the image that was serving
         env:
           RG: ${{ vars.AZURE_RESOURCE_GROUP }}
@@ -153,3 +162,9 @@ jobs:
           set -euo pipefail
           echo "::warning::rolling back to ${{ steps.deploy.outputs.previous }}"
           az containerapp update -n "$APP" -g "$RG" --image "${{ steps.deploy.outputs.previous }}"
+
+      - if: failure() && steps.deploy.outputs.was_serving == 'false'
+        name: Say why nothing was rolled back
+        run: |
+          echo "::warning::keeping the new revision: ${{ steps.deploy.outputs.previous }} was not"\
+            "serving before this deploy either, so reverting to it would only prolong the outage."

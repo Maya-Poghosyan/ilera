@@ -145,9 +145,13 @@ That mix-up is easy by hand (`az containerapp up` builds whatever directory you'
 and is what put the frontend image into `ilera-api`. Images are built by ACR itself, so no
 registry password exists in CI, and are tagged with the commit sha rather than `latest`, so a
 revision names the code it runs. After each update the workflow polls the app's public
-`/healthz` (plus `/readyz` for the API) for four minutes and, if it never answers 200, restores
-the image that was serving before — a broken deploy costs a few minutes of one replica, not the
-site.
+`/healthz` (plus `/readyz` for the API) for ten minutes — long enough for an image pull, the
+startup probe's grace period and ingress moving traffic — and, if it never answers 200, restores
+the image that was serving before, so a broken deploy costs minutes rather than the site.
+
+Rollback is conditional on the app having answered `/healthz` *before* the deploy. Reverting to an
+image that was already down replaces a possibly-working new revision with a known-broken one; when
+the app was already failing, the workflow keeps the new revision and says so in the log.
 
 One-time setup. Repository variables (Settings → Secrets and variables → Actions → Variables):
 
