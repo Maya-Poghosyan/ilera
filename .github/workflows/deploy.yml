@@ -1,0 +1,155 @@
+name: Deploy
+
+# Deploying from a laptop is how the frontend image ended up in the API's container app: the
+# command takes whichever directory you happen to be in. Here the app names, contexts and tags
+# are fixed, only main can trigger it, and a revision that doesn't answer its health endpoint is
+# rolled back instead of left serving errors.
+#
+# One-time setup (see README):
+#   variables: AZURE_RESOURCE_GROUP, AZURE_REGISTRY, API_APP, WEB_APP, API_HOST, WEB_HOST
+#   secrets:   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID  (OIDC, no password)
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+    inputs:
+      apps:
+        description: Which apps to deploy
+        type: choice
+        default: both
+        options: [both, api, web]
+
+# Two deploys of the same app at once would race over which image the app ends up on.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.pick.outputs.api }}
+      web: ${{ steps.pick.outputs.web }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - id: pick
+        name: Decide which apps changed
+        env:
+          MANUAL: ${{ inputs.apps }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          case "${MANUAL:-}" in
+            api)  echo "api=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
+            web)  echo "web=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
+            both) printf 'api=true\nweb=true\n' >> "$GITHUB_OUTPUT"; exit 0 ;;
+          esac
+          # A force-push or a new branch leaves no usable "before", so deploy both rather than
+          # silently skipping a change.
+          if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            echo "api=true" >> "$GITHUB_OUTPUT"
+            echo "web=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed=$(git diff --name-only "$BEFORE" "${{ github.sha }}")
+          echo "$changed"
+          grep -q '^backend/' <<<"$changed" && echo "api=true" >> "$GITHUB_OUTPUT" || true
+          grep -q '^frontend/' <<<"$changed" && echo "web=true" >> "$GITHUB_OUTPUT" || true
+
+  deploy:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      # One app failing shouldn't cancel the other mid-deploy.
+      fail-fast: false
+      matrix:
+        include:
+          - app: api
+            context: ./backend
+            image: ilera-api
+          - app: web
+            context: ./frontend
+            image: ilera-web
+    steps:
+      - id: gate
+        run: |
+          case "${{ matrix.app }}" in
+            api) selected="${{ needs.plan.outputs.api }}" ;;
+            web) selected="${{ needs.plan.outputs.web }}" ;;
+          esac
+          echo "run=${selected:-false}" >> "$GITHUB_OUTPUT"
+
+      - if: steps.gate.outputs.run == 'true'
+        uses: actions/checkout@v5
+
+      - if: steps.gate.outputs.run == 'true'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - if: steps.gate.outputs.run == 'true'
+        id: deploy
+        name: Build in ACR and roll the container app forward
+        env:
+          RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+          REGISTRY: ${{ vars.AZURE_REGISTRY }}
+          APP: ${{ matrix.app == 'api' && vars.API_APP || vars.WEB_APP }}
+        run: |
+          set -euo pipefail
+          tag="${{ matrix.image }}:${GITHUB_SHA::12}"
+          # Remembered before the update so a failed rollout can be undone.
+          previous=$(az containerapp show -n "$APP" -g "$RG" \
+            --query "properties.template.containers[0].image" -o tsv)
+          echo "previous=$previous" >> "$GITHUB_OUTPUT"
+          # Built by ACR itself: no docker credentials in CI, and the app pulls from the same
+          # registry it was built in.
+          az acr build --registry "$REGISTRY" --image "$tag" "${{ matrix.context }}"
+          az containerapp update -n "$APP" -g "$RG" --image "$REGISTRY.azurecr.io/$tag"
+
+      - if: steps.gate.outputs.run == 'true'
+        name: Wait for the new revision to answer
+        env:
+          HOST: ${{ matrix.app == 'api' && vars.API_HOST || vars.WEB_HOST }}
+        run: |
+          set -uo pipefail
+          # Checked against the public endpoint rather than a revision field, because what
+          # matters is whether a visitor gets an answer. /readyz on the API also proves Postgres
+          # is reachable from the new revision.
+          paths="/healthz"
+          [ "${{ matrix.app }}" = api ] && paths="/healthz /readyz"
+          deadline=$((SECONDS + 240))
+          for path in $paths; do
+            until code=$(curl -sS -o /dev/null -m 10 -w '%{http_code}' "https://$HOST$path") \
+              && [ "$code" = 200 ]; do
+              if [ $SECONDS -ge $deadline ]; then
+                # curl reports 000 when it never got a response at all.
+                case "${code:-000}" in 000) detail="never answered" ;; *) detail="answered $code" ;; esac
+                echo "::error::https://$HOST$path $detail for 4 minutes"
+                exit 1
+              fi
+              sleep 10
+            done
+            echo "https://$HOST$path -> 200"
+          done
+
+      - if: failure() && steps.deploy.outputs.previous != ''
+        name: Roll back to the image that was serving
+        env:
+          RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+          APP: ${{ matrix.app == 'api' && vars.API_APP || vars.WEB_APP }}
+        run: |
+          set -euo pipefail
+          echo "::warning::rolling back to ${{ steps.deploy.outputs.previous }}"
+          az containerapp update -n "$APP" -g "$RG" --image "${{ steps.deploy.outputs.previous }}"

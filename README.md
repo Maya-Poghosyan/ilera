@@ -116,7 +116,7 @@ An outage should be a delay, not a dead end. Four things arranged in order of ho
    switches both apps to HTTP probes and keeps one replica warm:
 
    ```bash
-   export RESOURCE_GROUP=<your resource group>
+   export RESOURCE_GROUP=Ilera
    deploy/azure/configure_availability.py ilera-api --readiness-path /readyz --dry-run
    deploy/azure/configure_availability.py ilera-api --readiness-path /readyz
    deploy/azure/configure_availability.py ilera-web
@@ -136,6 +136,48 @@ An outage should be a delay, not a dead end. Four things arranged in order of ho
 4. **You hear about it first.** `.github/workflows/uptime.yml` probes the public endpoints every
    ten minutes, opens a single issue while they're failing, and closes it on recovery. GitHub's
    cron is best-effort, so treat it as "within ~15 minutes", not a real-time monitor.
+
+## Deploying
+
+`.github/workflows/deploy.yml` deploys on every push to `main` that touches `backend/**` or
+`frontend/**` — the backend to one container app, the frontend to the other, never the reverse.
+That mix-up is easy by hand (`az containerapp up` builds whatever directory you're standing in)
+and is what put the frontend image into `ilera-api`. Images are built by ACR itself, so no
+registry password exists in CI, and are tagged with the commit sha rather than `latest`, so a
+revision names the code it runs. After each update the workflow polls the app's public
+`/healthz` (plus `/readyz` for the API) for four minutes and, if it never answers 200, restores
+the image that was serving before — a broken deploy costs a few minutes of one replica, not the
+site.
+
+One-time setup. Repository variables (Settings → Secrets and variables → Actions → Variables):
+
+| Variable | Value |
+| --- | --- |
+| `AZURE_RESOURCE_GROUP` | `Ilera` |
+| `AZURE_REGISTRY` | `caff3fa0d6e7acr` (name only, no `.azurecr.io`) |
+| `API_APP` / `WEB_APP` | the two container app names, e.g. `ilera-api` / `ilera-web` |
+| `API_HOST` / `WEB_HOST` | `api.ileracare.app` / `ileracare.app` |
+
+Then federated credentials, so GitHub authenticates with a short-lived token and no password is
+stored anywhere:
+
+```bash
+RG=Ilera; SUB=$(az account show --query id -o tsv); REPO=Maya-Poghosyan/ilera
+app=$(az ad app create --display-name ilera-deploy --query appId -o tsv)
+az ad sp create --id "$app"
+az role assignment create --assignee "$app" --role Contributor \
+  --scope "/subscriptions/$SUB/resourceGroups/$RG"
+az ad app federated-credential create --id "$app" --parameters "{
+  \"name\": \"main\", \"issuer\": \"https://token.actions.githubusercontent.com\",
+  \"subject\": \"repo:$REPO:ref:refs/heads/main\", \"audiences\": [\"api://AzureADTokenExchange\"]}"
+echo "AZURE_CLIENT_ID=$app  AZURE_TENANT_ID=$(az account show --query tenantId -o tsv)  AZURE_SUBSCRIPTION_ID=$SUB"
+```
+
+Save those three as repository **secrets**. The subject is pinned to `refs/heads/main`, so a
+workflow run from a fork or a branch cannot obtain the credential; add a second federated
+credential with `subject: repo:$REPO:environment:production` if you later gate deploys on a
+GitHub Environment. `workflow_dispatch` runs on `main` still work, and take an `api`/`web`/`both`
+choice for redeploying without a code change.
 
 ## Case ownership
 
