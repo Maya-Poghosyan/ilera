@@ -118,8 +118,10 @@ An outage should be a delay, not a dead end. Three things arranged in order of h
 2. **Intake survives it.** Answers are drafted to localStorage on every step, so an outage
    mid-wizard costs a caregiver a retry, not their answers.
 3. **You hear about it first.** `.github/workflows/uptime.yml` probes the public endpoints every
-   ten minutes, opens a single issue while they're failing, and closes it on recovery. GitHub's
-   cron is best-effort, so treat it as "within ~15 minutes", not a real-time monitor.
+   ten minutes and opens one issue per outage, closing it on recovery. That's deliberately one
+   notification, not one per run: while the issue is open it stays silent and the run still
+   passes, since a failing scheduled run would email you too. GitHub's cron is best-effort, so
+   treat it as "within ~15 minutes", not a real-time monitor.
 
 The container apps use Azure's default TCP check on the ingress port. HTTP probes on `/healthz`
 and `/readyz` were tried and reverted: a probe that misfires holds traffic off a revision whose

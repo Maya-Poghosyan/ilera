@@ -2,7 +2,11 @@ name: Uptime
 
 # Finding out from a caregiver's browser that the site is down is too late. This checks the
 # public endpoints on a schedule and files one issue per outage (GitHub emails you on it), then
-# closes it once things recover, so an outage is loud but a flap doesn't spam.
+# closes it once things recover.
+#
+# One notification per outage, not one per run: while the issue is already open the check stays
+# silent, and the job succeeds rather than failing, because a failed scheduled run is itself an
+# email. A long outage should not mean six emails an hour.
 #
 # GitHub's cron is best-effort and often runs late, so treat this as "you'll know within ~15
 # minutes", not as a second-by-second monitor.
@@ -52,7 +56,7 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Open or update the outage issue
+      - name: File the outage issue if it isn't already open
         if: steps.probe.outputs.failures != ''
         env:
           GH_TOKEN: ${{ github.token }}
@@ -64,13 +68,12 @@ jobs:
             --json number --jq '.[0].number // empty')
           body=$(printf '%s\n%s\n' "$FAILURES" "$RUN_URL")
           if [ -n "$existing" ]; then
-            gh issue comment "$existing" --body "Still failing:"$'\n\n'"$body"
+            echo "already reported in #$existing, staying quiet"
           else
             gh label create uptime --color B60205 --description "Production availability" 2>/dev/null || true
             gh issue create --title "$ISSUE_TITLE" --label uptime \
               --body "The scheduled check could not reach:"$'\n\n'"$body"
           fi
-          exit 1
 
       - name: Close the outage issue once everything answers
         if: steps.probe.outputs.failures == ''
