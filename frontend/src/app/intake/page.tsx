@@ -163,20 +163,28 @@ function renderQuestions(
   return elements;
 }
 
-/** Chevron that starts pointing up and turns to point right on hover. */
-function TurningChevron() {
+/** Arrow whose shaft draws itself out from under the head on hover. */
+function UncurlingArrow() {
   return (
     <svg
-      viewBox="0 0 12 12"
+      viewBox="0 0 22 12"
       fill="none"
       stroke="currentColor"
       strokeWidth={1.25}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className="size-3.5 -rotate-90 transition-transform duration-300 ease-out group-hover/button:rotate-0"
+      className="h-3 w-[22px]"
     >
-      <path d="M4 2l5 4-5 4" />
+      {/* Drawn from the head backwards: dashoffset hides the tail until hover. */}
+      <path
+        d="M20 6H3"
+        pathLength={1}
+        strokeDasharray={1}
+        strokeDashoffset={0.65}
+        className="transition-[stroke-dashoffset] duration-300 ease-out group-hover/button:[stroke-dashoffset:0]"
+      />
+      <path d="M15 1l5 5-5 5" />
     </svg>
   );
 }
@@ -317,7 +325,7 @@ export default function IntakePage() {
             className="h-11 gap-2 px-3.5 text-base ring-primary/35 duration-300 ease-out hover:pr-6 active:ring-4"
           >
             {schema.welcome.button}
-            <TurningChevron />
+            <UncurlingArrow />
           </Button>
         </div>
       </main>
