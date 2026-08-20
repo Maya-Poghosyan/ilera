@@ -108,7 +108,7 @@ with it, making `CORS_ORIGINS` unnecessary for the app itself.
 
 ## Staying up (and failing gracefully)
 
-An outage should be a delay, not a dead end. Three things arranged in order of how much they help:
+An outage should be a delay, not a dead end. Two things arranged in order of how much they help:
 
 1. **Reads retry themselves.** `lib/api.ts` retries a GET twice (400ms, 1.2s) when the API answers
    502/503/504 or is unreachable, which covers the seconds a restart takes. Writes are never
@@ -117,9 +117,6 @@ An outage should be a delay, not a dead end. Three things arranged in order of h
    before giving up, since the Band run continues server-side.
 2. **Intake survives it.** Answers are drafted to localStorage on every step, so an outage
    mid-wizard costs a caregiver a retry, not their answers.
-3. **You hear about it first.** `.github/workflows/uptime.yml` probes the public endpoints every
-   ten minutes, opens a single issue while they're failing, and closes it on recovery. GitHub's
-   cron is best-effort, so treat it as "within ~15 minutes", not a real-time monitor.
 
 The container apps use Azure's default TCP check on the ingress port. HTTP probes on `/healthz`
 and `/readyz` were tried and reverted: a probe that misfires holds traffic off a revision whose
