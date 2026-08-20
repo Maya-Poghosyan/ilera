@@ -35,6 +35,16 @@ export function QuestionField({ question, value, name, error, onChange }: Props)
         {!question.required && <span className="ml-1 text-sm text-muted-foreground">(optional)</span>}
       </Label>
       {helper && <p className="text-sm text-muted-foreground">{helper}</p>}
+      {question.helper_link && (
+        <a
+          href={question.helper_link.href}
+          target="_blank"
+          rel="noreferrer"
+          className="w-fit text-sm text-primary underline underline-offset-4 hover:no-underline"
+        >
+          {question.helper_link.text}
+        </a>
+      )}
       {why && (
         <p className="text-sm text-muted-foreground">
           <span className="font-medium">Why this matters: </span>

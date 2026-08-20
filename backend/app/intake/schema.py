@@ -13,6 +13,7 @@ Each question carries:
   - ``options``       literal option labels (for select types)
   - ``required``      bool
   - ``helper_text`` / ``why_this_matters`` where the spec provides them
+  - ``helper_link``   optional ``{"text", "href"}`` link rendered under the helper text
   - ``show_when``     machine-readable condition referencing other field_ids
   - ``validation``    e.g. exclusive options
   - ``allow_not_sure`` / ``allow_prefer_not_to_answer`` for non-select types
@@ -115,6 +116,7 @@ def q(
     *,
     options: list[str] | None = None,
     helper_text: str | None = None,
+    helper_link: dict[str, str] | None = None,
     why_this_matters: str | None = None,
     show_when: dict | None = None,
     validation: dict | None = None,
@@ -135,6 +137,8 @@ def q(
         out["options"] = options
     if helper_text:
         out["helper_text"] = helper_text
+    if helper_link:
+        out["helper_link"] = helper_link
     if why_this_matters:
         out["why_this_matters"] = why_this_matters
     if show_when is not None:
@@ -327,6 +331,10 @@ SCREENS: list[dict] = [
                 "What is your relationship to [recipient name]?",
                 "single_select",
                 True,
+                helper_text=(
+                    "They are my… — for example, choose Parent if you care for your "
+                    "mother or father."
+                ),
                 options=[
                     "Spouse or domestic partner",
                     "Parent",
@@ -435,6 +443,10 @@ SCREENS: list[dict] = [
                     "I'm not sure",
                 ],
                 helper_text="Medicaid may have a different name in your state, such as Medi-Cal in California.",
+                helper_link={
+                    "text": "See what Medicaid is called in your state",
+                    "href": "https://www.medicaid.gov/state-overviews/state-profiles",
+                },
             ),
             q(
                 "recipient.health_coverage",
