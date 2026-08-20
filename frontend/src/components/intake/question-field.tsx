@@ -43,9 +43,11 @@ export function QuestionField({ question, value, name, error, onChange }: Props)
           target="_blank"
           rel="noreferrer"
           // Hugs the question it explains, with a clear gap before the answer control.
-          className="-mt-0.5 mb-2 flex w-fit items-center gap-1.5 text-sm text-primary hover:underline"
+          className="group -mt-0.5 mb-2 flex w-fit items-center gap-1.5 text-sm text-primary"
         >
-          {question.helper_link.text}
+          <span className="relative after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 group-hover:after:scale-x-100">
+            {question.helper_link.text}
+          </span>
           <ExternalLink className="size-3.5" aria-hidden="true" />
         </a>
       )}
