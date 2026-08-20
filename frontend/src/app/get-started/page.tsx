@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -13,13 +14,32 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
+import { useAuth } from "@/lib/auth-context";
 
 const POKE_RECIPE_URL = "https://poke.com/r/DsatCoA1all";
 
 type Step = "poke" | "done";
 
 export default function GetStartedPage() {
+  const router = useRouter();
+  const { user, loading } = useAuth();
   const [step, setStep] = useState<Step>("poke");
+
+  // Connecting the assistant is the last step of onboarding, after the account
+  // exists — anyone who lands here without one belongs in the intake.
+  useEffect(() => {
+    if (!loading && !user) router.replace("/intake");
+  }, [loading, user, router]);
+
+  if (loading || !user) {
+    return (
+      <main className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center px-6 py-20">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-foreground" />
+      </main>
+    );
+  }
+
+  const nextHref = user.case_id ? `/eligibility/${user.case_id}` : "/intake";
 
   return (
     <main className="flex flex-1 flex-col">
@@ -32,11 +52,11 @@ export default function GetStartedPage() {
       <section className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
         {/* Progress indicators */}
         <div className="flex items-center gap-3">
-          <StepDot active={step === "poke"} done={step === "done"} label="1" />
+          <StepDot active={false} done label="1" />
           <div className="h-px w-8 bg-border" />
-          <StepDot active={step === "done"} done={false} label="2" />
+          <StepDot active={false} done label="2" />
           <div className="h-px w-8 bg-border" />
-          <StepDot active={false} done={false} label="3" />
+          <StepDot active={step === "poke"} done={step === "done"} label="3" />
         </div>
 
         {/* Step: Connect Poke */}
@@ -114,13 +134,14 @@ export default function GetStartedPage() {
               </div>
               <CardTitle className="text-2xl">You&apos;re all set!</CardTitle>
               <p className="text-base text-muted-foreground">
-                Now let&apos;s figure out which benefits you qualify for. No account needed
-                yet — you&apos;ll create one at the end to save your results.
+                {user.case_id
+                  ? "Your answers are saved to your account. Here are the programs you qualify for."
+                  : "Let\u2019s figure out which benefits you qualify for."}
               </p>
             </CardHeader>
             <CardContent>
-              <Button className="w-full py-3 text-base" render={<Link href="/intake" />}>
-                Start benefits intake
+              <Button className="w-full py-3 text-base" render={<Link href={nextHref} />}>
+                {user.case_id ? "See my results" : "Start benefits intake"}
                 <ArrowRight className="size-4" />
               </Button>
             </CardContent>

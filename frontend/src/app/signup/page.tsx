@@ -38,20 +38,18 @@ export default function SignupPage() {
     try {
       await signup(name, email, password);
       const pending = getPendingCaseId();
-      if (!pending) {
-        router.push("/get-started");
-        return;
+      if (pending) {
+        // The case is claimed here; a stale id someone else already owns is refused, and
+        // there is nothing the new account can do with it.
+        try {
+          await updateUser({ case_id: pending });
+        } catch {
+          /* the account still works without it */
+        } finally {
+          clearPendingCaseId();
+        }
       }
-      // The case is claimed here; a stale id someone else already owns is refused, and
-      // there is nothing the new account can do with it.
-      try {
-        await updateUser({ case_id: pending });
-        router.push(`/eligibility/${pending}`);
-      } catch {
-        router.push("/get-started");
-      } finally {
-        clearPendingCaseId();
-      }
+      router.push("/get-started");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed");
     } finally {
