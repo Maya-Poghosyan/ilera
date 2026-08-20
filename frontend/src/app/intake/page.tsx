@@ -168,18 +168,19 @@ function renderQuestions(
 /**
  * Arrow that grows to the right on hover, pushing its head into the extra padding.
  * Rendered at 1 viewBox unit per px, so the head's translate matches the shaft's growth.
+ * The box is only as wide as the resting art; the growth overflows into that padding.
  */
 function UncurlingArrow() {
   return (
     <svg
-      viewBox="0 0 22 12"
+      viewBox="0 0 14 12"
       fill="none"
       stroke="currentColor"
       strokeWidth={1.25}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className="h-3 w-[22px] overflow-visible"
+      className="h-3 w-[14px] overflow-visible"
     >
       {/* Drawn left to right: dashoffset trims the far end, so it extends rightwards. */}
       <path
