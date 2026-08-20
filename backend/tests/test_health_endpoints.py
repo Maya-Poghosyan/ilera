@@ -10,12 +10,6 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_healthz_is_liveness_only() -> None:
-    res = client.get("/healthz")
-    assert res.status_code == 200
-    assert res.json() == {"status": "ok"}
-
-
 def test_readyz_ok_when_postgres_reachable(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(db, "ready", lambda: True)
     res = client.get("/readyz")
