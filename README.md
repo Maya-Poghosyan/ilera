@@ -113,15 +113,13 @@ An outage should be a delay, not a dead end. Two things arranged in order of how
 1. **Reads retry themselves.** `lib/api.ts` retries a GET twice (400ms, 1.2s) when the API answers
    502/503/504 or is unreachable, which covers the seconds a restart takes. Writes are never
    replayed — a retried POST could file a second application. A read that still fails renders
-   `LoadFailure` with a Try again button, and the eligibility page tolerates five failed polls
-   before giving up, since the Band run continues server-side.
+   `LoadFailure` with a Try again button.
 2. **Intake survives it.** Answers are drafted to localStorage on every step, so an outage
    mid-wizard costs a caregiver a retry, not their answers.
 
 The container apps use Azure's default TCP check on the ingress port. HTTP probes on `/healthz`
 and `/readyz` were tried and reverted: a probe that misfires holds traffic off a revision whose
-process is fine, which is a worse failure than the one it prevents. `deploy/azure/remove_probes.py`
-clears them if they ever come back.
+process is fine, which is a worse failure than the one it prevents.
 
 ## Deploying
 

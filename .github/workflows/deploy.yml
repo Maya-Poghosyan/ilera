@@ -54,13 +54,6 @@ jobs:
             web)  echo "web=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
             both) printf 'api=true\nweb=true\n' >> "$GITHUB_OUTPUT"; exit 0 ;;
           esac
-          # A force-push or a new branch leaves no usable "before", so deploy both rather than
-          # silently skipping a change.
-          if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
-            echo "api=true" >> "$GITHUB_OUTPUT"
-            echo "web=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
           changed=$(git diff --name-only "$BEFORE" "${{ github.sha }}")
           echo "$changed"
           grep -q '^backend/' <<<"$changed" && echo "api=true" >> "$GITHUB_OUTPUT" || true
@@ -126,16 +119,13 @@ jobs:
           # is reachable from the new revision.
           paths="/healthz"
           [ "${{ matrix.app }}" = api ] && paths="/healthz /readyz"
-          # Long enough to cover the image pull, the startup probe's grace period and ingress
-          # moving traffic onto the new revision; four minutes was not.
+          # Long enough to cover the image pull and ingress moving traffic onto the new revision.
           deadline=$((SECONDS + 600))
           for path in $paths; do
             until code=$(curl -sS -o /dev/null -m 10 -w '%{http_code}' "https://$HOST$path") \
               && [ "$code" = 200 ]; do
               if [ $SECONDS -ge $deadline ]; then
-                # curl reports 000 when it never got a response at all.
-                case "${code:-000}" in 000) detail="never answered" ;; *) detail="answered $code" ;; esac
-                echo "::error::https://$HOST$path $detail for 10 minutes — check"\
+                echo "::error::https://$HOST$path answered ${code:-000} for 10 minutes — check"\
                   "az containerapp logs show -n $APP -g $RG"
                 exit 1
               fi
