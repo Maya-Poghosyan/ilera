@@ -1,5 +1,7 @@
 "use client";
 
+import { ExternalLink } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,9 +42,10 @@ export function QuestionField({ question, value, name, error, onChange }: Props)
           href={question.helper_link.href}
           target="_blank"
           rel="noreferrer"
-          className="w-fit text-sm text-primary underline underline-offset-4 hover:no-underline"
+          className="flex w-fit items-center gap-1.5 text-sm text-primary hover:underline"
         >
           {question.helper_link.text}
+          <ExternalLink className="size-3.5" aria-hidden="true" />
         </a>
       )}
       {why && (

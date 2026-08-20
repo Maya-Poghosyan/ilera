@@ -442,7 +442,6 @@ SCREENS: list[dict] = [
                     "Has not applied",
                     "I'm not sure",
                 ],
-                helper_text="Medicaid may have a different name in your state, such as Medi-Cal in California.",
                 helper_link={
                     "text": "See what Medicaid is called in your state",
                     "href": "https://www.medicaid.gov/state-overviews/state-profiles",
