@@ -27,22 +27,25 @@ export function QuestionField({ question, value, name, error, onChange }: Props)
   const why = question.why_this_matters ? interpolateName(question.why_this_matters, name) : undefined;
 
   return (
-    <div className="space-y-2">
-      <Label className="block text-sm font-medium">
+    // Full height with the control pushed to the bottom, so side-by-side fields keep
+    // their inputs on one line even when only one of them has helper text.
+    <div className="flex h-full flex-col gap-2">
+      <Label className="block text-base font-medium">
         {text}
-        {!question.required && <span className="ml-1 text-xs text-muted-foreground">(optional)</span>}
+        {!question.required && <span className="ml-1 text-sm text-muted-foreground">(optional)</span>}
       </Label>
-      {helper && <p className="text-xs text-muted-foreground">{helper}</p>}
+      {helper && <p className="text-sm text-muted-foreground">{helper}</p>}
       {why && (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           <span className="font-medium">Why this matters: </span>
           {why}
         </p>
       )}
 
-      <FieldControl question={question} value={value} name={name} onChange={onChange} />
-
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      <div className="mt-auto space-y-1.5">
+        <FieldControl question={question} value={value} name={name} onChange={onChange} />
+        {error && <p className="text-sm text-destructive">{error}</p>}
+      </div>
     </div>
   );
 }
@@ -89,7 +92,7 @@ function FieldControl({
     case "state_dropdown":
       return (
         <select
-          className="h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="h-10 w-full rounded-lg border border-input bg-transparent px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
         >
@@ -104,6 +107,7 @@ function FieldControl({
     case "zip":
       return (
         <Input
+          className="h-10"
           inputMode="numeric"
           maxLength={5}
           placeholder="12345"
@@ -116,7 +120,7 @@ function FieldControl({
     case "short_text":
     default:
       return (
-        <Input value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value)} />
+        <Input className="h-10" value={(value as string) ?? ""} onChange={(e) => onChange(e.target.value)} />
       );
   }
 }
@@ -138,7 +142,7 @@ function OptionRow({
       onClick={onClick}
       aria-pressed={selected}
       className={cn(
-        "flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left text-sm transition-colors",
+        "flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left text-base transition-colors",
         selected ? "border-primary bg-primary/5" : "border-input hover:bg-muted",
       )}
     >
@@ -243,7 +247,7 @@ function BooleanField({
           type="button"
           onClick={() => onChange(value === o.v ? null : o.v)}
           className={cn(
-            "rounded-lg border px-4 py-1.5 text-sm transition-colors",
+            "rounded-lg border px-4 py-2 text-base transition-colors",
             value === o.v ? "border-primary bg-primary/5" : "border-input hover:bg-muted",
           )}
         >
@@ -267,6 +271,7 @@ function NumberField({
   return (
     <div className="space-y-2">
       <Input
+        className="h-10"
         type="number"
         disabled={isPreferNot}
         value={isPreferNot || value === null || value === undefined ? "" : String(value)}
@@ -301,6 +306,7 @@ function DateField({
   return (
     <div className="space-y-2">
       <Input
+        className="h-10"
         type="date"
         disabled={isNotSure}
         value={isNotSure || value === null || value === undefined ? "" : String(value)}
