@@ -103,11 +103,13 @@ function paginate(questions: Question[]): Question[][] {
   return out;
 }
 
+// Stacked on narrow screens, side by side once there's room for readable fields.
 const INLINE_COLS: Record<number, string> = {
   1: "grid-cols-1",
-  2: "grid-cols-2",
-  3: "grid-cols-3",
+  2: "grid-cols-1 sm:grid-cols-2",
+  3: "grid-cols-1 sm:grid-cols-3",
 };
+const INLINE_COLS_FALLBACK = "grid-cols-1 sm:grid-cols-2";
 
 function renderQuestions(
   questions: Question[],
@@ -131,7 +133,7 @@ function renderQuestions(
       elements.push(
         <div
           key={`inline-${cur.field_id}`}
-          className={`grid items-end gap-5 ${INLINE_COLS[inlineGroup.length] ?? "grid-cols-2"}`}
+          className={`grid items-end gap-5 ${INLINE_COLS[inlineGroup.length] ?? INLINE_COLS_FALLBACK}`}
         >
           {inlineGroup.map((iq) => (
             <QuestionField
