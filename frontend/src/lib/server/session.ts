@@ -5,24 +5,15 @@ import type { NextRequest } from "next/server";
 
 import { SESSION_COOKIE, callApi, sessionCookieOptions } from "./api-proxy";
 
-const DEFAULT_SESSION_SECONDS = 72 * 60 * 60;
-
 /** Seconds until the token expires, from its own `exp` claim.
  *
  * The signature doesn't need checking — the backend just issued this over a trusted connection,
  * and the claim is only used to decide when the browser may forget the cookie. */
 function secondsUntilExpiry(token: string): number {
-  const payload = token.split(".")[1];
-  if (!payload) return DEFAULT_SESSION_SECONDS;
-  try {
-    const { exp } = JSON.parse(
-      Buffer.from(payload, "base64url").toString("utf8"),
-    ) as { exp?: number };
-    if (!exp) return DEFAULT_SESSION_SECONDS;
-    return Math.max(1, Math.floor(exp - Date.now() / 1000));
-  } catch {
-    return DEFAULT_SESSION_SECONDS;
-  }
+  const { exp } = JSON.parse(
+    Buffer.from(token.split(".")[1], "base64url").toString("utf8"),
+  ) as { exp: number };
+  return Math.max(1, Math.floor(exp - Date.now() / 1000));
 }
 
 /** Sign up or log in, keeping the token server-side.
@@ -45,11 +36,9 @@ export async function startSession(
     console.error(`api proxy: POST ${path} failed`, err);
     return Response.json({ detail: "The API is unreachable." }, { status: 502 });
   }
-  const body = await upstream.json().catch(() => null);
+  const body = await upstream.json();
   if (!upstream.ok) {
-    return Response.json(body ?? { detail: "Authentication failed" }, {
-      status: upstream.status,
-    });
+    return Response.json(body, { status: upstream.status });
   }
   const { token, user } = body as { token: string; user: unknown };
   (await cookies()).set(

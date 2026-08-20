@@ -37,9 +37,6 @@ const LOADING_MESSAGES = [
 ];
 
 const POLL_MS = 3000;
-// A Band run takes a while, so a poll that fails mid-run shouldn't discard it — the analysis
-// keeps going server-side. Give up only once the API has been unreachable for this many polls.
-const MAX_POLL_FAILURES = 5;
 
 export default function EligibilityPage() {
   const { caseId } = useParams<{ caseId: string }>();
@@ -51,26 +48,18 @@ export default function EligibilityPage() {
 
   useEffect(() => {
     let active = true;
-    let failures = 0;
 
     const poll = () => {
       getEligibility(caseId)
         .then((res) => {
           if (!active) return;
-          failures = 0;
           setData(res);
           if (res.status === "idle" || res.status === "processing") {
             timer.current = setTimeout(poll, POLL_MS);
           }
         })
         .catch(() => {
-          if (!active) return;
-          failures++;
-          if (failures >= MAX_POLL_FAILURES) {
-            setError("We lost contact while reviewing your programs.");
-          } else {
-            timer.current = setTimeout(poll, POLL_MS);
-          }
+          if (active) setError("We lost contact while reviewing your programs.");
         });
     };
 
