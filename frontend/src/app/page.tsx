@@ -53,7 +53,7 @@ export default function Home() {
                 <Button variant="outline" render={<Link href="/login" />}>
                   Sign in
                 </Button>
-                <Button render={<Link href="/get-started" />}>Get started</Button>
+                <Button render={<Link href="/intake" />}>Get started</Button>
               </>
             )}
           </div>
@@ -76,7 +76,7 @@ export default function Home() {
             </Button>
           ) : (
             <>
-              <Button size="lg" render={<Link href="/get-started" />}>
+              <Button size="lg" render={<Link href="/intake" />}>
                 Get started
                 <ArrowRight />
               </Button>
