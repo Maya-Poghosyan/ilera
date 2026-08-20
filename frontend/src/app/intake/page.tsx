@@ -163,6 +163,32 @@ function renderQuestions(
   return elements;
 }
 
+/** Arrow whose shaft draws itself out from under the head on hover. */
+function UncurlingArrow() {
+  return (
+    <svg
+      viewBox="0 0 22 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="h-3 w-[22px]"
+    >
+      {/* Drawn from the head backwards: dashoffset hides the tail until hover. */}
+      <path
+        d="M20 6H3"
+        pathLength={1}
+        strokeDasharray={1}
+        strokeDashoffset={0.65}
+        className="transition-[stroke-dashoffset] duration-300 ease-out group-hover/button:[stroke-dashoffset:0]"
+      />
+      <path d="M15 1l5 5-5 5" />
+    </svg>
+  );
+}
+
 export default function IntakePage() {
   const router = useRouter();
   const { user, updateUser } = useAuth();
@@ -290,8 +316,17 @@ export default function IntakePage() {
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-6 py-16">
         <div className="space-y-6">
           <h1 className="text-xl font-semibold">{schema.welcome.header}</h1>
-          <p className="text-sm text-muted-foreground">{schema.welcome.body}</p>
-          <Button onClick={() => setStarted(true)}>{schema.welcome.button}</Button>
+          {schema.welcome.body && (
+            <p className="text-sm text-muted-foreground">{schema.welcome.body}</p>
+          )}
+          <Button
+            size="lg"
+            onClick={() => setStarted(true)}
+            className="h-11 gap-2 px-5 text-base ring-primary/35 active:ring-4"
+          >
+            {schema.welcome.button}
+            <UncurlingArrow />
+          </Button>
         </div>
       </main>
     );

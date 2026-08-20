@@ -919,11 +919,9 @@ MINI_MODULES: list[dict] = [
 
 WELCOME = {
     "header": "Let's find support that may fit your caregiving situation.",
-    "body": (
-        "We'll ask a few short questions about you, the person you care for, "
-        "and your situation. This takes about 5 minutes."
-    ),
-    "button": "Get started",
+    # The length is on the button now, so the screen is just a header and one thing to press.
+    "body": "",
+    "button": "Get started (approx. 5 minutes)",
 }
 
 SUBMIT_BUTTON = "Find possible programs"
