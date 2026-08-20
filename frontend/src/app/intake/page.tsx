@@ -131,7 +131,7 @@ function renderQuestions(
       elements.push(
         <div
           key={`inline-${cur.field_id}`}
-          className={`grid gap-4 ${INLINE_COLS[inlineGroup.length] ?? "grid-cols-2"}`}
+          className={`grid items-end gap-5 ${INLINE_COLS[inlineGroup.length] ?? "grid-cols-2"}`}
         >
           {inlineGroup.map((iq) => (
             <QuestionField
@@ -446,28 +446,28 @@ export default function IntakePage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-6 py-12">
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-8 px-6 py-14">
       <div className="space-y-2">
         <Progress value={pct} />
       </div>
 
-      <Card ref={cardRef} className="overflow-visible">
+      <Card ref={cardRef} className="overflow-visible text-base [--card-spacing:--spacing(7)]">
         <CardHeader>
-          <CardTitle>{page.title}</CardTitle>
+          <CardTitle className="text-2xl">{page.title}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6 overflow-visible">
+        <CardContent className="space-y-7 overflow-visible">
           {page.showIntro && page.introText && (
-            <p className="text-sm text-muted-foreground">{page.introText.replaceAll("[recipient name]", name)}</p>
+            <p className="text-base text-muted-foreground">{page.introText.replaceAll("[recipient name]", name)}</p>
           )}
           {renderQuestions(visibleQuestions, name, answers, errors, setAnswer)}
         </CardContent>
       </Card>
 
       <div className="flex justify-between">
-        <Button variant="outline" disabled={stepIndex === 0} onClick={back}>
+        <Button size="lg" variant="outline" className="h-11 px-5 text-base" disabled={stepIndex === 0} onClick={back}>
           Back
         </Button>
-        <Button onClick={next} disabled={submitting}>
+        <Button size="lg" className="h-11 px-5 text-base" onClick={next} disabled={submitting}>
           {submitting ? "Submitting…" : isLast ? schema.submit_button : "Next"}
         </Button>
       </div>
