@@ -9,11 +9,14 @@ httpx>=0.28.0,<1.0
 pypdf>=5.0.0,<6.0
 fillpdf>=0.7.0,<1.0
 numpy>=1.26.0
-openai>=1.0,<2.0
+openai>=2.29,<3.0
 fastembed>=0.5.0,<1.0
 python-docx>=1.1.0,<2.0
 zipcodes>=3.0.0,<4.0
 mcp>=1.27.0,<2.0
 band-sdk>=1.0.0,<2.0
+# Band agents and the form-filling agents import pydantic_ai; the slim distribution plus the
+# openai extra is what the code actually uses, and it was missing from the image entirely.
+pydantic-ai-slim[openai]>=1.107,<2.0
 psycopg[binary]>=3.2,<4.0
 psycopg-pool>=3.2,<4.0
