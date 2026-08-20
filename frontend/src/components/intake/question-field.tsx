@@ -42,7 +42,8 @@ export function QuestionField({ question, value, name, error, onChange }: Props)
           href={question.helper_link.href}
           target="_blank"
           rel="noreferrer"
-          className="flex w-fit items-center gap-1.5 text-sm text-primary hover:underline"
+          // Hugs the question it explains, with a clear gap before the answer control.
+          className="-mt-0.5 mb-2 flex w-fit items-center gap-1.5 text-sm text-primary hover:underline"
         >
           {question.helper_link.text}
           <ExternalLink className="size-3.5" aria-hidden="true" />
