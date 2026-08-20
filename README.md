@@ -108,34 +108,23 @@ with it, making `CORS_ORIGINS` unnecessary for the app itself.
 
 ## Staying up (and failing gracefully)
 
-An outage should be a delay, not a dead end. Four things arranged in order of how much they help:
+An outage should be a delay, not a dead end. Three things arranged in order of how much they help:
 
-1. **A bad revision never takes traffic.** Azure's default probes are TCP against the ingress
-   port, which a process that is listening but broken still passes, so a container with, say, an
-   unusable `DATABASE_URL` can replace a healthy one. `deploy/azure/configure_availability.py`
-   switches both apps to HTTP probes and keeps one replica warm:
-
-   ```bash
-   export RESOURCE_GROUP=Ilera
-   deploy/azure/configure_availability.py ilera-api --readiness-path /readyz --dry-run
-   deploy/azure/configure_availability.py ilera-api --readiness-path /readyz
-   deploy/azure/configure_availability.py ilera-web
-   ```
-
-   The API's `/healthz` answers as long as the process is alive; `/readyz` also runs `SELECT 1`,
-   so a replica that can't reach Postgres is pulled out of rotation instead of losing cases. The
-   web app's `/healthz` deliberately ignores the API, so the site stays up and keeps explaining
-   itself while the backend is down.
-2. **Reads retry themselves.** `lib/api.ts` retries a GET twice (400ms, 1.2s) when the API answers
+1. **Reads retry themselves.** `lib/api.ts` retries a GET twice (400ms, 1.2s) when the API answers
    502/503/504 or is unreachable, which covers the seconds a restart takes. Writes are never
    replayed — a retried POST could file a second application. A read that still fails renders
    `LoadFailure` with a Try again button, and the eligibility page tolerates five failed polls
    before giving up, since the Band run continues server-side.
-3. **Intake survives it.** Answers are drafted to localStorage on every step, so an outage
+2. **Intake survives it.** Answers are drafted to localStorage on every step, so an outage
    mid-wizard costs a caregiver a retry, not their answers.
-4. **You hear about it first.** `.github/workflows/uptime.yml` probes the public endpoints every
+3. **You hear about it first.** `.github/workflows/uptime.yml` probes the public endpoints every
    ten minutes, opens a single issue while they're failing, and closes it on recovery. GitHub's
    cron is best-effort, so treat it as "within ~15 minutes", not a real-time monitor.
+
+The container apps use Azure's default TCP check on the ingress port. HTTP probes on `/healthz`
+and `/readyz` were tried and reverted: a probe that misfires holds traffic off a revision whose
+process is fine, which is a worse failure than the one it prevents. `deploy/azure/remove_probes.py`
+clears them if they ever come back.
 
 ## Deploying
 
