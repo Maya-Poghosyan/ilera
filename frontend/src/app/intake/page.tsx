@@ -170,7 +170,7 @@ function TurningChevron() {
       viewBox="0 0 12 12"
       fill="none"
       stroke="currentColor"
-      strokeWidth={2}
+      strokeWidth={1.25}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
@@ -314,7 +314,7 @@ export default function IntakePage() {
           <Button
             size="lg"
             onClick={() => setStarted(true)}
-            className="h-11 gap-2 px-5 text-base ring-primary/35 duration-300 ease-out hover:pr-8 active:ring-4"
+            className="h-11 gap-2 px-3.5 text-base ring-primary/35 duration-300 ease-out hover:pr-6 active:ring-4"
           >
             {schema.welcome.button}
             <TurningChevron />
