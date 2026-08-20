@@ -163,7 +163,10 @@ function renderQuestions(
   return elements;
 }
 
-/** Arrow whose shaft draws itself out from under the head on hover. */
+/**
+ * Arrow that grows to the right on hover, pushing its head into the extra padding.
+ * Rendered at 1 viewBox unit per px, so the head's translate matches the shaft's growth.
+ */
 function UncurlingArrow() {
   return (
     <svg
@@ -174,17 +177,20 @@ function UncurlingArrow() {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className="h-3 w-[22px]"
+      className="h-3 w-[22px] overflow-visible"
     >
-      {/* Drawn from the head backwards: dashoffset hides the tail until hover. */}
+      {/* Drawn left to right: dashoffset trims the far end, so it extends rightwards. */}
       <path
-        d="M20 6H3"
+        d="M1 6H21"
         pathLength={1}
         strokeDasharray={1}
-        strokeDashoffset={0.65}
+        strokeDashoffset={0.4}
         className="transition-[stroke-dashoffset] duration-300 ease-out group-hover/button:[stroke-dashoffset:0]"
       />
-      <path d="M15 1l5 5-5 5" />
+      <path
+        d="M9 2l4 4-4 4"
+        className="transition-transform duration-300 ease-out group-hover/button:translate-x-[8px]"
+      />
     </svg>
   );
 }
@@ -322,7 +328,7 @@ export default function IntakePage() {
           <Button
             size="lg"
             onClick={() => setStarted(true)}
-            className="h-11 gap-2 px-3.5 text-base ring-primary/35 duration-300 ease-out hover:pr-6 active:ring-4"
+            className="h-11 gap-1.5 px-3.5 text-base ring-primary/35 duration-300 ease-out hover:pr-6 active:ring-4"
           >
             {schema.welcome.button}
             <UncurlingArrow />
