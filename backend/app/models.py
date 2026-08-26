@@ -102,6 +102,9 @@ class CaseProfile(BaseModel):
     # Per-specialist count of cross-eligibility peer messages sent via ask_peer this run. Bounds
     # the peer conversation: once a specialist hits the budget, ask_peer refuses further sends.
     peer_msg_counts: dict[str, int] = Field(default_factory=dict)
+    # doc_keys the run gave up on: the strategy was synthesized without them, so their programs
+    # went unassessed and the caregiver is told so.
+    unassessed_specialists: list[str] = Field(default_factory=list)
 
 
 class FollowupQuestion(BaseModel):

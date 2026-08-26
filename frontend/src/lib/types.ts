@@ -100,6 +100,8 @@ export interface EligibilityResponse {
   strategy_complete: boolean;
   expected: string[];
   completed: string[];
+  /** Programs the review could not assess, so the plan leaves them out. */
+  unassessed_programs: string[];
   error: string;
 }
 

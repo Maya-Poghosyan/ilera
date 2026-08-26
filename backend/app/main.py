@@ -3,7 +3,6 @@ import logging
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from math import ceil
 from typing import Any, Optional
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -328,6 +327,9 @@ class EligibilityResponse(BaseModel):
     strategy_complete: bool = False
     expected: list[str] = []
     completed: list[str] = []
+    # Programs the run could not assess (a specialist never reported). Shown to the caregiver so
+    # an incomplete plan does not read like a complete one.
+    unassessed_programs: list[str] = []
     error: str = ""
 
 
@@ -342,13 +344,14 @@ _STRATEGY_TIMEOUT = 360  # seconds to wait for the routing agent to submit its s
 # steps (drain, synthesis trigger, settle) fire on the poll that observes the phase finishing.
 _POLL_INTERVAL = 1.5
 _WATCHDOG_INTERVAL = 20   # how often to sweep the room for stuck peer messages
-# Once most of the panel has reported, a single straggler is all that stands between the caregiver
-# and their strategy — and a stalled agent would otherwise hold the case for the full
-# _FINDINGS_TIMEOUT. After this grace period the run synthesizes from the findings it has.
+# Once the rest of the panel has reported, a lone straggler is all that stands between the
+# caregiver and their strategy — and a stalled agent would otherwise hold the case for the full
+# _FINDINGS_TIMEOUT. It gets nudged (re-@mentioned) after one grace period, and only after a
+# second one does the run synthesize without it, naming the program it could not assess.
 _STRAGGLER_GRACE = 90
-# Below this many findings the panel is too thin to synthesize a strategy from, so a run that
-# never gets there is an error rather than a partial plan.
-_MIN_FINDINGS_FRACTION = 0.5
+# How many specialists may be dropped that way. Losing one program costs the caregiver a line of
+# their plan; losing several means the plan is guesswork, so that stays an error.
+_MAX_DROPPED_SPECIALISTS = 1
 # A specialist-sent peer message older than this that is still un-acked is treated as stale: it
 # either finished a bounded cross-eligibility exchange or is a poison message trapping an agent in
 # a /next resync loop, so the watchdog force-acks it. Long enough to allow a real one-shot Q&A.
@@ -367,9 +370,9 @@ def _findings_summary(profile: CaseProfile, specialists: list[str]) -> str:
 
 async def _run_case_eligibility(case_id: str) -> None:
     """Orchestrate one case's Band eligibility run end-to-end:
-    create the room + seed, wait for the panel's complete findings (a straggler only gets
-    _STRAGGLER_GRACE once a quorum has reported), trigger the routing agent to synthesize the
-    strategy, and drive the case's band_status to complete/error.
+    create the room + seed, wait for the panel's complete findings (a lone straggler is nudged
+    once and only then dropped), trigger the routing agent to synthesize the strategy, and drive
+    the case's band_status to complete/error.
     Band is the sole engine — there is no in-process fallback."""
     from .integrations.band import (
         drain_routing_queue,
@@ -394,6 +397,7 @@ async def _run_case_eligibility(case_id: str) -> None:
     profile.strategy_complete = False
     profile.synthesis_requested = False
     profile.peer_msg_counts = {}
+    profile.unassessed_specialists = []
     save_profile(profile)
 
     try:
@@ -426,7 +430,7 @@ async def _run_case_eligibility(case_id: str) -> None:
     deadline_f = loop.time() + _FINDINGS_TIMEOUT
     next_watchdog = loop.time() + _WATCHDOG_INTERVAL
     straggler_deadline: Optional[float] = None
-    quorum = max(1, ceil(len(specialists) * _MIN_FINDINGS_FRACTION))
+    nudged = False
     while loop.time() < deadline_f:
         await asyncio.sleep(_POLL_INTERVAL)
         p = get_profile(case_id)
@@ -436,17 +440,30 @@ async def _run_case_eligibility(case_id: str) -> None:
         if len(done_now) == len(specialists):
             all_complete = True
             break
-        if len(done_now) >= quorum:
+        missing_now = [k for k in specialists if k not in done_now]
+        if len(missing_now) <= _MAX_DROPPED_SPECIALISTS:
             if straggler_deadline is None:
                 straggler_deadline = loop.time() + _STRAGGLER_GRACE
             elif loop.time() >= straggler_deadline:
-                logger.warning(
-                    "Band case %s: synthesizing without %s (straggler grace elapsed)",
-                    case_id,
-                    ", ".join(k for k in specialists if k not in done_now),
-                )
-                all_complete = True
-                break
+                if not nudged:
+                    # A silent specialist has usually just lost its turn (its queue was drained,
+                    # or its own peer question was the last thing it saw). Re-@mentioning it is
+                    # the cheap fix; dropping its program is the expensive one.
+                    nudged = True
+                    straggler_deadline = loop.time() + _STRAGGLER_GRACE
+                    logger.warning("Band case %s: nudging %s", case_id, ", ".join(missing_now))
+                    try:
+                        await seed_specialists(p, chat_id, missing_now)
+                    except Exception:
+                        logger.exception("Band straggler nudge failed for case %s", case_id)
+                else:
+                    logger.warning(
+                        "Band case %s: synthesizing without %s (nudge did not land)",
+                        case_id,
+                        ", ".join(missing_now),
+                    )
+                    all_complete = True
+                    break
         # Watchdog: clear any stale peer-chatter message that is stuck in a recipient's queue,
         # which would otherwise trap that agent in an infinite /next resync loop and prevent it
         # from ever submitting. Only specialist-sent messages are touched (never the seed).
@@ -461,11 +478,12 @@ async def _run_case_eligibility(case_id: str) -> None:
     if p is None:
         return
 
+    done = [k for k in specialists if k in p.findings and p.findings[k].complete]
+    missing = [k for k in specialists if k not in done]
+
     if not all_complete:
         # Too little of the panel reported to build a plan from: surface an error naming who is
         # missing so it can be retried.
-        done = [k for k in specialists if k in p.findings and p.findings[k].complete]
-        missing = [k for k in specialists if k not in done]
         p.band_status = "error"
         p.band_error = (
             "Specialist evaluation did not complete in time "
@@ -473,6 +491,11 @@ async def _run_case_eligibility(case_id: str) -> None:
         )
         save_profile(p)
         return
+
+    # Synthesizing without a specialist leaves one program unassessed; the caregiver is told which
+    # rather than handed a plan with a silent hole in it.
+    p.unassessed_specialists = missing
+    save_profile(p)
 
     # Clear routing's accumulated backlog (specialist notices it stayed silent on) while it is
     # still gated, THEN open the gate. That way, once synthesis_requested is set, the only
@@ -526,6 +549,13 @@ def _ensure_eligibility_started(case_id: str) -> Optional[CaseProfile]:
     return profile
 
 
+def _program_names(doc_keys: list[str]) -> list[str]:
+    from .agents.specialists import ALL_SPECIALISTS
+
+    names = {cls().doc_key: cls().program for cls in ALL_SPECIALISTS}
+    return [names.get(k, k) for k in doc_keys]
+
+
 def _eligibility_response(profile: CaseProfile) -> EligibilityResponse:
     expected = profile.expected_specialists
     completed = [k for k in expected if k in profile.findings and profile.findings[k].complete]
@@ -542,6 +572,7 @@ def _eligibility_response(profile: CaseProfile) -> EligibilityResponse:
         strategy_complete=profile.strategy_complete,
         expected=expected,
         completed=completed,
+        unassessed_programs=_program_names(profile.unassessed_specialists),
         error=profile.band_error,
     )
 

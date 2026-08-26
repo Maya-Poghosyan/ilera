@@ -170,6 +170,12 @@ export default function EligibilityPage() {
                   </li>
                 ))}
               </ul>
+              {data.unassessed_programs.length > 0 && (
+                <p className="mt-4 text-xs text-muted-foreground">
+                  One thing this plan leaves out: we couldn&apos;t finish checking{" "}
+                  {data.unassessed_programs.join(", ")}.
+                </p>
+              )}
             </CardContent>
           </Card>
         )}
