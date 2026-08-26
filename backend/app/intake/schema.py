@@ -488,26 +488,6 @@ SCREENS: list[dict] = [
     },
 ]
 
-CONTACT_SCREEN: dict = {
-    "id": "screen_contact",
-    "title": "Contact",
-    "questions": [
-        q(
-            "caregiver.phone",
-            "What is your phone number?",
-            "short_text",
-            True,
-        ),
-        q(
-            "caregiver.email",
-            "What is your email address?",
-            "short_text",
-            True,
-        ),
-    ],
-}
-
-
 # ---------------------------------------------------------------------------
 # Conditional Mini-Modules A–F
 # ---------------------------------------------------------------------------
@@ -983,7 +963,6 @@ def build_schema() -> dict:
         "form_wide_rules": FORM_WIDE_RULES,
         "delayed_questions": DELAYED_QUESTIONS,
         "screens": SCREENS,
-        "contact_screen": CONTACT_SCREEN,
         "mini_modules": MINI_MODULES,
     }
 

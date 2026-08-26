@@ -265,3 +265,31 @@ def map_answers_to_profile(answers: dict[str, Any], profile: CaseProfile) -> Cas
         hh.income_monthly = _INCOME_MIDPOINTS[income_range]
 
     return profile
+
+
+def apply_account_contact(
+    profile: CaseProfile,
+    *,
+    name: str = "",
+    email: str = "",
+    phone: str = "",
+) -> CaseProfile:
+    """Fill the caregiver's contact details from their account rather than from intake.
+
+    Screening asks nothing that a caregiver would hesitate to answer; the phone number and
+    email address government forms need are collected when the account is created, after the
+    strategy has been shown.
+    """
+    cg = profile.caregiver
+    if email:
+        cg.email = email
+    if phone:
+        cg.phone = phone
+    if name and not cg.name:
+        cg.name = name
+        parts = name.split()
+        if parts and not cg.first_name:
+            cg.first_name = parts[0]
+        if len(parts) > 1 and not cg.last_name:
+            cg.last_name = " ".join(parts[1:])
+    return profile

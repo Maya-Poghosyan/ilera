@@ -5,7 +5,8 @@ reference. Its hand-maintained `_NOT_COLLECTED` exclusion list is the fragile pa
 intake starts collecting one of those fields, the vocabulary silently stays short and
 forms keep asking the user for something we already have; if intake *stops* populating
 an offered path, PDFs silently print blank instead of asking. Both directions are
-checked here by mapping a synthetic, fully-answered intake.
+checked here by mapping a synthetic, fully-answered intake plus the contact details an
+account contributes.
 
 Runs against the in-memory store (no services). Run directly or via pytest.
 """
@@ -17,7 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.forms.filler import _dig  # noqa: E402
 from app.forms.profile_paths import _NOT_COLLECTED, profile_paths  # noqa: E402
 from app.intake import schema as intake_schema  # noqa: E402
-from app.intake.mapping import map_answers_to_profile  # noqa: E402
+from app.intake.mapping import apply_account_contact, map_answers_to_profile  # noqa: E402
 from app.models import CaseProfile  # noqa: E402
 
 # Answers that have to be specific for the derivation under test to produce a value;
@@ -41,7 +42,6 @@ def _all_questions() -> list[dict]:
         questions.extend(screen["questions"])
     for module in schema["mini_modules"]:
         questions.extend(module["questions"])
-    questions.extend(schema["contact_screen"]["questions"])
     return questions
 
 
@@ -72,6 +72,14 @@ def _fully_answered_profile() -> CaseProfile:
     answers.update(_PINNED)
     profile = CaseProfile(id="case-profile-paths")
     map_answers_to_profile(answers, profile)
+    # Contact details are not asked during intake; they arrive with the account the caregiver
+    # creates after reading their strategy.
+    apply_account_contact(
+        profile,
+        name="Test Caregiver",
+        email="caregiver@example.com",
+        phone="555-0100",
+    )
     return profile
 
 

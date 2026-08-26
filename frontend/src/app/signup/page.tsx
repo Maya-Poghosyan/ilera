@@ -15,9 +15,10 @@ import { clearPendingCaseId, getPendingCaseId } from "@/lib/pending-case";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { signup, updateUser } = useAuth();
+  const { signup } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -36,19 +37,10 @@ export default function SignupPage() {
     }
     setSubmitting(true);
     try {
-      await signup(name, email, password);
-      const pending = getPendingCaseId();
-      if (pending) {
-        // The case is claimed here; a stale id someone else already owns is refused, and
-        // there is nothing the new account can do with it.
-        try {
-          await updateUser({ case_id: pending });
-        } catch {
-          /* the account still works without it */
-        } finally {
-          clearPendingCaseId();
-        }
-      }
+      // The case is claimed as part of signup; a stale id someone else already owns is
+      // refused server-side, and the account still works without it.
+      await signup({ name, email, phone, password, case_id: getPendingCaseId() });
+      clearPendingCaseId();
       router.push("/get-started");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed");
@@ -71,7 +63,7 @@ export default function SignupPage() {
             <CardTitle className="text-xl">Create your account</CardTitle>
             <p className="text-sm text-muted-foreground">
               {hasPendingCase
-                ? "Save your answers and see the programs you qualify for."
+                ? "Save your plan, start your applications, and get reminders."
                 : "Set up your Ilera caregiver profile to get started."}
             </p>
           </CardHeader>
@@ -104,6 +96,17 @@ export default function SignupPage() {
                 />
               </div>
               <div className="space-y-1">
+                <Label htmlFor="phone">Phone number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+                  placeholder="(555) 555-0123"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
@@ -115,7 +118,11 @@ export default function SignupPage() {
                   minLength={6}
                 />
               </div>
-              <Button className="w-full" type="submit" disabled={submitting || !name.trim() || !email.trim()}>
+              <Button
+                className="w-full"
+                type="submit"
+                disabled={submitting || !name.trim() || !email.trim() || !phone.trim()}
+              >
                 {submitting ? "Creating account..." : "Create account"}
                 <ArrowRight className="size-4" />
               </Button>

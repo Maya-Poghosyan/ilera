@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadFailure } from "@/components/load-failure";
 import { Logo } from "@/components/logo";
+import { useAuth } from "@/lib/auth-context";
 import { determineEligibility, getEligibility } from "@/lib/api";
 import type { EligibilityResponse, MatchLevel } from "@/lib/types";
 
@@ -29,17 +30,26 @@ const matchLabel: Record<MatchLevel, string> = {
 };
 
 const LOADING_MESSAGES = [
-  "Spinning up the specialist agents in your case room…",
-  "Each specialist is grounding its answer in official program documentation…",
-  "Specialists are checking your state and county rules…",
-  "Coordinating cross-program eligibility between specialists…",
-  "The routing agent is synthesizing your application strategy…",
+  "Reading your answers…",
+  "Checking the rules in your county…",
+  "Consulting official program documents…",
+  "Comparing programs you may qualify for…",
+  "Putting your plan together…",
 ];
+
+/** The strategy is stored as one bullet per line; older cases hold a paragraph or two. */
+function strategyBullets(strategy: string): string[] {
+  return strategy
+    .split("\n")
+    .map((line) => line.replace(/^\s*(?:[-*•–—]|\(?\d+[.)])\s+/, "").trim())
+    .filter(Boolean);
+}
 
 const POLL_MS = 3000;
 
 export default function EligibilityPage() {
   const { caseId } = useParams<{ caseId: string }>();
+  const { user, loading: authLoading } = useAuth();
   const [data, setData] = useState<EligibilityResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [messageIndex, setMessageIndex] = useState(0);
@@ -104,7 +114,7 @@ export default function EligibilityPage() {
       <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
         <h1 className="text-xl font-semibold text-rose-600">Eligibility could not be completed</h1>
         <p className="max-w-sm text-sm text-muted-foreground">
-          {data.error || "The specialist agents did not return a result. Please try again."}
+          {data.error || "We couldn't finish reviewing your programs. Please try again."}
         </p>
         <Button variant="outline" render={<Link href="/intake" />}>
           Back to intake
@@ -114,8 +124,6 @@ export default function EligibilityPage() {
   }
 
   if (processing) {
-    const done = data?.completed.length ?? 0;
-    const total = data?.expected.length ?? 0;
     return (
       <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
@@ -126,11 +134,6 @@ export default function EligibilityPage() {
         >
           {LOADING_MESSAGES[messageIndex]}
         </p>
-        {total > 0 && (
-          <p className="text-xs text-muted-foreground">
-            {done} of {total} specialists have responded
-          </p>
-        )}
       </main>
     );
   }
@@ -149,17 +152,24 @@ export default function EligibilityPage() {
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight">Your eligibility results</h1>
           <p className="text-sm text-muted-foreground">
-            Match levels determined by each program specialist.
+            How well each program matches your situation.
           </p>
         </div>
 
         {data.strategy && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Application strategy</CardTitle>
+              <CardTitle className="text-base">Your plan</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-wrap text-sm text-muted-foreground">{data.strategy}</p>
+              <ul className="space-y-2">
+                {strategyBullets(data.strategy).map((bullet) => (
+                  <li key={bullet} className="flex gap-2.5 text-sm">
+                    <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
+                    <span>{bullet}</span>
+                  </li>
+                ))}
+              </ul>
             </CardContent>
           </Card>
         )}
@@ -185,10 +195,28 @@ export default function EligibilityPage() {
           ))}
         </div>
 
-        <Button render={<Link href="/dashboard/applications" />}>
-          Continue to applications
-          <ArrowRight />
-        </Button>
+        {authLoading ? null : user ? (
+          <Button render={<Link href="/dashboard/applications" />}>
+            Continue to applications
+            <ArrowRight />
+          </Button>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Keep this plan</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Create an account with your email and phone number to save these results, start
+                your applications, and get reminders. Your answers are already saved here.
+              </p>
+              <Button render={<Link href="/signup" />}>
+                Create an account
+                <ArrowRight />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </main>
     </>
   );

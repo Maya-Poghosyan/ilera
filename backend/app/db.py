@@ -30,6 +30,10 @@ CREATE TABLE IF NOT EXISTS users (
     created_at      text NOT NULL DEFAULT ''
 );
 
+-- The phone number is asked for at signup, which happens after the strategy is shown, so it
+-- arrives later than the rest of the account and existing rows have none.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone text NOT NULL DEFAULT '';
+
 -- owner_user_id is nullable because intake runs before there is an account: a case starts
 -- unowned, reachable only by whoever holds its id, and is claimed at signup. The foreign key
 -- makes an owner that isn't a real user impossible; ownership checks are enforced in access.py.

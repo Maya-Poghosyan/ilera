@@ -3,6 +3,7 @@ import logging
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from math import ceil
 from typing import Any, Optional
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -337,8 +338,17 @@ _agent_executions: list[dict] = []
 # Time budgets for the async Band eligibility run.
 _FINDINGS_TIMEOUT = 900  # seconds to wait for ALL specialists to submit complete findings
 _STRATEGY_TIMEOUT = 360  # seconds to wait for the routing agent to submit its strategy
-_POLL_INTERVAL = 4
+# The caregiver watches a spinner for every one of these polls, so it is short: the run's own
+# steps (drain, synthesis trigger, settle) fire on the poll that observes the phase finishing.
+_POLL_INTERVAL = 1.5
 _WATCHDOG_INTERVAL = 20   # how often to sweep the room for stuck peer messages
+# Once most of the panel has reported, a single straggler is all that stands between the caregiver
+# and their strategy — and a stalled agent would otherwise hold the case for the full
+# _FINDINGS_TIMEOUT. After this grace period the run synthesizes from the findings it has.
+_STRAGGLER_GRACE = 90
+# Below this many findings the panel is too thin to synthesize a strategy from, so a run that
+# never gets there is an error rather than a partial plan.
+_MIN_FINDINGS_FRACTION = 0.5
 # A specialist-sent peer message older than this that is still un-acked is treated as stale: it
 # either finished a bounded cross-eligibility exchange or is a poison message trapping an agent in
 # a /next resync loop, so the watchdog force-acks it. Long enough to allow a real one-shot Q&A.
@@ -357,8 +367,9 @@ def _findings_summary(profile: CaseProfile, specialists: list[str]) -> str:
 
 async def _run_case_eligibility(case_id: str) -> None:
     """Orchestrate one case's Band eligibility run end-to-end:
-    create the room + seed, wait for every specialist's complete finding, trigger the routing
-    agent to synthesize the strategy, and drive the case's band_status to complete/error.
+    create the room + seed, wait for the panel's complete findings (a straggler only gets
+    _STRAGGLER_GRACE once a quorum has reported), trigger the routing agent to synthesize the
+    strategy, and drive the case's band_status to complete/error.
     Band is the sole engine — there is no in-process fallback."""
     from .integrations.band import (
         drain_routing_queue,
@@ -414,14 +425,28 @@ async def _run_case_eligibility(case_id: str) -> None:
 
     deadline_f = loop.time() + _FINDINGS_TIMEOUT
     next_watchdog = loop.time() + _WATCHDOG_INTERVAL
+    straggler_deadline: Optional[float] = None
+    quorum = max(1, ceil(len(specialists) * _MIN_FINDINGS_FRACTION))
     while loop.time() < deadline_f:
         await asyncio.sleep(_POLL_INTERVAL)
         p = get_profile(case_id)
         if p is None:
             return
-        if all(k in p.findings and p.findings[k].complete for k in specialists):
+        done_now = [k for k in specialists if k in p.findings and p.findings[k].complete]
+        if len(done_now) == len(specialists):
             all_complete = True
             break
+        if len(done_now) >= quorum:
+            if straggler_deadline is None:
+                straggler_deadline = loop.time() + _STRAGGLER_GRACE
+            elif loop.time() >= straggler_deadline:
+                logger.warning(
+                    "Band case %s: synthesizing without %s (straggler grace elapsed)",
+                    case_id,
+                    ", ".join(k for k in specialists if k not in done_now),
+                )
+                all_complete = True
+                break
         # Watchdog: clear any stale peer-chatter message that is stuck in a recipient's queue,
         # which would otherwise trap that agent in an infinite /next resync loop and prevent it
         # from ever submitting. Only specialist-sent messages are touched (never the seed).
@@ -437,8 +462,8 @@ async def _run_case_eligibility(case_id: str) -> None:
         return
 
     if not all_complete:
-        # Not all specialists finished in time. No fallback / no partial synthesis: surface an
-        # error naming who is missing so it can be retried.
+        # Too little of the panel reported to build a plan from: surface an error naming who is
+        # missing so it can be retried.
         done = [k for k in specialists if k in p.findings and p.findings[k].complete]
         missing = [k for k in specialists if k not in done]
         p.band_status = "error"
