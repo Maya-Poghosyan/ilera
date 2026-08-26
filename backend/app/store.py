@@ -7,7 +7,9 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from . import db
+from .intake.mapping import apply_account_contact
 from .models import CaseProfile, EligibilityResult, MatchLevel, SpecialistFinding
+from .strategy_text import format_strategy
 
 _cases = db.JsonStore("cases")
 # Fallback (no-database) room_id -> case_id map. With Postgres, both API and Band worker
@@ -182,12 +184,21 @@ def record_strategy(room_id: str, strategy: str) -> Optional[str]:
     profile = get_profile(case_id)
     if profile is None:
         return None
-    profile.strategy = strategy
+    profile.strategy = format_strategy(strategy)
     profile.strategy_complete = True
     profile.band_status = "complete"
     profile.band_completed_at = datetime.now(timezone.utc).isoformat()
     save_profile(profile)
     return case_id
+
+
+def apply_contact(case_id: str, *, name: str = "", email: str = "", phone: str = "") -> None:
+    """Copy an account's contact details onto its case, where the form filler reads them."""
+    profile = get_profile(case_id)
+    if profile is None:
+        return
+    apply_account_contact(profile, name=name, email=email, phone=phone)
+    save_profile(profile)
 
 
 def save_profile(profile: CaseProfile) -> None:

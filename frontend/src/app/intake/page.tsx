@@ -270,7 +270,6 @@ export default function IntakePage() {
   // conditional questions and mini-modules appear/disappear as the user responds.
   const pages: Page[] = useMemo(() => {
     if (!schema) return [];
-    const contact = schema.contact_screen;
     const sections: { id: string; title: string; intro?: string; isModule: boolean; questions: Question[] }[] = [
       ...schema.screens.map((s: Screen) => ({
         id: s.id,
@@ -282,7 +281,6 @@ export default function IntakePage() {
       ...schema.mini_modules
         .filter((m: MiniModule) => evalCondition(m.trigger, answers))
         .map((m: MiniModule) => ({ id: m.id, title: m.title, isModule: true, questions: m.questions })),
-      { id: contact.id, title: contact.title, intro: contact.intro_text, isModule: false, questions: contact.questions },
     ];
 
     const out: Page[] = [];
@@ -427,12 +425,13 @@ export default function IntakePage() {
       const created = await submitIntakeAnswers(answers);
       localStorage.removeItem(DRAFT_KEY);
       localStorage.setItem("ilera_case_id", created.id);
+      // Straight to the results screen — an account is offered there, once there is a strategy
+      // worth saving. The case id is parked so that signup can claim it.
+      setPendingCaseId(created.id);
+      router.push(`/eligibility/${created.id}`);
       if (user) {
-        await updateUser({ case_id: created.id });
-        router.push(`/eligibility/${created.id}`);
-      } else {
-        setPendingCaseId(created.id);
-        router.push("/signup");
+        // Attaching the case to the account is not something to keep the caregiver waiting on.
+        void updateUser({ case_id: created.id }).catch(() => {});
       }
     } catch (err) {
       // The draft is still in localStorage, so nothing they typed is lost — the button just

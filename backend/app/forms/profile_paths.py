@@ -79,7 +79,7 @@ _NON_ANSWERS = {"I'm not sure", "Prefer not to answer", "None of these"}
 
 def _intake_options(field_id: str) -> list[str]:
     schema = intake_schema.build_schema()
-    groups = [*schema["screens"], *schema["mini_modules"], schema["contact_screen"]]
+    groups = [*schema["screens"], *schema["mini_modules"]]
     for group in groups:
         for question in group["questions"]:
             if question["field_id"] == field_id:

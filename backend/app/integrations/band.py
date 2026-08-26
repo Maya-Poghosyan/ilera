@@ -79,12 +79,18 @@ _ROUTING_PROMPT = (
     "responses (their findings will be included in that message), do this:\n"
     "1. Optionally call searchprogramdocs to ground any cross-program sequencing "
     "(prerequisites, payer order, tax treatment, application order) in the coordination docs.\n"
-    "2. Synthesize ONE clear, human-facing APPLICATION STRATEGY for the caregiver: which "
-    "programs to pursue and in what order, why, how the programs interact, and the concrete "
-    "next steps to qualify for and apply to the strongest options. Attribute claims to the "
-    "specialists and keep citations. Never invent program rules.\n"
-    "3. Submit it by calling the submit_strategy tool with the full strategy text. Do this "
-    "exactly once. Do not @mention specialists in the strategy."
+    "2. Synthesize ONE APPLICATION STRATEGY for the caregiver as a SHORT BULLETED LIST — they "
+    "read it on a results screen, not as a report. Rules for the text you submit:\n"
+    "   - AT MOST 7 bullets; each is one sentence of at most 20 words and starts with '- '.\n"
+    "   - Strongest programs first, in the order the caregiver should apply.\n"
+    "   - Each bullet names the program and the single concrete next step, e.g. 'Apply for IHSS "
+    "through your county social services office - strongest match'.\n"
+    "   - No headings, no numbering, no bold or markdown, no preamble or closing paragraph.\n"
+    "   - NEVER mention specialists, agents, or who said what, and do NOT append citations, "
+    "attributions, or disclaimers - the caregiver only sees their plan.\n"
+    "   - Never invent program rules; if a program does not apply, leave it out.\n"
+    "3. Submit it by calling the submit_strategy tool with that bulleted text. Do this exactly "
+    "once, and say nothing else."
 )
 
 
@@ -103,12 +109,13 @@ def _specialist_prompt(program: str) -> str:
         "(many programs are county-administered).\n"
         "3. Determine a match level on this scale: none, low, medium, likely, very_likely — plus "
         "a few short notes explaining the determination, with citations.\n"
-        "4. CROSS-ELIGIBILITY questions are allowed but MUST stay focused. If a specific factual "
-        "dependency on another program genuinely affects your determination, use the ask_peer tool "
-        "to ask ONE named specialist a single concrete question (one or two sentences). You may ask "
-        "a few such questions across the case, but a small budget is enforced — when ask_peer tells "
-        "you the budget is exhausted, stop asking and just record the interaction in cross_programs "
-        "and your notes. Never ask a question you can already answer from your own docs.\n"
+        "4. CROSS-ELIGIBILITY questions are allowed but MUST stay focused, and they NEVER hold up "
+        "your finding. If a specific factual dependency on another program genuinely affects your "
+        "determination, you may use ask_peer once to ask ONE named specialist a single concrete "
+        "question (one or two sentences) — then, in the SAME turn, submit your finding with your "
+        "best determination and note the open question. Do NOT wait for a reply: the caregiver is "
+        "waiting and the case cannot finish until every specialist has submitted. Never ask a "
+        "question you can already answer from your own docs.\n"
         "STRICT ROOM RULES — the room must not fill with chatter:\n"
         "  • ask_peer is the ONLY way you may address another agent, and ONLY for a genuine "
         "cross-eligibility question or a direct answer to one. It is one-to-one — you cannot "
@@ -351,10 +358,10 @@ _EXCLUDED_AGENT_TOOLS = frozenset(
     }
 )
 
-# Max cross-eligibility peer messages a single specialist may send (via ask_peer) per case. Covers
-# a couple of genuine question/answer exchanges without letting the room spiral. Total room peer
-# traffic is therefore bounded by len(specialists) * _PEER_MSG_BUDGET.
-_PEER_MSG_BUDGET = 3
+# Max cross-eligibility peer messages a single specialist may send (via ask_peer) per case. One
+# genuine dependency question is enough, and since a specialist now submits without waiting for
+# the answer, further questions only add room traffic and latency to every case.
+_PEER_MSG_BUDGET = 1
 _PEER_MSG_LOCK = asyncio.Lock()
 
 
@@ -503,8 +510,10 @@ def build_routing_agent(creds: dict, *, skip_backlog: bool = False):
 
     async def submit_strategy(ctx: "RunContext[AgentToolsProtocol]", strategy: str) -> str:
         """Submit the final synthesized application strategy for the caregiver. Call once,
-        after ALL specialists have returned complete responses. `strategy` is the full
-        human-facing plan (which programs, in what order, why, next steps)."""
+        after ALL specialists have returned complete responses. `strategy` is the caregiver-facing
+        plan as AT MOST 7 bullets, each line starting with '- ' and holding one sentence of at
+        most 20 words: which program to pursue, in what order, and the next step for each. No
+        headings, markdown, citations, attributions, or mention of who assessed what."""
         room_id = getattr(ctx.deps, "room_id", "") or ""
         case_id = await asyncio.to_thread(record_strategy, room_id, strategy)
         return "strategy recorded" if case_id else "could not resolve the case for this room"
@@ -598,8 +607,9 @@ def build_specialist_agent(doc_key: str, creds: dict, *, skip_backlog: bool = Fa
         )
         left = _PEER_MSG_BUDGET - used - 1
         return (
-            f"question sent to {target_handle} ({left} peer message(s) left). Wait for their "
-            "reply, then finish and submit."
+            f"question sent to {target_handle} ({left} peer message(s) left). Do NOT wait for a "
+            "reply — call submit_complete_response now with your best determination and note the "
+            "open question; if they do answer, you may submit again with a refined determination."
         )
 
     tools = [(LookupProgramDocsInput, lookup), submit_complete_response, ask_peer]
@@ -688,8 +698,9 @@ def _seed_content(profile: CaseProfile, mention_ids: list[str]) -> str:
         "(b) a few notes explaining it; (c) any cross-program interactions — name them in "
         "cross_programs and explain in your notes. If (and only if) a specific dependency on "
         "another program truly blocks your call, you may @mention that ONE specialist with a "
-        "SINGLE short question, then finish. Do NOT post status updates, summaries, or action "
-        "plans, do NOT announce or confirm your submission, and do NOT @mention the routing agent. "
+        "SINGLE short question and then submit in the same turn without waiting for their reply. "
+        "Do NOT post status updates, summaries, or action plans, do NOT announce or confirm your "
+        "submission, and do NOT @mention the routing agent. "
         "Just call submit_complete_response exactly once — routing collects it automatically.",
         "",
         "== CARE RECIPIENT ==",

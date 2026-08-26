@@ -27,6 +27,7 @@ class User(BaseModel):
     name: str
     email: str
     hashed_password: str
+    phone: str = ""
     created_at: str = ""
 
 
@@ -34,6 +35,7 @@ class UserPublic(BaseModel):
     id: str
     name: str
     email: str
+    phone: str = ""
     # Derived from cases.owner_user_id rather than stored on the user, so there is one
     # answer to who owns a case.
     case_id: Optional[str] = None
@@ -45,6 +47,7 @@ def _public(user: User) -> UserPublic:
         id=user.id,
         name=user.name,
         email=user.email,
+        phone=user.phone,
         case_id=store.get_case_id_for_user(user.id),
         created_at=user.created_at,
     )
@@ -56,7 +59,7 @@ def _public(user: User) -> UserPublic:
 
 _memory: dict[str, User] = {}
 
-_COLUMNS = "id, name, email, hashed_password, created_at"
+_COLUMNS = "id, name, email, hashed_password, phone, created_at"
 
 
 def _row_to_user(row) -> User:
@@ -65,7 +68,8 @@ def _row_to_user(row) -> User:
         name=row[1],
         email=row[2],
         hashed_password=row[3],
-        created_at=row[4],
+        phone=row[4],
+        created_at=row[5],
     )
 
 
@@ -76,17 +80,19 @@ def _save_user(user: User) -> None:
     with db.connection() as conn:
         conn.execute(
             f"""
-            INSERT INTO users ({_COLUMNS}) VALUES (%s, %s, %s, %s, %s)
+            INSERT INTO users ({_COLUMNS}) VALUES (%s, %s, %s, %s, %s, %s)
             ON CONFLICT (id) DO UPDATE SET
                 name = EXCLUDED.name,
                 email = EXCLUDED.email,
-                hashed_password = EXCLUDED.hashed_password
+                hashed_password = EXCLUDED.hashed_password,
+                phone = EXCLUDED.phone
             """,
             (
                 user.id,
                 user.name,
                 user.email.lower(),
                 user.hashed_password,
+                user.phone,
                 user.created_at,
             ),
         )
@@ -199,6 +205,11 @@ class SignupRequest(BaseModel):
     name: str
     email: str
     password: str
+    # Government forms need the caregiver's phone number; signup, after the strategy has been
+    # read, is where it is asked for.
+    phone: str = ""
+    # The case whose strategy the caller just read, claimed as part of creating the account.
+    case_id: Optional[str] = None
 
 
 class LoginRequest(BaseModel):
@@ -229,11 +240,27 @@ def signup(req: SignupRequest) -> AuthResponse:
         name=req.name.strip(),
         email=req.email.strip().lower(),
         hashed_password=_hash_password(req.password),
+        phone=req.phone.strip(),
         created_at=datetime.now(timezone.utc).isoformat(),
     )
     _save_user(user)
+    # A stale or foreign case id is not worth failing an account over: the account is what the
+    # caregiver asked for, and they can redo intake.
+    if req.case_id:
+        _try_claim(req.case_id, user)
 
     return AuthResponse(token=_create_token(user.id), user=_public(user))
+
+
+def _try_claim(case_id: str, user: User) -> bool:
+    """Take ownership of an anonymous case and stamp the account's contact details onto it.
+
+    False if the case is gone or already belongs to somebody else.
+    """
+    if not store.claim_case(case_id, user.id):
+        return False
+    store.apply_contact(case_id, name=user.name, email=user.email, phone=user.phone)
+    return True
 
 
 @router.post("/login", response_model=AuthResponse)
@@ -265,7 +292,7 @@ def update_me(
     if body.name is not None:
         user.name = body.name
         _save_user(user)
-    if body.case_id and not store.claim_case(body.case_id, user.id):
+    if body.case_id and not _try_claim(body.case_id, user):
         # Unowned cases are claimable; anything else is either gone or somebody's already.
         raise HTTPException(status_code=404, detail="case not found")
     return _public(user)

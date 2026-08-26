@@ -14,14 +14,24 @@ export type AuthUser = {
   id: string;
   name: string;
   email: string;
+  phone: string;
   case_id: string | null;
   created_at: string;
+};
+
+/** Signup collects contact details and adopts the case the caregiver just had reviewed. */
+export type SignupDetails = {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  case_id: string | null;
 };
 
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
-  signup: (name: string, email: string, password: string) => Promise<void>;
+  signup: (details: SignupDetails) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUser: (updates: Partial<Pick<AuthUser, "case_id" | "name">>) => Promise<void>;
@@ -74,8 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signup = useCallback(
-    (name: string, email: string, password: string) =>
-      authenticate("/api/auth/signup", { name, email, password }, "Signup failed"),
+    (details: SignupDetails) => authenticate("/api/auth/signup", details, "Signup failed"),
     [authenticate],
   );
 
