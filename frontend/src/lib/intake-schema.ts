@@ -31,6 +31,7 @@ export interface Question {
   required: boolean;
   options?: string[];
   helper_text?: string;
+  helper_link?: { text: string; href: string };
   why_this_matters?: string;
   show_when?: Condition;
   validation?: Validation;

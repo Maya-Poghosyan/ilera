@@ -1,5 +1,7 @@
 "use client";
 
+import { ExternalLink } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,6 +37,20 @@ export function QuestionField({ question, value, name, error, onChange }: Props)
         {!question.required && <span className="ml-1 text-sm text-muted-foreground">(optional)</span>}
       </Label>
       {helper && <p className="text-sm text-muted-foreground">{helper}</p>}
+      {question.helper_link && (
+        <a
+          href={question.helper_link.href}
+          target="_blank"
+          rel="noreferrer"
+          // Hugs the question it explains, with a clear gap before the answer control.
+          className="group -mt-0.5 mb-2 flex w-fit items-center gap-1.5 text-sm text-primary"
+        >
+          <span className="relative after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 group-hover:after:scale-x-100">
+            {question.helper_link.text}
+          </span>
+          <ExternalLink className="size-3.5" aria-hidden="true" />
+        </a>
+      )}
       {why && (
         <p className="text-sm text-muted-foreground">
           <span className="font-medium">Why this matters: </span>
