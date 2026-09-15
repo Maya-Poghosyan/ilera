@@ -194,8 +194,8 @@ export default function RecordsPage() {
   const renewalYearRange = renewalYear
     ? `${renewalYear - 1}\u2013${renewalYear}`
     : `${new Date().getFullYear()}\u2013${new Date().getFullYear() + 1}`;
-  const renewalDueSuffix = renewalDueDate
-    ? `${formatDate(renewal!.due_date)}, ${renewalYear}`
+  const renewalDueSuffix = renewalDueDate && renewal?.due_date
+    ? `${formatDate(renewal.due_date)}, ${renewalYear}`
     : "1 year from submission";
 
   return (
@@ -235,14 +235,12 @@ export default function RecordsPage() {
           aria-label="Daily text check-in"
           aria-checked={checkInId !== null}
           onClick={handleToggleCheckIn}
-          className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-            checkInId ? "bg-primary" : "bg-muted-foreground/30"
-          }`}
+          className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${checkInId ? "bg-primary" : "bg-muted-foreground/30"
+            }`}
         >
           <span
-            className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${
-              checkInId ? "left-4.5" : "left-0.5"
-            }`}
+            className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${checkInId ? "left-4.5" : "left-0.5"
+              }`}
           />
         </button>
         <p className="max-w-xl text-sm text-muted-foreground">
@@ -301,7 +299,7 @@ export default function RecordsPage() {
                       id="tk-date"
                       type="date"
                       value={tkDate}
-                      onChange={(e) =>setTkDate(e.target.value)}
+                      onChange={(e) => setTkDate(e.target.value)}
                     />
                   </div>
                   <div className="space-y-1">
@@ -313,7 +311,7 @@ export default function RecordsPage() {
                       min="0"
                       max="24"
                       value={tkHours}
-                      onChange={(e) =>setTkHours(e.target.value)}
+                      onChange={(e) => setTkHours(e.target.value)}
                     />
                   </div>
                 </div>
@@ -324,7 +322,7 @@ export default function RecordsPage() {
                       id="tk-start"
                       type="time"
                       value={tkStartTime}
-                      onChange={(e) =>setTkStartTime(e.target.value)}
+                      onChange={(e) => setTkStartTime(e.target.value)}
                     />
                   </div>
                   <div className="space-y-1">
@@ -333,7 +331,7 @@ export default function RecordsPage() {
                       id="tk-end"
                       type="time"
                       value={tkEndTime}
-                      onChange={(e) =>setTkEndTime(e.target.value)}
+                      onChange={(e) => setTkEndTime(e.target.value)}
                     />
                   </div>
                 </div>
@@ -358,7 +356,7 @@ export default function RecordsPage() {
                   <Input
                     id="tk-tasks"
                     value={tkTasks}
-                    onChange={(e) =>setTkTasks(e.target.value)}
+                    onChange={(e) => setTkTasks(e.target.value)}
                     placeholder="Bathing, dressing, meal prep, medication"
                   />
                 </div>
@@ -367,7 +365,7 @@ export default function RecordsPage() {
                   <Input
                     id="tk-notes"
                     value={tkNotes}
-                    onChange={(e) =>setTkNotes(e.target.value)}
+                    onChange={(e) => setTkNotes(e.target.value)}
                     placeholder="Any additional details"
                   />
                 </div>
@@ -428,7 +426,7 @@ export default function RecordsPage() {
                     id="jn-date"
                     type="date"
                     value={jnDate}
-                    onChange={(e) =>setJnDate(e.target.value)}
+                    onChange={(e) => setJnDate(e.target.value)}
                   />
                 </div>
                 <div className="space-y-1">
@@ -436,7 +434,7 @@ export default function RecordsPage() {
                   <Textarea
                     id="jn-text"
                     value={jnText}
-                    onChange={(e) =>setJnText(e.target.value)}
+                    onChange={(e) => setJnText(e.target.value)}
                     placeholder="How was today's care?"
                     rows={3}
                   />
