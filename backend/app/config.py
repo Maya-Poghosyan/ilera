@@ -67,6 +67,14 @@ class Settings(BaseSettings):
     # RAG/embedding memory don't share one container's memory limit.
     band_auto_start: bool = True
 
+    # Azure Durable Functions (eligibility pipeline)
+    # Base URL of the Function App, e.g. https://<app>.azurewebsites.net
+    # Leave empty to disable the Durable pipeline (the app falls back to Band).
+    azure_functions_url: str = ""
+    # Function-level host key for securing the HTTP starter endpoint.
+    # Empty = no key header sent (use for local func host with anonymous auth).
+    azure_functions_key: str = ""
+
     # Integrations
     poke_api_key: str = ""
     # Shared secret Poke must present as a bearer token on the /mcp mount.

@@ -14,7 +14,6 @@ on:
     paths:
       - "backend/**"
       - "frontend/**"
-      - ".github/workflows/deploy.yml"
   workflow_dispatch:
     inputs:
       apps:

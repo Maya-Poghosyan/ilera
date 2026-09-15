@@ -18,7 +18,7 @@ import {
   listSuggestedEvents,
   runReminderNow,
   scanForEvents,
-  setMonitorInboxes as setMonitorInboxes_,
+  setMonitorInboxes as setMonitorInboxesAPI,
   updateReminder,
 } from "@/lib/api";
 import type { SuggestedEventAPI } from "@/lib/api";
@@ -217,7 +217,7 @@ export default function CalendarPage() {
     const next = !monitorInboxes;
     setMonitorInboxes(next);
     try {
-      await setMonitorInboxes_(caseId, next);
+      await setMonitorInboxesAPI(caseId, next);
       showToast(
         next
           ? "Monitoring on \u2014 your assistant can look for care events"
@@ -326,7 +326,7 @@ export default function CalendarPage() {
   const enableDailyCareLog = async () => {
     await createReminder({
       // Scopes the check-in to this case so Poke logs hours against the right one.
-      case_id: localStorage.getItem("ilera_case_id"),
+      case_id: caseId,
       kind: "daily_care_log",
       message: "",
       schedule: { freq: "daily", time: "18:00", timezone: LOCAL_TIMEZONE },
@@ -452,7 +452,7 @@ export default function CalendarPage() {
                 <Input
                   id="msg"
                   value={formMessage}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormMessage(e.target.value)}
+                  onChange={(e) =>setFormMessage(e.target.value)}
                   placeholder="Reminder text sent to caregiver"
                 />
               </div>
@@ -486,7 +486,7 @@ export default function CalendarPage() {
                   id="time"
                   type="time"
                   value={formTime}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormTime(e.target.value)}
+                  onChange={(e) =>setFormTime(e.target.value)}
                   className="w-32"
                 />
               </div>
@@ -516,7 +516,7 @@ export default function CalendarPage() {
                     id="date"
                     type="date"
                     value={formDate}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormDate(e.target.value)}
+                    onChange={(e) =>setFormDate(e.target.value)}
                     className="w-40"
                   />
                 </div>

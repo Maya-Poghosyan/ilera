@@ -59,12 +59,15 @@ export default function EligibilityPage() {
   useEffect(() => {
     let active = true;
 
+    const shouldKeepPolling = (res: EligibilityResponse) =>
+      res.status === "idle" || res.status === "processing" || !res.strategy_complete;
+
     const poll = () => {
       getEligibility(caseId)
         .then((res) => {
           if (!active) return;
           setData(res);
-          if (res.status === "idle" || res.status === "processing") {
+          if (shouldKeepPolling(res)) {
             timer.current = setTimeout(poll, POLL_MS);
           }
         })
@@ -79,7 +82,7 @@ export default function EligibilityPage() {
         if (!active) return;
         setError(null);
         setData(res);
-        if (res.status === "idle" || res.status === "processing") {
+        if (shouldKeepPolling(res)) {
           timer.current = setTimeout(poll, POLL_MS);
         }
       })
@@ -156,23 +159,25 @@ export default function EligibilityPage() {
           </p>
         </div>
 
-        {data.strategy && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Your plan</CardTitle>
-            </CardHeader>
-            <CardContent>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Your plan</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {data.strategy ? (
               <ul className="space-y-2">
-                {strategyBullets(data.strategy).map((bullet) => (
-                  <li key={bullet} className="flex gap-2.5 text-sm">
+                {strategyBullets(data.strategy).map((bullet, i) => (
+                  <li key={i} className="flex gap-2.5 text-sm">
                     <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
                     <span>{bullet}</span>
                   </li>
                 ))}
               </ul>
-            </CardContent>
-          </Card>
-        )}
+            ) : (
+              <p className="text-sm text-muted-foreground">Finalizing your plan…</p>
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {data.results.map((r) => (

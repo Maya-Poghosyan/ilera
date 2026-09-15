@@ -79,7 +79,7 @@ export default function SignupPage() {
                 <Input
                   id="name"
                   value={name}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+                  onChange={(e) =>setName(e.target.value)}
                   placeholder="First name"
                   required
                 />
@@ -90,7 +90,7 @@ export default function SignupPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                  onChange={(e) =>setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
                 />
@@ -101,7 +101,7 @@ export default function SignupPage() {
                   id="phone"
                   type="tel"
                   value={phone}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+                  onChange={(e) =>setPhone(e.target.value)}
                   placeholder="(555) 555-0123"
                   required
                 />
@@ -112,7 +112,7 @@ export default function SignupPage() {
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                  onChange={(e) =>setPassword(e.target.value)}
                   placeholder="At least 6 characters"
                   required
                   minLength={6}

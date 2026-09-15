@@ -3,7 +3,6 @@ import logging
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from math import ceil
 from typing import Any, Optional
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -157,69 +156,14 @@ async def _purge_loop() -> None:
 async def lifespan(app: FastAPI):
     task = asyncio.create_task(_scheduler_loop())
     purge_task = asyncio.create_task(_purge_loop())
-    band_task = None
-    # Band is the eligibility engine: keep the routing + specialist agents connected for the
-    # life of the server so they react to per-case rooms as they are created.
-    if (
-        settings.band_auto_start
-        and settings.has_llm
-        and (settings.has_band or _band_registry_exists())
-    ):
-        band_task = asyncio.create_task(_band_loop())
     yield
     task.cancel()
     purge_task.cancel()
-    if band_task:
-        band_task.cancel()
     for background in (task, purge_task):
         try:
             await background
         except asyncio.CancelledError:
             pass
-    if band_task:
-        try:
-            await band_task
-        except asyncio.CancelledError:
-            pass
-
-
-def _band_registry_exists() -> bool:
-    import os
-    path = settings.band_agents_file
-    if path and not os.path.isabs(path):
-        path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), path
-        )
-    return bool(path and os.path.exists(path))
-
-
-async def _band_loop() -> None:
-    """Keep every configured Band agent connected so they react to per-case rooms.
-
-    skip_backlog=True so agents don't reprocess old/orphan rooms on startup; they still
-    receive live messages for rooms they're added to after connecting.
-    """
-    try:
-        from .integrations.band import build_agents, leave_all_rooms
-    except Exception:
-        logger.warning("Band SDK not available — skipping agent startup")
-        return
-    try:
-        agents = build_agents(skip_backlog=True)
-        # Leave every existing room before connecting. Old/orphan rooms hold undelivered `pending`
-        # backlog that can't be marked processed (see leave_all_rooms); if the agents stay members
-        # they re-run a full LLM turn per redelivered message and exhaust the rate limit. Agents
-        # are re-added per case (routing in start_case_room, specialists per wave), so they end up
-        # resident only in the room they're actively working.
-        await leave_all_rooms()
-        await asyncio.gather(*(a.start() for _, a in agents))
-        names = ", ".join(f"{k}" for k, _ in agents)
-        logger.info("Band agents connected: %s", names)
-        await asyncio.gather(*(a.run_forever() for _, a in agents))
-    except asyncio.CancelledError:
-        raise
-    except Exception:
-        logger.exception("Band agents failed")
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
@@ -308,8 +252,7 @@ async def submit_intake(req: IntakeRequest) -> CaseProfile:
     if req.answers is not None:
         map_answers_to_profile(req.answers, profile)
     save_profile(profile)
-    # Fire up the Band eligibility room for this case as soon as intake is submitted.
-    _ensure_eligibility_started(profile.id)
+    await _ensure_eligibility_started(profile.id)
     return get_profile(profile.id) or profile
 
 
@@ -331,199 +274,28 @@ class EligibilityResponse(BaseModel):
     error: str = ""
 
 
-# Track agent executions for the Band dashboard
-_agent_executions: list[dict] = []
+async def _ensure_eligibility_started(case_id: str) -> Optional[CaseProfile]:
+    """Start the Durable eligibility orchestration for a case if it hasn't been started yet.
+    Idempotent — Durable uses a deterministic instance ID so a duplicate call is a no-op."""
+    from durable.client import start_eligibility_orchestration
 
-
-# Time budgets for the async Band eligibility run.
-_FINDINGS_TIMEOUT = 900  # seconds to wait for ALL specialists to submit complete findings
-_STRATEGY_TIMEOUT = 360  # seconds to wait for the routing agent to submit its strategy
-# The caregiver watches a spinner for every one of these polls, so it is short: the run's own
-# steps (drain, synthesis trigger, settle) fire on the poll that observes the phase finishing.
-_POLL_INTERVAL = 1.5
-_WATCHDOG_INTERVAL = 20   # how often to sweep the room for stuck peer messages
-# Once most of the panel has reported, a single straggler is all that stands between the caregiver
-# and their strategy — and a stalled agent would otherwise hold the case for the full
-# _FINDINGS_TIMEOUT. After this grace period the run synthesizes from the findings it has.
-_STRAGGLER_GRACE = 90
-# Below this many findings the panel is too thin to synthesize a strategy from, so a run that
-# never gets there is an error rather than a partial plan.
-_MIN_FINDINGS_FRACTION = 0.5
-# A specialist-sent peer message older than this that is still un-acked is treated as stale: it
-# either finished a bounded cross-eligibility exchange or is a poison message trapping an agent in
-# a /next resync loop, so the watchdog force-acks it. Long enough to allow a real one-shot Q&A.
-_PEER_MSG_STALE_SECS = 60
-
-
-def _findings_summary(profile: CaseProfile, specialists: list[str]) -> str:
-    parts = []
-    for key in specialists:
-        f = profile.findings.get(key)
-        if f and f.complete:
-            notes = " ".join(f.notes)
-            parts.append(f"- {f.program}: match={f.match_level}. {notes}")
-    return "\n".join(parts)
-
-
-async def _run_case_eligibility(case_id: str) -> None:
-    """Orchestrate one case's Band eligibility run end-to-end:
-    create the room + seed, wait for the panel's complete findings (a straggler only gets
-    _STRAGGLER_GRACE once a quorum has reported), trigger the routing agent to synthesize the
-    strategy, and drive the case's band_status to complete/error.
-    Band is the sole engine — there is no in-process fallback."""
-    from .integrations.band import (
-        drain_routing_queue,
-        force_ack_stale_peer_messages,
-        seed_specialists,
-        settle_room,
-        start_case_room,
-        trigger_synthesis,
-    )
-
-    profile = get_profile(case_id)
-    if profile is None:
-        return
-
-    profile.band_status = "processing"
-    profile.band_started_at = datetime.now(timezone.utc).isoformat()
-    profile.band_completed_at = ""
-    profile.band_error = ""
-    profile.findings = {}
-    profile.eligibility = {}
-    profile.strategy = ""
-    profile.strategy_complete = False
-    profile.synthesis_requested = False
-    profile.peer_msg_counts = {}
-    save_profile(profile)
-
-    try:
-        chat_id, specialists = await start_case_room(profile)
-    except Exception as exc:  # Band unavailable / misconfigured — surface as error, no fallback
-        logger.exception("Band eligibility failed to start for case %s", case_id)
-        p = get_profile(case_id)
-        if p is not None:
-            p.band_status = "error"
-            p.band_error = f"Could not start eligibility processing: {exc}"
-            save_profile(p)
-        return
-
-    p = get_profile(case_id)
-    p.band_chat_id = chat_id
-    p.expected_specialists = specialists
-    save_profile(p)
-
-    # Seed the whole specialist panel with ONE message @mentioning all of them, then wait for
-    # every specialist to submit a complete finding. The mention gate means only @mentioned agents
-    # run a turn, and specialists may hold a short bounded cross-eligibility conversation before
-    # submitting — routing does not re-post per specialist.
-    loop = asyncio.get_running_loop()
-    all_complete = False
-    try:
-        await seed_specialists(profile, chat_id, specialists)
-    except Exception:
-        logger.exception("Band seed failed for case %s", case_id)
-
-    deadline_f = loop.time() + _FINDINGS_TIMEOUT
-    next_watchdog = loop.time() + _WATCHDOG_INTERVAL
-    straggler_deadline: Optional[float] = None
-    quorum = max(1, ceil(len(specialists) * _MIN_FINDINGS_FRACTION))
-    while loop.time() < deadline_f:
-        await asyncio.sleep(_POLL_INTERVAL)
-        p = get_profile(case_id)
-        if p is None:
-            return
-        done_now = [k for k in specialists if k in p.findings and p.findings[k].complete]
-        if len(done_now) == len(specialists):
-            all_complete = True
-            break
-        if len(done_now) >= quorum:
-            if straggler_deadline is None:
-                straggler_deadline = loop.time() + _STRAGGLER_GRACE
-            elif loop.time() >= straggler_deadline:
-                logger.warning(
-                    "Band case %s: synthesizing without %s (straggler grace elapsed)",
-                    case_id,
-                    ", ".join(k for k in specialists if k not in done_now),
-                )
-                all_complete = True
-                break
-        # Watchdog: clear any stale peer-chatter message that is stuck in a recipient's queue,
-        # which would otherwise trap that agent in an infinite /next resync loop and prevent it
-        # from ever submitting. Only specialist-sent messages are touched (never the seed).
-        if loop.time() >= next_watchdog:
-            next_watchdog = loop.time() + _WATCHDOG_INTERVAL
-            try:
-                await force_ack_stale_peer_messages(chat_id, _PEER_MSG_STALE_SECS)
-            except Exception:
-                logger.exception("Band peer-message watchdog failed for case %s", case_id)
-
-    p = get_profile(case_id)
-    if p is None:
-        return
-
-    if not all_complete:
-        # Too little of the panel reported to build a plan from: surface an error naming who is
-        # missing so it can be retried.
-        done = [k for k in specialists if k in p.findings and p.findings[k].complete]
-        missing = [k for k in specialists if k not in done]
-        p.band_status = "error"
-        p.band_error = (
-            "Specialist evaluation did not complete in time "
-            f"(missing: {', '.join(missing) or 'all'})."
-        )
-        save_profile(p)
-        return
-
-    # Clear routing's accumulated backlog (specialist notices it stayed silent on) while it is
-    # still gated, THEN open the gate. That way, once synthesis_requested is set, the only
-    # unprocessed message routing sees is the synthesis trigger — so it synthesizes exactly once
-    # instead of burning a turn per stale @mention.
-    try:
-        await drain_routing_queue(chat_id)
-    except Exception:
-        logger.exception("Band drain_routing_queue failed for case %s", case_id)
-    p.synthesis_requested = True
-    save_profile(p)
-    await trigger_synthesis(chat_id, _findings_summary(p, specialists))
-
-    # Wait for the routing agent to submit its strategy (record_strategy sets status=complete).
-    deadline = loop.time() + _STRATEGY_TIMEOUT
-    while loop.time() < deadline:
-        await asyncio.sleep(_POLL_INTERVAL)
-        p = get_profile(case_id)
-        if p is not None and p.strategy_complete:
-            # Phase done: empty this room's queue so a worker restart won't replay its messages
-            # and burn quota. The room stays open (reused later for application completion).
-            try:
-                await settle_room(chat_id)
-            except Exception:
-                logger.exception("Band settle failed for case %s", case_id)
-            return
-
-    # Completion requires a persisted strategy; if routing never delivered one, surface an error.
-    p = get_profile(case_id)
-    if p is not None and not p.strategy_complete:
-        p.band_status = "error"
-        p.band_error = "The routing agent did not deliver an application strategy in time."
-        save_profile(p)
-
-
-def _ensure_eligibility_started(case_id: str) -> Optional[CaseProfile]:
-    """Start the Band eligibility run for a case if it hasn't been started yet. Idempotent."""
     profile = get_profile(case_id)
     if profile is None:
         return None
     if profile.band_status in ("idle", "error"):
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            return profile
-        # Flip to processing synchronously so a near-simultaneous call doesn't start a 2nd room.
         profile.band_status = "processing"
         profile.band_error = ""
         save_profile(profile)
-        loop.create_task(_run_case_eligibility(case_id))
-    return profile
+        try:
+            await start_eligibility_orchestration(profile)
+        except Exception as exc:
+            logger.exception("Failed to start Durable orchestration for case %s", case_id)
+            p = get_profile(case_id)
+            if p is not None:
+                p.band_status = "error"
+                p.band_error = f"Could not start eligibility processing: {exc}"
+                save_profile(p)
+    return get_profile(case_id)
 
 
 def _eligibility_response(profile: CaseProfile) -> EligibilityResponse:
@@ -547,15 +319,12 @@ def _eligibility_response(profile: CaseProfile) -> EligibilityResponse:
 
 
 @app.post("/api/eligibility/{case_id}", response_model=EligibilityResponse)
-def determine_eligibility(
+async def determine_eligibility(
     case_id: str, _: str = Depends(require_case_access)
 ) -> EligibilityResponse:
-    """Start (idempotently) the Band eligibility run for a case and return current status.
-    Band is the sole engine — poll GET /api/eligibility/{case_id} until status is complete."""
-    profile = _ensure_eligibility_started(case_id)
-    if profile is None:
-        raise HTTPException(status_code=404, detail="case not found")
-    profile = get_profile(case_id)
+    """Start (idempotently) the Durable eligibility orchestration and return current status.
+    Poll GET /api/eligibility/{case_id} until status is complete."""
+    profile = await _ensure_eligibility_started(case_id)
     if profile is None:
         raise HTTPException(status_code=404, detail="case not found")
     return _eligibility_response(profile)
@@ -571,21 +340,6 @@ def get_eligibility(
         raise HTTPException(status_code=404, detail="case not found")
     return _eligibility_response(profile)
 
-
-@app.get("/api/agents/status")
-def agents_status() -> dict:
-    """Return which specialist agents have executed and when."""
-    from .agents.specialists import ALL_SPECIALISTS
-    agents = {}
-    for cls in ALL_SPECIALISTS:
-        agent = cls()
-        runs = [e for e in _agent_executions if e["agent"] == agent.program]
-        agents[agent.program] = {
-            "doc_key": agent.doc_key,
-            "total_runs": len(runs),
-            "last_run": runs[-1] if runs else None,
-        }
-    return {"agents": agents, "band_configured": settings.has_band}
 
 
 class RagQuery(BaseModel):

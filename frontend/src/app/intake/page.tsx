@@ -405,7 +405,7 @@ export default function IntakePage() {
     slide("left", () => {
       setStepIndex((s) => Math.min(s + 1, pages.length - 1));
       setErrors({});
-      if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+      window.scrollTo({ top: 0 });
     });
   }
 
@@ -413,7 +413,7 @@ export default function IntakePage() {
     slide("right", () => {
       setStepIndex((s) => Math.max(s - 1, 0));
       setErrors({});
-      if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+      window.scrollTo({ top: 0 });
     });
   }
 

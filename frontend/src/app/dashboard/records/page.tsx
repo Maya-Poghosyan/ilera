@@ -189,6 +189,15 @@ export default function RecordsPage() {
     );
   }
 
+  const renewalDueDate = renewal?.due_date ? new Date(renewal.due_date + "T00:00:00") : null;
+  const renewalYear = renewalDueDate?.getFullYear();
+  const renewalYearRange = renewalYear
+    ? `${renewalYear - 1}\u2013${renewalYear}`
+    : `${new Date().getFullYear()}\u2013${new Date().getFullYear() + 1}`;
+  const renewalDueSuffix = renewalDueDate
+    ? `${formatDate(renewal!.due_date)}, ${renewalYear}`
+    : "1 year from submission";
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -199,7 +208,7 @@ export default function RecordsPage() {
               <Input
                 type="date"
                 value={renewalDate}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRenewalDate(e.target.value)}
+                onChange={(e) => setRenewalDate(e.target.value)}
                 className="w-40"
               />
               <Button size="sm" onClick={handleSaveRenewal}>Save</Button>
@@ -243,10 +252,7 @@ export default function RecordsPage() {
       </div>
 
       <p className="text-2xl font-semibold">
-        Renewal for {renewal?.due_date
-          ? `${new Date(renewal.due_date + "T00:00:00").getFullYear() - 1}\u2013${new Date(renewal.due_date + "T00:00:00").getFullYear()}`
-          : `${new Date().getFullYear()}\u2013${new Date().getFullYear() + 1}`
-        } due {renewal?.due_date ? formatDate(renewal.due_date) + ", " + new Date(renewal.due_date + "T00:00:00").getFullYear() : "1 year from submission"}
+        Renewal for {renewalYearRange} due {renewalDueSuffix}
       </p>
 
       {fallEntries.length > 0 && (
@@ -274,7 +280,7 @@ export default function RecordsPage() {
                 href="https://www.etimesheets.ihss.ca.gov"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm text-black underline hover:text-black/70" style={{ fontFamily: "Manrope, sans-serif" }}
+                className="inline-flex items-center gap-1 text-sm text-black underline hover:text-black/70"
               >
                 Submit timesheet to IHSS portal
                 <ExternalLink className="size-3.5" />
@@ -295,7 +301,7 @@ export default function RecordsPage() {
                       id="tk-date"
                       type="date"
                       value={tkDate}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkDate(e.target.value)}
+                      onChange={(e) =>setTkDate(e.target.value)}
                     />
                   </div>
                   <div className="space-y-1">
@@ -307,7 +313,7 @@ export default function RecordsPage() {
                       min="0"
                       max="24"
                       value={tkHours}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkHours(e.target.value)}
+                      onChange={(e) =>setTkHours(e.target.value)}
                     />
                   </div>
                 </div>
@@ -318,7 +324,7 @@ export default function RecordsPage() {
                       id="tk-start"
                       type="time"
                       value={tkStartTime}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkStartTime(e.target.value)}
+                      onChange={(e) =>setTkStartTime(e.target.value)}
                     />
                   </div>
                   <div className="space-y-1">
@@ -327,7 +333,7 @@ export default function RecordsPage() {
                       id="tk-end"
                       type="time"
                       value={tkEndTime}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkEndTime(e.target.value)}
+                      onChange={(e) =>setTkEndTime(e.target.value)}
                     />
                   </div>
                 </div>
@@ -352,7 +358,7 @@ export default function RecordsPage() {
                   <Input
                     id="tk-tasks"
                     value={tkTasks}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkTasks(e.target.value)}
+                    onChange={(e) =>setTkTasks(e.target.value)}
                     placeholder="Bathing, dressing, meal prep, medication"
                   />
                 </div>
@@ -361,7 +367,7 @@ export default function RecordsPage() {
                   <Input
                     id="tk-notes"
                     value={tkNotes}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTkNotes(e.target.value)}
+                    onChange={(e) =>setTkNotes(e.target.value)}
                     placeholder="Any additional details"
                   />
                 </div>
@@ -422,7 +428,7 @@ export default function RecordsPage() {
                     id="jn-date"
                     type="date"
                     value={jnDate}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setJnDate(e.target.value)}
+                    onChange={(e) =>setJnDate(e.target.value)}
                   />
                 </div>
                 <div className="space-y-1">
@@ -430,7 +436,7 @@ export default function RecordsPage() {
                   <Textarea
                     id="jn-text"
                     value={jnText}
-                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setJnText(e.target.value)}
+                    onChange={(e) =>setJnText(e.target.value)}
                     placeholder="How was today's care?"
                     rows={3}
                   />
