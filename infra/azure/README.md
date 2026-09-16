@@ -116,10 +116,24 @@ when you're ready — the plan diff shows the change.
 
 One-time setup (mirrors `deploy.yml`):
 
-- Secrets `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` (OIDC federated
-  credential for this repo — no stored password).
+- Secrets `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` (OIDC — no password).
 - A GitHub Environment named `infra-production` with **required reviewers** configured, so the
-  apply job pauses for approval.
+  apply job pauses for approval. Keep "Prevent self-review" **off** if you are the only
+  reviewer, and restrict deployment branches to `main`.
+- **Two federated credentials on the CI app** (`ilera-deploy`). GitHub changes the OIDC
+  token's subject depending on whether a job runs in an environment:
+  - `repo:<owner>/<repo>:ref:refs/heads/main` — for the `plan` job (no environment).
+  - `repo:<owner>/<repo>:environment:infra-production` — for the `apply` job (runs in the
+    `infra-production` environment). **Without this second credential the apply job's Azure
+    login fails with `AADSTS700213: No matching federated identity record`** — the plan job
+    works but apply can't authenticate. Create it with:
+    ```sh
+    az ad app federated-credential create --id <ci-app-id> --parameters '{
+      "name": "github-env-infra-production",
+      "issuer": "https://token.actions.githubusercontent.com",
+      "subject": "repo:<owner>/<repo>:environment:infra-production",
+      "audiences": ["api://AzureADTokenExchange"]}'
+    ```
 - The CI service principal needs (all ARM, **no Entra/Graph permissions**):
   - `Contributor` on the `Ilera` resource group (create/update resources)
   - `Role Based Access Control Administrator` on the `Ilera` resource group (create the
