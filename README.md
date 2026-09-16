@@ -11,7 +11,7 @@ dashboard: care calendar, timekeeping, journal, renewals, and auto-filled govern
 1. **Intake** — a short, schema-driven wizard builds a `CaseProfile` from the caregiver's answers.
 2. **Eligibility** — a routing agent fans out to program-specialist agents (IHSS, Medi-Cal, PFL, VA, …), each grounded in its own RAG corpus. Results come back ranked by match level with a plain-language strategy.
 3. **Applications** — the backend resolves the `CaseProfile` against PDF field maps, auto-fills what it can, and asks only for what's missing. The caregiver downloads a completed, stitched PDF.
-4. **Dashboard** — care calendar with Poke-detected events, timekeeping, care journal, renewal tracking, and SMS reminders.
+4. **Dashboard** — care calendar with saved suggestions, timekeeping, care journal, renewal tracking, and saved reminders.
 
 ## Architecture
 
@@ -23,7 +23,7 @@ Next.js frontend  ──REST──▶  FastAPI backend
   dashboard                       │       pydantic-ai, each grounded in program-scoped RAG
                                   ├─ RAG over program docs (pgvector / in-memory fallback)
                                   └─ form fill + stitch (pypdf / fillpdf)
-                          integrations: Poke (SMS reminders + inbox scanning)
+                          planned: Outlook + Gmail email scanning → care calendar
 ```
 
 The **`CaseProfile`** is the shared spine: every agent reads from it and writes findings back to it.
@@ -57,7 +57,7 @@ Requires **Python ≥ 3.11**.
 cd backend
 python3.11 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env        # optional: add Postgres / LLM / Poke keys
+cp .env.example .env        # optional: add Postgres / LLM keys
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -176,7 +176,6 @@ rather than 403 to avoid confirming the case exists. Unclaimed cases are deleted
 | POST | `/api/reminders` | create a reminder |
 | PATCH | `/api/reminders/{id}` | update a reminder |
 | DELETE | `/api/reminders/{id}` | delete a reminder |
-| POST | `/api/reminders/{id}/run-now` | fire a reminder immediately via Poke |
 
 ## Wiring real services
 
@@ -185,7 +184,12 @@ rather than 403 to avoid confirming the case exists. Unclaimed cases are deleted
   and the same database serves the pgvector RAG index. Without it, every store falls back to
   an in-process dict.
 - **LLM:** set `OPENAI_API_KEY` (OpenAI or Azure OpenAI via `OPENAI_BASE_URL`).
-- **Poke:** set `POKE_API_KEY` — SMS reminders and inbox scanning activate. All Poke paths
-  gracefully no-op when the key is absent.
+- **Email:** Microsoft 365 OAuth connection management is implemented behind
+  `EMAIL_CONNECTIONS_ENABLED`; configure Entra and Key Vault using
+  [the Azure setup handoff](docs/azure-email-setup.md). Live integration validation is pending.
+  Webhooks, scanning, and Gmail remain planned; keep `EMAIL_SCANNING_ENABLED=false`.
+  Reminder records remain available, but automatic delivery and text check-ins are unavailable.
 - **Forms:** drop fillable government PDFs into `backend/data/` and fill out the corresponding
   field-map JSONs in `backend/data/form_schemas/`.
+
+Email scanning implementation milestones and current status: [Azure email roadmap](docs/email-scanning-milestones.md).

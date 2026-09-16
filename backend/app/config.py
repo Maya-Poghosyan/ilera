@@ -13,9 +13,6 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     # IANA zone reminder schedules are interpreted in ("18:00" means 6pm here).
     default_timezone: str = "America/Los_Angeles"
-    # Case that Poke's check-in replies are logged against when it doesn't name one.
-    default_case_id: str = "demo"
-
     # Auth
     jwt_secret: str = "ilera-dev-secret-change-in-production"
     jwt_algorithm: str = "HS256"
@@ -72,11 +69,19 @@ class Settings(BaseSettings):
     # "From" address — must match a domain verified in your ACS Email resource.
     from_email: str = "noreply@ileracare.app"
 
-    # Integrations
-    poke_api_key: str = ""
-    # Shared secret Poke must present as a bearer token on the /mcp mount.
-    # Empty disables the check (local development only).
-    mcp_api_key: str = ""
+    # Mailbox connection and scanning have independent rollout switches.
+    email_connections_enabled: bool = False
+    email_scanning_enabled: bool = False
+    email_microsoft_tenant_id: str = ""
+    email_microsoft_client_id: str = ""
+    email_microsoft_redirect_uri: str = ""
+    email_key_vault_url: str = ""
+    email_microsoft_client_secret_name: str = "ilera-microsoft-client-secret"
+    email_token_encryption_key_name: str = "ilera-email-token-key"
+    email_service_bus_namespace: str = ""
+    email_service_bus_queue: str = "email.scan"
+    email_use_managed_identity: bool = True
+    email_managed_identity_client_id: str = ""
 
     @property
     def has_postgres(self) -> bool:

@@ -13,8 +13,8 @@ import re
 
 # A leading list marker in any of the shapes a model reaches for: "- ", "* ", "• ", "1. ", "1) ".
 _MARKER = re.compile(r"^\s*(?:[-*•–—]|\(?\d+[.)])\s+")
-# Markdown emphasis and heading syntax, which renders as literal asterisks in plain text.
-_EMPHASIS = re.compile(r"(\*\*|__|\*|`|#+)")
+# Strip single-asterisk italics, backticks, and headings — but preserve ** bold.
+_EMPHASIS = re.compile(r"(__|\*(?!\*)|(?<!\*)\*|`|#+)")
 # Lines that describe the machinery rather than the plan: internal agent handles, and the
 # attribution/citation footers the model appends after the plan itself.
 _INTERNAL = re.compile(

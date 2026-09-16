@@ -11,7 +11,7 @@ with zero keys.
 
 from __future__ import annotations
 
-from .. import llm
+from ..config import get_settings
 from ..models import CaseProfile, Citation, EligibilityResult, InteractionNote
 from ..rag.index import get_index
 
@@ -110,7 +110,8 @@ def _analyze(
     active_set = set(active)
     if len(active_set) < 2:
         return []
-    if not llm.available():
+    s = get_settings()
+    if not s.has_llm:
         return _heuristic(active_set)
     hits = _retrieve(active)
     if not hits:
@@ -135,7 +136,23 @@ def _analyze(
         f"INTER-ELIGIBILITY ADVISING DOCUMENTATION:\n{context}\n\n{_SCHEMA_HINT}"
     )
     try:
-        data = llm.complete_json(_SYSTEM, user, max_tokens=1200)
+        import json
+        from openai import OpenAI
+        client = OpenAI(
+            api_key=s.openai_api_key,
+            base_url=s.openai_base_url or None,
+        )
+        resp = client.chat.completions.create(
+            model=s.openai_model,
+            max_completion_tokens=1200,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": _SYSTEM},
+                {"role": "user", "content": user},
+            ],
+        )
+        text = (resp.choices[0].message.content or "{}").strip()
+        data = json.loads(text)
     except Exception:
         return _heuristic(active_set)
     notes: list[InteractionNote] = []

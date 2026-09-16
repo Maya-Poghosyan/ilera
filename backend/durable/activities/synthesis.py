@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 
 from app.agents.interactions import analyze_program_interactions
 from app.config import get_settings
-from app.models import CaseProfile, SpecialistFinding
+from app.models import CaseProfile, EligibilityResult, SpecialistFinding
 from app.store import finding_to_result, get_profile, save_profile
 from app.strategy_text import format_strategy
 from durable.errors import FindingsPersistenceError
@@ -33,10 +33,21 @@ logger = logging.getLogger(__name__)
 _VALID_MATCH_LEVELS = {"none", "low", "medium", "likely", "very_likely"}
 
 _SYNTHESIS_SYSTEM = """\
-You are Ilera's application strategy coordinator. Given specialist eligibility findings,
-produce a concise application strategy as a plain bulleted list (at most 7 bullets, one per line,
-each starting with "- "). Order by match strength: strongest programs first. Each bullet names
-the program and one concrete next step. No headers, no markdown, no attribution, no disclaimers.\
+You are helping an unpaid family caregiver understand which benefits they may qualify for.
+Given specialist eligibility findings, produce a plain bulleted list of at most 7 bullets
+total (one per line, each starting with "- "). Skip programs with match_level "none".
+
+Structure the bullets as follows:
+1. One bullet per matched program, ordered strongest match first.
+   Format: "- **{Program}:** {one plain-English sentence explaining why this looks like a match}"
+2. If any programs have a dependency or must be applied for in a specific order, add a
+   separate bullet for that — do not fold it into the program bullet.
+   Format: "- **Heads up:** Start with {Program A} before applying for {Program B} — {one sentence why}"
+
+Use simple, everyday language. No jargon, no policy citations, no technical terms.
+Write as if explaining to someone with no benefits experience.
+No next steps. No action items. No headers, no markdown, no attribution, no disclaimers.
+The total number of bullets must not exceed 7.\
 """
 
 
@@ -58,13 +69,13 @@ def _build_fallback_strategy(results: list[SpecialistResult]) -> str:
     for r in sorted_results:
         if r.match_level in {"none", "assessment_failed"}:
             continue
-        level_label = {
-            "very_likely": "Very likely eligible",
-            "likely": "Likely eligible",
-            "medium": "Possibly eligible",
-            "low": "Low likelihood, worth checking",
-        }.get(r.match_level, r.match_level)
-        bullets.append(f"- {r.program}: {level_label} — apply and confirm eligibility")
+        reasoning = {
+            "very_likely": "Based on what you shared, you look like a strong match for this program.",
+            "likely": "You likely qualify based on your situation.",
+            "medium": "You may qualify — it's worth looking into.",
+            "low": "You might qualify in some cases — worth a quick check.",
+        }.get(r.match_level, "Eligibility could not be fully determined.")
+        bullets.append(f"- **{r.program}:** {reasoning}")
 
     if not bullets:
         bullets.append("- Review eligibility with a benefits counselor for personalized guidance")
@@ -81,7 +92,7 @@ def _build_synthesis_user_prompt(results: list[SpecialistResult]) -> str:
         else:
             note_summary = "; ".join(r.notes[:2]) if r.notes else "no notes"
             lines.append(f"  {r.program}: match_level={r.match_level} — {note_summary}")
-    lines.append("\nProduce a plain bulleted application strategy (at most 7 bullets).")
+    lines.append("\nProduce a plain bulleted list: one bullet per matched program, each with one sentence of reasoning and a prioritization note where programs depend on each other.")
     return "\n".join(lines)
 
 
@@ -148,8 +159,20 @@ async def synthesis_activity(payload: dict) -> dict:
         stored.findings.update(findings)
         stored.eligibility_status = "processing"
         stored.eligibility_started_at = stored.eligibility_started_at or now
-        # Also project findings into the legacy eligibility map.
+        # Project findings into the eligibility map, preferring the full EligibilityResult
+        # from the specialist activity (which carries roadblocks, required_documents, etc.)
+        # over the lossy finding_to_result() conversion.
+        sr_by_doc_key = {sr.doc_key: sr for sr in specialist_results}
         for dk, finding in findings.items():
+            sr = sr_by_doc_key.get(dk)
+            if sr and sr.eligibility_result_json:
+                try:
+                    stored.eligibility[finding.program] = EligibilityResult.model_validate_json(
+                        sr.eligibility_result_json
+                    )
+                    continue
+                except Exception:
+                    pass
             stored.eligibility[finding.program] = finding_to_result(finding)
         save_profile(stored)
         profile = stored  # use the freshly-updated profile for subsequent steps

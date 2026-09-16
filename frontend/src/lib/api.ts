@@ -127,34 +127,8 @@ export function deleteReminder(id: string): Promise<{ deleted: boolean }> {
   return request<{ deleted: boolean }>(`/api/reminders/${id}`, { method: "DELETE" });
 }
 
-export function runReminderNow(id: string): Promise<{ sent: boolean; poke: unknown }> {
-  return request<{ sent: boolean; poke: unknown }>(`/api/reminders/${id}/run-now`, { method: "POST" });
-}
-
-export function sendTestMessage(message: string): Promise<{ sent: boolean; poke: unknown }> {
-  return request<{ sent: boolean; poke: unknown }>("/api/reminders/send", {
-    method: "POST",
-    body: JSON.stringify({ message }),
-  });
-}
-
 export function getReminderTemplates(): Promise<ReminderTemplates> {
   return request<ReminderTemplates>("/api/reminders/templates");
-}
-
-// ---------------------------------------------------------------------------
-// Poke scanning
-// ---------------------------------------------------------------------------
-
-// Poke scans asynchronously and files results by calling the MCP server, so this
-// only confirms the request was queued — poll listSuggestedEvents for results.
-export function scanForEvents(
-  caseId?: string | null
-): Promise<{ requested: boolean; known_event_ids: string[] }> {
-  const query = caseId ? `?case_id=${encodeURIComponent(caseId)}` : "";
-  return request<{ requested: boolean; known_event_ids: string[] }>(`/api/poke/scan${query}`, {
-    method: "POST",
-  });
 }
 
 // ---------------------------------------------------------------------------
@@ -179,7 +153,7 @@ export function setMonitorInboxes(caseId: string, on: boolean): Promise<Preferen
 }
 
 // ---------------------------------------------------------------------------
-// Suggested events (from Poke MCP)
+// Suggested events
 // ---------------------------------------------------------------------------
 
 export type SuggestedEventAPI = {
@@ -341,4 +315,41 @@ export function completeApplication(
   return request(`/api/applications/${caseId}/${encodeURIComponent(program)}/complete`, {
     method: "POST",
   });
+}
+
+// Mailbox connections: OAuth credentials remain server-side.
+export type MailboxConnection = {
+  id: string;
+  case_id: string;
+  provider: "microsoft" | "google";
+  status: "pending" | "connected" | "reauthorization_required" | "disconnected";
+  mailbox_address: string | null;
+  consented_at: string;
+  scanning_active: boolean;
+};
+
+export type EmailProviders = {
+  microsoft: { available: boolean; account_type: "organization" };
+  google: { available: boolean };
+};
+
+export function getEmailProviders(): Promise<EmailProviders> {
+  return request<EmailProviders>("/api/email/providers");
+}
+
+export function listMailboxConnections(caseId: string): Promise<MailboxConnection[]> {
+  return request<MailboxConnection[]>(`/api/email/connections?case_id=${encodeURIComponent(caseId)}`);
+}
+
+export function connectMicrosoftMailbox(caseId: string): Promise<{ authorization_url: string }> {
+  return request<{ authorization_url: string }>("/api/email/microsoft/connect", {
+    method: "POST",
+    body: JSON.stringify({ case_id: caseId }),
+  });
+}
+
+export function disconnectMailbox(id: string): Promise<{ disconnected: boolean; subscription_cleanup_pending: boolean }> {
+  return request<{ disconnected: boolean; subscription_cleanup_pending: boolean }>(
+    `/api/email/connections/${encodeURIComponent(id)}`, { method: "DELETE" },
+  );
 }

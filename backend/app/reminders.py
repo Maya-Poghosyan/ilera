@@ -1,6 +1,6 @@
 """Reminder scheduling — model, persistence (Postgres / in-memory), and templates.
 
-A Reminder fires a Poke message on a schedule (daily, weekly, once).
+A Reminder stores a schedule (daily, weekly, once). Delivery is not configured.
 Persistence mirrors the CaseProfile pattern in store.py.
 """
 

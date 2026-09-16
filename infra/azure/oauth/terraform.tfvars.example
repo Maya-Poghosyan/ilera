@@ -1,0 +1,23 @@
+# Copy to terraform.tfvars and adjust. NON-SECRET values only — the reviewed production
+# inputs. The Microsoft client secret and the Fernet key are generated and stored in Key
+# Vault by Terraform; never put secret values here.
+#
+# This is the OAuth-slice module. The scanning pipeline is a separate module in scanning/.
+
+subscription_id = "01a341d5-5453-4e83-92ee-4f0cc2e3d47d"
+tenant_id       = "5c8a1e25-bdc4-4ced-b8c2-3cda51c721d9"
+resource_group  = "Ilera"
+location        = "eastus2"
+
+api_app_name = "ilera-api"
+
+mailbox_app_name = "ilera-microsoft-mailbox"
+redirect_uri     = "https://ileracare.app/api/email/microsoft/callback"
+vault_name       = "ilera-email-01a341d5"
+
+# HIPAA: reuse an existing Log Analytics workspace if you have one; otherwise leave empty
+# to create a dedicated one for email audit logs.
+# log_analytics_workspace_id = "/subscriptions/.../workspaces/ilera-logs"
+
+# EMAIL_CONNECTIONS_ENABLED / EMAIL_SCANNING_ENABLED are set directly in data.tf (both
+# "false"). Change them there when you're ready; the plan diff will show the change.

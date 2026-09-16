@@ -1,8 +1,7 @@
 """Per-case caregiver preferences (Postgres or in-memory fallback).
 
-Currently just the inbox-monitoring consent flag: Poke may only look through a
-caregiver's email and messages for care events while this is on. It defaults to
-off so scanning is opt-in.
+Legacy inbox-monitoring preferences are retained for stored-record compatibility.
+Future mailbox connections must collect their own provider-specific OAuth consent.
 """
 
 from pydantic import BaseModel

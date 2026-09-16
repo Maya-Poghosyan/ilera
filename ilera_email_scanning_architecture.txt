@@ -1,0 +1,230 @@
+Email Scanning Architecture Plan
+
+Recommended architecture
+
+User connects mailbox via OAuth
+        |
+        +-- Microsoft 365 -> Microsoft Graph
+        |                    change notification webhook
+        |
+        +-- Gmail -> Gmail API / push notification
+                         |
+                         v
+              Ilera Email Ingest API
+              Azure Container Apps
+                         |
+                 [message ID only]
+                         v
+                Azure Service Bus
+                         |
+                         v
+                Email Scan Worker
+              Azure Container Apps
+                         |
+              fetch email from provider
+                         |
+                         v
+                  Azure OpenAI
+            classify + extract event
+                         |
+                         v
+             PostgreSQL suggested_events
+                         |
+              raw email discarded
+
+
+Implementation plan
+
+1. Create a provider-neutral email connector interface.
+
+class EmailProvider:
+    authorize()
+    refresh_token()
+    subscribe()
+    fetch_message(message_id)
+    revoke()
+
+Implement MicrosoftEmailProvider first and GmailEmailProvider second. Everything after fetch_message() should be provider-independent.
+
+2. Use delegated OAuth, never mailbox passwords.
+
+Store refresh/access credentials encrypted server-side; preferably keep credentials or encryption keys through Azure Key Vault/managed identity. Request the minimum scope needed: essentially read email, not send/delete/manage email.
+
+For Microsoft, use delegated Mail.Read.
+
+3. Webhook only signals that something changed.
+
+Do not put an entire email onto the webhook-processing path.
+
+Example:
+{
+  provider: "microsoft",
+  connection_id: "...",
+  message_id: "..."
+}
+
+Validate the webhook, resolve the owning Ilera user, and enqueue the identifiers.
+
+4. Queue the scan.
+
+Use Azure Service Bus:
+
+email.notification
+    ->
+email.scan worker
+
+This gives retries, dead-lettering, duplicate handling, and prevents Graph from waiting on an LLM request.
+
+Use managed identity / Entra ID rather than long-lived Service Bus keys.
+
+5. Fetch the raw email only inside the worker.
+
+The worker uses the user's OAuth token to retrieve:
+- sender
+- subject
+- timestamp
+- plain-text body
+
+Initially ignore attachments. Attachments create more PHI exposure, parsing complexity, malware risk, and cost.
+
+6. Send only necessary content to Azure OpenAI.
+
+Have one narrow task:
+
+Does this email contain a caregiver-relevant actionable event?
+
+If yes, extract:
+- event_type
+- title
+- date/time
+- organization/person
+- action_required
+- confidence
+- short explanation
+
+No free-form autonomous agent and no RAG unless needed.
+
+Example result:
+{
+  "type": "appointment",
+  "title": "Neurology appointment",
+  "start_at": "2026-09-22T14:00:00",
+  "action_required": "Arrange transportation",
+  "confidence": 0.94
+}
+
+Then insert that into the existing suggested_events model.
+
+7. Discard the email body after processing.
+
+Persist something closer to:
+- user_id
+- provider
+- provider_message_id
+- message_timestamp
+- extracted_event
+- processing_status
+- model_version
+
+Avoid retaining the original body unless the product genuinely needs it.
+
+Ilera should be an event extractor, not a second email archive.
+
+
+Key tradeoffs
+
+- Webhook vs polling:
+  Recommend webhook.
+  Tradeoff: more subscription lifecycle code, much less unnecessary mailbox access.
+
+- Raw email storage:
+  Recommend do not store.
+  Tradeoff: harder to reprocess old emails, but substantially reduces PHI footprint.
+
+- Attachments:
+  Recommend skip in V1.
+  Tradeoff: miss events contained only in PDFs, but much simpler security model.
+
+- Scan every email:
+  Recommend yes initially.
+  Tradeoff: simple, but sends more data through processing; later add cheap metadata filtering.
+
+- One LLM call per email:
+  Recommend yes.
+  Tradeoff: slightly more expensive, but easiest system to reason about.
+
+- Delegated OAuth:
+  Recommend yes.
+  Tradeoff: user must connect mailbox, but much less privilege than tenant-wide access.
+
+- Application-wide mailbox access:
+  Recommend no.
+  Tradeoff: easier for enterprise deployments, but excessive privilege for Ilera.
+
+- Store OAuth tokens:
+  Recommend encrypted server-side.
+  Tradeoff: requires token lifecycle/security implementation.
+
+- Gmail + Outlook simultaneously:
+  Recommend provider adapter abstraction.
+  Tradeoff: slight upfront abstraction cost, prevents duplicated processing systems.
+
+
+Provider strategy
+
+Microsoft 365:
+Use Microsoft Graph change notifications + delegated OAuth + Azure pipeline.
+
+Google Workspace:
+Use the same downstream Azure pipeline:
+Gmail notification
+-> Ilera webhook
+-> Service Bus
+-> worker
+-> Gmail API fetch
+-> Azure OpenAI
+
+The connector changes, but PHI processing stays inside Azure.
+
+Consumer @gmail.com / Outlook.com accounts:
+Do not automatically treat these as acceptable for PHI scanning simply because OAuth works. This needs a separate compliance decision around the contractual environment and account type.
+
+
+Recommended code boundary
+
+providers/
+    microsoft.py
+    google.py
+
+email_ingestion/
+    webhook.py
+    queue.py
+    scanner.py
+    extractor.py
+
+Provider modules should only:
+- authenticate
+- subscribe
+- retrieve messages
+
+Everything involving PHI classification should stay inside the Azure-hosted scanner/extractor pipeline.
+
+
+Recommended V1 scope
+
+Microsoft 365 email
+-> Graph webhook
+-> Azure Service Bus
+-> Azure worker
+-> Azure OpenAI
+-> suggested_events
+
+Constraints:
+- no attachment processing
+- no permanent raw-email storage
+- delegated OAuth only
+- managed identity for Azure service-to-service auth
+- encrypted token storage
+- persist only structured extracted events and minimal provenance
+
+This is the smallest implementation that preserves the useful Poke behavior while making the trust boundary much easier to audit.

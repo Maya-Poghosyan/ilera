@@ -19,3 +19,19 @@ out/
 # Local data artifacts
 backend/data/program_docs/*.pdf
 backend/data/generated/
+
+# Terraform (infra/azure). State can contain secret values — never commit it.
+# The provider lock file (.terraform.lock.hcl) SHOULD be committed.
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc

@@ -1,0 +1,156 @@
+name: Terraform (email infra)
+
+# Terraform for the email infrastructure under infra/azure/. Two modules:
+#   oauth/     — mailbox OAuth slice (vault, Entra app, API identity, audit logs)
+#   scanning/  — Service Bus + scan worker + OpenAI wiring (opt-in; needs a worker image)
+#
+# Flow:
+#   - Pull request touching infra/azure/**  -> fmt check + validate + plan (read-only)
+#   - Push to main                          -> apply, gated behind the `infra-production`
+#                                              GitHub Environment (required reviewers)
+#
+# State lives in the ileratfstate storage account (see infra/azure/README.md). The CI
+# identity below needs, on top of resource/Entra permissions:
+#   - Storage Blob Data Contributor on ileratfstate   (read/write remote state)
+#   - permission to create Entra apps + Key Vault role assignments
+#
+# One-time setup mirrors deploy.yml:
+#   secrets: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID  (OIDC, no password)
+#   environment `infra-production` with required reviewers, so apply waits for a human.
+
+on:
+  pull_request:
+    paths:
+      - "infra/azure/**"
+      - ".github/workflows/terraform.yml"
+  push:
+    branches: [main]
+    paths:
+      - "infra/azure/**"
+      - ".github/workflows/terraform.yml"
+  workflow_dispatch:
+    inputs:
+      module:
+        description: Which module to run
+        type: choice
+        default: oauth
+        options: [oauth, scanning]
+      action:
+        description: plan or apply
+        type: choice
+        default: plan
+        options: [plan, apply]
+
+# Two runs against the same state race on the blob lease. Queue them.
+concurrency:
+  group: terraform-email-infra
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write # OIDC login to Azure
+  pull-requests: write # to comment the plan on PRs
+
+env:
+  TF_IN_AUTOMATION: "true"
+  ARM_USE_AZUREAD: "true" # backend auth via the OIDC identity, not storage keys
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # PLAN — runs on PRs and on main before apply. Read-only.
+  # ---------------------------------------------------------------------------
+  plan:
+    # Scanning is opt-in: on automatic triggers only plan oauth. Use workflow_dispatch to
+    # target scanning explicitly once its worker image exists.
+    if: github.event_name != 'workflow_dispatch' || inputs.action == 'plan'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [oauth]
+    defaults:
+      run:
+        working-directory: infra/azure/${{ matrix.module }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.16.2"
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Format check
+        run: terraform fmt -check -recursive
+
+      - name: Init
+        run: terraform init -input=false
+
+      - name: Validate
+        run: terraform validate
+
+      - name: Plan
+        id: plan
+        run: terraform plan -input=false -no-color -out=tfplan | tee plan.txt
+
+      # Surface the plan on the PR so a reviewer sees the diff before approving apply.
+      - name: Comment plan on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('infra/azure/${{ matrix.module }}/plan.txt', 'utf8');
+            const body = [
+              '#### Terraform plan — `${{ matrix.module }}`',
+              '```',
+              plan.length > 60000 ? plan.slice(-60000) : plan,
+              '```',
+            ].join('\n');
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
+
+  # ---------------------------------------------------------------------------
+  # APPLY — only on push to main (or an explicit apply dispatch). Gated behind the
+  # `infra-production` Environment, which should require a human reviewer.
+  # ---------------------------------------------------------------------------
+  apply:
+    if: >
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && inputs.action == 'apply')
+    runs-on: ubuntu-latest
+    environment: infra-production # required reviewers configured here = manual approval gate
+    defaults:
+      run:
+        working-directory: infra/azure/${{ github.event_name == 'workflow_dispatch' && inputs.module || 'oauth' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.16.2"
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Init
+        run: terraform init -input=false
+
+      # Re-plan into a file and apply exactly that plan, so apply can't drift from what
+      # was reviewed between plan and approval.
+      - name: Plan
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Apply
+        run: terraform apply -input=false -auto-approve tfplan

@@ -27,10 +27,9 @@ from pydantic import BaseModel, Field
 
 from app.agents.specialists import ALL_SPECIALISTS
 from app.config import get_settings
-from app.models import CaseProfile, EligibilityResult
-from app.store import finding_to_result
-from app.models import SpecialistFinding
+from app.models import CaseProfile, EligibilityResult, FollowupQuestion
 from durable.models import PeerQueryResult, SpecialistInput, SpecialistResult
+from durable.tools.eligibility_checks import make_gate_tool
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +40,14 @@ _REGISTRY: dict[str, type] = {cls.doc_key: cls for cls in ALL_SPECIALISTS}
 _DOC_KEY_TO_PROGRAM: dict[str, str] = {cls.doc_key: cls.program for cls in ALL_SPECIALISTS}
 
 # ── Pydantic-ai output schema ──────────────────────────────────────────────────
+
+
+class _FollowupOutput(BaseModel):
+    id: str
+    prompt: str
+    type: Literal["short_text", "long_text", "select", "multiselect", "boolean"] = "short_text"
+    options: list[str] = Field(default_factory=list)
+    why: str = ""
 
 
 class _SpecialistOutput(BaseModel):
@@ -59,6 +66,26 @@ class _SpecialistOutput(BaseModel):
         default_factory=list,
         description="Citation strings in format 'Title (page) — URL' or 'Title (page)'.",
     )
+    roadblocks: list[str] = Field(
+        default_factory=list,
+        description="Barriers that would prevent eligibility or complicate the application.",
+    )
+    next_steps: list[str] = Field(
+        default_factory=list,
+        description="Concrete action items for the caregiver to pursue this program.",
+    )
+    required_documents: list[str] = Field(
+        default_factory=list,
+        description="Documents the applicant will need to submit.",
+    )
+    missing_info: list[str] = Field(
+        default_factory=list,
+        description="Information not present in the profile that would affect eligibility.",
+    )
+    followups: list[_FollowupOutput] = Field(
+        default_factory=list,
+        description="Questions to ask the caregiver to fill gaps in the profile.",
+    )
 
 
 # ── System prompt template ─────────────────────────────────────────────────────
@@ -66,10 +93,21 @@ class _SpecialistOutput(BaseModel):
 _SYSTEM_TEMPLATE = """\
 You are Ilera's eligibility specialist for {program}.
 Assess ONLY {program} eligibility for the provided caregiver profile.
-Use the lookup_program_docs tool to retrieve official program documentation before assessing.
-Ground every claim in retrieved documentation. Do not invent program rules.
-Return structured output with match_level, notes (list of grounded reasoning strings),
-cross_programs (other programs this case should consider), and citations (source titles/pages).\
+
+Step 1 — ALWAYS call check_program_gate first. If it returns INELIGIBLE, immediately \
+return match_level='none' with the gate reason as your sole note. Do not call any other tools.
+Step 2 — If the gate returns ELIGIBLE, call lookup_program_docs to retrieve official \
+program documentation. Ground every claim in retrieved documentation. Do not invent program rules.
+Step 3 — Return structured output with:
+- match_level: eligibility confidence (none/low/medium/likely/very_likely)
+- notes: grounded reasoning strings, each citing a retrieved document
+- cross_programs: other programs this case should consider for cross-eligibility
+- citations: source titles/pages in format "Title (page) — URL"
+- roadblocks: barriers that would prevent eligibility or complicate the application
+- next_steps: concrete action items for the caregiver to pursue this program
+- required_documents: documents the applicant will need to submit
+- missing_info: information not in the profile that would affect eligibility
+- followups: questions to ask the caregiver to fill profile gaps\
 """
 
 
@@ -114,22 +152,45 @@ def _build_user_prompt(
     return "\n".join(parts)
 
 
+_MATCH_TO_STATUS = {
+    "none": ("unlikely", 0.05),
+    "low": ("unlikely", 0.3),
+    "medium": ("possible", 0.55),
+    "likely": ("likely", 0.78),
+    "very_likely": ("likely", 0.93),
+}
+
+
 def _eligibility_result_from_output(
-    output: _SpecialistOutput, program: str, doc_key: str
+    output: _SpecialistOutput, program: str,
 ) -> EligibilityResult:
-    """Project _SpecialistOutput into an EligibilityResult for the applications page."""
-    # Reuse the same mapping the rest of the app uses.
-    finding = SpecialistFinding(
+    """Project _SpecialistOutput into a full EligibilityResult, preserving all rich fields."""
+    status, confidence = _MATCH_TO_STATUS.get(output.match_level, ("needs_info", 0.4))
+    followups = [
+        FollowupQuestion(
+            program=program,
+            id=f.id,
+            prompt=f.prompt,
+            type=f.type,
+            options=f.options,
+            why=f.why,
+        )
+        for f in output.followups
+        if f.prompt
+    ]
+    return EligibilityResult(
         program=program,
-        doc_key=doc_key,
+        confidence=confidence,
+        status=status,  # type: ignore[arg-type]
         match_level=output.match_level,
-        notes=output.notes,
-        cross_programs=output.cross_programs,
-        citations=output.citations,
-        complete=True,
-        updated_at=datetime.now(timezone.utc).isoformat(),
+        rationale=" ".join(output.notes),
+        roadblocks=output.roadblocks,
+        required_documents=output.required_documents,
+        next_steps=output.next_steps,
+        missing_info=output.missing_info,
+        followups=followups,
+        sources=output.citations,
     )
-    return finding_to_result(finding)
 
 
 def _error_record(
@@ -226,7 +287,7 @@ async def specialist_activity(payload: dict) -> dict:
                 model=model,
                 output_type=_SpecialistOutput,
                 system_prompt=_SYSTEM_TEMPLATE.format(program=program),
-                tools=[make_rag_tool(doc_key)],
+                tools=[make_gate_tool(doc_key), make_rag_tool(doc_key)],
                 deps_type=CaseProfile,
                 max_retries=2,
             )
@@ -251,7 +312,7 @@ async def specialist_activity(payload: dict) -> dict:
 
     # LLM succeeded — build result.
     if llm_output is not None:
-        eligibility_result = _eligibility_result_from_output(llm_output, program, doc_key)
+        eligibility_result = _eligibility_result_from_output(llm_output, program)
         return SpecialistResult(
             doc_key=doc_key,
             program=program,

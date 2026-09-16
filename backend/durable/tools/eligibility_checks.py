@@ -17,9 +17,12 @@ Design notes:
 
 from __future__ import annotations
 
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 
 from app.models import CaseProfile
+
+if TYPE_CHECKING:
+    from pydantic_ai import RunContext
 
 # Return type: (skip, reason, fast_match_level)
 GateResult = tuple[bool, str, str]
@@ -157,3 +160,36 @@ GATES: dict[str, Callable[[CaseProfile], GateResult]] = {
     "medicare": check_medicare,
     "tax": check_tax,
 }
+
+
+def make_gate_tool(doc_key: str) -> Callable[..., str]:
+    """Return a pydantic-ai-compatible async tool function that runs the eligibility gate.
+
+    The tool reads the CaseProfile from the agent's deps (RunContext) so no arguments
+    are needed — the model calls it with no parameters.
+
+    The agent must call this tool first before doing any RAG retrieval or assessment.
+    If the gate returns INELIGIBLE, the agent must immediately return match_level='none'
+    with the reason as the sole note — no further tool calls needed.
+    """
+    gate_fn = GATES.get(doc_key)
+
+    async def check_program_gate(ctx: "RunContext[CaseProfile]") -> str:  # type: ignore[name-defined]
+        """Run the deterministic eligibility gate for this program.
+
+        Call this FIRST before any other tool. Returns either:
+        - "ELIGIBLE: proceed with full assessment" — continue with lookup_program_docs
+        - "INELIGIBLE: <reason>" — return match_level='none' immediately, no further calls needed.
+        """
+        if gate_fn is None:
+            return "ELIGIBLE: no gate configured for this program, proceed with full assessment"
+        try:
+            skip, reason, _ = gate_fn(ctx.deps)
+        except Exception:
+            # Conservative: gate errors should not block the assessment.
+            return "ELIGIBLE: gate check inconclusive, proceed with full assessment"
+        if skip:
+            return f"INELIGIBLE: {reason}"
+        return "ELIGIBLE: proceed with full assessment"
+
+    return check_program_gate

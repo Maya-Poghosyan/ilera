@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { CalendarDays, Check, ChevronLeft, ChevronRight, Sparkles, X } from "lucide-react";
 
+import { MailboxConnections } from "@/components/mailbox-connections";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,12 +15,8 @@ import {
   createReminder,
   deleteReminder,
   deleteSuggestedEvent,
-  getPreferences,
   listReminders,
   listSuggestedEvents,
-  runReminderNow,
-  scanForEvents,
-  setMonitorInboxes as setMonitorInboxesAPI,
   updateReminder,
 } from "@/lib/api";
 import type { SuggestedEventAPI } from "@/lib/api";
@@ -57,19 +55,11 @@ const events: CalEvent[] = [
   { day: 9, title: "IHSS timesheet due", kind: "Deadline" },
 ];
 
-// Matches settings.default_case_id on the backend, for the pre-intake demo case.
+// Fallback for the pre-intake demo case.
 const DEFAULT_CASE_ID = "demo";
 
 // Reminder times are wall-clock in the caregiver's own zone, not the server's.
 const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-const SCAN_POLL_ATTEMPTS = 10;
-const SCAN_POLL_INTERVAL_MS = 3000;
-
-const STATIC_SUGGESTED: CalEvent[] = [
-  { day: 3, title: "Pharmacy refill pickup", time: "9:00 AM", kind: "Appointment", suggested: true, description: "Found in email from CVS \u2014 prescription #4021 ready for pickup at Main St location." },
-  { day: 6, title: "IHSS pay stub review", kind: "Deadline", suggested: true, description: "IHSS direct deposit scheduled for Jun 6. Review hours logged against pay stub." },
-];
 
 function apiEventToCalEvent(e: SuggestedEventAPI): CalEvent {
   return {
@@ -155,13 +145,11 @@ export default function CalendarPage() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [apiSuggested, setApiSuggested] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [scanning, setScanning] = useState(false);
   const [caseId] = useState(
     () =>
       (typeof window !== "undefined" ? localStorage.getItem("ilera_case_id") : null) ??
       DEFAULT_CASE_ID
   );
-  const [monitorInboxes, setMonitorInboxes] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // Reminder form
@@ -199,52 +187,10 @@ export default function CalendarPage() {
     }
   }, []);
 
-  const loadPreferences = useCallback(async () => {
-    try {
-      setMonitorInboxes((await getPreferences(caseId)).monitor_inboxes);
-    } catch {
-      // API may not be running
-    }
-  }, [caseId]);
-
   useEffect(() => {
     loadReminders();
     loadSuggestedEvents();
-    loadPreferences();
-  }, [loadReminders, loadSuggestedEvents, loadPreferences]);
-
-  const handleToggleMonitoring = useCallback(async () => {
-    const next = !monitorInboxes;
-    setMonitorInboxes(next);
-    try {
-      await setMonitorInboxesAPI(caseId, next);
-      showToast(
-        next
-          ? "Monitoring on \u2014 your assistant can look for care events"
-          : "Monitoring off \u2014 your assistant won't read your inboxes"
-      );
-    } catch {
-      setMonitorInboxes(!next);
-      showToast("Couldn't save that setting");
-    }
-  }, [caseId, monitorInboxes, showToast]);
-
-  // Poke files what it finds asynchronously via MCP, so poll for a while after asking.
-  const handleScan = useCallback(async () => {
-    setScanning(true);
-    try {
-      await scanForEvents(caseId);
-      showToast("Looking for new events \u2014 they'll appear here");
-      for (let i = 0; i < SCAN_POLL_ATTEMPTS; i++) {
-        await new Promise((r) => setTimeout(r, SCAN_POLL_INTERVAL_MS));
-        await loadSuggestedEvents();
-      }
-    } catch {
-      showToast("Couldn't reach Poke \u2014 check the assistant connection");
-    } finally {
-      setScanning(false);
-    }
-  }, [caseId, loadSuggestedEvents, showToast]);
+  }, [loadReminders, loadSuggestedEvents]);
 
   const resetForm = () => {
     setFormKind("custom");
@@ -273,6 +219,7 @@ export default function CalendarPage() {
       showToast("Reminder updated");
     } else {
       const body: ReminderCreate = {
+        case_id: caseId,
         kind: formKind,
         message: formMessage,
         schedule: {
@@ -313,32 +260,6 @@ export default function CalendarPage() {
     await loadReminders();
   };
 
-  const handleRunNow = async (id: string) => {
-    try {
-      await runReminderNow(id);
-      showToast("Reminder sent via Poke");
-      await loadReminders();
-    } catch (e) {
-      showToast(e instanceof Error ? e.message : "Send failed");
-    }
-  };
-
-  const enableDailyCareLog = async () => {
-    await createReminder({
-      // Scopes the check-in to this case so Poke logs hours against the right one.
-      case_id: caseId,
-      kind: "daily_care_log",
-      message: "",
-      schedule: { freq: "daily", time: "18:00", timezone: LOCAL_TIMEZONE },
-    });
-    showToast("Daily care-log check-in enabled");
-    await loadReminders();
-  };
-
-  const hasCareLog = reminders.some(
-    (r) => r.kind === "daily_care_log" && r.active
-  );
-
   const formatNextRun = (iso: string | null | undefined) => {
     if (!iso) return "N/A";
     const d = new Date(iso);
@@ -351,7 +272,7 @@ export default function CalendarPage() {
   };
 
   // Combine all events for the calendar grid
-  const allSuggested = [...STATIC_SUGGESTED, ...apiSuggested];
+  const allSuggested = apiSuggested;
   const allEvents = [...events, ...allSuggested];
 
   const handleDismissSuggested = async (e: CalEvent) => {
@@ -378,28 +299,9 @@ export default function CalendarPage() {
       <div className="space-y-6">
         <div className="space-y-3">
           <h1 className="text-4xl font-bold">Care Calendar</h1>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <button
-              type="button"
-              role="switch"
-              aria-label="Monitor inboxes"
-              aria-checked={monitorInboxes}
-              onClick={handleToggleMonitoring}
-              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-                monitorInboxes ? "bg-primary" : "bg-muted-foreground/30"
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 size-4 rounded-full bg-white transition-all ${
-                  monitorInboxes ? "left-4.5" : "left-0.5"
-                }`}
-              />
-            </button>
-            <p className="max-w-xl text-sm text-muted-foreground">
-              Enabling allows our caregiving assistant scan your email, iMessage,
-              WhatsApp, etc and suggest relevant events here
-            </p>
-          </div>
+          <p className="max-w-xl text-sm text-muted-foreground">
+            Email scanning will surface care appointments and deadlines here.
+          </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button className="px-10 hover:font-bold">+ Appointment</Button>
@@ -414,14 +316,12 @@ export default function CalendarPage() {
           >
             + Reminder
           </Button>
-          {!hasCareLog && (
-            <Button className="px-10 hover:font-bold" onClick={enableDailyCareLog}>
-              + Care Log
-            </Button>
-          )}
+
 
         </div>
       </div>
+
+      <MailboxConnections />
 
       {/* Reminder creation / edit form */}
       {showReminderForm && (
@@ -453,13 +353,13 @@ export default function CalendarPage() {
                   id="msg"
                   value={formMessage}
                   onChange={(e) =>setFormMessage(e.target.value)}
-                  placeholder="Reminder text sent to caregiver"
+                  placeholder="Reminder details"
                 />
               </div>
             )}
             {formKind === "daily_care_log" && (
               <p className="text-sm text-muted-foreground">
-                Uses the built-in care-log prompt asking about hours, meals, meds, mood &amp; incidents.
+                A saved reminder to record daily care. Automatic text check-ins are unavailable.
               </p>
             )}
 
@@ -540,20 +440,11 @@ export default function CalendarPage() {
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="size-4" />
             <h3 className="text-sm font-semibold">Suggested Events</h3>
-            <Button
-              variant="outline"
-              size="sm"
-              className="ml-auto"
-              disabled={scanning || !monitorInboxes}
-              onClick={handleScan}
-            >
-              {scanning ? "Syncing\u2026" : "Sync new events"}
-            </Button>
           </div>
           <p className="text-xs text-muted-foreground">
-            {monitorInboxes
-              ? "Detected from recent emails and documents. Accept to add to your calendar."
-              : "Turn on the switch above to let your assistant find appointments and deadlines for you."}
+            {allSuggested.length > 0
+              ? "Previously saved suggestions. New email scanning is coming soon."
+              : "No suggested events yet. Outlook and Gmail connections are coming soon."}
           </p>
           <div className="space-y-2">
             {allSuggested.map((e, idx) => (
@@ -679,8 +570,9 @@ export default function CalendarPage() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-primary">
             <CalendarDays className="size-4" />
-            <h3 className="text-sm font-semibold">Active Reminders</h3>
+            <h3 className="text-sm font-semibold">Saved Reminders</h3>
           </div>
+          <p className="text-xs text-muted-foreground">Reminders are saved only. Automatic delivery is unavailable.</p>
           {reminders.map((r) => (
             <Card key={r.id}>
               <CardHeader className="flex flex-row items-center justify-between py-4">
@@ -701,9 +593,6 @@ export default function CalendarPage() {
                   </Badge>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="outline" size="sm" onClick={() => handleRunNow(r.id)}>
-                    Send Now
-                  </Button>
                   <Button variant="outline" size="sm" onClick={() => handleEdit(r)}>
                     Edit
                   </Button>

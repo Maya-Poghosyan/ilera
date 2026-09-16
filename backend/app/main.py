@@ -11,7 +11,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 
 from .access import authorize_case, require_case_access
-from .auth import User, get_optional_user
+from .auth import User, get_current_user, get_optional_user
 from .auth import router as auth_router
 from .applications import (
     AppStatus,
@@ -27,11 +27,10 @@ from .applications import (
 )
 from . import db
 from .config import get_settings
+from .email_ingestion.routes import router as email_router
 from .forms.filler import fill_pdf, list_schemas, resolve_fields
 from .geo import normalize_county, zip_to_county
-from .integrations import poke
 from .intake import INTAKE_SCHEMA, map_answers_to_profile
-from .mcp_server import build_mcp_app
 from .models import CaseProfile, EligibilityResult, EligibilityStatus
 from .rag.embeddings import provider as embedding_provider
 from .rag.index import get_index
@@ -40,7 +39,6 @@ from .reminders import (
     Reminder,
     ReminderKind,
     ReminderSchedule,
-    advance_next_run,
     compute_next_run,
     delete_reminder,
     get_reminder,
@@ -66,72 +64,13 @@ from .store import get_profile, purge_unclaimed_cases, save_profile
 from .suggested_events import (
     SuggestedEvent,
     delete_suggested_event,
+    get_suggested_event,
     list_suggested_events,
 )
 
 logger = logging.getLogger("ilera.scheduler")
 
 settings = get_settings()
-
-# ---------------------------------------------------------------------------
-# Scheduler — lightweight asyncio background loop
-# ---------------------------------------------------------------------------
-
-_SCHEDULER_INTERVAL = 30  # seconds between ticks
-
-
-def _care_log_message(reminder: Reminder) -> str:
-    """The daily check-in, personalised from the reminder's case when there is one."""
-    case_id = reminder.case_id or settings.default_case_id
-    profile = get_profile(case_id) if case_id else None
-    if profile is None:
-        return poke.daily_care_log_prompt()
-    return poke.daily_care_log_prompt(
-        recipient_name=profile.care_recipient.name,
-        caregiver_name=profile.caregiver.name,
-        case_id=case_id,
-    )
-
-
-async def _scheduler_loop() -> None:
-    """Check for due reminders every interval and fire them via Poke."""
-    while True:
-        try:
-            await asyncio.sleep(_SCHEDULER_INTERVAL)
-            now = datetime.now(timezone.utc)
-            for reminder in list_reminders():
-                if not reminder.active or not reminder.next_run:
-                    continue
-                fire_at = datetime.fromisoformat(reminder.next_run)
-                if fire_at.tzinfo is None:
-                    fire_at = fire_at.replace(tzinfo=timezone.utc)
-                if fire_at > now:
-                    continue
-                # Determine message
-                msg = reminder.message
-                if reminder.kind == ReminderKind.daily_care_log and not msg:
-                    msg = _care_log_message(reminder)
-                if not msg:
-                    continue
-                # Send via Poke (no-op if key missing)
-                if poke.available():
-                    try:
-                        poke.send_message(msg)
-                        logger.info("Sent reminder %s", reminder.id)
-                    except Exception:
-                        logger.exception("Failed to send reminder %s", reminder.id)
-                        continue
-                else:
-                    logger.debug("Poke not configured — skipping reminder %s", reminder.id)
-                # Advance
-                reminder.last_sent_at = now.isoformat()
-                advance_next_run(reminder)
-                save_reminder(reminder)
-        except asyncio.CancelledError:
-            break
-        except Exception:
-            logger.exception("Scheduler tick error")
-
 
 _PURGE_INTERVAL = 24 * 60 * 60  # seconds between unclaimed-case sweeps
 
@@ -154,12 +93,10 @@ async def _purge_loop() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    task = asyncio.create_task(_scheduler_loop())
     purge_task = asyncio.create_task(_purge_loop())
     yield
-    task.cancel()
     purge_task.cancel()
-    for background in (task, purge_task):
+    for background in (purge_task,):
         try:
             await background
         except asyncio.CancelledError:
@@ -176,11 +113,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount MCP server for Poke integration (SSE transport at /mcp)
-app.mount("/mcp", build_mcp_app())
-
 # Auth routes
 app.include_router(auth_router)
+app.include_router(email_router)
 
 
 @app.get("/healthz")
@@ -218,7 +153,6 @@ def health() -> dict:
         "postgres": db.ready(),
         "llm": settings.has_llm,
 
-        "poke": poke.available(),
         "embeddings": embedding_provider(),
         "rag_ready": index.size > 0,
         "rag_backend": index.backend,
@@ -403,23 +337,8 @@ def download_filled_form(
 
 
 # ---------------------------------------------------------------------------
-# Reminder CRUD + send
+# Reminder CRUD (delivery is not configured)
 # ---------------------------------------------------------------------------
-
-
-class SendMessageRequest(BaseModel):
-    message: str
-
-
-@app.post("/api/reminders/send")
-def send_reminder_now(req: SendMessageRequest) -> dict:
-    if not poke.available():
-        raise HTTPException(status_code=400, detail="POKE_API_KEY not configured")
-    try:
-        result = poke.send_message(req.message)
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Poke send failed: {exc}") from exc
-    return {"sent": True, "poke": result}
 
 
 class ReminderCreate(BaseModel):
@@ -498,28 +417,6 @@ def api_delete_reminder(reminder_id: str) -> dict:
     if not delete_reminder(reminder_id):
         raise HTTPException(status_code=404, detail="reminder not found")
     return {"deleted": True}
-
-
-@app.post("/api/reminders/{reminder_id}/run-now")
-def api_run_now(reminder_id: str) -> dict:
-    """Immediately fire a reminder via Poke (for demos / testing)."""
-    r = get_reminder(reminder_id)
-    if r is None:
-        raise HTTPException(status_code=404, detail="reminder not found")
-    msg = r.message
-    if r.kind == ReminderKind.daily_care_log and not msg:
-        msg = _care_log_message(r)
-    if not msg:
-        raise HTTPException(status_code=400, detail="reminder has no message")
-    if not poke.available():
-        raise HTTPException(status_code=400, detail="POKE_API_KEY not configured")
-    try:
-        result = poke.send_message(msg)
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Poke send failed: {exc}") from exc
-    r.last_sent_at = datetime.now(timezone.utc).isoformat()
-    save_reminder(r)
-    return {"sent": True, "poke": result}
 
 
 # ---------------------------------------------------------------------------
@@ -645,7 +542,7 @@ def api_preview_stitched(
 
 
 # ---------------------------------------------------------------------------
-# Poke message/email scanning → suggested events
+# Caregiver preferences
 # ---------------------------------------------------------------------------
 
 
@@ -668,46 +565,26 @@ def api_set_preferences(
     return save_preferences(prefs)
 
 
-@app.post("/api/poke/scan")
-def poke_scan_events(
-    case_id: str | None = None, user: Optional[User] = Depends(get_optional_user)
-) -> dict:
-    """Ask Poke to scan the user's messages/emails for medical events.
-
-    Requires inbox monitoring to be switched on for the case: that toggle is
-    the caregiver's consent to Poke reading their mail on Ilera's behalf.
-
-    Poke works asynchronously and files what it finds by calling the
-    ``add_suggested_event`` MCP tool, so this only confirms the request was
-    queued — clients should poll ``/api/suggested-events`` for results.
-    """
-    resolved_case = case_id or settings.default_case_id
-    if case_id:
-        authorize_case(case_id, user)
-    if not get_preferences(resolved_case).monitor_inboxes:
-        raise HTTPException(status_code=403, detail="Inbox monitoring is turned off")
-    if not poke.available():
-        raise HTTPException(status_code=400, detail="POKE_API_KEY not configured")
-    try:
-        poke.scan_for_events()
-    except Exception as exc:
-        raise HTTPException(status_code=502, detail=f"Poke scan failed: {exc}") from exc
-    return {"requested": True, "known_event_ids": [e.id for e in list_suggested_events()]}
-
-
-
 # ---------------------------------------------------------------------------
-# Suggested events (created by Poke via MCP or manually)
+# Suggested events (provider-independent storage)
 # ---------------------------------------------------------------------------
 
 
 @app.get("/api/suggested-events")
-def api_list_suggested_events() -> list[SuggestedEvent]:
-    return list_suggested_events()
+def api_list_suggested_events(
+    user: User = Depends(get_current_user),
+) -> list[SuggestedEvent]:
+    # Unowned legacy suggestions remain stored, but cannot safely be assigned to a user.
+    return list_suggested_events(user_id=user.id)
 
 
 @app.delete("/api/suggested-events/{event_id}")
-def api_delete_suggested_event(event_id: str) -> dict:
+def api_delete_suggested_event(
+    event_id: str, user: User = Depends(get_current_user)
+) -> dict:
+    event = get_suggested_event(event_id)
+    if event is None or event.user_id != user.id:
+        raise HTTPException(status_code=404, detail="suggested event not found")
     if not delete_suggested_event(event_id):
         raise HTTPException(status_code=404, detail="suggested event not found")
     return {"deleted": True}

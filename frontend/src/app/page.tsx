@@ -33,7 +33,7 @@ const features = [
   {
     icon: HeartHandshake,
     title: "Caregiver Support",
-    body: "A care calendar, timekeeping & journal, and a document store — with agentic SMS reminders and portal automation.",
+    body: "A care calendar, timekeeping & journal, and a document store to keep care organized.",
   },
 ];
 

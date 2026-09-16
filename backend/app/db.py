@@ -131,6 +131,38 @@ CREATE TABLE IF NOT EXISTS suggested_events (
     doc        jsonb NOT NULL,
     updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Email stores contain metadata and structured results only; never raw messages or tokens.
+CREATE TABLE IF NOT EXISTS email_connections (
+    id text PRIMARY KEY,
+    case_id text NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    doc jsonb NOT NULL,
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS email_connections_case_idx ON email_connections (case_id);
+CREATE TABLE IF NOT EXISTS email_scan_results (
+    id text PRIMARY KEY,
+    case_id text NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    doc jsonb NOT NULL,
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS email_scan_results_case_idx ON email_scan_results (case_id);
+-- Token ciphertext and OAuth state are isolated from public connection metadata.
+CREATE TABLE IF NOT EXISTS email_credentials (
+    connection_id text PRIMARY KEY REFERENCES email_connections(id) ON DELETE CASCADE,
+    encrypted_tokens text NOT NULL,
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS email_oauth_states (
+    state_hash text PRIMARY KEY,
+    user_id text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    case_id text NOT NULL REFERENCES cases(id) ON DELETE CASCADE,
+    encrypted_payload text NOT NULL,
+    expires_at timestamptz NOT NULL
+);
+CREATE INDEX IF NOT EXISTS email_oauth_states_expiry_idx ON email_oauth_states(expires_at);
+CREATE INDEX IF NOT EXISTS email_oauth_states_owner_idx ON email_oauth_states(user_id, case_id);
+CREATE INDEX IF NOT EXISTS suggested_events_owner_idx ON suggested_events ((doc->>'user_id'));
 """
 
 _pool = None
