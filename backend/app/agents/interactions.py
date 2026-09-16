@@ -5,9 +5,8 @@ secondary payer to Medi-Cal, IHSS/waiver wages can be federally tax-excludable u
 IRS Notice 2014-7, etc. This module grounds those cross-program interactions in the
 **inter-eligibility advising documents** in the corpus and returns cited notes.
 
-It is the shared brain behind both the synchronous HTTP routing flow and the Band
-coordinator's `analyzeinteractions` tool. Falls back to a small rule set when no LLM
-key is configured so the app still works with zero keys.
+Falls back to a small rule set when no LLM key is configured so the app still works
+with zero keys.
 """
 
 from __future__ import annotations
@@ -90,11 +89,7 @@ def _heuristic(active: set[str]) -> list[InteractionNote]:
 def analyze_interactions(
     profile: CaseProfile, results: list[EligibilityResult]
 ) -> list[InteractionNote]:
-    """Return cited cross-program interaction notes, given full specialist results.
-
-    Used by the synchronous, no-Band HTTP fallback (`run_routing`), which still assesses
-    the specialists in-process.
-    """
+    """Return cited cross-program interaction notes, given full specialist results."""
     active = [r.program for r in results if r.status in ("likely", "possible", "needs_info")]
     summary = "; ".join(f"{r.program}={r.status}({r.confidence:.2f})" for r in results)
     return _analyze(profile, active, summary)
@@ -103,13 +98,7 @@ def analyze_interactions(
 def analyze_program_interactions(
     profile: CaseProfile, programs: list[str]
 ) -> list[InteractionNote]:
-    """Return cited cross-program interaction notes from just the program names the
-    Band routing agent gathered by consulting specialists over the room.
-
-    This is the coordination-layer entry point: the routing agent no longer re-runs the
-    specialists in-process, it passes along the programs its specialist consultations
-    surfaced and this grounds the interactions in the coordination/advising corpus.
-    """
+    """Return cited cross-program interaction notes for the given active program names."""
     active = [p for p in dict.fromkeys(programs) if p]
     summary = ", ".join(active)
     return _analyze(profile, active, summary)

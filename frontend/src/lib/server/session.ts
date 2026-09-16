@@ -22,7 +22,7 @@ function secondsUntilExpiry(token: string): number {
  * body reachable from JavaScript, so an XSS bug can't read it out of storage. */
 export async function startSession(
   request: NextRequest,
-  path: "/api/auth/signup" | "/api/auth/login",
+  path: "/api/auth/login" | "/api/auth/verify-email" | "/api/auth/verify-otp",
 ): Promise<Response> {
   let upstream: Response;
   try {

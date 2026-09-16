@@ -1,6 +1,5 @@
-# Ilera — Agentic assistance for caregivers
+# Ilera: Agentic assistance for caregivers
 
-**🏆 1st place — Harvard Health Systems Innovation Lab Hackathon**
 
 Ilera helps unpaid caregivers discover, optimize, and apply for state and federal benefits
 (IHSS, Medi-Cal, Paid Family Leave, VA, and more) using a multi-agent system grounded in

@@ -8,7 +8,7 @@ pairs them per page and asks a model to align them.
 
 Generation is offline and reviewed, never part of serving an application:
 
-    pip install -r requirements-band.txt           # pydantic-ai; not needed to serve
+    pip install -r requirements.txt
     python -m app.forms.generate soc-426a          # write data/form_schemas/soc-426a.json
     python -m app.forms.generate soc-426a --dry-run
 

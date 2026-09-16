@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +13,6 @@ import { useAuth } from "@/lib/auth-context";
 import { clearPendingCaseId, getPendingCaseId } from "@/lib/pending-case";
 
 export default function SignupPage() {
-  const router = useRouter();
   const { signup } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,11 +20,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [hasPendingCase, setHasPendingCase] = useState(false);
-
-  useEffect(() => {
-    setHasPendingCase(getPendingCaseId() !== null);
-  }, []);
+  const [verificationSent, setVerificationSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,11 +31,9 @@ export default function SignupPage() {
     }
     setSubmitting(true);
     try {
-      // The case is claimed as part of signup; a stale id someone else already owns is
-      // refused server-side, and the account still works without it.
       await signup({ name, email, phone, password, case_id: getPendingCaseId() });
       clearPendingCaseId();
-      router.push("/get-started");
+      setVerificationSent(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed");
     } finally {
@@ -49,22 +41,59 @@ export default function SignupPage() {
     }
   };
 
+  const header = (
+    <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
+      <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
+        <Logo />
+      </div>
+    </header>
+  );
+
+  if (verificationSent) {
+    return (
+      <main className="flex flex-1 flex-col">
+        {header}
+        <section className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
+          <Card className="w-full">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-primary/10">
+                <Mail className="size-6 text-primary" />
+              </div>
+              <CardTitle className="text-xl">Check your email</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                We sent a verification link to{" "}
+                <span className="font-medium text-foreground">{email}</span>.
+                Click it to activate your account.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-3 text-center text-sm text-muted-foreground">
+              <p>The link expires in 1 hour. Check your spam folder if you don&apos;t see it.</p>
+              <p>
+                Wrong email?{" "}
+                <button
+                  className="text-primary hover:underline"
+                  onClick={() => setVerificationSent(false)}
+                >
+                  Go back
+                </button>
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
-          <Logo />
-        </div>
-      </header>
+      {header}
 
       <section className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
         <Card className="w-full">
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Create your account</CardTitle>
             <p className="text-sm text-muted-foreground">
-              {hasPendingCase
-                ? "Save your plan, start your applications, and get reminders."
-                : "Set up your Ilera caregiver profile to get started."}
+              Save your plan, start your applications, and get reminders.
             </p>
           </CardHeader>
           <CardContent>
@@ -79,7 +108,7 @@ export default function SignupPage() {
                 <Input
                   id="name"
                   value={name}
-                  onChange={(e) =>setName(e.target.value)}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="First name"
                   required
                 />
@@ -90,7 +119,7 @@ export default function SignupPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) =>setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
                 />
@@ -101,7 +130,7 @@ export default function SignupPage() {
                   id="phone"
                   type="tel"
                   value={phone}
-                  onChange={(e) =>setPhone(e.target.value)}
+                  onChange={(e) => setPhone(e.target.value)}
                   placeholder="(555) 555-0123"
                   required
                 />
@@ -112,7 +141,7 @@ export default function SignupPage() {
                   id="password"
                   type="password"
                   value={password}
-                  onChange={(e) =>setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 6 characters"
                   required
                   minLength={6}

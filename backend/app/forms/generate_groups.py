@@ -6,7 +6,7 @@ already answer. What's left would otherwise be shown to the applicant one box at
 box the profile can't fill, either the group it belongs to or a reason nobody should be
 asked about it (office use, filled at signing).
 
-    pip install -r requirements-band.txt
+    pip install -r requirements.txt
     python -m app.forms.generate_groups ccfrm604 --dry-run
 
 The output is committed next to the field map, so what an applicant types and where it

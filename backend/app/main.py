@@ -32,7 +32,7 @@ from .geo import normalize_county, zip_to_county
 from .integrations import poke
 from .intake import INTAKE_SCHEMA, map_answers_to_profile
 from .mcp_server import build_mcp_app
-from .models import BandStatus, CaseProfile, EligibilityResult
+from .models import CaseProfile, EligibilityResult, EligibilityStatus
 from .rag.embeddings import provider as embedding_provider
 from .rag.index import get_index
 from .reminders import (
@@ -217,7 +217,7 @@ def health() -> dict:
         "status": "ok",
         "postgres": db.ready(),
         "llm": settings.has_llm,
-        "band": settings.has_band,
+
         "poke": poke.available(),
         "embeddings": embedding_provider(),
         "rag_ready": index.size > 0,
@@ -265,7 +265,7 @@ def read_case(case_id: str, _: str = Depends(require_case_access)) -> CaseProfil
 
 
 class EligibilityResponse(BaseModel):
-    status: BandStatus
+    status: EligibilityStatus
     results: list[EligibilityResult]
     strategy: str = ""
     strategy_complete: bool = False
@@ -282,9 +282,9 @@ async def _ensure_eligibility_started(case_id: str) -> Optional[CaseProfile]:
     profile = get_profile(case_id)
     if profile is None:
         return None
-    if profile.band_status in ("idle", "error"):
-        profile.band_status = "processing"
-        profile.band_error = ""
+    if profile.eligibility_status in ("idle", "error"):
+        profile.eligibility_status = "processing"
+        profile.eligibility_error = ""
         save_profile(profile)
         try:
             await start_eligibility_orchestration(profile)
@@ -292,15 +292,15 @@ async def _ensure_eligibility_started(case_id: str) -> Optional[CaseProfile]:
             logger.exception("Failed to start Durable orchestration for case %s", case_id)
             p = get_profile(case_id)
             if p is not None:
-                p.band_status = "error"
-                p.band_error = f"Could not start eligibility processing: {exc}"
+                p.eligibility_status = "error"
+                p.eligibility_error = f"Could not start eligibility processing: {exc}"
                 save_profile(p)
     return get_profile(case_id)
 
 
 def _eligibility_response(profile: CaseProfile) -> EligibilityResponse:
-    expected = profile.expected_specialists
-    completed = [k for k in expected if k in profile.findings and profile.findings[k].complete]
+    expected = list(profile.findings.keys())
+    completed = [k for k, f in profile.findings.items() if f.complete]
     # Order results strongest-match first for display.
     order = {"very_likely": 0, "likely": 1, "medium": 2, "low": 3, "none": 4}
     results = sorted(
@@ -308,13 +308,13 @@ def _eligibility_response(profile: CaseProfile) -> EligibilityResponse:
         key=lambda r: order.get(r.match_level, 5),
     )
     return EligibilityResponse(
-        status=profile.band_status,
+        status=profile.eligibility_status,
         results=results,
         strategy=profile.strategy,
         strategy_complete=profile.strategy_complete,
         expected=expected,
         completed=completed,
-        error=profile.band_error,
+        error=profile.eligibility_error,
     )
 
 

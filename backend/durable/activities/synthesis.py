@@ -146,8 +146,8 @@ async def synthesis_activity(payload: dict) -> dict:
         # started.  Fall back to the in-flight profile if not found in the store yet.
         stored = get_profile(inp.case_id) or profile
         stored.findings.update(findings)
-        stored.band_status = "processing"
-        stored.band_started_at = stored.band_started_at or now
+        stored.eligibility_status = "processing"
+        stored.eligibility_started_at = stored.eligibility_started_at or now
         # Also project findings into the legacy eligibility map.
         for dk, finding in findings.items():
             stored.eligibility[finding.program] = finding_to_result(finding)
@@ -239,8 +239,8 @@ async def synthesis_activity(payload: dict) -> dict:
     try:
         profile.strategy = strategy
         profile.strategy_complete = True
-        profile.band_status = "complete"
-        profile.band_completed_at = datetime.now(timezone.utc).isoformat()
+        profile.eligibility_status = "complete"
+        profile.eligibility_completed_at = datetime.now(timezone.utc).isoformat()
         save_profile(profile)
     except Exception as exc:
         logger.error("synthesis_activity: strategy persistence failed: %s", exc, exc_info=True)

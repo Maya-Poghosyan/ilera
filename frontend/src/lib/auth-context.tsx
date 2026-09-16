@@ -33,6 +33,7 @@ type AuthContextValue = {
   loading: boolean;
   signup: (details: SignupDetails) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
+  verifyLoginOtp: (email: string, code: string) => Promise<void>;
   logout: () => void;
   updateUser: (updates: Partial<Pick<AuthUser, "case_id" | "name">>) => Promise<void>;
 };
@@ -83,14 +84,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signup = useCallback(
-    (details: SignupDetails) => authenticate("/api/auth/signup", details, "Signup failed"),
-    [authenticate],
-  );
+  const signup = useCallback(async (details: SignupDetails): Promise<void> => {
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(details),
+    });
+    if (!res.ok) {
+      const detail = await res.json().catch(() => null);
+      throw new Error(detail?.detail ?? "Signup failed");
+    }
+    // No session yet — a JWT is only issued after the user clicks the verification link.
+  }, []);
 
-  const login = useCallback(
-    (email: string, password: string) =>
-      authenticate("/api/auth/login", { email, password }, "Invalid email or password"),
+  const login = useCallback(async (email: string, password: string): Promise<void> => {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!res.ok) {
+      const detail = await res.json().catch(() => null);
+      throw new Error(detail?.detail ?? "Invalid email or password");
+    }
+    // 202 — OTP sent. Caller should show the code entry screen.
+  }, []);
+
+  const verifyLoginOtp = useCallback(
+    (email: string, code: string) =>
+      authenticate("/api/auth/verify-otp", { email, code }, "Invalid or expired code"),
     [authenticate],
   );
 
@@ -108,8 +130,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ user, loading, signup, login, logout, updateUser }),
-    [user, loading, signup, login, logout, updateUser],
+    () => ({ user, loading, signup, login, verifyLoginOtp, logout, updateUser }),
+    [user, loading, signup, login, verifyLoginOtp, logout, updateUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

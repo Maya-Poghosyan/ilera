@@ -34,6 +34,28 @@ CREATE TABLE IF NOT EXISTS users (
 -- arrives later than the rest of the account and existing rows have none.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS phone text NOT NULL DEFAULT '';
 
+-- Email must be confirmed before a session is issued.  Existing rows (pre-verification
+-- rollout) default to verified so that current accounts are not locked out.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified boolean NOT NULL DEFAULT true;
+
+-- Single-use, time-limited tokens e-mailed to confirm an address at signup.
+CREATE TABLE IF NOT EXISTS verification_tokens (
+    token      text PRIMARY KEY,
+    user_id    text NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    expires_at timestamptz NOT NULL,
+    used       boolean NOT NULL DEFAULT false
+);
+
+-- 6-digit OTP codes e-mailed at every login (2FA second factor).
+CREATE TABLE IF NOT EXISTS login_otps (
+    id         text PRIMARY KEY,
+    user_id    text NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    code       text NOT NULL,
+    expires_at timestamptz NOT NULL,
+    used       boolean NOT NULL DEFAULT false,
+    attempts   int NOT NULL DEFAULT 0
+);
+
 -- owner_user_id is nullable because intake runs before there is an account: a case starts
 -- unowned, reachable only by whoever holds its id, and is claimed at signup. The foreign key
 -- makes an owner that isn't a real user impossible; ownership checks are enforced in access.py.
@@ -61,13 +83,6 @@ BEGIN
         ALTER TABLE users DROP COLUMN case_id;
     END IF;
 END $$;
-
--- A Band specialist tool only knows the room it runs in, so it resolves the room back
--- to the owning case through here. Shared by the API and the Band worker process.
-CREATE TABLE IF NOT EXISTS band_rooms (
-    room_id text PRIMARY KEY,
-    case_id text NOT NULL
-);
 
 CREATE TABLE IF NOT EXISTS reminders (
     id         text PRIMARY KEY,

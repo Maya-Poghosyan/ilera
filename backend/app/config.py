@@ -56,24 +56,21 @@ class Settings(BaseSettings):
     # chunk text, so this process only embeds one-line queries.
     database_url: str = ""
 
-    # Multi-agent (Band)
-    band_rest_url: str = "https://app.band.ai"
-    band_ws_url: str = "wss://app.band.ai/api/v1/socket/websocket"
-    # Optional JSON registry mapping program group -> {agent_id, api_key} so each
-    # specialist runs as its own Band agent. See band_agents.example.json.
-    band_agents_file: str = "band_agents.json"
-    # If true, the API process also hosts the Band agents. Set false to run them as their own
-    # process (`python -m app.integrations.band`) so the agents' websockets and the API's
-    # RAG/embedding memory don't share one container's memory limit.
-    band_auto_start: bool = True
-
     # Azure Durable Functions (eligibility pipeline)
     # Base URL of the Function App, e.g. https://<app>.azurewebsites.net
-    # Leave empty to disable the Durable pipeline (the app falls back to Band).
     azure_functions_url: str = ""
     # Function-level host key for securing the HTTP starter endpoint.
     # Empty = no key header sent (use for local func host with anonymous auth).
     azure_functions_key: str = ""
+
+    # Email verification (Azure Communication Services — covered under Azure BAA)
+    # Connection string from your ACS resource. Without it the verification link is logged
+    # to stdout so developers can click it locally without an email service configured.
+    acs_email_connection_string: str = ""
+    # Public base URL of the frontend, used to build the verification link in emails.
+    app_url: str = "http://localhost:3000"
+    # "From" address — must match a domain verified in your ACS Email resource.
+    from_email: str = "noreply@ileracare.app"
 
     # Integrations
     poke_api_key: str = ""
@@ -88,17 +85,6 @@ class Settings(BaseSettings):
     @property
     def has_llm(self) -> bool:
         return bool(self.openai_api_key)
-
-    @property
-    def has_band(self) -> bool:
-        """True if a Band agent registry file is present."""
-        import os
-        path = self.band_agents_file
-        if path and not os.path.isabs(path):
-            path = os.path.join(
-                os.path.dirname(os.path.dirname(os.path.abspath(__file__))), path
-            )
-        return bool(path and os.path.exists(path))
 
 
 @lru_cache

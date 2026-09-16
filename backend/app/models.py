@@ -47,16 +47,15 @@ class Household(BaseModel):
     income_monthly: Optional[float] = None
 
 
-# Five-level eligibility match scale produced by each Band specialist agent.
+# Five-level eligibility match scale produced by each specialist.
 MatchLevel = Literal["none", "low", "medium", "likely", "very_likely"]
 
-# Lifecycle of a case's Band eligibility run.
-BandStatus = Literal["idle", "processing", "complete", "error"]
+# Lifecycle of a case's eligibility run.
+EligibilityStatus = Literal["idle", "processing", "complete", "error"]
 
 
 class SpecialistFinding(BaseModel):
-    """A single specialist agent's complete eligibility determination for its program,
-    submitted back to the routing agent via the Band `submit_complete_response` tool."""
+    """A single specialist's complete eligibility determination for its program."""
 
     program: str = ""
     doc_key: str = ""
@@ -82,26 +81,16 @@ class CaseProfile(BaseModel):
     followups: dict[str, str] = Field(default_factory=dict)
     eligibility: dict[str, "EligibilityResult"] = Field(default_factory=dict)
 
-    # --- Band eligibility orchestration ---------------------------------
-    # One Band chat room per case; the routing + specialist agents coordinate here.
-    band_chat_id: str = ""
-    band_status: BandStatus = "idle"
-    band_error: str = ""
-    band_started_at: str = ""
-    band_completed_at: str = ""
+    # --- Eligibility orchestration ---------------------------------------
+    eligibility_status: EligibilityStatus = "idle"
+    eligibility_error: str = ""
+    eligibility_started_at: str = ""
+    eligibility_completed_at: str = ""
     # Specialist findings keyed by doc_key (ihss, medical, medicare, pfl, va, tax).
     findings: dict[str, SpecialistFinding] = Field(default_factory=dict)
-    # doc_keys the routing agent @mentioned in the seed and expects a complete response from.
-    expected_specialists: list[str] = Field(default_factory=list)
-    # The routing agent's synthesized, human-facing application strategy.
+    # The synthesized, human-facing application strategy.
     strategy: str = ""
     strategy_complete: bool = False
-    # Set True right before the routing agent is asked to synthesize. The mention-gate keeps
-    # routing silent (ignores specialist chatter) until this flips, so routing only acts once.
-    synthesis_requested: bool = False
-    # Per-specialist count of cross-eligibility peer messages sent via ask_peer this run. Bounds
-    # the peer conversation: once a specialist hits the budget, ask_peer refuses further sends.
-    peer_msg_counts: dict[str, int] = Field(default_factory=dict)
 
 
 class FollowupQuestion(BaseModel):
