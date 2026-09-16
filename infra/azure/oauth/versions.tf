@@ -1,9 +1,9 @@
 # Provider and version pinning.
 #
-# azurerm manages the ARM control plane (Key Vault, Container Apps, Service Bus,
-# Cognitive Services, diagnostics, RBAC role assignments). azuread manages the
-# Entra objects (the mailbox application registration and its service principal),
-# which live in Microsoft Graph, not ARM.
+# azurerm manages the ARM control plane (Key Vault, Container Apps, diagnostics, RBAC role
+# assignments). azapi reads the API Container App's identity without owning the resource.
+# random generates the Fernet key. The Entra app is managed outside Terraform, so no
+# azuread provider is needed here.
 #
 # Versions are pinned with pessimistic constraints so `terraform init` in CI and on
 # a laptop resolve the same major/minor line. Bump deliberately and re-run plan.
@@ -16,23 +16,14 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
-    azuread = {
-      source  = "hashicorp/azuread"
-      version = "~> 3.0"
-    }
     azapi = {
-      # Used to patch identity + env vars onto the existing API Container App WITHOUT
-      # taking ownership of its image/scale (those stay with the deploy workflow).
+      # Reads the existing API Container App's identity; does not own the resource.
       source  = "azure/azapi"
       version = "~> 2.0"
     }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.6"
-    }
-    time = {
-      source  = "hashicorp/time"
-      version = "~> 0.12"
     }
   }
 
@@ -70,10 +61,6 @@ provider "azurerm" {
 
   subscription_id = var.subscription_id
   tenant_id       = var.tenant_id
-}
-
-provider "azuread" {
-  tenant_id = var.tenant_id
 }
 
 provider "azapi" {

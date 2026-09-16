@@ -36,8 +36,3 @@ output "api_identity_principal_id" {
   description = "System-assigned managed identity principal ID granted Key Vault Secrets User."
   value       = data.azapi_resource.api_identity.output.identity.principalId
 }
-
-output "email_backend_settings" {
-  description = "Non-secret EMAIL_* settings applied to the API (values are config names, not secrets)."
-  value       = local.api_email_settings
-}

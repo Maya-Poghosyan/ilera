@@ -25,9 +25,14 @@ resource "azurerm_key_vault" "email" {
   public_network_access_enabled = var.key_vault_public_network_access_enabled
 
   network_acls {
-    # Default deny. Only Azure trusted services (which includes the Container Apps
-    # managed identity path) and any explicitly listed operator IP ranges get through.
-    default_action             = "Deny"
+    # default_action is a VARIABLE, defaulting to "Allow". Access is still gated by RBAC —
+    # every call needs an authorized identity; "Allow" here only means the network layer
+    # doesn't additionally filter by IP. We do NOT default to "Deny" because Terraform runs
+    # from GitHub-hosted runners with dynamic IPs that can't be allowlisted and are not
+    # covered by the AzureServices bypass, so a deny default blocks CI's own secret writes
+    # (ForbiddenByFirewall). Switch to "Deny" once the vault is reachable over a private
+    # endpoint and CI runs from a known network — set var.key_vault_network_default_action.
+    default_action             = var.key_vault_network_default_action
     bypass                     = "AzureServices"
     ip_rules                   = var.key_vault_allowed_ip_ranges
     virtual_network_subnet_ids = []
@@ -37,15 +42,16 @@ resource "azurerm_key_vault" "email" {
 }
 
 # --- Bootstrap RBAC ----------------------------------------------------------
-# The operator/CI principal running `terraform apply` needs write access to create the
-# secrets. Secrets Officer (not Administrator) — enough to set secrets, not to rewrite
-# the vault's access model. This mirrors the Python script granting the signed-in user
-# Key Vault Secrets Officer, and it is separate from the app's runtime Secrets User role.
+# The identity that runs `terraform apply` needs write access to create the Fernet secret.
+# We target an EXPLICIT principal (var.terraform_principal_object_id), NOT
+# data.azuread_client_config (which resolves to "whoever ran terraform" — the CI SP in the
+# pipeline, a human locally — causing the assignment to thrash/replace on alternating runs).
+# Default is the CI service principal, since the pipeline is the normal apply path.
 resource "azurerm_role_assignment" "operator_secrets_officer" {
-  name               = uuidv5("url", "${local.role_assignment_scope}${data.azuread_client_config.current.object_id}${local.role_secrets_officer_id}")
+  name               = uuidv5("url", "${local.role_assignment_scope}${var.terraform_principal_object_id}${local.role_secrets_officer_id}")
   scope              = azurerm_key_vault.email.id
   role_definition_id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/${local.role_secrets_officer_id}"
-  principal_id       = data.azuread_client_config.current.object_id
+  principal_id       = var.terraform_principal_object_id
 }
 
 # --- Fernet token-encryption key --------------------------------------------

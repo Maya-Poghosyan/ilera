@@ -35,6 +35,12 @@ variable "api_app_name" {
   default     = "ilera-api"
 }
 
+variable "terraform_principal_object_id" {
+  description = "Object ID of the identity that runs terraform apply, granted Key Vault Secrets Officer to write the Fernet key. Defaults to the CI service principal (ilera-deploy). A human applying locally should override this with their own object ID (or pre-grant themselves the role)."
+  type        = string
+  default     = "9d46b02b-381b-4f94-a260-31d476992e63" # ilera-deploy CI service principal
+}
+
 # --- Mailbox OAuth (app managed outside Terraform — see entra.tf) ------------
 
 variable "mailbox_client_id" {
@@ -91,8 +97,19 @@ variable "log_retention_days" {
   }
 }
 
+variable "key_vault_network_default_action" {
+  description = "Key Vault network ACL default action. 'Allow' (RBAC still gates access) lets CI runners write secrets; switch to 'Deny' once a private endpoint + known CI network exist."
+  type        = string
+  default     = "Allow"
+
+  validation {
+    condition     = contains(["Allow", "Deny"], var.key_vault_network_default_action)
+    error_message = "key_vault_network_default_action must be 'Allow' or 'Deny'."
+  }
+}
+
 variable "key_vault_allowed_ip_ranges" {
-  description = "CIDR ranges permitted to reach Key Vault when public access stays on. Empty + trusted-services only is the hardened default."
+  description = "CIDR ranges permitted to reach Key Vault when default action is Deny."
   type        = list(string)
   default     = []
 }
