@@ -14,12 +14,21 @@ data "azurerm_client_config" "current" {}
 # app's runtime identity (which only ever gets Secrets User).
 data "azuread_client_config" "current" {}
 
-# Microsoft Graph service principal in this tenant — needed to resolve the app-role and
-# delegated-scope UUIDs (Mail.Read, openid, profile, offline_access) by name.
-data "azuread_application_published_app_ids" "well_known" {}
+# Microsoft Graph identifiers are well-known constants, identical in every Azure tenant.
+# We use the fixed values rather than reading the Graph service principal from the
+# directory — that read requires a directory-read Graph permission on whoever runs
+# Terraform (it 403s for the CI identity, which has none). Hardcoding keeps the CI
+# principal least-privilege: it never needs to read arbitrary directory objects.
+locals {
+  msgraph_app_id = "00000003-0000-0000-c000-000000000000"
 
-data "azuread_service_principal" "msgraph" {
-  client_id = data.azuread_application_published_app_ids.well_known.result["MicrosoftGraph"]
+  # Delegated (oauth2PermissionScopes) UUIDs on Microsoft Graph. Stable across tenants.
+  msgraph_scope_ids = {
+    "Mail.Read"      = "570282fd-fa5c-430d-a7fd-fc8dc98a9dca"
+    "openid"         = "37f7f235-527c-4136-accd-4a02d197296e"
+    "profile"        = "14dad69e-099b-42c9-810b-d002981feec1"
+    "offline_access" = "7427e0e9-2fba-42fe-b0c0-848c9e6a8182"
+  }
 }
 
 # The existing API Container App. We attach a system-assigned identity, vault access,

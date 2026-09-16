@@ -15,24 +15,24 @@ resource "azuread_application" "mailbox" {
   }
 
   required_resource_access {
-    resource_app_id = data.azuread_service_principal.msgraph.client_id # Microsoft Graph
+    resource_app_id = local.msgraph_app_id # Microsoft Graph
 
     # Delegated scope: read the signed-in user's mail.
     resource_access {
-      id   = data.azuread_service_principal.msgraph.oauth2_permission_scope_ids["Mail.Read"]
+      id   = local.msgraph_scope_ids["Mail.Read"]
       type = "Scope"
     }
     resource_access {
-      id   = data.azuread_service_principal.msgraph.oauth2_permission_scope_ids["openid"]
+      id   = local.msgraph_scope_ids["openid"]
       type = "Scope"
     }
     resource_access {
-      id   = data.azuread_service_principal.msgraph.oauth2_permission_scope_ids["profile"]
+      id   = local.msgraph_scope_ids["profile"]
       type = "Scope"
     }
     # offline_access = long-lived refresh tokens, required to refresh without re-consent.
     resource_access {
-      id   = data.azuread_service_principal.msgraph.oauth2_permission_scope_ids["offline_access"]
+      id   = local.msgraph_scope_ids["offline_access"]
       type = "Scope"
     }
   }
