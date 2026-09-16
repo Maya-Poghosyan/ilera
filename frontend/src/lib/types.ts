@@ -198,23 +198,46 @@ export interface JournalCreate {
   text: string;
 }
 
-export interface RenewalInfo {
+export type RenewalUrgency = "overdue" | "due_soon" | "upcoming" | "no_date";
+
+export type RenewalStatus = "active" | "pending" | "overdue";
+
+export interface RenewalItem {
+  id: string;
   case_id: string;
   program: string;
   due_date: string | null;
-  status: string;
+  status: RenewalStatus;
+  notes: string;
+  last_completed_date: string | null;
+  renewal_period_months: number | null;
+  created_at: string;
+  urgency: RenewalUrgency;
 }
 
-export interface RenewalUpdate {
+export interface RenewalItemCreate {
+  case_id: string;
+  program: string;
+  due_date?: string | null;
+  status?: RenewalStatus;
+  notes?: string;
+  last_completed_date?: string | null;
+  renewal_period_months?: number | null;
+}
+
+export interface RenewalItemUpdate {
   program?: string;
   due_date?: string | null;
-  status?: string;
+  status?: RenewalStatus;
+  notes?: string;
+  last_completed_date?: string | null;
+  renewal_period_months?: number | null;
 }
 
 export interface RecordsSummary {
   timekeeping: TimekeepingEntry[];
   journal: JournalEntry[];
-  renewal: RenewalInfo;
+  renewals: RenewalItem[];
   fall_flag: boolean;
 }
 

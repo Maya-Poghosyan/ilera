@@ -58,6 +58,36 @@ function groupQuestions(questions: AppQuestion[]): AppQuestion[][] {
 
 const INPUTS_PER_SCREEN = 6;
 
+// Generic input labels that repeat the answer control instead of naming a question:
+// a Yes/No group prints "Yes or No" above its two buttons, a select prints "Select one".
+const GENERIC_INPUT_LABELS = new Set([
+  "yes or no",
+  "yes/no",
+  "yes / no",
+  "select one",
+  "select",
+  "choose one",
+]);
+
+/**
+ * Whether a single-input group's input label is redundant with its prompt.
+ *
+ * These forms carry the real question in the group prompt ("Is the patient a family
+ * member?") and give the lone input a filler label ("Yes or No"). Rendered as-is the
+ * screen stutters: the question, then a generic label, then the buttons. When a group
+ * has exactly one input and that input's label adds nothing — it is generic, empty, or
+ * just repeats the prompt — the label is dropped so the prompt stands alone.
+ */
+function inputLabelIsRedundant(group: AppQuestion[]): boolean {
+  if (group.length !== 1) return false;
+  const only = group[0];
+  if (!only.group_prompt) return false;
+  const label = (only.text ?? "").trim().toLowerCase();
+  if (!label) return true;
+  if (GENERIC_INPUT_LABELS.has(label)) return true;
+  return label === only.group_prompt.trim().toLowerCase();
+}
+
 /**
  * Groups gathered onto screens, so a yes/no question doesn't get a page to itself.
  *
@@ -144,6 +174,8 @@ export default function ApplicationsPage() {
         ? localStorage.getItem("ilera_case_id")
         : null;
     if (stored) {
+      // Read the browser-only case after hydration.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCaseId(stored);
       listApplications(stored)
         .then((data) => setApps(data.applications))
@@ -310,6 +342,9 @@ export default function ApplicationsPage() {
               // Inputs of a group tend to repeat one explanation ("the Primary Contact
               // must be 18 or older") under every box. It is said once, above them.
               const shared = group[0]?.why_this_matters ?? "";
+              // A lone Yes/No or select input labels itself with filler that repeats the
+              // prompt or the buttons; drop it so the prompt is the only question shown.
+              const dropLabel = inputLabelIsRedundant(group);
               return (
                 <div
                   key={group[0].group_id || group[0].field_id}
@@ -325,22 +360,24 @@ export default function ApplicationsPage() {
                       )}
                     </div>
                   )}
-                  {group.map((question, i) => (
-                    <QuestionField
-                      key={question.field_id}
-                      question={
-                        (question.why_this_matters === shared ||
-                        question.why_this_matters ===
-                          group[i - 1]?.why_this_matters
-                          ? { ...question, why_this_matters: "" }
-                          : question) as Question
-                      }
-                      value={answers[question.field_id] ?? null}
-                      name=""
-                      error={errors[question.field_id]}
-                      onChange={(v) => setAnswer(question.field_id, v)}
-                    />
-                  ))}
+                  {group.map((question, i) => {
+                    const cleaned =
+                      question.why_this_matters === shared ||
+                      question.why_this_matters === group[i - 1]?.why_this_matters
+                        ? { ...question, why_this_matters: "" }
+                        : { ...question };
+                    if (dropLabel) cleaned.text = "";
+                    return (
+                      <QuestionField
+                        key={question.field_id}
+                        question={cleaned as Question}
+                        value={answers[question.field_id] ?? null}
+                        name=""
+                        error={errors[question.field_id]}
+                        onChange={(v) => setAnswer(question.field_id, v)}
+                      />
+                    );
+                  })}
                 </div>
               );
             })}

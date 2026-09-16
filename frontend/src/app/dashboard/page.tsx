@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, Check, ChevronLeft, ChevronRight, Sparkles, X } from "lucide-react";
 
 import { MailboxConnections } from "@/components/mailbox-connections";
@@ -14,12 +14,13 @@ import { cn } from "@/lib/utils";
 import {
   createReminder,
   deleteReminder,
-  deleteSuggestedEvent,
+  listCalendarEvents,
   listReminders,
   listSuggestedEvents,
+  reviewSuggestedEvent,
   updateReminder,
 } from "@/lib/api";
-import type { SuggestedEventAPI } from "@/lib/api";
+import type { CalendarEventAPI, SuggestedEventAPI } from "@/lib/api";
 import type {
   Reminder,
   ReminderCreate,
@@ -36,7 +37,7 @@ type EventKind = "Appointment" | "Visit" | "Deadline";
 type CalEvent = {
   id?: string;
   day: number;
-  /** ISO YYYY-MM-DD when known; absent for the hardcoded demo events. */
+  /** ISO YYYY-MM-DD when known; absent when a suggestion carries no date yet. */
   date?: string;
   title: string;
   time?: string;
@@ -45,23 +46,13 @@ type CalEvent = {
   description?: string;
 };
 
-const YEAR = 2026;
-const MONTH = 5; // June (0-indexed)
-const TODAY = 4;
-
-const events: CalEvent[] = [
-  { day: 2, title: "Dr. Patel \u2014 cardiology follow-up", time: "10:00 AM", kind: "Appointment" },
-  { day: 5, title: "County social worker visit", time: "2:00 PM", kind: "Visit" },
-  { day: 9, title: "IHSS timesheet due", kind: "Deadline" },
-];
-
 // Fallback for the pre-intake demo case.
 const DEFAULT_CASE_ID = "demo";
 
 // Reminder times are wall-clock in the caregiver's own zone, not the server's.
 const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-function apiEventToCalEvent(e: SuggestedEventAPI): CalEvent {
+function calendarEventToCalEvent(e: CalendarEventAPI): CalEvent {
   return {
     id: e.id,
     day: e.day,
@@ -69,38 +60,35 @@ function apiEventToCalEvent(e: SuggestedEventAPI): CalEvent {
     title: e.title,
     time: e.time,
     kind: (e.kind as EventKind) || "Appointment",
-    suggested: true,
+    suggested: false,
     description: e.description,
   };
 }
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const monthName = new Date(YEAR, MONTH, 1).toLocaleString("en-US", { month: "long" });
-
 // Events carrying a date only belong on the grid when it falls in the shown month.
-function isInDisplayedMonth(e: CalEvent): boolean {
-  if (!e.date) return true;
-  const [year, month] = e.date.split("-").map(Number);
-  return year === YEAR && month === MONTH + 1;
+function isInDisplayedMonth(e: CalEvent, year: number, month: number): boolean {
+  if (!e.date) return false;
+  const [y, m] = e.date.split("-").map(Number);
+  return y === year && m === month + 1;
 }
 
-function formatEventDate(e: CalEvent): string {
-  if (!e.date) return e.day > 0 ? `${monthName} ${e.day}` : "";
-  const [year, month, day] = e.date.split("-").map(Number);
+function formatISODate(iso: string): string {
+  const [year, month, day] = iso.split("-").map(Number);
   return new Date(year, month - 1, day).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
-    year: year === YEAR ? undefined : "numeric",
+    year: "numeric",
   });
 }
 
 type Cell = { day: number; inMonth: boolean };
 
-function buildCells(): Cell[] {
-  const firstWeekday = new Date(YEAR, MONTH, 1).getDay();
-  const daysInMonth = new Date(YEAR, MONTH + 1, 0).getDate();
-  const prevDays = new Date(YEAR, MONTH, 0).getDate();
+function buildCells(year: number, month: number): Cell[] {
+  const firstWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevDays = new Date(year, month, 0).getDate();
 
   const cells: Cell[] = [];
   for (let i = firstWeekday - 1; i >= 0; i--) {
@@ -140,11 +128,25 @@ const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 // ---------------------------------------------------------------------------
 
 export default function CalendarPage() {
-  const cells = buildCells();
+  const now = new Date();
+  const [viewYear, setViewYear] = useState(now.getFullYear());
+  const [viewMonth, setViewMonth] = useState(now.getMonth()); // 0-indexed
+
+  const cells = useMemo(() => buildCells(viewYear, viewMonth), [viewYear, viewMonth]);
+  const monthName = useMemo(
+    () => new Date(viewYear, viewMonth, 1).toLocaleString("en-US", { month: "long" }),
+    [viewYear, viewMonth]
+  );
+  // Highlight today's cell only when the calendar is showing the current month.
+  const todayDay =
+    now.getFullYear() === viewYear && now.getMonth() === viewMonth ? now.getDate() : -1;
 
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [apiSuggested, setApiSuggested] = useState<CalEvent[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestedEventAPI[]>([]);
+  const [calendarEvents, setCalendarEvents] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventsFailed, setEventsFailed] = useState(false);
   const [caseId] = useState(
     () =>
       (typeof window !== "undefined" ? localStorage.getItem("ilera_case_id") : null) ??
@@ -178,19 +180,48 @@ export default function CalendarPage() {
     }
   }, [caseId]);
 
-  const loadSuggestedEvents = useCallback(async () => {
+  // Suggestions (pending review) and committed calendar events are loaded together so the
+  // grid and the review panel stay consistent, and a failure surfaces a retry rather than a
+  // silently empty calendar. State is only touched after the awaited calls resolve, so this
+  // is safe to call directly from an effect without cascading synchronous renders.
+  const loadEvents = useCallback(async () => {
     try {
-      const data = await listSuggestedEvents();
-      setApiSuggested(data.map(apiEventToCalEvent));
+      const [sug, cal] = await Promise.all([listSuggestedEvents(), listCalendarEvents()]);
+      setSuggestions(sug);
+      setCalendarEvents(cal.map(calendarEventToCalEvent));
+      setEventsFailed(false);
     } catch {
-      // API may not be running
+      setEventsFailed(true);
+    } finally {
+      setEventsLoading(false);
     }
   }, []);
 
+  const retryEvents = useCallback(async () => {
+    setEventsLoading(true);
+    setEventsFailed(false);
+    await loadEvents();
+  }, [loadEvents]);
+
   useEffect(() => {
+    // Fire the initial loads on mount. These callbacks only setState after their awaited
+    // network calls resolve, so they don't cause synchronous cascading renders.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadReminders();
-    loadSuggestedEvents();
-  }, [loadReminders, loadSuggestedEvents]);
+    loadEvents();
+  }, [loadReminders, loadEvents]);
+
+  const goToMonth = (delta: number) => {
+    const d = new Date(viewYear, viewMonth + delta, 1);
+    setViewYear(d.getFullYear());
+    setViewMonth(d.getMonth());
+  };
+
+  const goToday = () => {
+    const t = new Date();
+    setViewYear(t.getFullYear());
+    setViewMonth(t.getMonth());
+  };
 
   const resetForm = () => {
     setFormKind("custom");
@@ -271,18 +302,49 @@ export default function CalendarPage() {
     });
   };
 
-  // Combine all events for the calendar grid
-  const allSuggested = apiSuggested;
-  const allEvents = [...events, ...allSuggested];
+  // Only suggestions still awaiting a decision belong in the review panel; accepted ones
+  // become calendar events and dismissed ones drop out.
+  const pendingSuggestions = suggestions.filter(
+    (s) => (s.status ?? "pending") === "pending"
+  );
 
-  const handleDismissSuggested = async (e: CalEvent) => {
-    if (e.id) {
-      try {
-        await deleteSuggestedEvent(e.id);
-        await loadSuggestedEvents();
-      } catch {
-        // ignore
-      }
+  // The grid shows committed calendar events (accepted or manual) as real data. Pending
+  // suggestions that carry a date are also previewed on the grid, styled as tentative.
+  const pendingWithDate: CalEvent[] = pendingSuggestions
+    .filter((s) => s.date)
+    .map((s) => ({
+      id: s.id,
+      day: s.day,
+      date: s.date ?? undefined,
+      title: s.title,
+      time: s.time,
+      kind: (s.kind as EventKind) || "Appointment",
+      suggested: true,
+      description: s.description,
+    }));
+  const allEvents = [...calendarEvents, ...pendingWithDate];
+
+  const handleAcceptSuggested = async (s: SuggestedEventAPI) => {
+    if (!s.date) {
+      showToast("Add a date before accepting — this suggestion needs review.");
+      return;
+    }
+    try {
+      await reviewSuggestedEvent(s.id, "accepted");
+      showToast("Added to your calendar");
+      await loadEvents();
+    } catch {
+      showToast("Couldn't accept — try again.");
+    }
+  };
+
+  const handleDismissSuggested = async (s: SuggestedEventAPI) => {
+    try {
+      await reviewSuggestedEvent(s.id, "dismissed");
+      showToast("Suggestion dismissed");
+      await loadEvents();
+    } catch {
+      showToast("Couldn't dismiss — try again.");
     }
   };
 
@@ -441,60 +503,109 @@ export default function CalendarPage() {
             <Sparkles className="size-4" />
             <h3 className="text-sm font-semibold">Suggested Events</h3>
           </div>
-          <p className="text-xs text-muted-foreground">
-            {allSuggested.length > 0
-              ? "Previously saved suggestions. New email scanning is coming soon."
-              : "No suggested events yet. Outlook and Gmail connections are coming soon."}
-          </p>
-          <div className="space-y-2">
-            {allSuggested.map((e, idx) => (
-              <div
-                key={e.id ?? `suggested-${idx}`}
-                className="flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-card px-3 py-2.5"
-              >
-                <div className="min-w-0 flex-1 space-y-1">
-                  <p className="text-sm font-medium text-foreground">{e.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatEventDate(e) || "Date needs review"}{e.time ? ` \u00b7 ${e.time}` : ""}{" \u00b7 "}{e.kind}
-                  </p>
-                  {e.description && (
-                    <p className="text-xs leading-relaxed text-muted-foreground/80">
-                      {e.description}
-                    </p>
-                  )}
-                </div>
-                <div className="ml-3 flex shrink-0 items-center gap-1 pt-0.5">
-                  <button
-                    className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-primary hover:bg-primary hover:text-white transition-colors"
-                    aria-label="Accept"
+          {eventsFailed ? (
+            <div className="flex items-center justify-between rounded-lg border border-dashed border-red-300 bg-card px-3 py-2.5">
+              <p className="text-xs text-red-600">
+                Couldn&apos;t load suggestions. This doesn&apos;t mean your mailbox failed to scan.
+              </p>
+              <Button variant="outline" size="sm" onClick={retryEvents}>
+                Retry
+              </Button>
+            </div>
+          ) : eventsLoading ? (
+            <p className="text-xs text-muted-foreground">Loading suggestions&hellip;</p>
+          ) : (
+            <>
+              <p className="text-xs text-muted-foreground">
+                {pendingSuggestions.length > 0
+                  ? "Detected from your connected mailbox. Review each one before it joins your calendar."
+                  : "No suggestions to review. New ones appear here after a connected mailbox is scanned."}
+              </p>
+              <div className="space-y-2">
+                {pendingSuggestions.map((e) => (
+                  <div
+                    key={e.id}
+                    className="flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-card px-3 py-2.5"
                   >
-                    <Check className="size-3.5" />
-                  </button>
-                  <button
-                    className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-muted-foreground hover:bg-red-100 hover:text-red-600 transition-colors"
-                    aria-label="Dismiss"
-                    onClick={() => handleDismissSuggested(e)}
-                  >
-                    <X className="size-3.5" />
-                  </button>
-                </div>
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-medium text-foreground">{e.title}</p>
+                        {typeof e.confidence === "number" && (
+                          <Badge variant="outline" className="text-[10px]">
+                            {Math.round(e.confidence * 100)}% confidence
+                          </Badge>
+                        )}
+                        {e.source && (
+                          <Badge variant="secondary" className="text-[10px] capitalize">
+                            {e.source === "email" ? "From email" : e.source}
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {e.date ? formatISODate(e.date) : "Date needs review"}
+                        {e.time ? ` \u00b7 ${e.time}` : ""}{" \u00b7 "}
+                        {e.kind}
+                      </p>
+                      {e.action_required && (
+                        <p className="text-xs font-medium text-amber-600">
+                          Action needed: {e.action_required}
+                        </p>
+                      )}
+                      {e.description && (
+                        <p className="text-xs leading-relaxed text-muted-foreground/80">
+                          {e.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="ml-3 flex shrink-0 items-center gap-1 pt-0.5">
+                      <button
+                        className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-primary hover:bg-primary hover:text-white transition-colors disabled:opacity-40"
+                        aria-label="Accept"
+                        title={e.date ? "Add to calendar" : "Needs a date before it can be added"}
+                        disabled={!e.date}
+                        onClick={() => handleAcceptSuggested(e)}
+                      >
+                        <Check className="size-3.5" />
+                      </button>
+                      <button
+                        className="flex size-7 items-center justify-center rounded-full bg-brand-subtle text-muted-foreground hover:bg-red-100 hover:text-red-600 transition-colors"
+                        aria-label="Dismiss"
+                        onClick={() => handleDismissSuggested(e)}
+                      >
+                        <X className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
       </div>
 
       {/* Month-view calendar grid */}
       <div className="overflow-hidden rounded-xl border border-brand-subtle bg-card shadow-xs">
         <div className="flex items-center justify-between border-b border-brand-subtle bg-brand-subtle/40 px-4 py-3">
           <h2 className="text-lg font-semibold">
-            {monthName} {YEAR}
+            {monthName} {viewYear}
           </h2>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon-sm" aria-label="Previous month">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Previous month"
+              onClick={() => goToMonth(-1)}
+            >
               <ChevronLeft />
             </Button>
-            <Button variant="outline" size="sm">Today</Button>
-            <Button variant="ghost" size="icon-sm" aria-label="Next month">
+            <Button variant="outline" size="sm" onClick={goToday}>
+              Today
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Next month"
+              onClick={() => goToMonth(1)}
+            >
               <ChevronRight />
             </Button>
           </div>
@@ -513,9 +624,11 @@ export default function CalendarPage() {
 
         <div className="grid grid-cols-7">
           {cells.map((cell, i) => {
-            const isToday = cell.inMonth && cell.day === TODAY;
+            const isToday = cell.inMonth && cell.day === todayDay;
             const dayEvents = cell.inMonth
-              ? allEvents.filter((e) => e.day === cell.day && isInDisplayedMonth(e))
+              ? allEvents.filter(
+                  (e) => e.day === cell.day && isInDisplayedMonth(e, viewYear, viewMonth)
+                )
               : [];
             return (
               <div

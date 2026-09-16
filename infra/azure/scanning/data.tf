@@ -24,14 +24,23 @@ data "azurerm_cognitive_account" "openai" {
   resource_group_name = var.resource_group
 }
 
+# The registry holding the worker image. The worker's user-assigned identity is granted
+# AcrPull so the container app can pull without admin credentials.
+data "azurerm_container_registry" "acr" {
+  name                = var.container_registry_name
+  resource_group_name = var.resource_group
+}
+
 locals {
   vault_id                  = data.terraform_remote_state.oauth.outputs.key_vault_id
   api_identity_principal_id = data.terraform_remote_state.oauth.outputs.api_identity_principal_id
   vault_uri                 = data.terraform_remote_state.oauth.outputs.key_vault_uri
+  acr_login_server          = data.azurerm_container_registry.acr.login_server
 
   # Built-in role definition GUIDs (stable across Azure).
   role_secrets_user_id = "4633458b-17de-408a-b874-0445c86b69e6" # Key Vault Secrets User
   role_sb_sender_id    = "69a216fc-b8fb-44d8-bc22-1f3c2cd27a39" # Azure Service Bus Data Sender
   role_sb_receiver_id  = "4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0" # Azure Service Bus Data Receiver
   role_openai_user_id  = "5e0bd9bd-7b93-4f28-af87-19fc36ad61bd" # Cognitive Services OpenAI User
+  role_acr_pull_id     = "7f951dda-4ed3-4680-a7ca-43fe172d538d" # AcrPull
 }

@@ -125,3 +125,82 @@ def test_scanning_disabled_blocks_subscriptions(setup):
     setup.settings.email_scanning_enabled = False
     with pytest.raises(RuntimeError):
         s.ensure_subscription("connection", "owner")
+
+
+def test_maintenance_reconciles_after_ensuring_subscription(setup, monkeypatch):
+    # The hourly run both renews/creates subscriptions and recovers any flagged gap.
+    rows = [(setup.mailbox.model_dump(mode="json"),)]
+
+    @contextmanager
+    def connection():
+        yield SimpleNamespace(execute=lambda *a, **k: SimpleNamespace(fetchall=lambda: rows))
+
+    monkeypatch.setattr(s.db, "connection", connection)
+    monkeypatch.setattr(s, "ensure_subscription", lambda cid, uid: None)
+    calls = []
+    monkeypatch.setattr(s, "reconcile", lambda cid, uid: calls.append((cid, uid)) or 4)
+    monkeypatch.setattr(s, "prune_orphan_subscriptions", lambda cid, uid: 0)
+
+    result = s.maintain_subscriptions()
+    assert calls == [("connection", "owner")]
+    assert result["checked"] == 1 and result["reconciled"] == 1 and result["enqueued"] == 4
+
+
+def test_maintenance_counts_reconciliation_failure_without_stopping(setup, monkeypatch):
+    rows = [(setup.mailbox.model_dump(mode="json"),)]
+
+    @contextmanager
+    def connection():
+        yield SimpleNamespace(execute=lambda *a, **k: SimpleNamespace(fetchall=lambda: rows))
+
+    monkeypatch.setattr(s.db, "connection", connection)
+    monkeypatch.setattr(s, "ensure_subscription", lambda cid, uid: None)
+
+    def failing_reconcile(cid, uid):
+        raise RuntimeError("gap listing failed")
+
+    monkeypatch.setattr(s, "reconcile", failing_reconcile)
+    monkeypatch.setattr(s, "prune_orphan_subscriptions", lambda cid, uid: 0)
+    result = s.maintain_subscriptions()
+    # Subscription check still counted; reconciliation failure counted separately.
+    assert result["checked"] == 1 and result["failed"] == 1 and result["enqueued"] == 0
+
+
+def test_maintenance_prunes_orphans_and_counts(setup, monkeypatch):
+    rows = [(setup.mailbox.model_dump(mode="json"),)]
+
+    @contextmanager
+    def connection():
+        yield SimpleNamespace(execute=lambda *a, **k: SimpleNamespace(fetchall=lambda: rows))
+
+    monkeypatch.setattr(s.db, "connection", connection)
+    monkeypatch.setattr(s, "ensure_subscription", lambda cid, uid: None)
+    monkeypatch.setattr(s, "reconcile", lambda cid, uid: 0)
+    prune_calls = []
+    monkeypatch.setattr(s, "prune_orphan_subscriptions",
+                        lambda cid, uid: prune_calls.append((cid, uid)) or 2)
+
+    result = s.maintain_subscriptions()
+    assert prune_calls == [("connection", "owner")]
+    assert result["pruned"] == 2 and result["failed"] == 0
+
+
+def test_maintenance_prune_failure_is_isolated(setup, monkeypatch):
+    rows = [(setup.mailbox.model_dump(mode="json"),)]
+
+    @contextmanager
+    def connection():
+        yield SimpleNamespace(execute=lambda *a, **k: SimpleNamespace(fetchall=lambda: rows))
+
+    monkeypatch.setattr(s.db, "connection", connection)
+    monkeypatch.setattr(s, "ensure_subscription", lambda cid, uid: None)
+    monkeypatch.setattr(s, "reconcile", lambda cid, uid: 1)
+
+    def failing_prune(cid, uid):
+        raise RuntimeError("graph list failed")
+
+    monkeypatch.setattr(s, "prune_orphan_subscriptions", failing_prune)
+    result = s.maintain_subscriptions()
+    # Renew + reconcile still counted; prune failure counted, not raised.
+    assert result["checked"] == 1 and result["reconciled"] == 1
+    assert result["enqueued"] == 1 and result["failed"] == 1

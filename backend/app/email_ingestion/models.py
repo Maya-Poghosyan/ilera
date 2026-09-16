@@ -33,6 +33,9 @@ class MailboxConnection(BaseModel):
     subscription_client_state_hash: str | None = Field(default=None, repr=False)
     subscription_renewal_required: bool = False
     reconciliation_required: bool = False
+    # The instant up to which gap messages have been enqueued. The next reconciliation
+    # window starts here (falling back to consented_at). Advanced only on a fully covered pass.
+    reconciled_through: AwareDatetime | None = None
     created_at: AwareDatetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 

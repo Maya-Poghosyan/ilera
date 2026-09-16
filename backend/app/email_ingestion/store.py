@@ -1,5 +1,7 @@
 """Server-only stores. Live mailbox metadata requires durable Postgres storage."""
 
+from __future__ import annotations
+
 from .. import db
 from .models import MailboxConnection, ScanResult
 

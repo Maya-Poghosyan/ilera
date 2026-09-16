@@ -10,18 +10,20 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createJournal,
+  createRenewal,
   createTimekeeping,
   deleteJournalEntry,
+  deleteRenewalItem,
   deleteTimekeepingEntry,
-  getRenewal,
   listJournal,
+  listRenewals,
   listTimekeeping,
-  updateRenewal,
+  updateRenewalItem,
   updateTimekeeping,
   updateJournal,
   reviewIncident,
 } from "@/lib/api";
-import type { JournalEntry, RenewalInfo, ServiceType, TimekeepingEntry } from "@/lib/types";
+import type { JournalEntry, RenewalItem, RenewalStatus, RenewalUrgency, ServiceType, TimekeepingEntry } from "@/lib/types";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   personal_care: "Personal Care",
@@ -30,11 +32,61 @@ const SERVICE_LABELS: Record<ServiceType, string> = {
   accompaniment: "Accompaniment",
 };
 
+const URGENCY_BADGE: Record<RenewalUrgency, { label: string; className: string }> = {
+  overdue: { label: "Overdue", className: "bg-red-100 text-red-800 border border-red-300" },
+  due_soon: { label: "Due soon", className: "bg-amber-100 text-amber-800 border border-amber-300" },
+  upcoming: { label: "Upcoming", className: "bg-emerald-100 text-emerald-800 border border-emerald-300" },
+  no_date: { label: "No date set", className: "bg-muted text-muted-foreground border" },
+};
+
+// Overdue first, then soonest-due, then upcoming, then undated.
+const URGENCY_ORDER: Record<RenewalUrgency, number> = {
+  overdue: 0,
+  due_soon: 1,
+  upcoming: 2,
+  no_date: 3,
+};
+
+const RENEWAL_STATUSES: RenewalStatus[] = ["active", "pending", "overdue"];
+
+const STATUS_LABELS: Record<RenewalStatus, string> = {
+  active: "Active",
+  pending: "Pending",
+  overdue: "Overdue",
+};
+
+// How a flagged possible-fall entry reads to the caregiver, by review state.
+const INCIDENT_BADGE: Record<JournalEntry["incident_status"], { label: string; className: string }> = {
+  unreviewed: { label: "Possible fall — needs review", className: "bg-amber-100 text-amber-800 border border-amber-300" },
+  confirmed: { label: "Confirmed fall", className: "bg-red-100 text-red-800 border border-red-300" },
+  dismissed: { label: "Not a fall", className: "bg-muted text-muted-foreground border" },
+};
+
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+/** Whole-day difference between an ISO date and today (negative = in the past). */
+function daysUntil(iso: string): number {
+  const target = new Date(iso + "T00:00:00").setHours(0, 0, 0, 0);
+  const today = new Date().setHours(0, 0, 0, 0);
+  return Math.round((target - today) / MS_PER_DAY);
+}
+
+/** Human, at-a-glance phrasing of a due date, e.g. "Due in 12 days" or "5 days overdue". */
+function relativeDue(iso: string | null): string {
+  if (!iso) return "No due date set";
+  const days = daysUntil(iso);
+  if (days === 0) return "Due today";
+  if (days === 1) return "Due tomorrow";
+  if (days === -1) return "1 day overdue";
+  if (days < 0) return `${Math.abs(days)} days overdue`;
+  return `Due in ${days} days`;
+}
+
 export default function RecordsPage() {
   const [caseId, setCaseId] = useState<string | null>(null);
   const [timekeeping, setTimekeeping] = useState<TimekeepingEntry[]>([]);
   const [journal, setJournal] = useState<JournalEntry[]>([]);
-  const [renewal, setRenewal] = useState<RenewalInfo | null>(null);
+  const [renewals, setRenewals] = useState<RenewalItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [loadError, setLoadError] = useState(false);
@@ -61,9 +113,15 @@ export default function RecordsPage() {
   const [jnDate, setJnDate] = useState("");
   const [jnText, setJnText] = useState("");
 
-  // Renewal editing
-  const [editingRenewal, setEditingRenewal] = useState(false);
-  const [renewalDate, setRenewalDate] = useState("");
+  // Renewal add/edit form
+  const [showRnForm, setShowRnForm] = useState(false);
+  const [editingRn, setEditingRn] = useState<string | null>(null);
+  const [rnProgram, setRnProgram] = useState("");
+  const [rnDueDate, setRnDueDate] = useState("");
+  const [rnStatus, setRnStatus] = useState<RenewalStatus>("active");
+  const [rnLastCompleted, setRnLastCompleted] = useState("");
+  const [rnPeriod, setRnPeriod] = useState("");
+  const [rnNotes, setRnNotes] = useState("");
 
   const loadData = useCallback(async (id: string) => {
     setLoading(true);
@@ -72,11 +130,11 @@ export default function RecordsPage() {
       const [tk, jn, rn] = await Promise.all([
         listTimekeeping(id),
         listJournal(id),
-        getRenewal(id),
+        listRenewals(id),
       ]);
       setTimekeeping(tk);
       setJournal(jn);
-      setRenewal(rn);
+      setRenewals(rn);
     } catch {
       setLoadError(true);
     } finally {
@@ -100,6 +158,16 @@ export default function RecordsPage() {
   const inRange = (date: string) => (!fromDate || date >= fromDate) && (!toDate || date <= toDate);
   const visibleTimekeeping = timekeeping.filter((entry) => inRange(entry.date));
   const visibleJournal = journal.filter((entry) => inRange(entry.date));
+
+  // Surface the most urgent renewals first, then soonest-due within a bucket.
+  const sortedRenewals = [...renewals].sort((a, b) => {
+    const order = URGENCY_ORDER[a.urgency] - URGENCY_ORDER[b.urgency];
+    if (order !== 0) return order;
+    if (a.due_date && b.due_date) return a.due_date.localeCompare(b.due_date);
+    return a.program.localeCompare(b.program);
+  });
+  const overdueCount = renewals.filter((r) => r.urgency === "overdue").length;
+  const dueSoonCount = renewals.filter((r) => r.urgency === "due_soon").length;
 
   const mutate = async (action: () => Promise<void>) => {
     if (saving.current) return;
@@ -194,16 +262,56 @@ export default function RecordsPage() {
     await loadData(caseId);
   };
 
+  const resetRenewalForm = () => {
+    setEditingRn(null); setRnProgram(""); setRnDueDate(""); setRnStatus("active");
+    setRnLastCompleted(""); setRnPeriod(""); setRnNotes(""); setShowRnForm(false);
+  };
+
+  const editRenewal = (item: RenewalItem) => {
+    setEditingRn(item.id);
+    setRnProgram(item.program);
+    setRnDueDate(item.due_date ?? "");
+    setRnStatus(item.status);
+    setRnLastCompleted(item.last_completed_date ?? "");
+    setRnPeriod(item.renewal_period_months != null ? String(item.renewal_period_months) : "");
+    setRnNotes(item.notes);
+    setShowRnForm(true);
+  };
+
   const handleSaveRenewal = async () => {
     if (!caseId) return;
-    await updateRenewal(caseId, { due_date: renewalDate || null });
-    setEditingRenewal(false);
+    if (!rnProgram.trim()) { setSaveError("Enter the program this renewal is for."); return; }
+    const period = rnPeriod.trim() ? Number(rnPeriod) : null;
+    if (period != null && (!Number.isInteger(period) || period < 1 || period > 120)) {
+      setSaveError("Renewal period must be a whole number of months between 1 and 120."); return;
+    }
+    const body = {
+      program: rnProgram.trim(),
+      due_date: rnDueDate || null,
+      status: rnStatus,
+      last_completed_date: rnLastCompleted || null,
+      renewal_period_months: period,
+      notes: rnNotes,
+    };
+    if (editingRn) {
+      await updateRenewalItem(editingRn, caseId, body);
+    } else {
+      await createRenewal({ case_id: caseId, ...body });
+    }
+    resetRenewalForm();
+    await loadData(caseId);
+  };
+
+  const handleDeleteRenewal = async (id: string) => {
+    if (!caseId) return;
+    if (!window.confirm("Delete this renewal? This cannot be undone.")) return;
+    await deleteRenewalItem(id, caseId);
     await loadData(caseId);
   };
 
   const formatDate = (iso: string) => {
     const d = new Date(iso + "T00:00:00");
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   };
 
   if (!caseId && !loading) {
@@ -222,44 +330,13 @@ export default function RecordsPage() {
     );
   }
 
-  const renewalDueDate = renewal?.due_date ? new Date(renewal.due_date + "T00:00:00") : null;
-  const overdue = renewalDueDate ? renewalDueDate < new Date(new Date().setHours(0, 0, 0, 0)) : false;
-
   return (
     <div className="space-y-6">
       <fieldset disabled={pending || loading || loadError} className="space-y-6 min-w-0">
       <div className="flex flex-wrap gap-3 items-center justify-between">
         <h1 className="text-4xl font-bold">Records &amp; Renewal</h1>
-        <div className="flex items-center gap-2">
-          {editingRenewal ? (
-            <>
-              <Input
-                type="date"
-                aria-label="Renewal due date"
-                value={renewalDate}
-                onChange={(e) => setRenewalDate(e.target.value)}
-                className="w-40"
-              />
-              <Button size="sm" onClick={() => mutate(handleSaveRenewal)}>Save</Button>
-              <Button size="sm" variant="outline" onClick={() => setEditingRenewal(false)}>Cancel</Button>
-            </>
-          ) : (
-            <button
-              className="text-sm font-medium text-muted-foreground hover:text-foreground"
-              onClick={() => {
-                setRenewalDate(renewal?.due_date ?? "");
-                setEditingRenewal(true);
-              }}
-            >
-              Renewal due: {renewal?.due_date ? formatDate(renewal.due_date) : "Not set (click to edit)"}
-            </button>
-          )}
-        </div>
       </div>
 
-      <p className="text-lg font-semibold">
-        {renewal?.due_date ? `${renewal.program} renewal ${overdue ? "overdue" : "due"}: ${formatDate(renewal.due_date)}, ${renewalDueDate?.getFullYear()}` : "Renewal deadline not set"}
-      </p>
       <div className="flex flex-wrap items-end gap-4">
         <div className="space-y-1"><Label htmlFor="records-from">From</Label><Input id="records-from" type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} /></div>
         <div className="space-y-1"><Label htmlFor="records-to">Through</Label><Input id="records-to" type="date" min={fromDate} value={toDate} onChange={(e) => setToDate(e.target.value)} /></div>
@@ -279,8 +356,112 @@ export default function RecordsPage() {
         </Card>
       )}
 
+      {/* Renewals */}
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-xl font-semibold">Renewals</h2>
+            {overdueCount > 0 && (
+              <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 border border-red-300">
+                {overdueCount} overdue
+              </span>
+            )}
+            {dueSoonCount > 0 && (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 border border-amber-300">
+                {dueSoonCount} due soon
+              </span>
+            )}
+          </div>
+          <Button size="sm" variant="outline" onClick={() => { resetRenewalForm(); setShowRnForm(true); }}>
+            + Renewal
+          </Button>
+        </div>
+
+        {showRnForm && (
+          <Card>
+            <CardContent className="space-y-3 py-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <Label htmlFor="rn-program">Program</Label>
+                  <Input id="rn-program" value={rnProgram} onChange={(e) => setRnProgram(e.target.value)} placeholder="IHSS, Medi-Cal, PFL, VA…" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="rn-due">Due date</Label>
+                  <Input id="rn-due" type="date" value={rnDueDate} onChange={(e) => setRnDueDate(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="rn-last">Last completed</Label>
+                  <Input id="rn-last" type="date" value={rnLastCompleted} onChange={(e) => setRnLastCompleted(e.target.value)} />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="rn-period">Renewal period (months)</Label>
+                  <Input id="rn-period" type="number" min="1" max="120" value={rnPeriod} onChange={(e) => setRnPeriod(e.target.value)} placeholder="12" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label>Status</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {RENEWAL_STATUSES.map((s) => (
+                    <Button key={s} type="button" variant={rnStatus === s ? "default" : "outline"} size="sm" onClick={() => setRnStatus(s)}>
+                      {STATUS_LABELS[s]}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="rn-notes">Notes</Label>
+                <Textarea id="rn-notes" value={rnNotes} onChange={(e) => setRnNotes(e.target.value)} placeholder="Renewal packet details, contacts, what's needed…" rows={2} maxLength={2000} />
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => mutate(handleSaveRenewal)}>{editingRn ? "Save changes" : "Add"}</Button>
+                <Button size="sm" variant="outline" onClick={resetRenewalForm}>Cancel</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {loading && <p className="text-sm text-muted-foreground">Loading...</p>}
+
+        {!loading && !loadError && renewals.length === 0 && (
+          <p className="text-sm text-muted-foreground">No renewals tracked yet. Add one to keep deadlines in view.</p>
+        )}
+
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {sortedRenewals.map((r) => {
+            const badge = URGENCY_BADGE[r.urgency];
+            return (
+              <Card key={r.id} className={r.urgency === "overdue" ? "border-red-300" : r.urgency === "due_soon" ? "border-amber-300" : ""}>
+                <CardContent className="space-y-2 px-4 py-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-base font-semibold">{r.program}</span>
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badge.className}`}>{badge.label}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button size="sm" variant="ghost" onClick={() => editRenewal(r)}>Edit</Button>
+                      <button onClick={() => mutate(() => handleDeleteRenewal(r.id))} className="text-muted-foreground hover:text-destructive" aria-label={`Delete ${r.program} renewal`}>
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  <p className={`text-sm font-medium ${r.urgency === "overdue" ? "text-red-700" : r.urgency === "due_soon" ? "text-amber-700" : "text-foreground"}`}>
+                    {relativeDue(r.due_date)}
+                    {r.due_date && <span className="font-normal text-muted-foreground"> · {formatDate(r.due_date)}</span>}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Status: {STATUS_LABELS[r.status]}
+                    {r.renewal_period_months ? ` · Renews every ${r.renewal_period_months} mo` : ""}
+                    {r.last_completed_date ? ` · Last completed ${formatDate(r.last_completed_date)}` : ""}
+                  </p>
+                  {r.notes && <p className="text-sm whitespace-pre-wrap">{r.notes}</p>}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Timesheets */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -392,25 +573,37 @@ export default function RecordsPage() {
 
           {visibleTimekeeping.map((t) => (
             <Card key={t.id}>
-              <CardContent className="px-4 py-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-base font-semibold">{formatDate(t.date)}</span>
-                  <Button size="sm" variant="ghost" onClick={() => editTimekeeping(t)}>Edit</Button>
-                  <button
-                    onClick={() => mutate(() => handleDeleteTimekeeping(t.id))}
-                    className="text-muted-foreground hover:text-destructive"
-                    aria-label="Delete entry"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
+              <CardContent className="px-4 py-3 space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-semibold">{formatDate(t.date)}</span>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                      {t.hours} {t.hours === 1 ? "hr" : "hrs"}
+                    </span>
+                    {t.start_time && t.end_time && (
+                      <span className="text-xs text-muted-foreground">{t.start_time}–{t.end_time}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => editTimekeeping(t)}>Edit</Button>
+                    <button
+                      onClick={() => mutate(() => handleDeleteTimekeeping(t.id))}
+                      className="text-muted-foreground hover:text-destructive"
+                      aria-label={`Delete timesheet entry for ${formatDate(t.date)}`}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  <span>Hours: <span className="font-medium">{t.hours}</span></span>
-                  {t.start_time && t.end_time && <span> ({t.start_time}\u2013{t.end_time})</span>}
-                  {" · "}{SERVICE_LABELS[t.service_type] ?? t.service_type}
-                  {" · "}{t.tasks.length > 0 ? t.tasks.join(", ") : "No activities"}
-                  {t.notes && <span> · {t.notes}</span>}
-                </p>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="rounded-full border px-2 py-0.5 text-xs font-medium">
+                    {SERVICE_LABELS[t.service_type] ?? t.service_type}
+                  </span>
+                  {t.tasks.map((task) => (
+                    <span key={task} className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{task}</span>
+                  ))}
+                </div>
+                {t.notes && <p className="text-xs text-muted-foreground">{t.notes}</p>}
               </CardContent>
             </Card>
           ))}
@@ -464,24 +657,35 @@ export default function RecordsPage() {
 
           {visibleJournal.map((j) => (
             <Card key={j.id} className={j.fall_flagged && j.incident_status !== "dismissed" ? "border-amber-300" : ""}>
-              <CardContent className="px-4 py-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-base font-semibold">{formatDate(j.date)}</span>
-                  <Button size="sm" variant="ghost" onClick={() => editJournal(j)}>Edit</Button>
-                  <button
-                    onClick={() => mutate(() => handleDeleteJournal(j.id))}
-                    className="text-muted-foreground hover:text-destructive"
-                    aria-label="Delete entry"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
+              <CardContent className="px-4 py-3 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-base font-semibold">{formatDate(j.date)}</span>
+                    {j.fall_flagged && (
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${INCIDENT_BADGE[j.incident_status].className}`}>
+                        {INCIDENT_BADGE[j.incident_status].label}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => editJournal(j)}>Edit</Button>
+                    <button
+                      onClick={() => mutate(() => handleDeleteJournal(j.id))}
+                      className="text-muted-foreground hover:text-destructive"
+                      aria-label={`Delete journal entry for ${formatDate(j.date)}`}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <p className="text-sm whitespace-pre-wrap text-muted-foreground">{j.text}</p>
-                {j.fall_flagged && <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
-                  <span>Possible fall: {j.incident_status}</span>
-                  {j.incident_status !== "confirmed" && <Button size="sm" variant="outline" onClick={() => mutate(async () => { await reviewIncident(j.id, caseId!, "confirmed"); await loadData(caseId!); })}>Confirm</Button>}
-                  {j.incident_status !== "dismissed" && <Button size="sm" variant="outline" onClick={() => mutate(async () => { await reviewIncident(j.id, caseId!, "dismissed"); await loadData(caseId!); })}>Dismiss</Button>}
-                </div>}
+                {j.fall_flagged && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    {j.incident_status !== "confirmed" && <Button size="sm" variant="outline" onClick={() => mutate(async () => { await reviewIncident(j.id, caseId!, "confirmed"); await loadData(caseId!); })}>Confirm fall</Button>}
+                    {j.incident_status !== "dismissed" && <Button size="sm" variant="outline" onClick={() => mutate(async () => { await reviewIncident(j.id, caseId!, "dismissed"); await loadData(caseId!); })}>Not a fall</Button>}
+                    {j.incident_status !== "unreviewed" && <Button size="sm" variant="ghost" onClick={() => mutate(async () => { await reviewIncident(j.id, caseId!, "unreviewed"); await loadData(caseId!); })}>Reset</Button>}
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

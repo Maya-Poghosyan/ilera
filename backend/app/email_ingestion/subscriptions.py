@@ -15,6 +15,7 @@ from .. import db
 from ..config import get_settings
 from . import connections
 from .models import MailboxConnection
+from .reconciliation import prune_orphan_subscriptions, reconcile
 
 
 def require_configuration() -> None:
@@ -78,14 +79,31 @@ def maintain_subscriptions() -> dict[str, int]:
             "WHERE e.doc->>'provider' = 'microsoft' AND e.doc->>'status' = 'connected' "
             "AND c.owner_user_id = e.doc->>'user_id'"
         ).fetchall()
-    counts = {"checked": 0, "failed": 0}
+    counts = {"checked": 0, "failed": 0, "reconciled": 0, "enqueued": 0, "pruned": 0}
     for row in rows:
+        mailbox = None
         try:
             mailbox = MailboxConnection.model_validate(row[0])
             ensure_subscription(mailbox.id, mailbox.user_id)
             counts["checked"] += 1
         except Exception:
             counts["failed"] += 1
+        # Recover any gap even if the mailbox's subscription was already healthy. A creation
+        # or replacement above sets reconciliation_required; reconcile() is a no-op when the
+        # flag is clear, so this stays cheap for steady-state mailboxes. Reconciliation
+        # failures are counted separately and never block the next mailbox.
+        if mailbox is not None:
+            try:
+                counts["enqueued"] += reconcile(mailbox.id, mailbox.user_id)
+                counts["reconciled"] += 1
+            except Exception:
+                counts["failed"] += 1
+            # Clean up any subscription we leaked (create succeeded, DB commit didn't).
+            # Isolated from renew/reconcile so one failure never blocks the others.
+            try:
+                counts["pruned"] += prune_orphan_subscriptions(mailbox.id, mailbox.user_id)
+            except Exception:
+                counts["failed"] += 1
     return counts
 
 
@@ -95,5 +113,6 @@ if __name__ == "__main__":
     except Exception:
         print("email_subscription_maintenance_unavailable")
         raise SystemExit(1) from None
-    print(f"checked={result['checked']} failed={result['failed']}")
+    print(f"checked={result['checked']} reconciled={result['reconciled']} "
+          f"enqueued={result['enqueued']} pruned={result['pruned']} failed={result['failed']}")
     raise SystemExit(1 if result["failed"] else 0)

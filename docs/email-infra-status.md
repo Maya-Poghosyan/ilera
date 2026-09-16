@@ -7,10 +7,15 @@ works) and [azure-email-setup.md](azure-email-setup.md) / [email-scanning-milest
 
 ## TL;DR
 
-The mailbox-OAuth infrastructure is provisioned via Terraform and applied to production.
-Email is **off**. To turn it on, an admin must place the Entra client secret in Key Vault
-and the app deployment must set the `EMAIL_*` env vars — see "Remaining". The scanning
-pipeline (Service Bus + worker + OpenAI) is written but not applied.
+The mailbox-OAuth infrastructure AND the scanning pipeline are provisioned via Terraform and
+applied to production (`ilera-subscription`). Service Bus (`ilera-email-bus`/`email.scan`), the
+scan worker container app, the hourly maintenance job (`ilera-email-maint`), and all RBAC are
+live. The Entra client secret and Fernet key are in Key Vault. BAA / abuse-monitoring opt-out
+for the `ilera-resource` Azure OpenAI account is confirmed, so `EMAIL_CONNECTIONS_ENABLED=true`
+and `EMAIL_SCANNING_ENABLED=true` are set on the API, worker, and maintenance job. The
+maintenance job runs clean (`checked=0 failed=0`). Remaining: interactive live end-to-end
+validation (connect a real M365 mailbox in the browser → send a test email → confirm a
+suggestion reaches the Care Calendar).
 
 ## Done (verified in Azure)
 
@@ -94,13 +99,17 @@ Prerequisites, then apply:
    Service Bus Sender, worker = Receiver + Secrets User + Cognitive Services OpenAI User.
 5. **HIPAA for OpenAI:** confirm the OpenAI account is BAA-covered and has content-logging /
    abuse-monitoring **opted out** for PHI.
-6. Finish the app code (per email-scanning-milestones.md §3–5). Graph notification ingress
-   and subscription creation/renewal are implemented locally. Worker fetch/extract and
-   atomic suggestion persistence are also implemented (89 focused email tests pass).
-   Configure `EMAIL_MICROSOFT_NOTIFICATION_URL` on the public API origin and schedule
-   `python -m app.email_ingestion.subscriptions` at least hourly when ready. Still pending:
-   missed-message/orphan-subscription reconciliation and Care Calendar
-   event review. No maintenance schedule or scanning deployment has been applied.
+6. Finish the app code (per email-scanning-milestones.md §3–5). Graph notification ingress,
+   subscription creation/renewal, missed-notification reconciliation, and orphan-subscription
+   pruning are implemented locally. Worker fetch/extract and atomic suggestion persistence are
+   also implemented. Configure `EMAIL_MICROSOFT_NOTIFICATION_URL` on the public API origin and
+   schedule `python -m app.email_ingestion.subscriptions` at least hourly when ready; one pass
+   renews subscriptions, reconciles flagged gaps (idempotent, identifier-only, bounded), and
+   prunes orphaned subscriptions that deliver to our URL but are no longer tracked. The Care
+   Calendar review flow (accept/dismiss with persisted status and idempotent calendar-event
+   acceptance) is implemented and unit-tested. Still pending: live end-to-end verification. No
+   maintenance schedule or scanning deployment has been applied. The backend suite is 216
+   passing on a Python 3.12 conda env with full requirements.txt installed.
    Keep `EMAIL_SCANNING_ENABLED=false` until the full pipeline is ready and validated.
 
 ### C. Hardening / follow-ups (optional, not blocking)
@@ -154,7 +163,9 @@ Remaining priorities before PHI rollout:
   shorten the locks currently held during publishing. It needs a publisher, retries,
   retention, and disconnect checks; do not replace durable delivery with an in-process task.
 - Page maintenance queries and select only due connections as mailbox count grows. Keep
-  state rechecks under locks and add missed-message/orphan-subscription reconciliation.
+  state rechecks under locks. Missed-notification and orphan-subscription reconciliation are
+  implemented (identifier-only, idempotent, bounded, cursor-tracked; orphan pruning is scoped
+  to our notification URL and never deletes the tracked subscription).
 - The worker now implements atomic idempotency, bounded extraction input/output, prompt
   isolation, minimization instructions, and owner checks. Live validation remains required.
   See [worker implementation and validation](email-scanning-milestones.md#worker-implementation-and-validation-2026-09-16)

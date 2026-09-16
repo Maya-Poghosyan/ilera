@@ -6,6 +6,8 @@ Usage:
 Lists every fillable field name, type (text/checkbox/radio/choice), and tooltip.
 """
 
+from __future__ import annotations
+
 import json
 import sys
 from typing import Any

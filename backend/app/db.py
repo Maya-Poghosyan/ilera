@@ -11,6 +11,8 @@ read and written entirely. `JsonStore` is that shape, and it owns the in-memory 
 so callers never branch on whether a database is configured.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 import threading
@@ -106,11 +108,15 @@ CREATE TABLE IF NOT EXISTS journal (
 );
 CREATE INDEX IF NOT EXISTS journal_case_idx ON journal (case_id);
 
-CREATE TABLE IF NOT EXISTS renewals (
-    case_id    text PRIMARY KEY,
+-- Multiple renewals per case (one per program).
+CREATE TABLE IF NOT EXISTS renewal_items (
+    case_id    text NOT NULL,
+    id         text NOT NULL,
     doc        jsonb NOT NULL,
-    updated_at timestamptz NOT NULL DEFAULT now()
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (case_id, id)
 );
+CREATE INDEX IF NOT EXISTS renewal_items_case_idx ON renewal_items (case_id);
 
 CREATE TABLE IF NOT EXISTS applications (
     case_id    text NOT NULL,
@@ -131,6 +137,16 @@ CREATE TABLE IF NOT EXISTS suggested_events (
     doc        jsonb NOT NULL,
     updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Accepted suggestions become calendar events: the caregiver's committed calendar. The id is
+-- derived from the source suggestion id, so re-accepting the same suggestion overwrites rather
+-- than inserts a duplicate.
+CREATE TABLE IF NOT EXISTS calendar_events (
+    id         text PRIMARY KEY,
+    doc        jsonb NOT NULL,
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS calendar_events_owner_idx ON calendar_events ((doc->>'user_id'));
 
 -- Email stores contain metadata and structured results only; never raw messages or tokens.
 CREATE TABLE IF NOT EXISTS email_connections (

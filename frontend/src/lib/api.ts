@@ -1,5 +1,5 @@
 import type { Answers, AnswerValue, IntakeSchema } from "./intake-schema";
-import type { AppStatus, ApplicationEntry, CaseProfile, EligibilityResponse, FormSchema, JournalCreate, JournalEntry, RecordsSummary, Reminder, ReminderCreate, ReminderUpdate, ReminderTemplates, RenewalInfo, RenewalUpdate, StartApplicationResult, TimekeepingCreate, TimekeepingEntry } from "./types";
+import type { AppStatus, ApplicationEntry, CaseProfile, EligibilityResponse, FormSchema, JournalCreate, JournalEntry, RecordsSummary, Reminder, ReminderCreate, ReminderUpdate, ReminderTemplates, RenewalItem, RenewalItemCreate, RenewalItemUpdate, StartApplicationResult, TimekeepingCreate, TimekeepingEntry } from "./types";
 
 /** Thrown for any non-2xx reply, carrying the status so callers can tell "the backend is down"
  * from "you may not read this case". */
@@ -168,14 +168,49 @@ export type SuggestedEventAPI = {
   kind: string;
   description?: string;
   source: string;
+  confidence?: number | null;
+  action_required?: string | null;
+  status?: "pending" | "accepted" | "dismissed";
+};
+
+/** A committed calendar entry (an accepted suggestion or a manual event). */
+export type CalendarEventAPI = {
+  id: string;
+  date: string | null;
+  timezone?: string | null;
+  day: number;
+  title: string;
+  time?: string;
+  kind: string;
+  description?: string;
+  source: string;
+  source_suggestion_id?: string | null;
 };
 
 export function listSuggestedEvents(): Promise<SuggestedEventAPI[]> {
   return request<SuggestedEventAPI[]>("/api/suggested-events");
 }
 
+export function reviewSuggestedEvent(
+  id: string,
+  status: "pending" | "accepted" | "dismissed"
+): Promise<SuggestedEventAPI> {
+  return request<SuggestedEventAPI>(`/api/suggested-events/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+
 export function deleteSuggestedEvent(id: string): Promise<{ deleted: boolean }> {
   return request<{ deleted: boolean }>(`/api/suggested-events/${id}`, { method: "DELETE" });
+}
+
+export function listCalendarEvents(): Promise<CalendarEventAPI[]> {
+  return request<CalendarEventAPI[]>("/api/calendar-events");
+}
+
+export function deleteCalendarEvent(id: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/api/calendar-events/${id}`, { method: "DELETE" });
 }
 
 // ---------------------------------------------------------------------------
@@ -212,15 +247,26 @@ export function deleteJournalEntry(id: string, caseId: string): Promise<{ delete
   return request<{ deleted: boolean }>(`/api/records/journal/${id}?case_id=${caseId}`, { method: "DELETE" });
 }
 
-export function getRenewal(caseId: string): Promise<RenewalInfo> {
-  return request<RenewalInfo>(`/api/records/renewal/${caseId}`);
+export function listRenewals(caseId: string): Promise<RenewalItem[]> {
+  return request<RenewalItem[]>(`/api/records/renewals/${caseId}`);
 }
 
-export function updateRenewal(caseId: string, body: RenewalUpdate): Promise<RenewalInfo> {
-  return request<RenewalInfo>(`/api/records/renewal/${caseId}`, {
+export function createRenewal(body: RenewalItemCreate): Promise<RenewalItem> {
+  return request<RenewalItem>("/api/records/renewals", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function updateRenewalItem(id: string, caseId: string, body: RenewalItemUpdate): Promise<RenewalItem> {
+  return request<RenewalItem>(`/api/records/renewals/${id}?case_id=${caseId}`, {
     method: "PUT",
     body: JSON.stringify(body),
   });
+}
+
+export function deleteRenewalItem(id: string, caseId: string): Promise<{ deleted: boolean }> {
+  return request<{ deleted: boolean }>(`/api/records/renewals/${id}?case_id=${caseId}`, { method: "DELETE" });
 }
 
 export function getRecordsSummary(caseId: string): Promise<RecordsSummary> {

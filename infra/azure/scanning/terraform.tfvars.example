@@ -9,8 +9,20 @@ location        = "eastus2"
 
 container_apps_environment_name = "ilera-env"
 
-scan_worker_image = "ilera.azurecr.io/ilera-email-worker:<sha>"
+# Existing Azure Container Registry holding the images (no .azurecr.io suffix).
+container_registry_name = "caff3fa0d6e7acr"
 
-# The single existing Azure OpenAI account and the deployment name to use for extraction.
-existing_openai_account_name = "ilera-openai"
-email_openai_deployment_name = "gpt-4o-mini"
+# Worker image, built & pushed to the registry above.
+scan_worker_image = "caff3fa0d6e7acr.azurecr.io/ilera-email-worker:<sha>"
+
+# Full API image (has the whole app) used by the hourly maintenance job.
+api_image = "caff3fa0d6e7acr.azurecr.io/ilera-api:<sha>"
+
+# The single existing AIServices/OpenAI account and the deployment used for extraction.
+# The worker calls it under https://<custom-subdomain>.openai.azure.com/ (derived in main.tf).
+existing_openai_account_name = "ilera-resource"
+email_openai_deployment_name = "gpt-5-mini"
+
+# database_url is SENSITIVE — do NOT put it here. Provide it out of band, e.g.:
+#   export TF_VAR_database_url="$(az containerapp secret show -g Ilera -n ilera-api \
+#       --secret-name database-url --query value -o tsv)"

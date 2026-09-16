@@ -176,19 +176,27 @@ rather than 403 to avoid confirming the case exists. Unclaimed cases are deleted
 | POST | `/api/reminders` | create a reminder |
 | PATCH | `/api/reminders/{id}` | update a reminder |
 | DELETE | `/api/reminders/{id}` | delete a reminder |
+| GET | `/api/suggested-events` | list the caller's suggested calendar events (owner only) |
+| PATCH | `/api/suggested-events/{id}` | review a suggestion (accept/dismiss/pending); accepting materializes a calendar event |
+| DELETE | `/api/suggested-events/{id}` | delete a suggestion and any calendar event accepted from it |
+| GET | `/api/calendar-events` | list the caller's committed calendar events (owner only) |
+| DELETE | `/api/calendar-events/{id}` | delete a calendar event (owner only) |
 
 ## Wiring real services
 
 - **Postgres:** set `DATABASE_URL` — all stores persist (`users`, `cases`, `reminders`,
-  `timekeeping`, `journal`, `renewals`, `applications`, `preferences`, `suggested_events`)
-  and the same database serves the pgvector RAG index. Without it, every store falls back to
-  an in-process dict.
+  `timekeeping`, `journal`, `renewal_items`, `applications`, `preferences`, `suggested_events`,
+  `calendar_events`) and the same database serves the pgvector RAG index. Without it, every
+  store falls back to an in-process dict.
 - **LLM:** set `OPENAI_API_KEY` (OpenAI or Azure OpenAI via `OPENAI_BASE_URL`).
 - **Email:** Microsoft 365 OAuth connection management is implemented behind
   `EMAIL_CONNECTIONS_ENABLED`; configure Entra and Key Vault using
   [the Azure setup handoff](docs/azure-email-setup.md). Live integration validation is pending.
-  Webhooks, scanning, and Gmail remain planned; keep `EMAIL_SCANNING_ENABLED=false`.
-  Reminder records remain available, but automatic delivery and text check-ins are unavailable.
+  The Care Calendar review flow (accept/dismiss suggestions with persisted status and
+  idempotent calendar-event acceptance) is implemented. Webhook ingestion, the scan worker,
+  and Gmail remain gated; keep `EMAIL_SCANNING_ENABLED=false` until the ingestion path is
+  validated. Reminder records remain available, but automatic delivery and text check-ins
+  are unavailable.
 - **Forms:** drop fillable government PDFs into `backend/data/` and fill out the corresponding
   field-map JSONs in `backend/data/form_schemas/`.
 

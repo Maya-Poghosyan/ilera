@@ -4,6 +4,8 @@ Loads field-map schemas from data/form_schemas/<form_id>.json, resolves values
 from a CaseProfile, and writes them into fillable PDF AcroForms using pypdf.
 """
 
+from __future__ import annotations
+
 import io
 import json
 import os

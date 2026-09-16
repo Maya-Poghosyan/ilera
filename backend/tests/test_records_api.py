@@ -28,7 +28,7 @@ def test_timekeeping_validation(changes):
     assert client.post("/api/records/timekeeping", json=payload).status_code == 422
 
 
-def test_edit_records_and_clear_renewal():
+def test_edit_timekeeping_entry():
     case_id = case()
     payload = {"case_id": case_id, "date": "2026-09-16", "hours": 1}
     created = client.post("/api/records/timekeeping", json=payload).json()
@@ -37,10 +37,6 @@ def test_edit_records_and_clear_renewal():
     assert response.json()["hours"] == 2
     assert response.json()["created_at"] == created["created_at"]
     assert client.put(f"/api/records/timekeeping/{created['id']}", json={**payload, "case_id": case()}).status_code == 404
-    url = f"/api/records/renewal/{case_id}"
-    assert client.put(url, json={"due_date": "2026-12-01"}).status_code == 200
-    assert client.put(url, json={"due_date": None}).json()["due_date"] is None
-    assert client.put(url, json={"due_date": ""}).status_code == 422
 
 
 def test_incident_review_and_edit_reset():
@@ -97,7 +93,7 @@ def test_authenticated_stranger_cannot_edit_owned_records():
     headers = {"Authorization": f"Bearer {auth._create_token(stranger.id)}"}
     assert client.put(f"/api/records/timekeeping/{entry['id']}", headers=headers, json={**payload, "hours": 2}).status_code == 404
     assert client.delete(f"/api/records/timekeeping/{entry['id']}?case_id={case_id}", headers=headers).status_code == 404
-    assert client.put(f"/api/records/renewal/{case_id}", headers=headers, json={"due_date": "2026-12-01"}).status_code == 404
+    assert client.post("/api/records/renewals", headers=headers, json={"case_id": case_id, "program": "IHSS"}).status_code == 404
     owner_headers = {"Authorization": f"Bearer {auth._create_token(owner.id)}"}
     reminder = client.post("/api/reminders", headers=owner_headers, json={"case_id": case_id}).json()
     assert client.get(f"/api/reminders/{reminder['id']}", headers=headers).status_code == 404

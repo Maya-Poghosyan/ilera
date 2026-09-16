@@ -264,21 +264,79 @@ def _merge_question(existing: AppQuestion, addition: AppQuestion) -> None:
         existing.form_id = ""  # it now fills more than one form
 
 
-_WHO = re.compile(r"person\s*(\d+)|(primary contact)", re.I)
-_NOISE = re.compile(
-    r"\([^)]*\)|person\s*\d+|primary contact|\b(this|their|they|the)\b", re.I
+# A record marker names *which* of several like things a question is about: "Person 2",
+# "Household Member 1", "Other insurance #2", "Income source 3", "Dependent 2". The
+# leading noun and its number together identify the record; two questions about the same
+# fact belong to the same person only when both resolve to the same record. "Primary
+# contact" is a form's name for the first person, so it is treated as person 1.
+_RECORD = re.compile(
+    r"(person|household\s*member|member|insurance|income|dependent|child|employer|"
+    r"applicant|parent|spouse)\s*#?\s*(\d+)|(primary\s+contact)",
+    re.I,
 )
+# Everything stripped from a label before comparing what it asks: parentheticals, any
+# record marker, and bare demonstratives that only make a sentence read naturally.
+_NOISE = re.compile(
+    r"\([^)]*\)|(?:person|household\s*member|member|insurance|income|dependent|child|"
+    r"employer|applicant|parent|spouse)\s*#?\s*\d+|primary\s+contact|"
+    r"\b(this|that|their|they|the)\b",
+    re.I,
+)
+# Role suffixes on a group id that don't change which record it is about, stripped so a
+# section and its opt-in ("..._contact" and "..._contact_opt_in") share one scope.
+_GROUP_SUFFIX = re.compile(r"_(opt_in|profile|details|contact|info)$")
+
+
+def _record_key(text: str) -> Optional[str]:
+    """A `<noun>:<number>` scope from a record marker in `text`, or None.
+
+    "Primary contact" collapses onto person 1 so a form's prose name for the applicant
+    and its numbered table row are the same record.
+    """
+    marker = _RECORD.search(text)
+    if not marker:
+        return None
+    if marker.group(3):  # "primary contact"
+        return "person:1"
+    noun = marker.group(1).lower().replace(" ", "")
+    return f"{noun}:{marker.group(2) or '1'}"
+
+
+def _scope(question: AppQuestion) -> str:
+    """Which record a question is about — the person/policy/source it belongs to.
+
+    Both a group id (`household_member_2`, `insurance_1`, `person_3_profile`) and a
+    record marker in the text ("Household member 2", "Other insurance #1") name a
+    record, and they must resolve to the *same* key so a loose reprint of a boxed field
+    folds into the group that owns it. So both are reduced to `<noun>:<number>`. A
+    named block with no numbered record (an address, a representative) is scoped by its
+    group id, minus role suffixes so a section and its opt-in agree. A question with
+    neither is scoped to the primary record ("").
+    """
+    if question.group_id:
+        keyed = _record_key(question.group_id.replace("_", " "))
+        if keyed:
+            return keyed
+        base = question.group_id
+        while True:
+            stripped = _GROUP_SUFFIX.sub("", base)
+            if stripped == base:
+                break
+            base = stripped
+        return f"g:{base}"
+    return _record_key(f"{question.group_prompt} {question.text}") or ""
 
 
 def _fact(question: AppQuestion) -> tuple[str, str]:
-    """What a question asks, and whom it asks it about.
+    """What a question asks, and which record it asks it about.
 
     A form names the same person two ways — "Person 1" in its table, "the Primary
     Contact" in its opening — and labels the same box "Middle name" in one place and
-    "Person 1 (Primary Contact) middle name" in another. Both reduce to the same pair.
+    "Person 1 (Primary Contact) middle name" in another: same record, same fact. But
+    "Household member 1" and "Household member 2" are different records, so their
+    identically-worded boxes are different facts and must not be merged.
     """
-    who = _WHO.search(f"{question.group_prompt} {question.text}")
-    scope = (who.group(1) or "1") if who else ""
+    scope = _scope(question)
     asked = _NOISE.sub(" ", question.text)
     return scope, "".join(c for c in asked.lower() if c.isalnum())
 

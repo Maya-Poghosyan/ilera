@@ -165,6 +165,16 @@ API Container App is also **not** imported as a full resource: `api.tf` patches 
 identity + env onto it via `azapi_update_resource`, leaving the image/scale to the deploy
 workflow.
 
+### Scale (min replicas)
+
+The `api` and `web` apps run with `--min-replicas 1` so a visitor never waits on a
+cold start. This is **not** set in Terraform — writing these apps' `scale` block means
+writing their template, which would clobber the CI-managed image, env vars and Key Vault
+secret refs (`ContainerAppSecretInvalid`; see `oauth/api.tf`). Instead `deploy.yml` passes
+`--min-replicas 1` on every roll-forward, so the warm-instance setting is reapplied with
+each deploy and survives a rebuild. The queue-driven scan worker is different: it is
+Terraform-owned and intentionally `min_replicas = 0` (idle at no cost).
+
 ## Entra app (out of band)
 
 The `ilera-microsoft-mailbox` Entra application and its client secret are managed by a

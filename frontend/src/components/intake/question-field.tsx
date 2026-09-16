@@ -32,10 +32,12 @@ export function QuestionField({ question, value, name, error, onChange }: Props)
     // Full height with the control pushed to the bottom, so side-by-side fields keep
     // their inputs on one line even when only one of them has helper text.
     <div className="flex h-full flex-col gap-2">
-      <Label className="block text-base font-medium">
-        {text}
-        {!question.required && <span className="ml-1 text-sm text-muted-foreground">(optional)</span>}
-      </Label>
+      {text && (
+        <Label className="block text-base font-medium">
+          {text}
+          {!question.required && <span className="ml-1 text-sm text-muted-foreground">(optional)</span>}
+        </Label>
+      )}
       {helper && <p className="text-sm text-muted-foreground">{helper}</p>}
       {question.helper_link && (
         <a

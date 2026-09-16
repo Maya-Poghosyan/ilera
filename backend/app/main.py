@@ -51,18 +51,20 @@ from .reminders import (
 )
 from .records import (
     JournalEntry,
-    RenewalInfo,
+    RenewalItem,
     TimekeepingEntry,
     _detect_fall,
     delete_journal,
+    delete_renewal_item,
     delete_timekeeping,
-    get_renewal,
+    get_renewal_item,
     get_timekeeping,
     get_journal,
     list_journal,
+    list_renewal_items,
     list_timekeeping,
     save_journal,
-    save_renewal,
+    save_renewal_item,
     save_timekeeping,
 )
 from .preferences import Preferences, get_preferences, save_preferences
@@ -72,6 +74,14 @@ from .suggested_events import (
     delete_suggested_event,
     get_suggested_event,
     list_suggested_events,
+    save_suggested_event,
+)
+from .calendar_events import (
+    CalendarEvent,
+    accept_from_suggestion,
+    delete_calendar_event,
+    get_calendar_event,
+    list_calendar_events,
 )
 
 logger = logging.getLogger("ilera.scheduler")
@@ -595,6 +605,46 @@ def api_list_suggested_events(
     return list_suggested_events(user_id=user.id)
 
 
+class SuggestedEventReview(BaseModel):
+    status: Literal["pending", "accepted", "dismissed"]
+
+
+@app.patch("/api/suggested-events/{event_id}")
+def api_review_suggested_event(
+    event_id: str,
+    body: SuggestedEventReview,
+    user: User = Depends(get_current_user),
+) -> SuggestedEvent:
+    """Persist a review decision (accept/dismiss/reset) on a suggestion.
+
+    Accepting also materializes an idempotent calendar event; dismissing or resetting
+    removes any calendar event previously accepted from this suggestion.
+    """
+    event = get_suggested_event(event_id)
+    if event is None or event.user_id != user.id:
+        raise HTTPException(status_code=404, detail="suggested event not found")
+    event.status = body.status
+    save_suggested_event(event)
+    if body.status == "accepted":
+        accept_from_suggestion(
+            suggestion_id=event.id,
+            user_id=user.id,
+            case_id=event.case_id,
+            date=event.date,
+            timezone=event.timezone,
+            title=event.title,
+            time=event.time,
+            kind=event.kind,
+            description=event.description,
+        )
+    else:
+        # A suggestion no longer accepted should not linger on the calendar.
+        from .calendar_events import _event_id_for_suggestion
+
+        delete_calendar_event(_event_id_for_suggestion(event.id))
+    return event
+
+
 @app.delete("/api/suggested-events/{event_id}")
 def api_delete_suggested_event(
     event_id: str, user: User = Depends(get_current_user)
@@ -602,8 +652,36 @@ def api_delete_suggested_event(
     event = get_suggested_event(event_id)
     if event is None or event.user_id != user.id:
         raise HTTPException(status_code=404, detail="suggested event not found")
+    # Remove any calendar event materialized from this suggestion first.
+    from .calendar_events import _event_id_for_suggestion
+
+    delete_calendar_event(_event_id_for_suggestion(event_id))
     if not delete_suggested_event(event_id):
         raise HTTPException(status_code=404, detail="suggested event not found")
+    return {"deleted": True}
+
+
+# ---------------------------------------------------------------------------
+# Calendar events (accepted suggestions + manual entries)
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/calendar-events")
+def api_list_calendar_events(
+    user: User = Depends(get_current_user),
+) -> list[CalendarEvent]:
+    return list_calendar_events(user_id=user.id)
+
+
+@app.delete("/api/calendar-events/{event_id}")
+def api_delete_calendar_event(
+    event_id: str, user: User = Depends(get_current_user)
+) -> dict:
+    event = get_calendar_event(event_id)
+    if event is None or event.user_id != user.id:
+        raise HTTPException(status_code=404, detail="calendar event not found")
+    if not delete_calendar_event(event_id):
+        raise HTTPException(status_code=404, detail="calendar event not found")
     return {"deleted": True}
 
 
@@ -660,14 +738,32 @@ class IncidentReview(BaseModel):
     status: Literal["confirmed", "dismissed", "unreviewed"]
 
 
-class RenewalUpdate(BaseModel):
-    program: Optional[str] = Field(default=None, min_length=1)
+class RenewalItemCreate(BaseModel):
+    case_id: str
+    program: str = Field(default="IHSS", min_length=1, max_length=120)
+    due_date: Optional[str] = None
+    status: Literal["active", "pending", "overdue"] = "active"
+    notes: str = Field(default="", max_length=2000)
+    last_completed_date: Optional[str] = None
+    renewal_period_months: Optional[int] = Field(default=None, ge=1, le=120)
+
+    @field_validator("due_date", "last_completed_date")
+    @classmethod
+    def valid_optional_date(cls, value):
+        return TimekeepingCreate.valid_date(value) if value is not None else None
+
+
+class RenewalItemUpdate(BaseModel):
+    program: Optional[str] = Field(default=None, min_length=1, max_length=120)
     due_date: Optional[str] = None
     status: Optional[Literal["active", "pending", "overdue"]] = None
+    notes: Optional[str] = Field(default=None, max_length=2000)
+    last_completed_date: Optional[str] = None
+    renewal_period_months: Optional[int] = Field(default=None, ge=1, le=120)
 
-    @field_validator("due_date")
+    @field_validator("due_date", "last_completed_date")
     @classmethod
-    def valid_due_date(cls, value):
+    def valid_optional_date(cls, value):
         return TimekeepingCreate.valid_date(value) if value is not None else None
 
 
@@ -737,42 +833,68 @@ def api_delete_journal(
     return {"deleted": True}
 
 
-@app.get("/api/records/renewal/{case_id}")
-def api_get_renewal(case_id: str, _: str = Depends(require_case_access)) -> RenewalInfo:
-    info = get_renewal(case_id)
-    if info is None:
-        return RenewalInfo(case_id=case_id)
-    return info
+@app.get("/api/records/renewals/{case_id}")
+def api_list_renewals(
+    case_id: str, _: str = Depends(require_case_access)
+) -> list[RenewalItem]:
+    return list_renewal_items(case_id)
 
 
-@app.put("/api/records/renewal/{case_id}")
-def api_put_renewal(
-    case_id: str, body: RenewalUpdate, _: str = Depends(require_case_access)
-) -> RenewalInfo:
-    existing = get_renewal(case_id)
+@app.post("/api/records/renewals", status_code=201)
+def api_create_renewal_item(
+    body: RenewalItemCreate, user: Optional[User] = Depends(get_optional_user)
+) -> RenewalItem:
+    authorize_case(body.case_id, user)
+    item = RenewalItem(
+        case_id=body.case_id,
+        program=body.program,
+        due_date=body.due_date,
+        status=body.status,
+        notes=body.notes,
+        last_completed_date=body.last_completed_date,
+        renewal_period_months=body.renewal_period_months,
+    )
+    save_renewal_item(item)
+    return item
+
+
+@app.put("/api/records/renewals/{item_id}")
+def api_update_renewal_item(
+    item_id: str,
+    body: RenewalItemUpdate,
+    case_id: str,
+    _: str = Depends(require_case_access),
+) -> RenewalItem:
+    existing = get_renewal_item(case_id, item_id)
     if existing is None:
-        existing = RenewalInfo(case_id=case_id)
-    if body.program is not None:
-        existing.program = body.program
-    if "due_date" in body.model_fields_set:
-        existing.due_date = body.due_date
-    if body.status is not None:
-        existing.status = body.status
-    save_renewal(existing)
+        raise HTTPException(status_code=404, detail="renewal not found")
+    updates = body.model_dump(exclude_unset=True)
+    for field, value in updates.items():
+        setattr(existing, field, value)
+    save_renewal_item(existing)
     return existing
+
+
+@app.delete("/api/records/renewals/{item_id}")
+def api_delete_renewal_item(
+    item_id: str, case_id: str, _: str = Depends(require_case_access)
+) -> dict:
+    if not delete_renewal_item(case_id, item_id):
+        raise HTTPException(status_code=404, detail="renewal not found")
+    return {"deleted": True}
 
 
 @app.get("/api/records/{case_id}")
 def api_records_summary(case_id: str, _: str = Depends(require_case_access)) -> dict:
-    """Combined summary: timekeeping + journal + renewal + fall_flag."""
+    """Combined summary: timekeeping + journal + renewals + fall_flag."""
     timekeeping = list_timekeeping(case_id)
     journal = list_journal(case_id)
-    renewal = get_renewal(case_id) or RenewalInfo(case_id=case_id)
+    renewals = list_renewal_items(case_id)
     fall_flag = any(j.fall_flagged and j.incident_status != "dismissed" for j in journal)
     return {
         "timekeeping": timekeeping,
         "journal": journal,
-        "renewal": renewal,
+        "renewals": renewals,
         "fall_flag": fall_flag,
     }
 

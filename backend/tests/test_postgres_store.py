@@ -98,15 +98,6 @@ def test_case_profile_roundtrip():
     assert store.get_profile("case-missing") is None
 
 
-def test_room_case_mapping_roundtrip():
-    room = f"room-{uuid.uuid4().hex}"
-    store.map_room_to_case(room, "case-xyz")
-    assert store.get_case_for_room(room) == "case-xyz"
-    store.map_room_to_case(room, "case-abc")
-    assert store.get_case_for_room(room) == "case-abc"
-    assert store.get_case_for_room("room-unknown") is None
-
-
 def test_reminder_crud():
     reminder = reminders.Reminder(
         kind=reminders.ReminderKind.custom,
@@ -142,11 +133,19 @@ def test_timekeeping_and_journal_are_scoped_by_case():
 
 def test_renewal_and_preferences_are_keyed_by_case():
     case_id = f"case-{uuid.uuid4().hex}"
-    assert records.get_renewal(case_id) is None
-    records.save_renewal(records.RenewalInfo(case_id=case_id, due_date="2026-06-01"))
-    records.save_renewal(records.RenewalInfo(case_id=case_id, due_date="2026-07-01"))
-    renewal = records.get_renewal(case_id)
-    assert renewal is not None and renewal.due_date == "2026-07-01"
+    assert records.list_renewal_items(case_id) == []
+    item = records.RenewalItem(case_id=case_id, program="Medi-Cal", due_date="2026-06-01")
+    records.save_renewal_item(item)
+    records.save_renewal_item(
+        records.RenewalItem(case_id=case_id, program="IHSS", due_date="2026-07-01")
+    )
+    items = records.list_renewal_items(case_id)
+    assert len(items) == 2
+    assert {r.program for r in items} == {"Medi-Cal", "IHSS"}
+    # A second case does not see the first case's renewals.
+    assert records.list_renewal_items(f"case-{uuid.uuid4().hex}") == []
+    assert records.delete_renewal_item(case_id, item.id) is True
+    assert len(records.list_renewal_items(case_id)) == 1
 
     assert preferences.get_preferences(case_id).monitor_inboxes is False
     preferences.save_preferences(

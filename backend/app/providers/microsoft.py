@@ -162,6 +162,42 @@ class MicrosoftEmailProvider:
         except Exception:
             raise ProviderError("Microsoft message could not be read") from None
 
+    async def list_message_ids_since(
+        self, access_token: SecretStr, *, since: datetime, max_ids: int = 500, max_pages: int = 20
+    ) -> list[str]:
+        """Identifiers for messages received at or after `since`, oldest first.
+
+        Reconciliation only — never fetches bodies, subjects, or senders. The result is
+        bounded by `max_ids`/`max_pages`; a mailbox with more unrecovered mail than the
+        bound keeps `reconciliation_required` set so a later pass continues. Paging follows
+        Graph's `@odata.nextLink` but re-selects `id` defensively and ignores non-string ids.
+        """
+        # A tiny margin absorbs clock skew between our cursor and the server's timestamps.
+        filter_ts = since.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        params: dict | None = {
+            "$select": "id",
+            "$filter": f"receivedDateTime ge {filter_ts}",
+            "$orderby": "receivedDateTime asc",
+            "$top": "50",
+        }
+        path = "/me/messages"
+        ids: list[str] = []
+        for _ in range(max_pages):
+            data = await self._graph("GET", path, access_token, params=params)
+            for item in data.get("value", []):
+                message_id = item.get("id") if isinstance(item, dict) else None
+                if isinstance(message_id, str) and 1 <= len(message_id) <= 2048:
+                    ids.append(message_id)
+                    if len(ids) >= max_ids:
+                        return ids
+            next_link = data.get("@odata.nextLink")
+            if not isinstance(next_link, str) or not next_link.startswith(GRAPH):
+                break
+            # nextLink carries its own opaque query; pass it as an absolute path with no extra params.
+            path = next_link[len(GRAPH):]
+            params = None
+        return ids
+
     async def subscribe(self, access_token: SecretStr, *, notification_url: str,
                         client_state: str) -> EmailSubscription:
         if urlparse(notification_url).scheme != "https":
@@ -188,6 +224,31 @@ class MicrosoftEmailProvider:
 
     async def unsubscribe(self, access_token: SecretStr, subscription_id: str) -> None:
         await self._graph("DELETE", f"/subscriptions/{quote(subscription_id, safe='')}", access_token)
+
+    async def list_subscriptions(self, access_token: SecretStr, *, max_items: int = 100) -> list[dict]:
+        """Active Graph subscriptions visible to this delegated token.
+
+        Reconciliation only. Returns minimal dicts ``{"id", "notification_url", "resource"}`` so
+        the caller can identify subscriptions that point at our notification URL but are no
+        longer tracked in the database (leaked when a create preceded a failed DB commit).
+        No message content is involved; ids are opaque subscription identifiers, not mailbox data.
+        """
+        data = await self._graph("GET", "/subscriptions", access_token)
+        result: list[dict] = []
+        for item in data.get("value", []):
+            if not isinstance(item, dict):
+                continue
+            sub_id = item.get("id")
+            if not isinstance(sub_id, str) or not 1 <= len(sub_id) <= 256:
+                continue
+            result.append({
+                "id": sub_id,
+                "notification_url": item.get("notificationUrl") if isinstance(item.get("notificationUrl"), str) else None,
+                "resource": item.get("resource") if isinstance(item.get("resource"), str) else None,
+            })
+            if len(result) >= max_items:
+                break
+        return result
 
     async def revoke(self, tokens: OAuthTokens) -> None:
         # Microsoft has no narrow RFC 7009 revocation endpoint for these delegated tokens.
