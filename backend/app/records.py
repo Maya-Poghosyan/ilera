@@ -49,6 +49,7 @@ class JournalEntry(BaseModel):
     date: str  # ISO date (YYYY-MM-DD)
     text: str
     fall_flagged: bool = False
+    incident_status: str = "unreviewed"
     created_at: str = Field(
         default_factory=lambda: datetime.now(timezone.utc).isoformat()
     )
@@ -85,7 +86,7 @@ def get_timekeeping(entry_id: str, case_id: str) -> Optional[TimekeepingEntry]:
 
 
 def list_timekeeping(case_id: str) -> list[TimekeepingEntry]:
-    return [TimekeepingEntry.model_validate(doc) for doc in _timekeeping.list(case_id)]
+    return sorted([TimekeepingEntry.model_validate(doc) for doc in _timekeeping.list(case_id)], key=lambda e: (e.date, e.created_at, e.id), reverse=True)
 
 
 def delete_timekeeping(entry_id: str, case_id: str) -> bool:
@@ -109,7 +110,7 @@ def get_journal(entry_id: str, case_id: str) -> Optional[JournalEntry]:
 
 
 def list_journal(case_id: str) -> list[JournalEntry]:
-    return [JournalEntry.model_validate(doc) for doc in _journal.list(case_id)]
+    return sorted([JournalEntry.model_validate(doc) for doc in _journal.list(case_id)], key=lambda e: (e.date, e.created_at, e.id), reverse=True)
 
 
 def delete_journal(entry_id: str, case_id: str) -> bool:

@@ -101,8 +101,8 @@ export function getCase(caseId: string): Promise<CaseProfile> {
 // Reminders
 // ---------------------------------------------------------------------------
 
-export function listReminders(): Promise<Reminder[]> {
-  return request<Reminder[]>("/api/reminders");
+export function listReminders(caseId?: string): Promise<Reminder[]> {
+  return request<Reminder[]>(`/api/reminders${caseId ? `?case_id=${encodeURIComponent(caseId)}` : ""}`);
 }
 
 export function createReminder(body: ReminderCreate): Promise<Reminder> {
@@ -158,8 +158,10 @@ export function setMonitorInboxes(caseId: string, on: boolean): Promise<Preferen
 
 export type SuggestedEventAPI = {
   id: string;
-  /** ISO YYYY-MM-DD. `day` is the day-of-month derived from it. */
-  date: string;
+  /** ISO YYYY-MM-DD, or null when email did not establish a date. */
+  date: string | null;
+  date_status?: "known" | "ambiguous" | "missing";
+  timezone?: string | null;
   day: number;
   title: string;
   time?: string;
@@ -352,4 +354,18 @@ export function disconnectMailbox(id: string): Promise<{ disconnected: boolean; 
   return request<{ disconnected: boolean; subscription_cleanup_pending: boolean }>(
     `/api/email/connections/${encodeURIComponent(id)}`, { method: "DELETE" },
   );
+}
+
+export function updateTimekeeping(id: string, body: TimekeepingCreate): Promise<TimekeepingEntry> {
+  return request(`/api/records/timekeeping/${id}`, { method: "PUT", body: JSON.stringify(body) });
+}
+
+export function updateJournal(id: string, body: JournalCreate): Promise<JournalEntry> {
+  return request(`/api/records/journal/${id}`, { method: "PUT", body: JSON.stringify(body) });
+}
+
+export function reviewIncident(id: string, caseId: string, status: JournalEntry["incident_status"]): Promise<JournalEntry> {
+  return request(`/api/records/journal/${id}/incident?case_id=${encodeURIComponent(caseId)}`, {
+    method: "PATCH", body: JSON.stringify({ status }),
+  });
 }

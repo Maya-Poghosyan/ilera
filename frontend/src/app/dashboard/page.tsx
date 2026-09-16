@@ -65,7 +65,7 @@ function apiEventToCalEvent(e: SuggestedEventAPI): CalEvent {
   return {
     id: e.id,
     day: e.day,
-    date: e.date,
+    date: e.date ?? undefined,
     title: e.title,
     time: e.time,
     kind: (e.kind as EventKind) || "Appointment",
@@ -169,14 +169,14 @@ export default function CalendarPage() {
 
   const loadReminders = useCallback(async () => {
     try {
-      const data = await listReminders();
+      const data = await listReminders(caseId);
       setReminders(data);
     } catch {
       // API may not be running
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [caseId]);
 
   const loadSuggestedEvents = useCallback(async () => {
     try {
@@ -455,7 +455,7 @@ export default function CalendarPage() {
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-sm font-medium text-foreground">{e.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    {formatEventDate(e)}{e.time ? ` \u00b7 ${e.time}` : ""}{" \u00b7 "}{e.kind}
+                    {formatEventDate(e) || "Date needs review"}{e.time ? ` \u00b7 ${e.time}` : ""}{" \u00b7 "}{e.kind}
                   </p>
                   {e.description && (
                     <p className="text-xs leading-relaxed text-muted-foreground/80">

@@ -56,10 +56,11 @@ resource "azurerm_container_app" "scan_worker" {
 
   template {
     container {
-      name   = "worker"
-      image  = var.scan_worker_image
-      cpu    = 0.5
-      memory = "1Gi"
+      name    = "worker"
+      image   = var.scan_worker_image
+      command = ["python", "-m", "app.email_ingestion.worker"]
+      cpu     = 0.5
+      memory  = "1Gi"
 
       # Non-secret worker config. Secret material is read from Key Vault at runtime via
       # the worker's managed identity, never injected here.

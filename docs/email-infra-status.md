@@ -94,9 +94,14 @@ Prerequisites, then apply:
    Service Bus Sender, worker = Receiver + Secrets User + Cognitive Services OpenAI User.
 5. **HIPAA for OpenAI:** confirm the OpenAI account is BAA-covered and has content-logging /
    abuse-monitoring **opted out** for PHI.
-6. Implement the still-missing app code (per email-scanning-milestones.md §3–5): the Graph
-   webhook/notification ingress, the worker's fetch+extract, and the Care Calendar event
-   review UI. Only then flip `EMAIL_SCANNING_ENABLED=true`.
+6. Finish the app code (per email-scanning-milestones.md §3–5). Graph notification ingress
+   and subscription creation/renewal are implemented locally. Worker fetch/extract and
+   atomic suggestion persistence are also implemented (89 focused email tests pass).
+   Configure `EMAIL_MICROSOFT_NOTIFICATION_URL` on the public API origin and schedule
+   `python -m app.email_ingestion.subscriptions` at least hourly when ready. Still pending:
+   missed-message/orphan-subscription reconciliation and Care Calendar
+   event review. No maintenance schedule or scanning deployment has been applied.
+   Keep `EMAIL_SCANNING_ENABLED=false` until the full pipeline is ready and validated.
 
 ### C. Hardening / follow-ups (optional, not blocking)
 
@@ -113,6 +118,47 @@ Prerequisites, then apply:
   Consider adding `needs: plan` (with the scanning matrix caveat) to enforce this.
 - **Client-secret rotation** is manual/out-of-band (see README → Rotation). Track its
   expiry and rotate before it lapses.
+
+### Local PHI and efficiency review (2026-09-16)
+
+Implemented in the email code, not yet deployed:
+- Email routes return fixed validation/unexpected-error responses, avoiding FastAPI's
+  default input echo and ASGI exception tracebacks. Responses include `no-store` and
+  `no-referrer`. Email model validation exception strings hide input values.
+- Backend Uvicorn access logging redacts email route identifiers and query strings.
+  HTTPX/httpcore and Azure SDK transport logs are suppressed within mailbox operations;
+  Service Bus and Key Vault wire logging remain disabled. This does **not** configure
+  frontend/ingress logs or third-party tracing/error reporters: disable body capture,
+  query capture, and exception-local capture there before rollout.
+- Notification batches use one thread dispatch and reuse one lazily opened Service Bus
+  sender/credential/client, instead of opening them per message. Duplicate successful
+  sends within a batch are skipped. SDK send retries are disabled and each send has a
+  five-second timeout; failed requests still return 503 for provider retry. This is a
+  per-send bound, not a guarantee on total webhook latency or credential acquisition.
+- Subscription checks that are not due return before credential decryption, Key Vault
+  access, or token refresh. Credentials are not cached across requests.
+
+47 focused tests pass, including sentinel-based checks for error/log disclosure,
+connection reuse, duplicate handling, failure cleanup, and avoiding unnecessary
+credential access. Tests use mocked cloud/database boundaries on Python 3.14; production
+Python 3.12 and live integration validation remain pending.
+
+Remaining priorities before PHI rollout:
+- Queue identifiers and extracted calendar events can still be sensitive/linkable; treat
+  them as protected data, including dead letters, backups, deletion, and retention.
+- Verify frontend/ingress/APM logging and Azure OpenAI data-retention configuration,
+  applicable BAA coverage, and database/service access controls in the deployed environment.
+  Local code tests do not establish HIPAA compliance.
+- Consider a transactional identifier-only outbox: acknowledge after a durable DB write,
+  then publish asynchronously. It would remove AMQP latency from webhook requests and
+  shorten the locks currently held during publishing. It needs a publisher, retries,
+  retention, and disconnect checks; do not replace durable delivery with an in-process task.
+- Page maintenance queries and select only due connections as mailbox count grows. Keep
+  state rechecks under locks and add missed-message/orphan-subscription reconciliation.
+- The worker now implements atomic idempotency, bounded extraction input/output, prompt
+  isolation, minimization instructions, and owner checks. Live validation remains required.
+  See [worker implementation and validation](email-scanning-milestones.md#worker-implementation-and-validation-2026-09-16)
+  for the new image, runtime configuration, test scope, and remaining deployment wiring.
 
 ## Key IDs (non-secret)
 

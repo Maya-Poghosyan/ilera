@@ -1,0 +1,13 @@
+# Standalone scanning excludes embedding models, forms, and the eligibility pipeline.
+fastapi>=0.115.0,<1.0
+pydantic>=2.10.0,<3.0
+pydantic-settings>=2.7.0,<3.0
+httpx>=0.28.0,<1.0
+python-jose[cryptography]>=3.3.0,<4.0
+cryptography>=43.0.0
+openai>=2.29,<3.0
+azure-identity>=1.19.0,<2.0
+azure-keyvault-secrets>=4.9.0,<5.0
+azure-servicebus>=7.14.0,<8.0
+psycopg[binary]>=3.2,<4.0
+psycopg-pool>=3.2,<4.0

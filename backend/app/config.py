@@ -80,8 +80,13 @@ class Settings(BaseSettings):
     email_token_encryption_key_name: str = "ilera-email-token-key"
     email_service_bus_namespace: str = ""
     email_service_bus_queue: str = "email.scan"
+    # Public API origin, bypassing the authenticated frontend API proxy.
+    email_microsoft_notification_url: str = ""
     email_use_managed_identity: bool = True
     email_managed_identity_client_id: str = ""
+    email_openai_endpoint: str = ""
+    email_openai_deployment: str = ""
+    email_scan_max_deliveries: int = 5
 
     @property
     def has_postgres(self) -> bool:

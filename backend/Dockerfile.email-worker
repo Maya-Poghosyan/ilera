@@ -1,0 +1,9 @@
+FROM python:3.12-slim
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+WORKDIR /app
+COPY requirements-email-worker.txt ./
+RUN pip install --no-cache-dir -r requirements-email-worker.txt
+COPY app ./app
+RUN addgroup --system app && adduser --system --ingroup app --no-create-home app
+USER app
+CMD ["python", "-m", "app.email_ingestion.worker"]

@@ -16,7 +16,7 @@ EmailProviderName = Literal["microsoft", "google"]
 class MailboxConnection(BaseModel):
     """Server-only metadata; credentials live in encrypted storage, never this document."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str = Field(min_length=1)
     case_id: str = Field(min_length=1)
@@ -30,13 +30,16 @@ class MailboxConnection(BaseModel):
     consented_at: AwareDatetime
     subscription_id: str | None = None
     subscription_expires_at: AwareDatetime | None = None
+    subscription_client_state_hash: str | None = Field(default=None, repr=False)
+    subscription_renewal_required: bool = False
+    reconciliation_required: bool = False
     created_at: AwareDatetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class EmailScanJob(BaseModel):
     """The complete queue payload: identifiers only, no subject, sender, body, or tokens."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True, hide_input_in_errors=True)
     version: Literal[1] = 1
     provider: EmailProviderName
     connection_id: str = Field(min_length=1, max_length=128)
@@ -54,7 +57,7 @@ class EmailScanJob(BaseModel):
 class EmailMessage(BaseModel):
     """Transient worker input. Never write to a store, queue, trace, or log."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
     message_id: str
     received_at: AwareDatetime
     sender: SecretStr

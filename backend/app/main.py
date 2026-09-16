@@ -8,7 +8,9 @@ from typing import Any, Optional
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator, model_validator
+from datetime import date as Date
+from typing import Literal
 
 from .access import authorize_case, require_case_access
 from .auth import User, get_current_user, get_optional_user
@@ -28,6 +30,8 @@ from .applications import (
 from . import db
 from .config import get_settings
 from .email_ingestion.routes import router as email_router
+from .email_ingestion.notifications import router as email_notifications_router
+from .email_ingestion.privacy import configure_email_access_logging
 from .forms.filler import fill_pdf, list_schemas, resolve_fields
 from .geo import normalize_county, zip_to_county
 from .intake import INTAKE_SCHEMA, map_answers_to_profile
@@ -53,6 +57,8 @@ from .records import (
     delete_journal,
     delete_timekeeping,
     get_renewal,
+    get_timekeeping,
+    get_journal,
     list_journal,
     list_timekeeping,
     save_journal,
@@ -60,7 +66,7 @@ from .records import (
     save_timekeeping,
 )
 from .preferences import Preferences, get_preferences, save_preferences
-from .store import get_profile, purge_unclaimed_cases, save_profile
+from .store import get_case_id_for_user, get_profile, purge_unclaimed_cases, save_profile
 from .suggested_events import (
     SuggestedEvent,
     delete_suggested_event,
@@ -104,6 +110,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
+configure_email_access_logging()
 
 app.add_middleware(
     CORSMiddleware,
@@ -116,6 +123,7 @@ app.add_middleware(
 # Auth routes
 app.include_router(auth_router)
 app.include_router(email_router)
+app.include_router(email_notifications_router)
 
 
 @app.get("/healthz")
@@ -357,18 +365,24 @@ class ReminderUpdate(BaseModel):
 
 
 @app.get("/api/reminders")
-def api_list_reminders() -> list[Reminder]:
-    return list_reminders()
+def api_list_reminders(case_id: Optional[str] = None, user: Optional[User] = Depends(get_optional_user)) -> list[Reminder]:
+    scope = case_id or (get_case_id_for_user(user.id) if user else None)
+    if not scope:
+        return []
+    authorize_case(scope, user)
+    return [r for r in list_reminders() if r.case_id == scope]
 
 
 @app.post("/api/reminders", status_code=201)
 def api_create_reminder(
     body: ReminderCreate, user: Optional[User] = Depends(get_optional_user)
 ) -> Reminder:
-    if body.case_id:
-        authorize_case(body.case_id, user)
+    scope = body.case_id or (get_case_id_for_user(user.id) if user else None)
+    if not scope:
+        raise HTTPException(status_code=422, detail="A case is required")
+    authorize_case(scope, user)
     reminder = Reminder(
-        case_id=body.case_id,
+        case_id=scope,
         kind=body.kind,
         message=body.message,
         schedule=body.schedule,
@@ -385,18 +399,20 @@ def api_templates() -> dict:
 
 
 @app.get("/api/reminders/{reminder_id}")
-def api_get_reminder(reminder_id: str) -> Reminder:
+def api_get_reminder(reminder_id: str, user: Optional[User] = Depends(get_optional_user)) -> Reminder:
     r = get_reminder(reminder_id)
-    if r is None:
+    if r is None or not r.case_id:
         raise HTTPException(status_code=404, detail="reminder not found")
+    authorize_case(r.case_id, user)
     return r
 
 
 @app.patch("/api/reminders/{reminder_id}")
-def api_patch_reminder(reminder_id: str, body: ReminderUpdate) -> Reminder:
+def api_patch_reminder(reminder_id: str, body: ReminderUpdate, user: Optional[User] = Depends(get_optional_user)) -> Reminder:
     r = get_reminder(reminder_id)
-    if r is None:
+    if r is None or not r.case_id:
         raise HTTPException(status_code=404, detail="reminder not found")
+    authorize_case(r.case_id, user)
     if body.message is not None:
         r.message = body.message
     if body.schedule is not None:
@@ -413,7 +429,8 @@ def api_patch_reminder(reminder_id: str, body: ReminderUpdate) -> Reminder:
 
 
 @app.delete("/api/reminders/{reminder_id}")
-def api_delete_reminder(reminder_id: str) -> dict:
+def api_delete_reminder(reminder_id: str, user: Optional[User] = Depends(get_optional_user)) -> dict:
+    api_get_reminder(reminder_id, user)
     if not delete_reminder(reminder_id):
         raise HTTPException(status_code=404, detail="reminder not found")
     return {"deleted": True}
@@ -598,24 +615,60 @@ def api_delete_suggested_event(
 class TimekeepingCreate(BaseModel):
     case_id: str
     date: str
-    hours: float
-    start_time: Optional[str] = None
-    end_time: Optional[str] = None
-    service_type: str = "personal_care"
-    tasks: list[str] = []
+    hours: float = Field(gt=0, le=24, allow_inf_nan=False)
+    start_time: Optional[str] = Field(default=None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    end_time: Optional[str] = Field(default=None, pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    service_type: Literal["personal_care", "domestic", "paramedical", "accompaniment"] = "personal_care"
+    tasks: list[str] = Field(default_factory=list)
     notes: str = ""
+
+    @field_validator("date")
+    @classmethod
+    def valid_date(cls, value: str) -> str:
+        if Date.fromisoformat(value).isoformat() != value:
+            raise ValueError("Use YYYY-MM-DD")
+        return value
+
+    @model_validator(mode="after")
+    def valid_duration(self):
+        if bool(self.start_time) != bool(self.end_time):
+            raise ValueError("Provide both start and end times")
+        if self.start_time and self.end_time:
+            start = sum(int(v) * m for v, m in zip(self.start_time.split(":"), (60, 1)))
+            end = sum(int(v) * m for v, m in zip(self.end_time.split(":"), (60, 1)))
+            if end <= start or abs(self.hours * 60 - (end - start)) > 0.01:
+                raise ValueError("Hours must match the same-day time range; split overnight care into separate dates")
+        return self
 
 
 class JournalCreate(BaseModel):
     case_id: str
     date: str
-    text: str
+    text: str = Field(min_length=1, max_length=20000)
+
+    _valid_date = field_validator("date")(TimekeepingCreate.valid_date.__func__)
+
+    @field_validator("text")
+    @classmethod
+    def nonblank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Enter a journal note")
+        return value.strip()
+
+
+class IncidentReview(BaseModel):
+    status: Literal["confirmed", "dismissed", "unreviewed"]
 
 
 class RenewalUpdate(BaseModel):
-    program: Optional[str] = None
+    program: Optional[str] = Field(default=None, min_length=1)
     due_date: Optional[str] = None
-    status: Optional[str] = None
+    status: Optional[Literal["active", "pending", "overdue"]] = None
+
+    @field_validator("due_date")
+    @classmethod
+    def valid_due_date(cls, value):
+        return TimekeepingCreate.valid_date(value) if value is not None else None
 
 
 @app.get("/api/records/timekeeping/{case_id}")
@@ -701,7 +754,7 @@ def api_put_renewal(
         existing = RenewalInfo(case_id=case_id)
     if body.program is not None:
         existing.program = body.program
-    if body.due_date is not None:
+    if "due_date" in body.model_fields_set:
         existing.due_date = body.due_date
     if body.status is not None:
         existing.status = body.status
@@ -715,10 +768,44 @@ def api_records_summary(case_id: str, _: str = Depends(require_case_access)) -> 
     timekeeping = list_timekeeping(case_id)
     journal = list_journal(case_id)
     renewal = get_renewal(case_id) or RenewalInfo(case_id=case_id)
-    fall_flag = any(j.fall_flagged for j in journal)
+    fall_flag = any(j.fall_flagged and j.incident_status != "dismissed" for j in journal)
     return {
         "timekeeping": timekeeping,
         "journal": journal,
         "renewal": renewal,
         "fall_flag": fall_flag,
     }
+
+
+@app.put("/api/records/timekeeping/{entry_id}")
+def api_update_timekeeping(entry_id: str, body: TimekeepingCreate, user: Optional[User] = Depends(get_optional_user)) -> TimekeepingEntry:
+    authorize_case(body.case_id, user)
+    existing = get_timekeeping(entry_id, body.case_id)
+    if existing is None:
+        raise HTTPException(status_code=404, detail="timekeeping entry not found")
+    entry = TimekeepingEntry(**body.model_dump(), id=existing.id, created_at=existing.created_at)
+    save_timekeeping(entry)
+    return entry
+
+
+@app.put("/api/records/journal/{entry_id}")
+def api_update_journal(entry_id: str, body: JournalCreate, user: Optional[User] = Depends(get_optional_user)) -> JournalEntry:
+    authorize_case(body.case_id, user)
+    existing = get_journal(entry_id, body.case_id)
+    if existing is None:
+        raise HTTPException(status_code=404, detail="journal entry not found")
+    entry = JournalEntry(**body.model_dump(), id=existing.id, created_at=existing.created_at,
+                         fall_flagged=_detect_fall(body.text),
+                         incident_status=existing.incident_status if body.text == existing.text else "unreviewed")
+    save_journal(entry)
+    return entry
+
+
+@app.patch("/api/records/journal/{entry_id}/incident")
+def api_review_incident(entry_id: str, body: IncidentReview, case_id: str, _: str = Depends(require_case_access)) -> JournalEntry:
+    entry = get_journal(entry_id, case_id)
+    if entry is None:
+        raise HTTPException(status_code=404, detail="journal entry not found")
+    entry.incident_status = body.status
+    save_journal(entry)
+    return entry

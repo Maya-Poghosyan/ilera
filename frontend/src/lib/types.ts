@@ -188,6 +188,7 @@ export interface JournalEntry {
   date: string;
   text: string;
   fall_flagged: boolean;
+  incident_status: "unreviewed" | "confirmed" | "dismissed";
   created_at: string;
 }
 
@@ -206,7 +207,7 @@ export interface RenewalInfo {
 
 export interface RenewalUpdate {
   program?: string;
-  due_date?: string;
+  due_date?: string | null;
   status?: string;
 }
 

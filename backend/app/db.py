@@ -140,6 +140,7 @@ CREATE TABLE IF NOT EXISTS email_connections (
     updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS email_connections_case_idx ON email_connections (case_id);
+CREATE INDEX IF NOT EXISTS email_connections_subscription_idx ON email_connections ((doc->>'subscription_id'));
 CREATE TABLE IF NOT EXISTS email_scan_results (
     id text PRIMARY KEY,
     case_id text NOT NULL REFERENCES cases(id) ON DELETE CASCADE,

@@ -6,6 +6,7 @@ No raw provider errors escape this boundary: they can contain tokens or message 
 from __future__ import annotations
 
 import secrets
+import json
 from datetime import datetime, timedelta, timezone
 from typing import Literal
 from urllib.parse import quote, urlencode, urlparse
@@ -17,6 +18,7 @@ from pydantic import SecretStr
 
 from ..config import get_settings
 from ..email_ingestion.models import EmailMessage
+from ..email_ingestion.privacy import private_transport
 from .base import AuthorizedMailbox, EmailSubscription, OAuthTokens
 
 GRAPH = "https://graph.microsoft.com/v1.0"
@@ -60,6 +62,7 @@ class MicrosoftEmailProvider:
             "nonce": nonce, "prompt": "select_account",
         })
 
+    @private_transport
     async def _token(self, fields: dict) -> dict:
         try:
             async with httpx.AsyncClient(timeout=20) as client:
@@ -95,6 +98,7 @@ class MicrosoftEmailProvider:
         except Exception:
             raise ProviderError("Microsoft did not grant mailbox access") from None
 
+    @private_transport
     async def exchange_code(self, *, code: str, code_verifier: str, nonce: str) -> AuthorizedMailbox:
         data = await self._token({"grant_type": "authorization_code", "code": code,
                                   "code_verifier": code_verifier, "redirect_uri": self.redirect_uri})
@@ -122,19 +126,25 @@ class MicrosoftEmailProvider:
         data = await self._token({"grant_type": "refresh_token", "refresh_token": refresh_token.get_secret_value()})
         return self._tokens(data, refresh_token)
 
+    @private_transport
     async def _graph(self, method: str, path: str, token: SecretStr, **kwargs) -> dict:
         try:
             async with httpx.AsyncClient(timeout=20) as client:
-                response = await client.request(method, GRAPH + path, headers={
+                async with client.stream(method, GRAPH + path, headers={
                     "Authorization": f"Bearer {token.get_secret_value()}",
                     "Prefer": 'IdType="ImmutableId", outlook.body-content-type="text"',
-                }, **kwargs)
-            if method == "DELETE" and response.status_code in (204, 404):
-                return {}
-            if response.status_code == 401:
-                raise ReauthorizationRequired("Microsoft sign-in is required")
-            response.raise_for_status()
-            return response.json()
+                }, **kwargs) as response:
+                    if method == "DELETE" and response.status_code in (204, 404):
+                        return {}
+                    if response.status_code == 401:
+                        raise ReauthorizationRequired("Microsoft sign-in is required")
+                    response.raise_for_status()
+                    body = bytearray()
+                    async for chunk in response.aiter_bytes():
+                        if len(body) + len(chunk) > 2_000_000:
+                            raise ValueError("Message exceeds processing limit")
+                        body.extend(chunk)
+                    return json.loads(body)
         except ReauthorizationRequired:
             raise
         except Exception:
@@ -158,6 +168,7 @@ class MicrosoftEmailProvider:
             raise ProviderError("An HTTPS notification URL is required")
         data = await self._graph("POST", "/subscriptions", access_token, json={
             "changeType": "created", "notificationUrl": notification_url,
+            "lifecycleNotificationUrl": notification_url,
             "resource": "me/messages", "clientState": client_state,
             "expirationDateTime": (datetime.now(timezone.utc) + timedelta(days=6)).isoformat(),
         })

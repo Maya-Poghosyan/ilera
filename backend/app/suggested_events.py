@@ -17,7 +17,9 @@ _store = db.JsonStore("suggested_events")
 
 class SuggestedEvent(BaseModel):
     id: str = Field(default_factory=lambda: uuid.uuid4().hex[:12])
-    date: date_cls
+    date: Optional[date_cls] = None
+    date_status: Literal["known", "ambiguous", "missing"] = "known"
+    timezone: Optional[str] = None
     title: str
     time: Optional[str] = None
     kind: str = "Appointment"
@@ -44,7 +46,7 @@ class SuggestedEvent(BaseModel):
     @computed_field
     @property
     def day(self) -> int:
-        return self.date.day
+        return self.date.day if self.date else 0
 
 
 def save_suggested_event(event: SuggestedEvent) -> SuggestedEvent:

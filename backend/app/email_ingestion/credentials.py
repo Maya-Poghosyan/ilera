@@ -15,6 +15,7 @@ from pydantic import SecretStr
 
 from ..config import get_settings
 from ..providers.base import OAuthTokens
+from .privacy import private_transport_logs
 
 
 class CredentialError(Exception):
@@ -34,7 +35,7 @@ def _vault() -> Iterator:
         ManagedIdentityCredential(client_id=settings.email_managed_identity_client_id or None)
         if settings.email_use_managed_identity else DefaultAzureCredential()
     )
-    with credential:
+    with private_transport_logs(), credential:
         with SecretClient(vault_url=settings.email_key_vault_url, credential=credential,
                           logging_enable=False, connection_timeout=5, read_timeout=10, retry_total=2) as client:
             yield client

@@ -13,8 +13,9 @@ from ..providers.microsoft import ProviderError
 from . import connections, credentials
 from .models import MailboxConnection
 from .store import list_connections
+from .privacy import PrivateEmailRoute
 
-router = APIRouter(prefix="/api/email", tags=["email"])
+router = APIRouter(prefix="/api/email", tags=["email"], route_class=PrivateEmailRoute)
 
 
 def _configured() -> bool:
