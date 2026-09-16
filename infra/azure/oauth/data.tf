@@ -14,23 +14,6 @@ data "azurerm_client_config" "current" {}
 # app's runtime identity (which only ever gets Secrets User).
 data "azuread_client_config" "current" {}
 
-# Microsoft Graph identifiers are well-known constants, identical in every Azure tenant.
-# We use the fixed values rather than reading the Graph service principal from the
-# directory — that read requires a directory-read Graph permission on whoever runs
-# Terraform (it 403s for the CI identity, which has none). Hardcoding keeps the CI
-# principal least-privilege: it never needs to read arbitrary directory objects.
-locals {
-  msgraph_app_id = "00000003-0000-0000-c000-000000000000"
-
-  # Delegated (oauth2PermissionScopes) UUIDs on Microsoft Graph. Stable across tenants.
-  msgraph_scope_ids = {
-    "Mail.Read"      = "570282fd-fa5c-430d-a7fd-fc8dc98a9dca"
-    "openid"         = "37f7f235-527c-4136-accd-4a02d197296e"
-    "profile"        = "14dad69e-099b-42c9-810b-d002981feec1"
-    "offline_access" = "7427e0e9-2fba-42fe-b0c0-848c9e6a8182"
-  }
-}
-
 # The existing API Container App. We attach a system-assigned identity, vault access,
 # and env vars to it; we do not define its image or scaling here (that stays with the
 # deploy workflow). Managed via an azapi/ignore pattern documented in the README so a
@@ -61,7 +44,7 @@ locals {
     EMAIL_CONNECTIONS_ENABLED          = "false"
     EMAIL_SCANNING_ENABLED             = "false"
     EMAIL_MICROSOFT_TENANT_ID          = var.tenant_id
-    EMAIL_MICROSOFT_CLIENT_ID          = azuread_application.mailbox.client_id
+    EMAIL_MICROSOFT_CLIENT_ID          = var.mailbox_client_id
     EMAIL_MICROSOFT_REDIRECT_URI       = var.redirect_uri
     EMAIL_KEY_VAULT_URL                = local.vault_uri
     EMAIL_MICROSOFT_CLIENT_SECRET_NAME = var.client_secret_name

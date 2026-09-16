@@ -78,14 +78,8 @@ resource "azurerm_key_vault_secret" "token_encryption_key" {
 }
 
 # --- Microsoft application client secret -------------------------------------
-resource "azurerm_key_vault_secret" "client_secret" {
-  name            = var.client_secret_name
-  value           = azuread_application_password.mailbox.value
-  key_vault_id    = azurerm_key_vault.email.id
-  content_type    = "entra-client-secret"
-  expiration_date = azuread_application_password.mailbox.end_date
+# NOT managed here. The Entra app and its secret are managed outside Terraform (see
+# entra.tf). Write the client-secret VALUE into this vault as var.client_secret_name
+# out-of-band. Terraform only references the name via the API config, and grants the API
+# identity read access below.
 
-  depends_on = [azurerm_role_assignment.operator_secrets_officer]
-
-  tags = var.tags
-}

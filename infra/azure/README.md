@@ -28,9 +28,9 @@ vault ID and API identity), so apply `oauth` first.
 |---|---|
 | `versions.tf` | Provider pins (azurerm, azuread, azapi, random, time) and the remote-state backend |
 | `variables.tf` | Inputs; defaults are the reviewed non-secret production values |
-| `data.tf` | References to existing resources (subscription, API app, Graph SP); `EMAIL_*` env values |
-| `entra.tf` | Mailbox app registration + service principal + rotating client secret |
-| `keyvault.tf` | Dedicated Key Vault, Fernet key, client-secret; bootstrap + runtime RBAC |
+| `data.tf` | References to existing resources (subscription, API app, its identity); `EMAIL_*` env values |
+| `entra.tf` | Docs only — the Entra app is managed **outside** Terraform (see below) |
+| `keyvault.tf` | Dedicated Key Vault, Fernet key; bootstrap + runtime RBAC |
 | `api.tf` | System-assigned identity, Secrets User role, and `EMAIL_*` env vars on `ilera-api` |
 | `hipaa.tf` | Log Analytics + Key Vault diagnostic settings |
 | `outputs.tf` | Non-secret resource IDs, callback URL, config names (read by `scanning/`) |
@@ -48,10 +48,12 @@ vault ID and API identity), so apply `oauth` first.
 
 - Terraform >= 1.6 and an Azure CLI login in the configured tenant/subscription
   (`az login --tenant <tenant>`; `az account set --subscription <sub>`).
-- The operator running `apply` needs: Entra application-creation permission, resource
-  create/update in the `Ilera` resource group, and permission to create role assignments
-  on the new Key Vault. Terraform grants that operator `Key Vault Secrets Officer` on the
-  vault to write the two secrets. The API runtime identity only ever gets `Secrets User`.
+- The operator/CI identity running `apply` needs: resource create/update in the `Ilera`
+  resource group and permission to create role assignments on the Key Vault
+  (`Role Based Access Control Administrator`). It needs **no Entra/Graph permissions** —
+  the Entra app is managed outside Terraform. Terraform grants the operator identity
+  `Key Vault Secrets Officer` to write the Fernet key; the API runtime identity only gets
+  `Secrets User`.
 - The `Microsoft.KeyVault` and (for scanning) `Microsoft.ServiceBus`,
   `Microsoft.CognitiveServices` resource providers registered on the subscription.
 
@@ -118,44 +120,66 @@ One-time setup (mirrors `deploy.yml`):
   credential for this repo — no stored password).
 - A GitHub Environment named `infra-production` with **required reviewers** configured, so the
   apply job pauses for approval.
-- The CI service principal needs, beyond resource/Entra/Key-Vault permissions:
-  **`Storage Blob Data Contributor`** on `ileratfstate` (to read/write remote state — the
-  same role granted to the operator during backend bootstrap).
+- The CI service principal needs (all ARM, **no Entra/Graph permissions**):
+  - `Contributor` on the `Ilera` resource group (create/update resources)
+  - `Role Based Access Control Administrator` on the `Ilera` resource group (create the
+    Key Vault / Service Bus / OpenAI role assignments)
+  - `Storage Blob Data Contributor` on `ileratfstate` (read/write remote state)
 
 The apply job re-plans into a file and applies exactly that plan, so nothing can drift
 between the reviewed plan and the approved apply.
 
 ## Importing existing resources
 
-If the Python bootstrap already created the vault, the Entra app, or assigned the API
-identity, import them so Terraform adopts rather than duplicates them. Run these from
-`infra/azure/oauth/`. Import, then run `plan` and reconcile any diff before `apply`:
+If the Python bootstrap already created the vault or assigned the API identity, import
+them so Terraform adopts rather than duplicates them. Run these from `infra/azure/oauth/`.
+Import, then run `plan` and reconcile any diff before `apply`:
 
 ```sh
 # Key Vault
 terraform import azurerm_key_vault.email \
   /subscriptions/<sub>/resourceGroups/Ilera/providers/Microsoft.KeyVault/vaults/ilera-email-01a341d5
 
-# Entra application (use the application OBJECT id, not the client id)
-terraform import azuread_application.mailbox /applications/<application-object-id>
-terraform import azuread_service_principal.mailbox <service-principal-object-id>
-
-# Existing secrets — the Fernet key has ignore_changes on value, so importing it preserves
-# the existing key material rather than re-keying stored tokens.
+# If a Fernet key already exists in the vault, import it — ignore_changes on value
+# preserves the existing key material rather than re-keying stored tokens.
 terraform import azurerm_key_vault_secret.token_encryption_key \
   "https://ilera-email-01a341d5.vault.azure.net/secrets/ilera-email-token-key/<version>"
 ```
 
-The API Container App is intentionally **not** imported as a full resource: `api.tf` patches
-only identity + env onto it via `azapi_update_resource`, leaving the image/scale to the
-deploy workflow.
+The Entra application is **not** imported — it is managed outside Terraform (below). The
+API Container App is also **not** imported as a full resource: `api.tf` patches only
+identity + env onto it via `azapi_update_resource`, leaving the image/scale to the deploy
+workflow.
+
+## Entra app (out of band)
+
+The `ilera-microsoft-mailbox` Entra application and its client secret are managed by a
+human admin, not this module — managing a directory object from a CI service principal
+would require granting that principal standing Microsoft Graph app-management permissions
+with admin consent, which we don't want the deploy identity to hold.
+
+Terraform only references the app's client ID (`var.mailbox_client_id`) and expects the
+client-secret VALUE to already be present in the Key Vault under `var.client_secret_name`.
+Admin steps (one-time, and on rotation):
+
+1. Ensure the app exists: single-tenant (`AzureADMyOrg`), web redirect `var.redirect_uri`,
+   delegated Microsoft Graph scopes `Mail.Read`, `openid`, `profile`, `offline_access`.
+2. Create/rotate the client secret in the portal (or an admin-run `az ad app credential`
+   command).
+3. Write the secret VALUE into the vault:
+   `az keyvault secret set --vault-name ilera-email-01a341d5 --name ilera-microsoft-client-secret --file <secret-file>`
+   (use `--file`, not `--value`, to keep it out of shell history).
+
+The API reads that secret at runtime via its managed identity. Rotation is a matter of
+adding a new secret version out of band; Terraform is not involved.
 
 ## HIPAA notes
 
 Technical safeguards Terraform expresses here (HIPAA Security Rule references):
 
 - **Audit controls (§164.312(b))** — Key Vault diagnostic settings stream every secret
-  access to Log Analytics; `log_retention_days` defaults to 2192 (6 years).
+  access to Log Analytics; `log_retention_days` defaults to 730 (the workspace maximum).
+  Longer HIPAA retention (e.g. 6 years) is via archive/export — see `hipaa.tf`.
 - **Access control (§164.312(a))** — RBAC-only vault; runtime identities get `Secrets User`,
   never write/manage. Service Bus and OpenAI use managed identity, `local_auth_enabled = false`.
 - **Transmission security (§164.312(e))** — Key Vault network ACLs default-deny; private
@@ -187,10 +211,10 @@ content-logging / abuse-monitoring opted out for PHI.
 
 ## Rotation
 
-- **Client secret** — `time_rotating.client_secret` rotates the Entra credential every
-  `client_secret_rotation_days` (180). On rotation Terraform issues a new secret, stores its
-  value as a new Key Vault version, and updates the expiration. Validate a token refresh, then
-  retire the old Entra credential.
+- **Client secret** — managed outside Terraform. Rotate by adding a new Entra credential
+  and writing its value into the vault under `var.client_secret_name` (see "Entra app (out
+  of band)"). Validate a token refresh, then retire the old credential. Terraform is not
+  involved.
 - **Fernet key** — `azurerm_key_vault_secret.token_encryption_key` has `ignore_changes = [value]`
   so a re-apply never silently re-keys stored tokens. To rotate deliberately, add a new secret
   version out of band and re-encrypt database ciphertext before disabling the old version. Each

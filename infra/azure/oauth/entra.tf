@@ -1,65 +1,23 @@
-# Mailbox OAuth identity (Microsoft Graph, delegated).
+# Mailbox OAuth Entra application — MANAGED OUTSIDE TERRAFORM.
 #
-# Replaces the `az ad app create` / `az ad sp create` / `az ad app credential reset`
-# path in setup_email.py. Single-tenant (AzureADMyOrg): consumer Outlook.com accounts
-# are intentionally unsupported by this slice. Delegated Mail.Read only — no mail-write,
-# no send, no directory-wide or application-mailbox permissions.
-
-resource "azuread_application" "mailbox" {
-  display_name     = var.mailbox_app_name
-  sign_in_audience = "AzureADMyOrg"
-
-  # Web redirect (authorization code flow), NOT an SPA redirect.
-  web {
-    redirect_uris = [var.redirect_uri]
-  }
-
-  required_resource_access {
-    resource_app_id = local.msgraph_app_id # Microsoft Graph
-
-    # Delegated scope: read the signed-in user's mail.
-    resource_access {
-      id   = local.msgraph_scope_ids["Mail.Read"]
-      type = "Scope"
-    }
-    resource_access {
-      id   = local.msgraph_scope_ids["openid"]
-      type = "Scope"
-    }
-    resource_access {
-      id   = local.msgraph_scope_ids["profile"]
-      type = "Scope"
-    }
-    # offline_access = long-lived refresh tokens, required to refresh without re-consent.
-    resource_access {
-      id   = local.msgraph_scope_ids["offline_access"]
-      type = "Scope"
-    }
-  }
-
-  tags = ["ilera", "email-scanning", "hipaa"]
-}
-
-# The enterprise application (service principal) in this tenant. Consent remains a
-# separate user/admin flow; creating the SP does not grant consent.
-resource "azuread_service_principal" "mailbox" {
-  client_id = azuread_application.mailbox.client_id
-}
-
-# Rotating client secret. Terraform manages the lifetime; the VALUE is written to Key
-# Vault below and never printed. rotate_when_changed forces a fresh secret when the
-# rotation window elapses. The value transits Terraform state once — keep state in the
-# encrypted azurerm backend (see README), never local for production.
-resource "time_rotating" "client_secret" {
-  rotation_days = var.client_secret_rotation_days
-}
-
-resource "azuread_application_password" "mailbox" {
-  application_id = azuread_application.mailbox.id
-  display_name   = "ilera-mailbox-keyvault"
-  end_date       = timeadd(time_rotating.client_secret.rotation_rfc3339, "${var.client_secret_rotation_days * 24}h")
-
-  rotate_when_changed = {
-    rotation = time_rotating.client_secret.id
-  }
-}
+# The Entra application (`ilera-microsoft-mailbox`) and its client secret are deliberately
+# NOT managed by this module. Managing a directory object from a CI service principal would
+# require granting that principal standing Microsoft Graph app-management permissions
+# (Application.ReadWrite.OwnedBy) with admin consent — a directory-level privilege we don't
+# want the deploy identity to hold. Terraform here manages Azure *resources*; a human admin
+# manages the *directory object*.
+#
+# Terraform only REFERENCES the app via var.mailbox_client_id (the existing client ID).
+#
+# The app must exist with:
+#   - sign-in audience: AzureADMyOrg (single tenant)
+#   - web redirect URI: var.redirect_uri (…/api/email/microsoft/callback)
+#   - delegated Microsoft Graph scopes: Mail.Read, openid, profile, offline_access
+#
+# The client secret VALUE must be written into this module's Key Vault as the secret named
+# var.client_secret_name, out-of-band (portal or an admin-run script). See README →
+# "Entra app (out of band)". Terraform reads that secret name into the API config but never
+# creates or rotates the credential.
+#
+# Current app (for reference): ilera-microsoft-mailbox
+#   client id : c3b57022-1fcd-4434-a04a-b9ce41e54987   (= var.mailbox_client_id default)

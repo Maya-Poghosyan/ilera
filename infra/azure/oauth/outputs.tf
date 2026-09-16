@@ -1,19 +1,10 @@
-# Non-secret outputs. These mirror the JSON "report" setup_email.py returned: resource
-# names/IDs, the callback URL, and config names — never secret values.
+# Non-secret outputs: resource names/IDs, the callback URL, and config names — never
+# secret values. The scanning module reads key_vault_id, key_vault_uri, and
+# api_identity_principal_id from this module's remote state.
 
-output "mailbox_application_client_id" {
-  description = "Entra application (client) ID for EMAIL_MICROSOFT_CLIENT_ID."
-  value       = azuread_application.mailbox.client_id
-}
-
-output "mailbox_application_object_id" {
-  description = "Entra application object ID."
-  value       = azuread_application.mailbox.object_id
-}
-
-output "mailbox_service_principal_object_id" {
-  description = "Enterprise application (service principal) object ID."
-  value       = azuread_service_principal.mailbox.object_id
+output "mailbox_client_id" {
+  description = "Client ID of the (externally managed) mailbox Entra app used for EMAIL_MICROSOFT_CLIENT_ID."
+  value       = var.mailbox_client_id
 }
 
 output "redirect_uri" {
@@ -32,13 +23,8 @@ output "key_vault_id" {
 }
 
 output "client_secret_name" {
-  description = "Key Vault secret name holding the Entra client secret."
+  description = "Key Vault secret name holding the (externally written) Entra client secret."
   value       = var.client_secret_name
-}
-
-output "client_secret_expiration" {
-  description = "Expiration of the current Entra client secret; rotate before this date."
-  value       = azuread_application_password.mailbox.end_date
 }
 
 output "encryption_key_name" {
@@ -48,7 +34,7 @@ output "encryption_key_name" {
 
 output "api_identity_principal_id" {
   description = "System-assigned managed identity principal ID granted Key Vault Secrets User."
-  value       = azapi_update_resource.api_email_config.output.identity.principalId
+  value       = data.azapi_resource.api_identity.output.identity.principalId
 }
 
 output "email_backend_settings" {

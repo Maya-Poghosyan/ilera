@@ -35,12 +35,12 @@ variable "api_app_name" {
   default     = "ilera-api"
 }
 
-# --- Mailbox OAuth (implemented slice) ---------------------------------------
+# --- Mailbox OAuth (app managed outside Terraform — see entra.tf) ------------
 
-variable "mailbox_app_name" {
-  description = "Display name for the Entra application used for delegated mailbox OAuth."
+variable "mailbox_client_id" {
+  description = "Client (application) ID of the existing ilera-microsoft-mailbox Entra app. Managed outside Terraform."
   type        = string
-  default     = "ilera-microsoft-mailbox"
+  default     = "c3b57022-1fcd-4434-a04a-b9ce41e54987"
 }
 
 variable "redirect_uri" {
@@ -70,12 +70,6 @@ variable "encryption_key_name" {
   description = "Key Vault secret name holding the Fernet token-encryption key."
   type        = string
   default     = "ilera-email-token-key"
-}
-
-variable "client_secret_rotation_days" {
-  description = "Lifetime of the generated Entra client secret before Terraform rotates it."
-  type        = number
-  default     = 180
 }
 
 # --- HIPAA hardening ---------------------------------------------------------

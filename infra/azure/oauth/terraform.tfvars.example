@@ -1,6 +1,6 @@
-# Copy to terraform.tfvars and adjust. NON-SECRET values only — the reviewed production
-# inputs. The Microsoft client secret and the Fernet key are generated and stored in Key
-# Vault by Terraform; never put secret values here.
+# Copy to terraform.tfvars and adjust. NON-SECRET values only. The Fernet key is
+# generated and stored in Key Vault by Terraform. The Entra app and its client secret are
+# managed OUTSIDE Terraform (see entra.tf); write the secret into the vault out-of-band.
 #
 # This is the OAuth-slice module. The scanning pipeline is a separate module in scanning/.
 
@@ -11,9 +11,9 @@ location        = "eastus2"
 
 api_app_name = "ilera-api"
 
-mailbox_app_name = "ilera-microsoft-mailbox"
-redirect_uri     = "https://ileracare.app/api/email/microsoft/callback"
-vault_name       = "ilera-email-01a341d5"
+mailbox_client_id = "c3b57022-1fcd-4434-a04a-b9ce41e54987" # existing Entra app, managed out of band
+redirect_uri      = "https://ileracare.app/api/email/microsoft/callback"
+vault_name        = "ilera-email-01a341d5"
 
 # HIPAA: reuse an existing Log Analytics workspace if you have one; otherwise leave empty
 # to create a dedicated one for email audit logs.
