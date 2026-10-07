@@ -923,29 +923,6 @@ def api_update_journal(entry_id: str, body: JournalCreate, user: Optional[User] 
     return entry
 
 
-@app.get("/api/debug/llm-check")
-async def debug_llm_check() -> dict:
-    """Temporary: test LLM connectivity and return any error."""
-    s = get_settings()
-    result: dict = {"has_llm": s.has_llm, "model": s.openai_model, "base_url": s.openai_base_url}
-    if not s.has_llm:
-        return result
-    try:
-        from openai import AsyncOpenAI
-        from pydantic_ai import Agent
-        from pydantic_ai.models.openai import OpenAIModel
-        from pydantic_ai.providers.openai import OpenAIProvider
-        client = AsyncOpenAI(api_key=s.openai_api_key, base_url=s.openai_base_url or None, max_retries=0, timeout=20.0)
-        model = OpenAIModel(s.openai_model, provider=OpenAIProvider(openai_client=client))
-        agent: Agent[None, str] = Agent(model=model, output_type=str)
-        run = await agent.run("Say hi in one word.")
-        result["llm_ok"] = True
-        result["response"] = run.output
-    except Exception as exc:
-        result["llm_ok"] = False
-        result["error"] = repr(exc)
-    return result
-
 
 @app.patch("/api/records/journal/{entry_id}/incident")
 def api_review_incident(entry_id: str, body: IncidentReview, case_id: str, _: str = Depends(require_case_access)) -> JournalEntry:

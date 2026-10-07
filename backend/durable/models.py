@@ -83,21 +83,12 @@ class SpecialistResult(BaseModel):
     citations: list[str] = Field(default_factory=list)
     # Full structured EligibilityResult for the applications page (JSON string).
     eligibility_result_json: str = ""
-    # Set when the activity degraded or fully failed.
-    # used_heuristic=True means the LLM failed but the heuristic succeeded.
-    # match_level="assessment_failed" means both failed.
+    # Set when the LLM call failed; match_level will be "assessment_failed".
     error_record: dict[str, Any] | None = None
 
     @property
     def fully_failed(self) -> bool:
         return self.match_level == "assessment_failed"
-
-    @property
-    def used_heuristic(self) -> bool:
-        return (
-            self.error_record is not None
-            and self.error_record.get("used_heuristic", False)
-        )
 
 
 class SynthesisResult(BaseModel):
@@ -106,5 +97,3 @@ class SynthesisResult(BaseModel):
     # Non-empty when one or more specialists had error records — surfaced to the
     # frontend so it can warn the caregiver that some programs could not be assessed.
     failed_specialist_programs: list[str] = Field(default_factory=list)
-    # Set when synthesis itself degraded (LLM failed, fell back to bullet list).
-    error_record: dict[str, Any] | None = None

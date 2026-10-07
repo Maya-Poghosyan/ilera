@@ -1,14 +1,13 @@
 """Synthesis activity.
 
 Aggregates all specialist results into a final application strategy and persists the
-complete findings to the database.  This is the only activity in the pipeline that
-intentionally raises (FindingsPersistenceError) — DB write failures are retryable at
-the Durable level, and idempotent because save_profile overwrites by case_id.
+complete findings to the database.  Raises FindingsPersistenceError on any failure —
+DB write failures and LLM failures are both retryable at the Durable level.
 
 Phases:
   1. Deserialise inputs and build SpecialistFinding objects.
-  2. Persist findings to DB — raises FindingsPersistenceError if this fails (Durable retries).
-  3. Run LLM strategy synthesis.  Falls back to a structured bullet list on LLM failure.
+  2. Persist findings to DB — raises FindingsPersistenceError if this fails.
+  3. Run LLM strategy synthesis — raises FindingsPersistenceError if this fails.
   4. Run analyze_program_interactions for cross-program interaction notes.
   5. Persist strategy + mark case complete.
   6. Return SynthesisResult.
@@ -59,32 +58,7 @@ def _safe_match_level(match_level: str) -> str:
     return match_level if match_level in _VALID_MATCH_LEVELS else "none"
 
 
-def _build_fallback_strategy(results: list[SpecialistResult]) -> str:
-    """Construct a structured bullet strategy directly from match levels."""
-    # Order by match strength (highest first).
-    _ORDER = {"very_likely": 0, "likely": 1, "medium": 2, "low": 3, "none": 4, "assessment_failed": 5}
-    sorted_results = sorted(results, key=lambda r: _ORDER.get(r.match_level, 5))
-
-    bullets: list[str] = []
-    for r in sorted_results:
-        if r.match_level in {"none", "assessment_failed"}:
-            continue
-        reasoning = {
-            "very_likely": "Based on what you shared, you look like a strong match for this program.",
-            "likely": "You likely qualify based on your situation.",
-            "medium": "You may qualify — it's worth looking into.",
-            "low": "You might qualify in some cases — worth a quick check.",
-        }.get(r.match_level, "Eligibility could not be fully determined.")
-        bullets.append(f"- **{r.program}:** {reasoning}")
-
-    if not bullets:
-        bullets.append("- Review eligibility with a benefits counselor for personalized guidance")
-
-    return "\n".join(bullets[:7])
-
-
 def _build_synthesis_user_prompt(results: list[SpecialistResult]) -> str:
-    """Build the user prompt for LLM synthesis."""
     lines: list[str] = ["SPECIALIST ELIGIBILITY FINDINGS:"]
     for r in results:
         if r.match_level == "assessment_failed":
@@ -94,17 +68,6 @@ def _build_synthesis_user_prompt(results: list[SpecialistResult]) -> str:
             lines.append(f"  {r.program}: match_level={r.match_level} — {note_summary}")
     lines.append("\nProduce a plain bulleted list: one bullet per matched program, each with one sentence of reasoning and a prioritization note where programs depend on each other.")
     return "\n".join(lines)
-
-
-def _error_record(*, code: str, step: str, detail: str, used_fallback: bool, failed_specialists: list[str]) -> dict:
-    return {
-        "code": code,
-        "step": step,
-        "detail": detail,
-        "used_fallback": used_fallback,
-        "failed_specialists": failed_specialists,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-    }
 
 
 # ── Activity ───────────────────────────────────────────────────────────────────
@@ -117,7 +80,7 @@ async def synthesis_activity(payload: dict) -> dict:
     Returns: SynthesisResult.model_dump()
 
     Raises:
-        FindingsPersistenceError — DB write failure (retryable at Durable level).
+        FindingsPersistenceError — any failure (DB write or LLM); Durable retries.
     """
     inp = SynthesisInput.model_validate(payload)
     specialist_results = inp.specialist_results
@@ -127,7 +90,6 @@ async def synthesis_activity(payload: dict) -> dict:
         profile = CaseProfile.model_validate_json(inp.profile_json)
     except Exception as exc:
         logger.error("synthesis_activity: profile deserialization failed: %s", exc)
-        # Cannot persist without a profile; raise so Durable retries.
         raise FindingsPersistenceError(
             str(exc),
             step="synthesis_activity.deserialize",
@@ -153,15 +115,10 @@ async def synthesis_activity(payload: dict) -> dict:
 
     # ── Phase 2: Persist findings to DB ───────────────────────────────────────
     try:
-        # Load the current profile from store; it may have been updated since orchestration
-        # started.  Fall back to the in-flight profile if not found in the store yet.
         stored = get_profile(inp.case_id) or profile
         stored.findings.update(findings)
         stored.eligibility_status = "processing"
         stored.eligibility_started_at = stored.eligibility_started_at or now
-        # Project findings into the eligibility map, preferring the full EligibilityResult
-        # from the specialist activity (which carries roadblocks, required_documents, etc.)
-        # over the lossy finding_to_result() conversion.
         sr_by_doc_key = {sr.doc_key: sr for sr in specialist_results}
         for dk, finding in findings.items():
             sr = sr_by_doc_key.get(dk)
@@ -175,7 +132,7 @@ async def synthesis_activity(payload: dict) -> dict:
                     pass
             stored.eligibility[finding.program] = finding_to_result(finding)
         save_profile(stored)
-        profile = stored  # use the freshly-updated profile for subsequent steps
+        profile = stored
     except Exception as exc:
         logger.error("synthesis_activity: findings persistence failed: %s", exc, exc_info=True)
         raise FindingsPersistenceError(
@@ -185,58 +142,34 @@ async def synthesis_activity(payload: dict) -> dict:
         ) from exc
 
     # ── Phase 3: LLM strategy synthesis ──────────────────────────────────────
-    strategy_raw: str = ""
-    synthesis_error_record: dict | None = None
-    failed_programs: list[str] = [
-        sr.program for sr in specialist_results if sr.fully_failed
-    ]
+    try:
+        from openai import AsyncOpenAI
+        from pydantic_ai import Agent
+        from pydantic_ai.models.openai import OpenAIModel
+        from pydantic_ai.providers.openai import OpenAIProvider
 
-    s = get_settings()
-    if s.has_llm:
-        try:
-            from openai import AsyncOpenAI
-            from pydantic_ai import Agent
-            from pydantic_ai.models.openai import OpenAIModel
-            from pydantic_ai.providers.openai import OpenAIProvider
-
-            openai_client = AsyncOpenAI(
-                api_key=s.openai_api_key,
-                base_url=s.openai_base_url or None,
-                max_retries=6,
-                timeout=90.0,
-            )
-            model = OpenAIModel(s.openai_model, provider=OpenAIProvider(openai_client=openai_client))
-            agent: Agent[None, str] = Agent(
-                model=model,
-                output_type=str,
-                system_prompt=_SYNTHESIS_SYSTEM,
-            )
-            user_prompt = _build_synthesis_user_prompt(specialist_results)
-            result = await agent.run(user_prompt)
-            strategy_raw = result.output or ""
-        except Exception as exc:
-            logger.warning("synthesis_activity: LLM synthesis failed: %s", exc, exc_info=True)
-            synthesis_error_record = _error_record(
-                code="SYNTHESIS_LLM_ERROR",
-                step="synthesis_activity.llm",
-                detail=str(exc),
-                used_fallback=True,
-                failed_specialists=failed_programs,
-            )
-            strategy_raw = ""
-    else:
-        logger.info("synthesis_activity: no LLM key, using fallback strategy")
-        synthesis_error_record = _error_record(
-            code="NO_LLM_KEY",
-            step="synthesis_activity.llm",
-            detail="LLM key not configured; using heuristic strategy",
-            used_fallback=True,
-            failed_specialists=failed_programs,
+        s = get_settings()
+        openai_client = AsyncOpenAI(
+            api_key=s.openai_api_key,
+            base_url=s.openai_base_url or None,
+            max_retries=6,
+            timeout=90.0,
         )
-
-    # Fall back to structured bullet list if LLM failed or produced nothing.
-    if not strategy_raw or not strategy_raw.strip():
-        strategy_raw = _build_fallback_strategy(specialist_results)
+        model = OpenAIModel(s.openai_model, provider=OpenAIProvider(openai_client=openai_client))
+        agent: Agent[None, str] = Agent(
+            model=model,
+            output_type=str,
+            system_prompt=_SYNTHESIS_SYSTEM,
+        )
+        result = await agent.run(_build_synthesis_user_prompt(specialist_results))
+        strategy_raw = result.output or ""
+    except Exception as exc:
+        logger.error("synthesis_activity: LLM synthesis failed: %s", exc, exc_info=True)
+        raise FindingsPersistenceError(
+            str(exc),
+            step="synthesis_activity.llm",
+            case_id=inp.case_id,
+        ) from exc
 
     strategy = format_strategy(strategy_raw)
 
@@ -257,7 +190,6 @@ async def synthesis_activity(payload: dict) -> dict:
             ]
     except Exception as exc:
         logger.warning("synthesis_activity: interaction analysis failed: %s", exc)
-        # Non-fatal: strategy is still complete without interaction notes.
 
     # ── Phase 5: Persist strategy + mark case complete ────────────────────────
     try:
@@ -274,16 +206,10 @@ async def synthesis_activity(payload: dict) -> dict:
             case_id=inp.case_id,
         ) from exc
 
-    # ── Collect partial failures for the frontend warning ─────────────────────
-    degraded_programs = [
-        sr.program
-        for sr in specialist_results
-        if sr.error_record is not None
-    ]
+    degraded_programs = [sr.program for sr in specialist_results if sr.error_record is not None]
 
     return SynthesisResult(
         strategy=strategy,
         interaction_notes=interaction_notes,
         failed_specialist_programs=degraded_programs,
-        error_record=synthesis_error_record,
     ).model_dump()
