@@ -567,7 +567,7 @@ MINI_MODULES: list[dict] = [
             ),
             q(
                 "caregiver.leave_relationship",
-                "Who do you need leave to care for?",
+                "Who is this leave to care for?",
                 "single_select",
                 True,
                 options=[
@@ -787,6 +787,10 @@ MINI_MODULES: list[dict] = [
                 "single_select",
                 True,
                 options=["Yes", "No", "The year is not over yet", "I'm not sure"],
+                helper_link={
+                    "text": "What counts as the tax year",
+                    "href": "https://www.irs.gov/taxtopics/tc301",
+                },
             ),
             q(
                 "tax.paid_care_to_work",

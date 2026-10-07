@@ -11,22 +11,20 @@ import { LoadFailure } from "@/components/load-failure";
 import { Logo } from "@/components/logo";
 import { useAuth } from "@/lib/auth-context";
 import { determineEligibility, getEligibility } from "@/lib/api";
-import type { EligibilityResponse, MatchLevel } from "@/lib/types";
+import type { EligibilityResponse } from "@/lib/types";
 
-const matchColor: Record<MatchLevel, string> = {
-  very_likely: "border-transparent bg-primary text-primary-foreground",
+const statusColor: Record<string, string> = {
   likely: "border-transparent bg-emerald-600 text-white",
-  medium: "border-transparent bg-amber-500 text-white",
-  low: "border-transparent bg-orange-500 text-white",
-  none: "border-transparent bg-muted text-muted-foreground",
+  possible: "border-transparent bg-amber-500 text-white",
+  unlikely: "border-transparent bg-muted text-muted-foreground",
+  needs_info: "border-transparent bg-muted text-muted-foreground",
 };
 
-const matchLabel: Record<MatchLevel, string> = {
-  very_likely: "very likely",
+const statusLabel: Record<string, string> = {
   likely: "likely",
-  medium: "medium",
-  low: "low",
-  none: "no match",
+  possible: "possible",
+  unlikely: "unlikely",
+  needs_info: "needs info",
 };
 
 const LOADING_MESSAGES = [
@@ -165,40 +163,64 @@ export default function EligibilityPage() {
           </CardHeader>
           <CardContent>
             {data.strategy ? (
-              <ul className="space-y-2">
+              <div className="space-y-2">
                 {strategyBullets(data.strategy).map((bullet, i) => (
-                  <li key={i} className="flex gap-2.5 text-sm">
-                    <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
-                    <span>{bullet}</span>
-                  </li>
+                  <p key={i} className="text-sm">{bullet}</p>
                 ))}
-              </ul>
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground">Finalizing your plan…</p>
             )}
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {data.results.map((r) => (
+        {(() => {
+          const qualified = data.results.filter(
+            (r) => r.status === "likely" || r.status === "possible",
+          );
+          const notLikely = data.results.filter(
+            (r) => r.status === "unlikely" || r.status === "needs_info",
+          );
+          const ProgramCard = ({ r }: { r: typeof data.results[0] }) => (
             <Card key={r.program} size="sm" className="gap-3">
               <CardHeader className="gap-2">
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle className="text-base">{r.program}</CardTitle>
-                  <Badge className={matchColor[r.match_level]}>{matchLabel[r.match_level]}</Badge>
+                  <Badge className={statusColor[r.status] ?? "border-transparent bg-muted text-muted-foreground"}>
+                    {statusLabel[r.status] ?? r.status}
+                  </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2.5 text-xs">
+              <CardContent className="text-xs">
                 <p className="text-muted-foreground">{r.rationale}</p>
-                {r.sources.length > 0 && (
-                  <p className="text-[11px] text-muted-foreground">
-                    Sources: {r.sources.join(", ")}
-                  </p>
-                )}
               </CardContent>
             </Card>
-          ))}
-        </div>
+          );
+          return (
+            <>
+              {qualified.length > 0 && (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {qualified.map((r) => <ProgramCard key={r.program} r={r} />)}
+                </div>
+              )}
+              {notLikely.length > 0 && (
+                <details className="group">
+                  <summary className="cursor-pointer list-none">
+                    <span className="text-sm font-medium text-muted-foreground group-open:hidden">
+                      Show {notLikely.length} program{notLikely.length !== 1 ? "s" : ""} unlikely to apply ›
+                    </span>
+                    <span className="hidden text-sm font-medium text-muted-foreground group-open:inline">
+                      Hide ‹
+                    </span>
+                  </summary>
+                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {notLikely.map((r) => <ProgramCard key={r.program} r={r} />)}
+                  </div>
+                </details>
+              )}
+            </>
+          );
+        })()}
 
         {authLoading ? null : user ? (
           <Button render={<Link href="/dashboard/applications" />}>

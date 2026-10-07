@@ -455,9 +455,13 @@ export default function IntakePage() {
 
       <Card ref={cardRef} className="overflow-visible text-base [--card-spacing:--spacing(7)]">
         <CardHeader>
-          <CardTitle className="text-2xl">{page.title}</CardTitle>
+          {page.isModule ? (
+            <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{page.title}</p>
+          ) : (
+            <CardTitle className="text-2xl">{page.title}</CardTitle>
+          )}
         </CardHeader>
-        <CardContent className="space-y-7 overflow-visible">
+        <CardContent className="space-y-7 overflow-visible -mt-3">
           {page.showIntro && page.introText && (
             <p className="text-base text-muted-foreground">{page.introText.replaceAll("[recipient name]", name)}</p>
           )}
