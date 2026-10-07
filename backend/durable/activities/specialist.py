@@ -7,8 +7,8 @@ before producing a structured SpecialistResult.
 If the LLM call fails for any reason, the activity returns match_level="assessment_failed"
 with full error context — it does not fall back to heuristics.
 
-The activity also accepts peer_answers (set by the orchestrator after peer-query
-sub-orchestrations) and injects them into the user prompt as additional context.
+The LLM reasons privately via tool calls (gate check + RAG). Only a clean one-sentence
+summary is returned to the user — no raw reasoning, citations, or policy quotes.
 """
 
 from __future__ import annotations
@@ -45,21 +45,20 @@ class _SpecialistOutput(BaseModel):
     """Structured output schema the LLM must conform to."""
 
     match_level: Literal["none", "low", "medium", "likely", "very_likely"]
-    notes: list[str] = Field(
-        default_factory=list,
-        description="Grounded reasoning strings; each note cites a retrieved document.",
-    )
-    cross_programs: list[str] = Field(
-        default_factory=list,
-        description="Other programs this case should consider for cross-eligibility.",
-    )
-    citations: list[str] = Field(
-        default_factory=list,
-        description="Citation strings in format 'Title (page) — URL' or 'Title (page)'.",
+    # User-facing one-liner. Must NOT contain citations, policy quotes, or program
+    # descriptions. Plain English for a family caregiver — the LLM's reasoning stays
+    # internal (tool calls / RAG); only the clean verdict reaches the user.
+    summary: str = Field(
+        default="",
+        description=(
+            "One sentence for the caregiver explaining why this program does or doesn't "
+            "look like a fit — using only facts from THIS person's profile. "
+            "No program descriptions. No citations. No jargon."
+        ),
     )
     roadblocks: list[str] = Field(
         default_factory=list,
-        description="Barriers that would prevent eligibility or complicate the application.",
+        description="Specific barriers for this person that would block or complicate the application.",
     )
     next_steps: list[str] = Field(
         default_factory=list,
@@ -71,7 +70,7 @@ class _SpecialistOutput(BaseModel):
     )
     missing_info: list[str] = Field(
         default_factory=list,
-        description="Information not present in the profile that would affect eligibility.",
+        description="Information not in the profile that would change this assessment.",
     )
     followups: list[_FollowupOutput] = Field(
         default_factory=list,
@@ -85,20 +84,21 @@ _SYSTEM_TEMPLATE = """\
 You are Ilera's eligibility specialist for {program}.
 Assess ONLY {program} eligibility for the provided caregiver profile.
 
-Step 1 — ALWAYS call check_program_gate first. If it returns INELIGIBLE, immediately \
-return match_level='none' with the gate reason as your sole note. Do not call any other tools.
+Step 1 — ALWAYS call check_program_gate first. If it returns INELIGIBLE, set \
+match_level='none' and write a one-sentence summary explaining the disqualifying reason \
+in plain English. Do not call any other tools.
 Step 2 — If the gate returns ELIGIBLE, call lookup_program_docs to retrieve official \
-program documentation. Ground every claim in retrieved documentation. Do not invent program rules.
-Step 3 — Return structured output with:
-- match_level: eligibility confidence (none/low/medium/likely/very_likely)
-- notes: grounded reasoning strings, each citing a retrieved document
-- cross_programs: other programs this case should consider for cross-eligibility
-- citations: source titles/pages in format "Title (page) — URL"
-- roadblocks: barriers that would prevent eligibility or complicate the application
-- next_steps: concrete action items for the caregiver to pursue this program
-- required_documents: documents the applicant will need to submit
-- missing_info: information not in the profile that would affect eligibility
-- followups: questions to ask the caregiver to fill profile gaps\
+program documentation. Use it to reason privately — do not quote or cite it in summary.
+Step 3 — Return structured output:
+- match_level: your eligibility confidence (none/low/medium/likely/very_likely)
+- summary: ONE sentence for the caregiver. Use only facts from their profile. \
+  No program descriptions, no citations, no jargon — just the reason this person \
+  does or doesn't look like a fit.
+- roadblocks: specific barriers for this person (short bullets, plain English)
+- next_steps: concrete actions for the caregiver
+- required_documents: documents they will need
+- missing_info: profile gaps that would change your assessment
+- followups: questions to fill those gaps\
 """
 
 
@@ -172,13 +172,13 @@ def _eligibility_result_from_output(
         confidence=confidence,
         status=status,  # type: ignore[arg-type]
         match_level=output.match_level,
-        rationale=" ".join(output.notes),
+        rationale=output.summary,
         roadblocks=output.roadblocks,
         required_documents=output.required_documents,
         next_steps=output.next_steps,
         missing_info=output.missing_info,
         followups=followups,
-        sources=output.citations,
+        sources=[],
     )
 
 
@@ -260,8 +260,6 @@ async def specialist_activity(payload: dict) -> dict:
         doc_key=doc_key,
         program=program,
         match_level=llm_output.match_level,
-        notes=llm_output.notes,
-        cross_programs=llm_output.cross_programs,
-        citations=llm_output.citations,
+        notes=[llm_output.summary] if llm_output.summary else [],
         eligibility_result_json=eligibility_result.model_dump_json(),
     ).model_dump()

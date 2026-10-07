@@ -67,6 +67,10 @@ def not_(cond: dict) -> dict:
     return {"not": cond}
 
 
+def blank(field: str) -> dict:
+    return {"field": field, "op": "blank"}
+
+
 # Reusable condition: the user is acting as a caregiver (drives Screen-6/8 gating).
 IS_CAREGIVER = in_(
     "case.user_role",
@@ -664,11 +668,19 @@ MINI_MODULES: list[dict] = [
         "title": "Child or developmental disability",
         "trigger": any_(
             lt("recipient.age", 22),
-            includes_any(
-                "recipient.condition_categories",
-                ["Autism", "Intellectual or developmental disability"],
+            # For adults with a known age, suppress the module — IDD/Autism
+            # conditions in the tag-input should not route an elderly recipient
+            # to children's programs.
+            all_(
+                blank("recipient.age"),
+                any_(
+                    includes_any(
+                        "recipient.condition_categories",
+                        ["Autism", "Intellectual or developmental disability"],
+                    ),
+                    eq("recipient.onset_age", "Before age 18"),
+                ),
             ),
-            eq("recipient.onset_age", "Before age 18"),
         ),
         "routing": [
             "Katie Beckett/TEFRA Agent",
