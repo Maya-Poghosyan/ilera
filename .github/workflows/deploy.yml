@@ -165,7 +165,7 @@ jobs:
         working-directory: backend
         run: |
           pip install --target .python_packages/lib/site-packages \
-            -r requirements.txt 2>&1 | tail -5
+            -r requirements.txt
 
       - name: Zip and deploy to Azure Functions
         working-directory: backend
@@ -183,4 +183,3 @@ jobs:
             -n "$FUNC_APP" -g "$RG" \
             --src /tmp/ilera-durable.zip \
             --build-remote false
-          az functionapp restart -n "$FUNC_APP" -g "$RG"
