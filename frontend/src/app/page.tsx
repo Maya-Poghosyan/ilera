@@ -47,21 +47,21 @@ export default function Home() {
           <Logo />
           <div className="flex items-center gap-2">
             <nav className="mr-2 flex items-center gap-1">
-              <Button variant="ghost" className="px-5" render={<Link href="/" />}>
+              <Button variant="ghost" className="px-5 py-2.5" render={<Link href="/" />}>
                 Home
               </Button>
-              <Button variant="ghost" className="px-5" render={<Link href="/about" />}>
+              <Button variant="ghost" className="px-5 py-2.5" render={<Link href="/about" />}>
                 About
               </Button>
             </nav>
             {!loading && user ? (
-              <Button className="px-6" render={<Link href="/dashboard" />}>Dashboard</Button>
+              <Button className="px-6 py-2.5" render={<Link href="/dashboard" />}>Dashboard</Button>
             ) : (
               <>
-                <Button variant="outline" className="px-6" render={<Link href="/login" />}>
+                <Button variant="outline" className="px-6 py-2.5" render={<Link href="/login" />}>
                   Sign in
                 </Button>
-                <Button className="px-6" render={<Link href="/intake" />}>Get started</Button>
+                <Button className="px-6 py-2.5" render={<Link href="/intake" />}>Get started</Button>
               </>
             )}
           </div>
