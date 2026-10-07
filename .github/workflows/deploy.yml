@@ -19,8 +19,8 @@ on:
       apps:
         description: Which apps to deploy
         type: choice
-        default: both
-        options: [both, api, web]
+        default: all
+        options: [all, api, web, functions]
 
 # Two deploys of the same app at once would race over which image the app ends up on.
 concurrency:
@@ -37,6 +37,7 @@ jobs:
     outputs:
       api: ${{ steps.pick.outputs.api }}
       web: ${{ steps.pick.outputs.web }}
+      functions: ${{ steps.pick.outputs.functions }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -49,13 +50,14 @@ jobs:
         run: |
           set -euo pipefail
           case "${MANUAL:-}" in
-            api)  echo "api=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
-            web)  echo "web=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
-            both) printf 'api=true\nweb=true\n' >> "$GITHUB_OUTPUT"; exit 0 ;;
+            api)       echo "api=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
+            web)       echo "web=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
+            functions) echo "functions=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
+            all)       printf 'api=true\nweb=true\nfunctions=true\n' >> "$GITHUB_OUTPUT"; exit 0 ;;
           esac
           changed=$(git diff --name-only "$BEFORE" "${{ github.sha }}")
           echo "$changed"
-          grep -q '^backend/' <<<"$changed" && echo "api=true" >> "$GITHUB_OUTPUT" || true
+          grep -q '^backend/'  <<<"$changed" && printf 'api=true\nfunctions=true\n' >> "$GITHUB_OUTPUT" || true
           grep -q '^frontend/' <<<"$changed" && echo "web=true" >> "$GITHUB_OUTPUT" || true
 
   deploy:
@@ -103,7 +105,12 @@ jobs:
           # Built by ACR itself: no docker credentials in CI, and the app pulls from the same
           # registry it was built in.
           az acr build --registry "$REGISTRY" --image "$tag" "${{ matrix.context }}"
-          az containerapp update -n "$APP" -g "$RG" --image "$REGISTRY.azurecr.io/$tag"
+          # --min-replicas 1 keeps one instance warm so a visitor never waits on a cold
+          # start. Scale lives with the deploy (not the Terraform infra, which must not
+          # write these apps' templates — see infra/azure/oauth/api.tf), so pinning it on
+          # every roll-forward is what makes the setting survive a rebuild.
+          az containerapp update -n "$APP" -g "$RG" \
+            --image "$REGISTRY.azurecr.io/$tag" --min-replicas 1
 
       - if: steps.gate.outputs.run == 'true'
         name: Wait for the new revision to answer
@@ -136,3 +143,44 @@ jobs:
       # No automatic rollback: the previous image is not known to be good, and reverting to a
       # broken one turns a failed deploy into a longer outage. A red check plus the log line above
       # is enough — you decide what to point the app at.
+
+  deploy-functions:
+    needs: plan
+    if: needs.plan.outputs.functions == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies into package dir
+        working-directory: backend
+        run: |
+          pip install --target .python_packages/lib/site-packages \
+            -r requirements.txt 2>&1 | tail -5
+
+      - name: Zip and deploy to Azure Functions
+        working-directory: backend
+        env:
+          RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+          FUNC_APP: ${{ vars.FUNCTIONS_APP }}
+        run: |
+          set -euo pipefail
+          zip -r /tmp/ilera-durable.zip . \
+            --exclude "*.pyc" \
+            --exclude "*/__pycache__/*" \
+            --exclude ".git/*" \
+            --exclude "*.egg-info/*"
+          az functionapp deployment source config-zip \
+            -n "$FUNC_APP" -g "$RG" \
+            --src /tmp/ilera-durable.zip \
+            --build-remote false
+          az functionapp restart -n "$FUNC_APP" -g "$RG"
