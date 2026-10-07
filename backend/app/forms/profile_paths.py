@@ -5,9 +5,9 @@
 `None` and silently leaves the field blank, so both the map generator and its validator
 work from this enumeration rather than from guesswork.
 
-Only the intake-derived branches are offered. The orchestration fields (`band_*`,
-`findings`, `strategy`, ...) are about running the eligibility session, never about
-what goes on a government form.
+Only the intake-derived branches are offered. The orchestration fields (`findings`,
+`strategy`, ...) are about running the eligibility session, never about what goes on
+a government form.
 """
 
 from typing import Any, Literal, Union, get_args, get_origin
