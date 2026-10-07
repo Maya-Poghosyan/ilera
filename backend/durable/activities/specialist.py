@@ -274,6 +274,7 @@ async def specialist_activity(payload: dict) -> dict:
             from openai import AsyncOpenAI
             from pydantic_ai import Agent
             from pydantic_ai.models.openai import OpenAIModel
+            from pydantic_ai.providers.openai import OpenAIProvider
             from durable.tools.rag_tool import make_rag_tool
 
             openai_client = AsyncOpenAI(
@@ -282,14 +283,14 @@ async def specialist_activity(payload: dict) -> dict:
                 max_retries=6,
                 timeout=90.0,
             )
-            model = OpenAIModel(s.openai_model, openai_client=openai_client)
+            model = OpenAIModel(s.openai_model, provider=OpenAIProvider(openai_client=openai_client))
             agent: Agent[CaseProfile, _SpecialistOutput] = Agent(
                 model=model,
                 output_type=_SpecialistOutput,
                 system_prompt=_SYSTEM_TEMPLATE.format(program=program),
                 tools=[make_gate_tool(doc_key), make_rag_tool(doc_key)],
                 deps_type=CaseProfile,
-                max_retries=2,
+                retries=2,
             )
 
             user_prompt = _build_user_prompt(profile, inp.peer_answers)

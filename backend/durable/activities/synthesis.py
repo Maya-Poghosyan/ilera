@@ -197,6 +197,7 @@ async def synthesis_activity(payload: dict) -> dict:
             from openai import AsyncOpenAI
             from pydantic_ai import Agent
             from pydantic_ai.models.openai import OpenAIModel
+            from pydantic_ai.providers.openai import OpenAIProvider
 
             openai_client = AsyncOpenAI(
                 api_key=s.openai_api_key,
@@ -204,7 +205,7 @@ async def synthesis_activity(payload: dict) -> dict:
                 max_retries=6,
                 timeout=90.0,
             )
-            model = OpenAIModel(s.openai_model, openai_client=openai_client)
+            model = OpenAIModel(s.openai_model, provider=OpenAIProvider(openai_client=openai_client))
             agent: Agent[None, str] = Agent(
                 model=model,
                 output_type=str,
