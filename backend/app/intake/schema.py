@@ -565,18 +565,6 @@ MINI_MODULES: list[dict] = [
                     "I'm not sure",
                 ],
             ),
-            q(
-                "caregiver.leave_relationship",
-                "Who is this leave to care for?",
-                "single_select",
-                True,
-                options=[
-                    "The person named earlier in this form",
-                    "A different person",
-                ],
-                system_behavior="Use the relationship already captured in Q3 and ask only if the leave is for a different person.",
-            ),
-
         ],
     },
     {
