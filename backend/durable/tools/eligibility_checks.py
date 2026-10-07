@@ -17,12 +17,11 @@ Design notes:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import Callable
+
+from pydantic_ai import RunContext
 
 from app.models import CaseProfile
-
-if TYPE_CHECKING:
-    from pydantic_ai import RunContext
 
 # Return type: (skip, reason, fast_match_level)
 GateResult = tuple[bool, str, str]
@@ -174,7 +173,7 @@ def make_gate_tool(doc_key: str) -> Callable[..., str]:
     """
     gate_fn = GATES.get(doc_key)
 
-    async def check_program_gate(ctx: "RunContext[CaseProfile]") -> str:  # type: ignore[name-defined]
+    async def check_program_gate(ctx: RunContext[CaseProfile]) -> str:
         """Run the deterministic eligibility gate for this program.
 
         Call this FIRST before any other tool. Returns either:
