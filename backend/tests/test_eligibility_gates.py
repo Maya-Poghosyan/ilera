@@ -18,6 +18,7 @@ from durable.tools.eligibility_checks import (
     check_medicare,
     check_pfl,
     check_va,
+    make_gate_tool,
 )
 
 
@@ -26,6 +27,44 @@ def _profile(**care_recipient_fields) -> CaseProfile:
     for k, v in care_recipient_fields.items():
         setattr(p.care_recipient, k, v)
     return p
+
+
+# ── Regression: the gate tool's type hints must resolve at runtime ────────────
+#
+# pydantic-ai builds a tool schema by calling typing.get_type_hints() on the tool
+# function. If `RunContext` is not a resolvable name in the module's runtime globals
+# (e.g. it was imported only under TYPE_CHECKING), that call raises
+# `NameError: name 'RunContext' is not defined` and EVERY specialist that actually runs
+# fails its assessment — silently rendering as "not eligible". This test exercises that
+# exact call so the regression can never return without pydantic_ai installed.
+
+
+def test_gate_tool_type_hints_resolve_at_runtime():
+    import typing
+
+    import durable.tools.eligibility_checks as mod
+
+    # In production `from pydantic_ai import RunContext` makes RunContext a real Generic
+    # class. Where pydantic_ai is absent it falls back to Any. Either way the tool's
+    # annotation must resolve. Inject a Generic stub matching RunContext's shape when the
+    # real class isn't present, mirroring the production import state.
+    if getattr(mod.RunContext, "__class_getitem__", None) is None:
+        T = typing.TypeVar("T")
+
+        class _RunContextStub(typing.Generic[T]):
+            pass
+
+        original = mod.RunContext
+        mod.RunContext = _RunContextStub
+        try:
+            hints = typing.get_type_hints(make_gate_tool("ihss"))
+        finally:
+            mod.RunContext = original
+    else:
+        hints = typing.get_type_hints(make_gate_tool("ihss"))
+
+    assert "ctx" in hints  # resolved without NameError
+    assert hints["return"] is str
 
 
 # ── check_enrolled ──────────────────────────────────────────────────────────

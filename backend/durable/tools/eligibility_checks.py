@@ -25,15 +25,21 @@ Design notes:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable
+from typing import Callable
 
 from app.models import CaseProfile
 
-if TYPE_CHECKING:
-    # Only needed to type-hint the pydantic-ai tool below.  Importing it lazily keeps
-    # the pure-Python gate functions importable (and unit-testable) in environments
-    # where pydantic_ai is not installed.
+# pydantic-ai is only installed where the specialist agent actually runs (the Durable
+# Function App). It is imported for real when available so that `make_gate_tool`'s tool
+# function has a resolvable `RunContext` annotation at agent-build time — pydantic-ai
+# evaluates tool type hints via typing.get_type_hints(), which looks names up in this
+# module's globals. When pydantic-ai is absent (e.g. unit-testing the pure gate
+# functions), `RunContext` falls back to Any; the tool factory is simply never called
+# in that environment, so the fallback is never exercised at runtime.
+try:  # pragma: no cover - import shape depends on environment
     from pydantic_ai import RunContext
+except ModuleNotFoundError:  # pragma: no cover
+    from typing import Any as RunContext  # type: ignore[assignment]
 
 # Return type: (skip, reason, fast_match_level)
 GateResult = tuple[bool, str, str]
@@ -307,7 +313,7 @@ def make_gate_tool(doc_key: str) -> Callable[..., str]:
     """
     gate_fn = GATES.get(doc_key)
 
-    async def check_program_gate(ctx: RunContext[CaseProfile]) -> str:
+    async def check_program_gate(ctx: "RunContext[CaseProfile]") -> str:
         """Run the deterministic eligibility gate for this program.
 
         Call this FIRST before any other tool. Returns one of:

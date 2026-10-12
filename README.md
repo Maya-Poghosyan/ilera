@@ -55,11 +55,18 @@ Requires **Python ≥ 3.11**.
 
 ```bash
 cd backend
-python3.11 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+# The containers run Python 3.12. `uv` creates a matching local env from the committed
+# lockfile so local == container. Install uv once: https://docs.astral.sh/uv/
+make setup                  # fetches Python 3.12, builds .venv from requirements.lock
 cp .env.example .env        # optional: add Postgres / LLM keys
-uvicorn app.main:app --reload --port 8000
+make run                    # uvicorn app.main:app --reload --port 8000
+make test                   # run the full test suite in the venv
 ```
+
+Dependencies live in `requirements.txt` (what the containers install). `requirements.lock`
+pins exact, hash-verified versions for local reproducibility; regenerate it with `make lock`
+after editing `requirements.txt`, and commit both. `.python-version` pins the interpreter.
+
 
 ### RAG index
 
