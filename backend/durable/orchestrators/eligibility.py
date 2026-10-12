@@ -82,13 +82,18 @@ def eligibility_orchestrator(context: df.DurableOrchestrationContext):
 
     all_results: dict[str, SpecialistResult] = dict(first_pass)
 
-    # ── Phase 3: Fill in skipped specialists as instant "none" results ────────
+    # ── Phase 3: Fill in skipped specialists from the gate decision ───────────
+    # A gate skip is either a confident disqualification ("none") or a confirmed
+    # current enrollment ("very_likely").  Honor whatever level the gate returned
+    # instead of hardcoding "none", so programs the recipient already receives come
+    # through as eligible rather than as "not eligible".
     for dk, gate in gates.items():
         if gate.skip:
+            match_level = gate.fast_match_level or "none"
             all_results[dk] = SpecialistResult(
                 doc_key=dk,
                 program=_DOC_KEY_TO_PROGRAM[dk],
-                match_level="none",
+                match_level=match_level,
                 notes=[gate.reason] if gate.reason else [],
             )
 

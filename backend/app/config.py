@@ -23,7 +23,11 @@ class Settings(BaseSettings):
 
     # LLM (OpenAI or an OpenAI-compatible endpoint such as Azure OpenAI)
     openai_api_key: str = ""
-    openai_model: str = "gpt-4o-mini"
+    # Chat/completions model. On Azure OpenAI this must match a *deployment* name on the
+    # configured resource (see openai_base_url). Defaults to the deployment provisioned for
+    # Ilera; override via OPENAI_MODEL only when pointing at a resource that names it
+    # differently (e.g. plain OpenAI, or a separate Azure resource).
+    openai_model: str = "gpt-5-mini"
     # Optional OpenAI-compatible base URL (e.g. an Azure OpenAI v1 endpoint:
     # https://<resource>.openai.azure.com/openai/v1). Empty = api.openai.com.
     openai_base_url: str = ""

@@ -136,4 +136,30 @@ class EligibilityResult(BaseModel):
     citations: list[Citation] = Field(default_factory=list)
 
 
+class FormReadiness(BaseModel):
+    """What a caregiver needs to gather before completing a program's forms.
+
+    Built from data the eligibility pass already produced — it does NOT run the LLM or
+    the Durable pipeline again. It aggregates, per program:
+      - `required_documents` / `missing_info` the specialist surfaced, and
+      - `withheld_fields`: info intake deliberately defers (SSN, exact bank figures,
+        physician contact, member numbers, signatures, …) that forms will ask for.
+
+    This is the bridge from the pre-signup eligibility summary to the later forms flow:
+    the caregiver can start assembling documents immediately, and the forms step begins
+    from a known checklist instead of re-deriving it.
+    """
+
+    program: str = ""
+    match_level: MatchLevel = "none"
+    # Documents the specialist said this program's application needs.
+    required_documents: list[str] = Field(default_factory=list)
+    # Profile gaps the specialist flagged as decision-relevant.
+    missing_info: list[str] = Field(default_factory=list)
+    # Concrete next actions for the caregiver (from the specialist).
+    next_steps: list[str] = Field(default_factory=list)
+    # Sensitive fields intake defers on purpose; forms will need them later.
+    withheld_fields: list[str] = Field(default_factory=list)
+
+
 CaseProfile.model_rebuild()

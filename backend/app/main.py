@@ -33,9 +33,10 @@ from .email_ingestion.routes import router as email_router
 from .email_ingestion.notifications import router as email_notifications_router
 from .email_ingestion.privacy import configure_email_access_logging
 from .forms.filler import fill_pdf, list_schemas, resolve_fields
+from .forms.readiness import program_readiness
 from .geo import normalize_county, zip_to_county
 from .intake import INTAKE_SCHEMA, map_answers_to_profile
-from .models import CaseProfile, EligibilityResult, EligibilityStatus
+from .models import CaseProfile, EligibilityResult, EligibilityStatus, FormReadiness
 from .rag.embeddings import provider as embedding_provider
 from .rag.index import get_index
 from .reminders import (
@@ -332,6 +333,30 @@ def form_fields(form_id: str, case_id: str, _: str = Depends(require_case_access
     if profile is None:
         raise HTTPException(status_code=404, detail="case not found")
     return resolve_fields(form_id, profile)
+
+
+class FormReadinessResponse(BaseModel):
+    status: EligibilityStatus
+    programs: list[FormReadiness] = []
+
+
+@app.get("/api/applications/{case_id}/readiness", response_model=FormReadinessResponse)
+def application_readiness(
+    case_id: str, _: str = Depends(require_case_access)
+) -> FormReadinessResponse:
+    """Per-program checklist of documents to gather and info forms will still need.
+
+    A pure projection of the completed eligibility findings — no LLM, no re-run. Lets
+    the caregiver start assembling paperwork from the pre-signup summary, and lets the
+    forms flow begin from a known checklist. Returns an empty list until eligibility
+    completes (status reflects where the run is)."""
+    profile = get_profile(case_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="case not found")
+    return FormReadinessResponse(
+        status=profile.eligibility_status,
+        programs=program_readiness(profile),
+    )
 
 
 @app.get("/api/forms/{form_id}/{case_id}/download")

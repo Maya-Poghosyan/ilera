@@ -86,7 +86,9 @@ Assess ONLY {program} eligibility for the provided caregiver profile.
 
 Step 1 — ALWAYS call check_program_gate first. If it returns INELIGIBLE, set \
 match_level='none' and write a one-sentence summary explaining the disqualifying reason \
-in plain English. Do not call any other tools.
+in plain English. If it returns ALREADY ENROLLED, set match_level='very_likely' and write \
+a one-sentence summary telling the caregiver this program is already active for the care \
+recipient. In either case, do not call any other tools.
 Step 2 — If the gate returns ELIGIBLE, call lookup_program_docs to retrieve official \
 program documentation. Use it to reason privately — do not quote or cite it in summary.
 Step 3 — Return structured output:
