@@ -33,6 +33,11 @@ resource "azurerm_role_assignment" "api_sb_sender" {
   scope              = azurerm_servicebus_queue.scan.id
   role_definition_id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/${local.role_sb_sender_id}"
   principal_id       = local.api_identity_principal_id
+
+  # Preserve the imported assignment GUID while managing its permissions.
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
 
 # Worker is the receiver: consumes with peek-lock, completes after commit.

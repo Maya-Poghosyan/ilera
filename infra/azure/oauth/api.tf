@@ -27,4 +27,10 @@ resource "azurerm_role_assignment" "api_secrets_user" {
   scope              = azurerm_key_vault.email.id
   role_definition_id = "/subscriptions/${var.subscription_id}/providers/Microsoft.Authorization/roleDefinitions/${local.role_secrets_user_id}"
   principal_id       = data.azapi_resource.api_identity.output.identity.principalId
+
+  # Adopt the migrated assignment without changing its Azure-generated GUID.
+  # Principal, scope and role remain managed normally.
+  lifecycle {
+    ignore_changes = [name]
+  }
 }
