@@ -19,6 +19,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 concurrency:
   # Two ingests writing the same rows would interleave; queue them instead.
@@ -31,22 +32,54 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-python@v5
+      - uses: azure/login@v2
         with:
-          python-version: '3.12'
-          cache: pip
-          cache-dependency-path: backend/requirements.txt
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - run: pip install -r requirements.txt
-        working-directory: backend
-
-      - name: Sync the vector index
-        working-directory: backend
+      # Hosted runners cannot reach private PostgreSQL. Build the checked-out corpus
+      # into an image, then execute ingestion in the VNet-connected job.
+      - name: Build the corpus image
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_BASE_URL: ${{ vars.OPENAI_BASE_URL }}
-          EMBEDDING_PROVIDER: ${{ vars.EMBEDDING_PROVIDER || 'openai' }}
-          EMBEDDING_MODEL: ${{ vars.EMBEDDING_MODEL || 'text-embedding-3-small' }}
+          REGISTRY: ${{ vars.AZURE_REGISTRY }}
         run: |
-          python -m app.rag.ingest ${{ inputs.rebuild && '--rebuild' || '' }}
+          az acr build --registry "$REGISTRY" --image "ilera-rag:${GITHUB_SHA::12}" ./backend
+
+      - name: Sync the vector index inside the VNet
+        env:
+          RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+          REGISTRY: ${{ vars.AZURE_REGISTRY }}
+          REBUILD: ${{ inputs.rebuild && 'true' || 'false' }}
+        run: |
+          set -euo pipefail
+          az containerapp job show -g "$RG" -n ilera-rag-ingest \
+            --query properties.template -o json > /tmp/ingest-template.json
+          python3 - <<'PYTHON'
+          import json, os
+          path = "/tmp/ingest-template.json"
+          with open(path) as stream:
+              template = json.load(stream)
+          container = template["containers"][0]
+          container["image"] = f"{os.environ['REGISTRY']}.azurecr.io/ilera-rag:{os.environ['GITHUB_SHA'][:12]}"
+          container["command"] = ["python"]
+          container["args"] = ["-m", "app.rag.ingest"]
+          if os.environ["REBUILD"] == "true":
+              container["args"].append("--rebuild")
+          with open(path, "w") as stream:
+              json.dump(template, stream)
+          PYTHON
+          execution=$(az containerapp job start -g "$RG" -n ilera-rag-ingest \
+            --yaml /tmp/ingest-template.json --query name -o tsv)
+          deadline=$((SECONDS + 3900))
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            status=$(az containerapp job execution show -g "$RG" -n ilera-rag-ingest \
+              --job-execution-name "$execution" --query properties.status -o tsv)
+            case "$status" in
+              Succeeded) echo "Ingestion succeeded: $execution"; exit 0 ;;
+              Failed|Stopped|Degraded) echo "::error::Ingestion $execution: $status"; exit 1 ;;
+            esac
+            sleep 15
+          done
+          echo "::error::Timed out waiting for ingestion $execution"
+          exit 1
