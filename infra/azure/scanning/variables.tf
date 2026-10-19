@@ -22,9 +22,9 @@ variable "location" {
 }
 
 variable "container_apps_environment_name" {
-  description = "Existing Container Apps managed environment (ilera-env) the worker runs in."
+  description = "Existing Container Apps managed environment (ilera-prod-cae-eastus2) the worker runs in."
   type        = string
-  default     = "ilera-env"
+  default     = "ilera-prod-cae-eastus2"
 }
 
 variable "scan_worker_image" {

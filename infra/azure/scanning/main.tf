@@ -71,7 +71,7 @@ resource "azurerm_role_assignment" "worker_acr_pull" {
 
 # --- Scan worker Container App ----------------------------------------------
 resource "azurerm_container_app" "scan_worker" {
-  name                         = "ilera-email-worker"
+  name                         = "ilera-email-worker-prod"
   resource_group_name          = var.resource_group
   container_app_environment_id = data.azurerm_container_app_environment.shared.id
   revision_mode                = "Single"
@@ -175,6 +175,7 @@ resource "azurerm_container_app" "scan_worker" {
     custom_scale_rule {
       name             = "servicebus-scan"
       custom_rule_type = "azure-servicebus"
+      identity_id      = azurerm_user_assigned_identity.scan_worker.id
       metadata = {
         queueName    = azurerm_servicebus_queue.scan.name
         namespace    = azurerm_servicebus_namespace.email.name
@@ -219,7 +220,7 @@ resource "azurerm_role_assignment" "worker_openai_user" {
 # It is effective only when EMAIL_SCANNING_ENABLED=true; otherwise it exits with a fixed
 # "unavailable" outcome by design.
 resource "azurerm_container_app_job" "maintenance" {
-  name                         = "ilera-email-maint"
+  name                         = "ilera-email-maint-prod"
   resource_group_name          = var.resource_group
   location                     = var.location
   container_app_environment_id = data.azurerm_container_app_environment.shared.id

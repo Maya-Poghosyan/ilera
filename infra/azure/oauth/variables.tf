@@ -32,7 +32,7 @@ variable "location" {
 variable "api_app_name" {
   description = "Existing API Container App to attach identity, env vars, and vault access to."
   type        = string
-  default     = "ilera-api"
+  default     = "ilera-api-prod-eastus2"
 }
 
 variable "terraform_principal_object_id" {

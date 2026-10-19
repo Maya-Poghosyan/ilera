@@ -9,7 +9,7 @@ tenant_id       = "5c8a1e25-bdc4-4ced-b8c2-3cda51c721d9"
 resource_group  = "Ilera"
 location        = "eastus2"
 
-api_app_name = "ilera-api"
+api_app_name = "ilera-api-prod-eastus2"
 
 mailbox_client_id = "c3b57022-1fcd-4434-a04a-b9ce41e54987" # existing Entra app, managed out of band
 redirect_uri      = "https://ileracare.app/api/email/microsoft/callback"

@@ -7,7 +7,7 @@ tenant_id       = "5c8a1e25-bdc4-4ced-b8c2-3cda51c721d9"
 resource_group  = "Ilera"
 location        = "eastus2"
 
-container_apps_environment_name = "ilera-env"
+container_apps_environment_name = "ilera-prod-cae-eastus2"
 
 # Existing Azure Container Registry holding the images (no .azurecr.io suffix).
 container_registry_name = "caff3fa0d6e7acr"
