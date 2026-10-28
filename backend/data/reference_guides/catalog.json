@@ -1,0 +1,25 @@
+{
+  "edd-multistate-employment": {
+    "title": "EDD Multistate Employment \u2014 DE 231D",
+    "source_url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de231d.pdf",
+    "blob_key": "CA/EDD/employment/DE-231D.pdf",
+    "filename": "EDD-DE-231D-multistate-employment.pdf"
+  },
+  "ssa-benefit-letter": {
+    "title": "How to get a Social Security benefit verification letter",
+    "source_url": "https://www.ssa.gov/manage-benefits/get-benefit-letter",
+    "blob_key": "US/SSA/income/benefit-verification-letter.html",
+    "filename": "Social-Security-benefit-letter-guide.html",
+    "media_type": "text/html",
+    "source_file": "US/SSA/income/benefit-verification-letter.html"
+  },
+  "medi-cal-member-guide": {
+    "title": "My Medi-Cal guide: previous and revised versions comparison",
+    "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Pub68_myMedi-Calcomparison.pdf",
+    "blob_key": "CA/DHCS/Medi-Cal/myMedi-Cal-member-guide.pdf",
+    "filename": "myMedi-Cal-member-guide.pdf",
+    "fallback_source_urls": [
+      "https://www.dhcs.ca.gov/services/Documents/Pub68_myMedi-Calcomparison.pdf"
+    ]
+  }
+}

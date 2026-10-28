@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 
 from app.agents.specialists import ALL_SPECIALISTS
 from app.config import get_settings
+from app.rag.scope import profile_scope
 from app.models import CaseProfile, EligibilityResult, FollowupQuestion
 from durable.models import PeerQueryResult, SpecialistInput, SpecialistResult
 from durable.tools.eligibility_checks import make_gate_tool
@@ -83,6 +84,64 @@ class _SpecialistOutput(BaseModel):
 _SYSTEM_TEMPLATE = """\
 You are Ilera's eligibility specialist for {program}.
 Assess ONLY {program} eligibility for the provided caregiver profile.
+
+Evidence rules: use explicit intake answers and canonical facts marked known. Model
+defaults (including CA, False and empty lists) are not evidence. An unanswered or
+unsure fact is unknown, not No. income_monthly_range is a reported range, not an
+exact amount; do not invent a midpoint. Household.size is resident headcount,
+not automatically a program eligibility unit; ask for missing unit facts. VA contact or coverage in another VA
+program does not establish caregiver-support eligibility. If a necessary fact is
+unresolved, identify it in missing_info/followups and keep the conclusion tentative.
+Distinguish preliminary fit from required application certifications and agency
+decisions; do not ask for agency approval to finish preliminary screening.
+Read profile.answers for the topic-specific screening details.
+Tax year is chosen before the filing questions. recipient.tax_filing_status
+establishes whether the recipient plans to file jointly for that reviewed year;
+reuse it instead of asking tax.recipient_joint_return again. An uncertain filing
+answer remains unresolved. Relationship
+questions use explicit self-reports. caregiver.relationship stores
+the recipient's relationship to the caregiver (e.g. Parent means the recipient is
+their parent), matching the “They are your…” dropdown. caregiver.claims_recipient=True identifies the caregiver as the intended tax claimant;
+use the inverse of caregiver.relationship for their relationship to the recipient.
+If False, recipient.claimed_as_dependent and dependent_claimant_relationship refer
+to someone else. Missing or uncertain other-claimant answers remain unresolved.
+An intention to claim a dependent does not establish that tax requirements are met.
+Payment status is separate;
+do not infer legal authority or paid/unpaid status from a relationship answer.
+household.members is a structured list that INCLUDES the recipient, their spouse
+when applicable, the caregiver and added people; kind identifies each subject.
+Some people live elsewhere. Income sources are selected lists, and missing amounts
+remain unknown. Do not count all people as a program eligibility unit or double-count
+caregiver/spouse rows. household.reported_income_monthly sums reported income for
+residents only when the list is confirmed complete and every amount is known; it is
+NOT program-countable income. Never use citizenship No as a blanket disqualifier.
+Policy retrieval is scoped by the application to program, jurisdiction and date.
+Federal sources do not establish state-specific implementation. Sources marked
+date_status=unverified have unknown effective dates; flag conflicts or uncertain
+current applicability. No matching documents is a coverage gap, not ineligibility.
+Do not substitute general policy knowledge for missing retrieval evidence.
+Immigration follow-ups are preliminary self-reports. caregiver.work_authorized
+concerns paid-provider work, not Paid Family Leave eligibility or the recipient's
+coverage. Do not infer work authorization solely from a citizenship answer.
+recipient.lpr_since concerns when permanent-resident status began;
+recipient.five_year_us_residence concerns continuous U.S. residence for the
+relevant Medicare enrollment pathway. These are different facts; neither is a
+blanket Medi-Cal or Medicare disqualifier. Consider pregnancy/postpartum and
+former-foster-youth pathways where relevant; self-report is not agency approval.
+caregiver.tax_residency and recipient.tax_residency concern the requested tax year,
+not a universal immigration category. Missing, unsure, or declined answers stay
+unresolved; never treat them as no status or no work authorization. Respect a
+declined sensitive answer; do not repeat the same status question as a required follow-up.
+Reduced hours or inability to find work does not establish a leave claim or its dates;
+omitted Paid Family Leave details stay unresolved, not negative. Program status and
+dates are per program in recipient.program_statuses and case.program_dates.
+Asset values require ownership and exclusions before counting; complex
+trusts, uncertain ownership and income variability require follow-up. Use tax.year
+for tax questions; current household filing answers may concern a different year. Current no income
+does not prove zero income in a previous tax year; keep historical figures unresolved.
+Keep VA pension and PCAFC requirements separate. A missing or unsure conditional
+answer does not establish failure of a criterion. Certification signatures,
+provider enrollment and agency assessments remain downstream application steps.
 
 Step 1 — ALWAYS call check_program_gate first. If it returns INELIGIBLE, set \
 match_level='none' and write a one-sentence summary explaining the disqualifying reason \
@@ -237,16 +296,18 @@ async def specialist_activity(payload: dict) -> dict:
             timeout=90.0,
         )
         model = OpenAIModel(s.openai_model, provider=OpenAIProvider(openai_client=openai_client))
+        scope = profile_scope(profile, doc_key)
         agent: Agent[CaseProfile, _SpecialistOutput] = Agent(
             model=model,
             output_type=_SpecialistOutput,
             system_prompt=_SYSTEM_TEMPLATE.format(program=program),
-            tools=[make_gate_tool(doc_key), make_rag_tool(doc_key)],
+            tools=[make_gate_tool(doc_key), make_rag_tool(doc_key, scope)],
             deps_type=CaseProfile,
             retries=2,
         )
 
         user_prompt = _build_user_prompt(profile, inp.peer_answers)
+        user_prompt += f"\nPOLICY RETRIEVAL SCOPE: program={scope.program}, state={scope.state or 'unknown (federal only)'}, as_of={scope.as_of}."
         result = await agent.run(user_prompt, deps=profile)
         llm_output = result.output
 

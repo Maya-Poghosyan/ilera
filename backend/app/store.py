@@ -3,7 +3,8 @@
 The Postgres path stores the profile whole as `jsonb` in the `cases` table.
 """
 
-from typing import Optional
+from typing import Callable, Optional, TypeVar
+from threading import RLock
 
 from . import db
 from .intake.mapping import apply_account_contact
@@ -124,3 +125,32 @@ def save_profile(profile: CaseProfile) -> None:
 def get_profile(case_id: str) -> Optional[CaseProfile]:
     doc = _cases.get(case_id)
     return CaseProfile.model_validate(doc) if doc else None
+
+
+_MutationResult = TypeVar("_MutationResult")
+_case_mutation_lock = RLock()
+
+
+def mutate_profile(case_id: str, operation: Callable[[CaseProfile], tuple[CaseProfile, _MutationResult]]) -> _MutationResult:
+    """Serialize resolution mutations and commit profile/tasks/results together.
+
+    An exception rolls back the operation. Postgres locks the existing case row;
+    the development fallback uses a process lock. Operations must not perform I/O.
+    """
+    if not db.available():
+        with _case_mutation_lock:
+            profile = get_profile(case_id)
+            if profile is None:
+                raise KeyError(case_id)
+            updated, result = operation(profile)
+            save_profile(updated)
+            return result
+    with db.connection() as conn:
+        with conn.transaction():
+            row = conn.execute("SELECT doc FROM cases WHERE id = %s FOR UPDATE", (case_id,)).fetchone()
+            if row is None:
+                raise KeyError(case_id)
+            updated, result = operation(CaseProfile.model_validate(row[0]))
+            conn.execute("UPDATE cases SET doc = %s::jsonb, updated_at = now() WHERE id = %s",
+                         (updated.model_dump_json(), case_id))
+            return result

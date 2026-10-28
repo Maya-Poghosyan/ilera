@@ -91,7 +91,7 @@ export function MailboxConnections() {
     <section className="space-y-3 rounded-xl border border-brand-subtle bg-card p-4" aria-label="Email connections">
       <div className="flex items-center gap-2 text-primary">
         <Mail className="size-4" />
-        <h2 className="text-sm font-semibold">Email connections</h2>
+        <h2 className="text-sm">Email connections</h2>
       </div>
       <p className="text-sm text-muted-foreground">
         {available

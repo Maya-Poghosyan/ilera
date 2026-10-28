@@ -1,0 +1,269 @@
+{
+  "program": "Medi-Cal",
+  "result": {
+    "conclusion": "No. The current intake does NOT collect all facts needed for a defensible preliminary eligibility determination for the Medi\u2011Cal pathways it attempts to screen (especially institutional/nursing\u2011facility Medi\u2011Cal and waiver pathways). It gathers useful triage information but omits specific facts that trigger different eligibility calculations (asset values/ownership/trusts, transfer details and dates, immigration/citizenship specifics, spouse income/ownership, household roster/ages/tax dependency, clinician documentation details, exact facility admission/date, and precise case/BIC/notice dates). See focused gaps below (each gap is tied to the criterion it resolves and the trigger that requires it).",
+    "screening_gaps": [
+      {
+        "criterion": "Countable resources (asset test) \u2014 exact values, ownership form, trust status, acquisition date",
+        "pathway": "Medi\u2011Cal long\u2011term care (institutional) and non\u2011MAGI asset\u2011tested Medi\u2011Cal / waiver asset evaluation",
+        "current_fields": [
+          "recipient.assets"
+        ],
+        "missing_facts": [
+          "Current dollar value for each asset (primary residence, other real property, bank accounts, investments, vehicles, life insurance cash value)",
+          "Ownership form for each asset (sole, joint \u2014 with whom and percentages, revocable/irrevocable trust, community property, tenancy in common)",
+          "Date of acquisition for real property and high\u2011value assets (to assess transfers or step\u2011up issues)",
+          "Any promissory notes, annuities, or encumbrances (loans against property)"
+        ],
+        "trigger": "Any asset type selected in recipient.assets; applicant seeks LTC/institutional Medi\u2011Cal, waiver with asset rules, or asset midpoint approaches program limits.",
+        "simple_questions": [
+          "For each asset type you selected, enter: asset label (e.g., 'Primary home'), current estimated value ($), date acquired (mm/dd/yyyy), and ownership form (Sole / Joint w/Name+relationship / Trust \u2014 revocable/irrevocable).",
+          "Do you have any annuities, promissory notes, or loans secured by property? (Yes/No). If yes, list type and current balance."
+        ],
+        "document_lookup_when": "If any single reported asset value is within ~20% of known program limits, or applicant is institutionalized/applying for LTC, or transfers are reported. County will require bank/brokerage statements, deed, trust instrument, escrow or property tax bill for agency verification.",
+        "source_ids": [
+          "MEPM-ARTICLE-9:105:ba5ad77e0f",
+          "ACWDL-25-14:11:3157a90690"
+        ],
+        "caveat": "Self\u2011reported values suffice only for triage; a defensible eligibility conclusion requires document verification per county rules and the MEPM guidance."
+      },
+      {
+        "criterion": "30\u2011month transfer lookback \u2014 description, date, value, recipient, and documentary proof",
+        "pathway": "Nursing\u2011facility (institutional) Medi\u2011Cal \u2014 transfer penalty calculation",
+        "current_fields": [
+          "recipient.recent_transfers",
+          "recipient.living_setting"
+        ],
+        "missing_facts": [
+          "For every transfer within 30 months: date (mm/dd/yyyy), exact or approximate value, to whom (name and relationship), reason (gift/sale/loan), and whether any documentation exists (deed, cancelled check, trust instrument, bill of sale)",
+          "Whether transfers were for fair market value or less"
+        ],
+        "trigger": "recipient.recent_transfers = Yes or 'I'm not sure'; living_setting indicates nursing home or skilled nursing facility; assets decline shortly before application.",
+        "simple_questions": [
+          "List each transfer in the last 30 months: date (mm/dd/yyyy), amount or value, recipient's name & relationship, and whether you have documentation (Yes/No).",
+          "Was anything sold to a family member or transferred below fair market value? (Yes/No/Unsure)"
+        ],
+        "document_lookup_when": "Always look up when transfers reported or applicant is institutionalized; agency will need deeds, checks, sales contracts, trust amendments to compute penalty period.",
+        "source_ids": [
+          "MEPM-ARTICLE-9:105:ba5ad77e0f"
+        ],
+        "caveat": "You cannot estimate a defensible penalty period from a Yes/No; date and value details are required."
+      },
+      {
+        "criterion": "Immigration/citizenship/lawful presence for Medi\u2011Cal eligibility",
+        "pathway": "All Medi\u2011Cal pathways (MAGI and non\u2011MAGI) where immigration status affects eligibility or scope of benefits",
+        "current_fields": [
+          "recipient.medicaid_status",
+          "recipient.health_coverage"
+        ],
+        "missing_facts": [
+          "Recipient's citizenship or immigration status category (U.S. citizen, Lawfully present non\u2011citizen, Medi\u2011Cal eligible immigrant subgroup \u2014 e.g., 5\u2011year bar exempt, refugee/asylee, SIJS, removal deferred, or other), date of entry to U.S.",
+          "Whether recipient has proof (naturalization, green card, I\u201194, deferred action documents)"
+        ],
+        "trigger": "Any non\u2011U.S. born or unknown status, or when eligibility might rely on immigrant\u2011specific exclusions or protections (waivers or state\u2011funded coverage).",
+        "simple_questions": [
+          "Is the recipient a U.S. citizen, a lawfully present immigrant, or other/unknown? (Citizen / Lawfully present \u2014 list category / Other or unknown).",
+          "If not a citizen, what date did they first enter the U.S. (mm/yyyy) or write 'unknown'?"
+        ],
+        "document_lookup_when": "If non\u2011citizen status reported or unsure and application proceeds; county will request immigration documents during application.",
+        "source_ids": [
+          "MEPM-ARTICLE-19:9:04bd946a81"
+        ],
+        "caveat": "Do NOT assume all California Medi\u2011Cal pathways are barred by non\u2011citizenship \u2014 some state programs or county\u2011funded options and specific waivers may apply; intake must flag uncertainty for county review."
+      },
+      {
+        "criterion": "Spousal impoverishment / special waiver deeming \u2014 spouse income, assets, and residence",
+        "pathway": "AL Waiver, DDS Waiver, other waivers that apply spousal impoverishment rules; institutional Medi\u2011Cal where spouse at home impacts resource allowance",
+        "current_fields": [
+          "recipient.marital_status",
+          "recipient.spouse_living_situation",
+          "recipient.household_size"
+        ],
+        "missing_facts": [
+          "Spouse's monthly gross income by source, spouse assets and their values, whether assets are jointly owned, and whether spouse lives in the community or facility",
+          "Spouse's countable resources that affect community spouse resource allowance"
+        ],
+        "trigger": "recipient.marital_status = Yes or waiver pathway sought; any waiver referral per MEPM-ARTICLE-19.",
+        "simple_questions": [
+          "Does the spouse live in the community? (Yes/No/I'm not sure). If yes, enter spouse monthly gross income by source and approximate total assets ($).",
+          "List any jointly held accounts or property and ownership split (e.g., joint bank account 50/50)."
+        ],
+        "document_lookup_when": "If spouse exists and waiver or LTC application proceeds; county will request spouse income verification (paystubs, SSA letters) and asset documentation.",
+        "source_ids": [
+          "MEPM-ARTICLE-19:8:cbd9bb857a",
+          "MEPM-ARTICLE-19:91:b5584a000c"
+        ],
+        "caveat": ""
+      },
+      {
+        "criterion": "Household composition for income counting and eligibility unit (names, ages, relationships, tax dependency)",
+        "pathway": "MAGI Medi\u2011Cal, SSI\u2011related determinations, waiver eligibility when parental income is disregarded or included",
+        "current_fields": [
+          "recipient.household_size"
+        ],
+        "missing_facts": [
+          "Full roster of household members with relationship to recipient, dates of birth or ages, whether each is a tax dependent and whether income is attributed to the household (ownership of income)",
+          "Which adults in the household share income/expenses (marriage/partner status, guardians)"
+        ],
+        "trigger": "Any non\u2011single household_size or when MAGI rules are applied; when income bands are near eligibility thresholds.",
+        "simple_questions": [
+          "List each household member: name (or initial), relationship to recipient, date of birth (mm/dd/yyyy) or age, and whether they file taxes as dependent of the recipient (Yes/No/NA).",
+          "For each household adult, list primary monthly income sources and who owns/receives those incomes."
+        ],
+        "document_lookup_when": "If household composition affects MAGI calculation or spousal impoverishment; county may request proof (birth certificates, lease, tax returns).",
+        "source_ids": [
+          "MEPM-ARTICLE-19:9:04bd946a81"
+        ],
+        "caveat": ""
+      },
+      {
+        "criterion": "Medical/functional eligibility evidence for waivers and IHSS \u2014 clinician identity, assessment date, and instrument type",
+        "pathway": "HCBS waivers (AL, DDS), IHSS referrals, and waiver medical eligibility determinations",
+        "current_fields": [
+          "recipient.condition_documented",
+          "recipient.has_certifying_clinician",
+          "recipient.adl_needs"
+        ],
+        "missing_facts": [
+          "Clinician name and contact (or facility/clinic), date of most recent assessment, whether a formal functional assessment/physician statement/DHS 7071 exists and can be produced",
+          "Specific quantified functional limitations (e.g., number of ADLs the person cannot perform, need for supervision for safety, frequency of assistance)"
+        ],
+        "trigger": "case.goals includes waivers, recipient.adl_needs indicates assistance, or facility discharge planning.",
+        "simple_questions": [
+          "Does a clinician have a written functional assessment? (Yes/No/Unsure). If Yes: clinician name, clinic, phone, and date of last assessment (mm/dd/yyyy).",
+          "For each ADL checked, indicate whether help is 'supervision only', 'limited assistance', or 'extensive/total assistance'."
+        ],
+        "document_lookup_when": "When applying or referring to county waiver contact; county requires clinician statements/DHS waiver forms for definitive medical eligibility.",
+        "source_ids": [
+          "MEPM-ARTICLE-19:40:f89f7d8b58",
+          "MEPM-ARTICLE-19:59:34efce13d0"
+        ],
+        "caveat": "Self\u2011report supports triage but not a defensible final medical eligibility conclusion without county or clinician verification."
+      },
+      {
+        "criterion": "Exact facility admission date and facility identity for institutional Medi\u2011Cal start/penalty timing",
+        "pathway": "Nursing\u2011facility Medi\u2011Cal, waiver referral initiated while institutionalized",
+        "current_fields": [
+          "recipient.living_setting",
+          "recipient.move_timeline",
+          "recipient.facility_length_of_stay"
+        ],
+        "missing_facts": [
+          "Exact admission date (mm/dd/yyyy), facility name and address, expected or planned discharge date (if any), and whether admission is for skilled nursing or short\u2011term rehab",
+          "Any facility\u2011requested documentation or facility contact for discharge planning"
+        ],
+        "trigger": "recipient.living_setting indicates hospital, nursing home, rehab, group home with move_timeline indicating imminent discharge or for penalty start date calculation.",
+        "simple_questions": [
+          "Enter facility name, full address, and admission date (mm/dd/yyyy). Is a discharge planned? If yes, planned date (mm/dd/yyyy).",
+          "Is the current stay for 'short\u2011term rehab' or 'long\u2011term nursing placement'?"
+        ],
+        "document_lookup_when": "If institutional Medi\u2011Cal is sought or discharge planning is time\u2011sensitive; county/agency will request facility admission records.",
+        "source_ids": [
+          "MEPM-ARTICLE-19:91:b5584a000c",
+          "MEPM-ARTICLE-19:8:cbd9bb857a"
+        ],
+        "caveat": ""
+      },
+      {
+        "criterion": "Medi\u2011Cal case control: current enrollment, case number/BIC, and adverse notice dates for urgent deadlines",
+        "pathway": "All Medi\u2011Cal pathways where existing case status or appeal deadlines affect actions",
+        "current_fields": [
+          "recipient.medicaid_status",
+          "case.last_application_or_decision_date",
+          "case.adverse_notice_received",
+          "case.notice_deadline"
+        ],
+        "missing_facts": [
+          "County case number or Benefits Identification Card (BIC) number, effective dates of coverage, copy or date of any adverse notice, and the exact appeal/response deadline date",
+          "Whether an appeal or fair hearing has already been filed"
+        ],
+        "trigger": "Any self\u2011report of existing enrollment, prior denial, or benefits stopped; case.adverse_notice_received = Yes.",
+        "simple_questions": [
+          "Do you have the county case number or BIC? If yes, enter the number (optional to type) or upload/describe notice date.",
+          "If you received an adverse notice, what is the notice date and the listed appeal deadline (mm/dd/yyyy)?"
+        ],
+        "document_lookup_when": "Immediately when an adverse notice exists or deadlines are approaching; county needs the notice to preserve rights.",
+        "source_ids": [
+          "MEPM-ARTICLE-19:41:dc48ce0239",
+          "ACWDL-25-14:11:3157a90690"
+        ],
+        "caveat": "Collecting the number is for case triage only; do not require it to screen but do flag time sensitivity."
+      },
+      {
+        "criterion": "Income source ownership, frequency, and countability for share\u2011of\u2011cost and MAGI calculations",
+        "pathway": "MAGI Medi\u2011Cal, non\u2011MAGI share\u2011of\u2011cost calculations (LTC), waiver financial eligibility",
+        "current_fields": [
+          "recipient.monthly_income_range",
+          "recipient.current_benefits",
+          "caregiver.payment_status"
+        ],
+        "missing_facts": [
+          "Income by source, payor and recipient (who receives each income stream), frequency (monthly/quarterly), pre\u2011tax gross amount, and whether income is attributable to household or to spouse",
+          "Any irregular income (pensions, VA compensation, lump sums, annuities) and dates received"
+        ],
+        "trigger": "recipient.monthly_income_range not 'No income' or household income near thresholds; any LTC application or waiver with share\u2011of\u2011cost.",
+        "simple_questions": [
+          "For each income source, enter: source name (SSA, VA, wages), who receives it (name), gross monthly amount or frequency and amount (mm/yyyy for lump sums).",
+          "Have you received any lump\u2011sum payments in the last 12 months? (Yes/No). If yes, list amount and date."
+        ],
+        "document_lookup_when": "If income reported that could affect eligibility or share\u2011of\u2011cost; county will request paystubs, SSA award letters, VA letters, pension statements.",
+        "source_ids": [
+          "MEPM-ARTICLE-19:9:04bd946a81",
+          "MEPM-ARTICLE-19:59:34efce13d0"
+        ],
+        "caveat": "Do not invent numeric midpoints; use reported exacts when provided. Rough ranges are fine for triage but insufficient to compute precise share\u2011of\u2011cost."
+      },
+      {
+        "criterion": "VA PCAFC caregiver relationship, VA enrollment and pension/Aid & Attendance interactions with Medi\u2011Cal",
+        "pathway": "Intersecting VA benefits (VA pension, Aid and Attendance, PCAFC) and Medi\u2011Cal asset/income interactions",
+        "current_fields": [
+          "recipient.military_status",
+          "recipient.va_contact",
+          "recipient.va_pension_status",
+          "recipient.va_rating_assigned",
+          "case.goals"
+        ],
+        "missing_facts": [
+          "Whether caregiver is recognized under VA PCAFC (is caregiver enrolled/approved), veteran's VA enrollment status and effective dates, whether Aid & Attendance or VA pension is paid and payment amounts and recipient of the payments",
+          "PCAFC specifics: caregiver approval date and whether caregiver lives with veteran (PCAFC coresidence requirement)"
+        ],
+        "trigger": "case.goals includes 'Finding VA caregiver benefits' or recipient.current_benefits includes VA pension/Aid and Attendance.",
+        "simple_questions": [
+          "Does the caregiver have an approved VA PCAFC enrollment? (Yes/No/Unsure). If yes, date approved (mm/yyyy).",
+          "Does the veteran currently receive Aid & Attendance or VA pension? (Yes/No/I'm not sure). If yes, monthly amount and who receives the check?"
+        ],
+        "document_lookup_when": "If VA benefits may affect Medi\u2011Cal income/resource counting or caregiver payment eligibility; obtain VA award letters and PCAFC approval letters.",
+        "source_ids": [
+          "MEPM-ARTICLE-19:8:cbd9bb857a",
+          "MEPM-ARTICLE-19:40:f89f7d8b58"
+        ],
+        "caveat": "VA PCAFC caregiver approval and VA enrollment are distinct facts; intake asks VA contact but does not currently distinguish PCAFC coresidence or caregiver approval."
+      }
+    ],
+    "application_only": [
+      "Provide copies of bank and brokerage statements, deeds, escrow statements, property tax bills, and trust documents (asset verification) \u2014 (application/agency verification only).",
+      "Certified or original immigration documents (naturalization, green card, I\u201194, asylum/refugee documents) for non\u2011citizen verification.",
+      "Marriage certificate and spouse proof of income (paystubs, SSA letters) where spousal impoverishment rules apply.",
+      "Clinician-signed functional assessments (DHS 7071 or equivalent), physician statements, or home health/IHSS assessments for waiver medical eligibility.",
+      "Facility admission records and discharge summaries for institutional Medi\u2011Cal date verification.",
+      "Benefit letters and notices (BIC, county case number, adverse notices) required to preserve appeal deadlines."
+    ],
+    "visibility_gaps": [
+      "No household roster prompt for names, DOBs/ages, and relationships (only household_size).",
+      "No explicit question on tax dependency or who claims whom for tax purposes (affects dependent income counting and some waiver rules).",
+      "No prompt for ownership splits or percentages on joint accounts or property (community property vs sole matters).",
+      "No explicit capture of whether assets are in a revocable vs irrevocable trust (affects countability).",
+      "No distinction between general VA contact/use of VA health care and specific PCAFC caregiver approval/coresidence.",
+      "No question capturing dates attached to asset balances (asset valuation date) \u2014 asset rules are date\u2011sensitive."
+    ],
+    "unsupported_or_stale_claims": [
+      "No unsupported changes from prior audit were relied upon; however, note that asset rules and notice requirements are date\u2011sensitive \u2014 any citations or intake logic that do not track effective dates should be treated as potentially stale until verified with current MEPM and ACWDL guidance (see exact sources cited)."
+    ],
+    "scope_limits": [
+      "This screening cannot compute definitive share\u2011of\u2011cost, penalty period lengths, or final eligibility determinations \u2014 those require documentary verification and county calculations.",
+      "Preliminary conclusions based on ranges or 'I'm not sure' answers are only triage\u2011level and must be flagged for verification.",
+      "This audit is limited to the Medi\u2011Cal pathways explicitly touched by the intake (MAGI, non\u2011MAGI LTC, waivers discussed in MEPM Article 19) and the provided source excerpts \u2014 it does not attempt to exhaustively cover every possible state\u2011funded program or local county\u2011only option."
+    ]
+  },
+  "validation_issues": []
+}

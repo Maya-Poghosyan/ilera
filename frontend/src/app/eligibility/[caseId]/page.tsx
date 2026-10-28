@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadFailure } from "@/components/load-failure";
-import { Logo } from "@/components/logo";
+import { SiteHeader } from "@/components/site-header";
 import { useAuth } from "@/lib/auth-context";
 import { determineEligibility, getEligibility } from "@/lib/api";
 import type { EligibilityResponse } from "@/lib/types";
@@ -113,7 +113,7 @@ export default function EligibilityPage() {
   if (data && data.status === "error") {
     return (
       <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
-        <h1 className="text-xl font-semibold text-rose-600">Eligibility could not be completed</h1>
+        <h1 className="text-xl text-rose-600">Eligibility could not be completed</h1>
         <p className="max-w-sm text-sm text-muted-foreground">
           {data.error || "We couldn't finish reviewing your programs. Please try again."}
         </p>
@@ -128,7 +128,7 @@ export default function EligibilityPage() {
     return (
       <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
-        <h1 className="text-xl font-semibold text-primary">Determining eligibility…</h1>
+        <h1 className="text-xl">Determining eligibility…</h1>
         <p
           key={messageIndex}
           className="min-h-10 max-w-sm text-sm text-foreground animate-in fade-in duration-700"
@@ -141,17 +141,12 @@ export default function EligibilityPage() {
 
   return (
     <>
-      <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
-          <Logo />
-          <Button variant="outline" size="sm" render={<Link href="/intake" />}>
-            Edit intake
-          </Button>
-        </div>
-      </header>
+      <SiteHeader
+        actions={<Button variant="outline" size="sm" render={<Link href="/intake" />}> Edit intake </Button>}
+      />
       <main className="mx-auto w-full max-w-5xl flex-1 space-y-6 px-6 py-12">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Your eligibility results</h1>
+          <h1 className="text-2xl">Your eligibility results</h1>
           <p className="text-sm text-muted-foreground">
             How well each program matches your situation.
           </p>

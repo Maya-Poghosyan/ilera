@@ -1,0 +1,347 @@
+{
+  "program": "IHSS",
+  "result": {
+    "conclusion": "No \u2014 the current intake gathers a strong set of triage facts for IHSS but does NOT collect all facts required for a defensible preliminary eligibility conclusion across every IHSS pathway you attempt to cover. The intake enables reliable referrals and time\u2011sensitive prioritization, but it leaves specific, document\u2011sensitive, and countable financial and medical facts unresolved (SOC 873 recency/type, exact Medi\u2011Cal/SSI/Share\u2011of\u2011Cost details, household member incomes/tax dependency, paramedical orders, provider\u2011enrollment/CORI readiness, immigration status and look\u2011back transfer specifics). Ask the focused follow\u2011ups below to close the gaps before asserting a defensible preliminary determination; flag application\u2011only items separately so the specialist does not ask for them during pure screening.",
+    "screening_gaps": [
+      {
+        "criterion": "Signed IHSS Health Care Certification (SOC 873) or acceptable alternative, dated within 60 days",
+        "pathway": "California IHSS initial medical eligibility (medical need documented)",
+        "current_fields": [
+          "recipient.condition_documented",
+          "recipient.has_certifying_clinician",
+          "recipient.adl_needs"
+        ],
+        "missing_facts": [
+          "Whether a completed SOC 873 exists",
+          "Exact date of the SOC 873 (to confirm <=60 days recency)",
+          "Clinician type/license who signed (must be one of CDSS\u2011approved types) and whether the alternative document meets CDSS criteria"
+        ],
+        "trigger": "Any intake where recipient.condition_documented = Yes or recipient.has_certifying_clinician \u2260 No, or when scheduling/filing the IHSS application or assessment.",
+        "simple_questions": [
+          "Do you have a completed IHSS Health Care Certification (SOC 873) or an alternative medical note?",
+          "What is the date on that document?",
+          "Who signed it (physician, PA, RN, OT, PT, psychiatrist, psychologist, optometrist/ophthalmologist, public health nurse, LCSW, or MFT)?"
+        ],
+        "document_lookup_when": "Before scheduling the county assessment or filing the application (or immediately if county appointment is imminent). If user says Yes but cannot provide the date/type, request the clinician name/type and a photo of the document at application stage.",
+        "source_ids": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-CASE-ASSESSMENT-CHECKLIST",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "caveat": "Self\u2011report of an existent SOC 873 can support a preliminary referral, but the 60\u2011day rule is strict for initial application per CDSS and must be confirmed by date on the document."
+      },
+      {
+        "criterion": "Current Medi\u2011Cal / SSI / SSI\u2011criteria and monthly Share\u2011of\u2011Cost (SOC) \u2014 exact program status and countable income/assets",
+        "pathway": "IHSS eligibility tied to SSI/SSP criteria or Medi\u2011Cal enrollment (including SOC pathways in MPP 30\u2011755)",
+        "current_fields": [
+          "recipient.medicaid_status",
+          "recipient.current_benefits",
+          "recipient.monthly_income_range",
+          "recipient.assets",
+          "recipient.household_size"
+        ],
+        "missing_facts": [
+          "Whether recipient has a current Medi\u2011Cal award letter or SSI/SSP award letter",
+          "If Medi\u2011Cal, the exact monthly Share\u2011of\u2011Cost (if any)",
+          "Precise monthly income(s) and asset dollar amounts and ownership allocation (whose income/assets are counted)",
+          "Whether household members are tax dependents or otherwise affect resource/unit calculations"
+        ],
+        "trigger": "Always for IHSS screening (financial criteria determine eligibility categories .111\u2013.114); especially crucial if monthly_income_range is near program thresholds or user answers 'Has not applied' or 'Application pending.'",
+        "simple_questions": [
+          "Is there a Medi\u2011Cal award letter, SSI/SSP award letter, or current Medi\u2011Cal ID card for the recipient?",
+          "If not enrolled, what is the recipient\u2019s exact gross monthly income and the monthly income of other household members?",
+          "Do you know the recipient\u2019s current monthly Share\u2011of\u2011Cost (if Medi\u2011Cal SOC applies)?"
+        ],
+        "document_lookup_when": "If recipient is not clearly enrolled or income/asset ranges are near program limits \u2014 at intake follow\u2011up or application stage request paystubs, SSA award letters, bank statements, Medi\u2011Cal award letter to compute SOC and countable income/assets.",
+        "source_ids": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "caveat": "Numeric ranges are adequate for triage but insufficient for a defensible financial determination because Medi\u2011Cal/SSI countable\u2011income and resource rules depend on composition, exclusions, and ownership."
+      },
+      {
+        "criterion": "Immigration/citizenship eligibility criterion that affects SSI/SSI\u2011criteria or Medi\u2011Cal countability",
+        "pathway": "IHSS eligibility category .113 (meets SSI/SSP criteria except for immigration) and related Medi\u2011Cal eligibility rules",
+        "current_fields": [
+          "recipient.medicaid_status",
+          "recipient.current_benefits"
+        ],
+        "missing_facts": [
+          "Recipient\u2019s immigration/citizenship status (U.S. citizen, qualified noncitizen, other noncitizen category)",
+          "Whether any immigration-related exceptions or state\u2011only rules may apply"
+        ],
+        "trigger": "When recipient.medicaid_status \u2260 'Enrolled now' or when income alone would qualify but immigration status is unknown or reported as an obstacle.",
+        "simple_questions": [
+          "What is the recipient\u2019s immigration or citizenship status (U.S. citizen, permanent resident, other)?",
+          "If not a U.S. citizen, do they have a green card, refugee/asylee status, or other qualifying status?"
+        ],
+        "document_lookup_when": "If immigration status appears to affect eligibility or if the applicant requests application assistance; county verification or legal/benefits counsel may be needed.",
+        "source_ids": [
+          "IHSS-MPP-30-700-764"
+        ],
+        "caveat": "State Medi\u2011Cal and SSI rules have narrow exceptions; do NOT assume noncitizen = automatic ineligibility. The intake should record the fact and escalate to agency verification or legal aid as appropriate."
+      },
+      {
+        "criterion": "Availability of government\u2011issued photo ID and Social Security Number for applicant/recipient",
+        "pathway": "IHSS application completion and provider enrollment; identity verification required for final eligibility and provider hire",
+        "current_fields": [
+          "recipient.date_of_birth",
+          "caregiver.first_name",
+          "caregiver.last_name",
+          "caregiver.address.state"
+        ],
+        "missing_facts": [
+          "Whether the recipient (and caregiver, if applying to be paid) can provide a government\u2011issued photo ID and the recipient\u2019s SSN (or SSN card)"
+        ],
+        "trigger": "At application stage and when pursuing paid\u2011care provider enrollment.",
+        "simple_questions": [
+          "Can you provide a government\u2011issued photo ID for the recipient and the recipient\u2019s SSN (or SSN card)?",
+          "If you (caregiver) want to be paid, do you have your own ID and SSN available?"
+        ],
+        "document_lookup_when": "Application stage: county social worker will view originals or copies; flag these as application\u2011only items to collect at the home visit or document drop\u2011off.",
+        "source_ids": [
+          "IHSS-CASE-ASSESSMENT-CHECKLIST",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "caveat": "Self\u2011report that ID/SSN exist suffices for pre\u2011screening; originals are mandatory for county application processing."
+      },
+      {
+        "criterion": "Caregiver provider\u2011enrollment readiness, DOJ/CORI exclusions, and prior denial history",
+        "pathway": "IHSS paid caregiver employment eligibility (provider enrollment and CORI checks, general exceptions)",
+        "current_fields": [
+          "caregiver.payment_status",
+          "case.goals",
+          "caregiver.employment_status"
+        ],
+        "missing_facts": [
+          "Whether caregiver is willing/able to complete provider enrollment (live scan, identity/SSN provision)",
+          "Any prior denial of provider enrollment or convictions that might lead to exclusion under CORI",
+          "Whether caregiver is a minor (must be >=18 for most paid roles)"
+        ],
+        "trigger": "If caregiver.payment_status indicates payment via IHSS/waiver or case.goals includes 'Getting paid as a caregiver'.",
+        "simple_questions": [
+          "Do you want to be paid through IHSS and are you able to complete enrollment (provide ID/SSN and do a live scan fingerprint)?",
+          "Have you ever been denied employment as an IHSS provider or had a criminal conviction that resulted in a denial?"
+        ],
+        "document_lookup_when": "Application/enrollment stage \u2014 county will request ID, SSN, and complete DOJ checks. Ilera should flag but not collect live scan or criminal history documents during screening.",
+        "source_ids": [
+          "IHSS-MPP-30-765-785",
+          "IHSS-CASE-ASSESSMENT-CHECKLIST"
+        ],
+        "caveat": "Preliminary screening can note willingness and prior denials, but final provider eligibility is governed by county CORI results and possible general exceptions."
+      },
+      {
+        "criterion": "Paramedical task authorization (physician order / SOC 321) when skilled nursing tasks are needed",
+        "pathway": "Authorization of paramedical services within IHSS (paramedical tasks require SOC 321 or physician order)",
+        "current_fields": [
+          "recipient.adl_needs",
+          "recipient.condition_categories"
+        ],
+        "missing_facts": [
+          "Whether recipient requires paramedical/skilled tasks (catheter care, wound care, injections, tracheostomy care, etc.)",
+          "Existence and date of a SOC 321 or physician order authorizing paramedical tasks"
+        ],
+        "trigger": "If any ADLs or care needs imply skilled tasks (medication injections, wound care, tracheostomy), or if the applicant requests paramedical services.",
+        "simple_questions": [
+          "Does the recipient need catheter care, wound care, injections, tracheostomy care, or other skilled nursing tasks?",
+          "If yes, is there a physician order or SOC 321 that authorizes those services? When was it signed?"
+        ],
+        "document_lookup_when": "If paramedical services are claimed \u2014 request SOC 321 or physician order at application/agency verification stage.",
+        "source_ids": [
+          "IHSS-CASE-ASSESSMENT-CHECKLIST",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "caveat": "Self\u2011report flags need but county requires clinician orders to authorize paramedical IHSS tasks."
+      },
+      {
+        "criterion": "30\u2011month transfer (look\u2011back) details for institutionalized applicants affecting Medi\u2011Cal eligibility and resource counts",
+        "pathway": "IHSS applicants who are/were in nursing home or facility where transfers in look\u2011back can affect Medi\u2011Cal and IHSS eligibility",
+        "current_fields": [
+          "recipient.recent_transfers",
+          "recipient.living_setting",
+          "recipient.facility_length_of_stay",
+          "recipient.assets"
+        ],
+        "missing_facts": [
+          "Exact dates, amounts, and recipients of any money/property transferred within the 30 months prior to institutionalization or application",
+          "Supporting documentation (deeds, bank transfers, trust amendments)"
+        ],
+        "trigger": "When recipient.living_setting indicates nursing home/skilled nursing facility or when recipient.recent_transfers = Yes/I'm not sure.",
+        "simple_questions": [
+          "Has money or property been given away or transferred in the last 30 months? If yes, what dates and amounts and to whom?",
+          "Do you have bank statements, deed transfers, trust/estate documents covering those transfers?"
+        ],
+        "document_lookup_when": "Application/agency verification stage if transfers reported or suspected; county will require supporting docs to evaluate look\u2011back penalties.",
+        "source_ids": [
+          "IHSS-FIELD-HANDBOOK",
+          "IHSS-MPP-30-700-764"
+        ],
+        "caveat": "Self\u2011report triggers urgent follow\u2011up; precise dates/amounts are essential because asset/transfer rules are date\u2011sensitive."
+      },
+      {
+        "criterion": "Household composition, ages, relationships, and tax dependency for counting unit and for tax/benefit pathways",
+        "pathway": "Financial eligibility (SSI/SSP/Medi\u2011Cal countable unit) and caregiver tax credit/dependent\u2011care benefit recommendations",
+        "current_fields": [
+          "recipient.household_size",
+          "tax.provides_over_half_support",
+          "tax.lived_together_over_half_year"
+        ],
+        "missing_facts": [
+          "Full household roster (name, age, relationship to recipient), each member\u2019s monthly income, and who claims whom on taxes",
+          "Which incomes/assets belong to recipient versus other household members (ownership)"
+        ],
+        "trigger": "When household_size >1, or when household income ranges are near program thresholds, or when user requests tax\u2011credit or Medi\u2011Cal eligibility help.",
+        "simple_questions": [
+          "Please list every person living with the recipient, their relationship, age, and their approximate monthly income.",
+          "Who claims the recipient (or other household members) as a dependent on taxes?"
+        ],
+        "document_lookup_when": "If exact eligibility depends on household composition \u2014 request paystubs, SSA letters, tax returns, or signed statements at follow\u2011up/application stage.",
+        "source_ids": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "caveat": "Counting rules depend on ownership and tax dependency; brief self\u2011reported rosters usually suffice to triage but not to finalize an eligibility conclusion."
+      },
+      {
+        "criterion": "California residency confirmation for jurisdiction and IHSS program applicability",
+        "pathway": "IHSS residency requirement (California resident living in own home)",
+        "current_fields": [
+          "caregiver.address.state",
+          "recipient.address.state",
+          "caregiver.coresidence"
+        ],
+        "missing_facts": [
+          "Explicit confirmation that recipient actually lives in California and current mailing/live address",
+          "Any recent moves in/out of California that could affect jurisdiction"
+        ],
+        "trigger": "Always \u2014 to determine county jurisdiction and whether IHSS applies.",
+        "simple_questions": [
+          "Does the recipient currently live in California? What is the full current address (street, city, county, ZIP)?",
+          "If not, do they plan to move to California soon?"
+        ],
+        "document_lookup_when": "Application stage if county requests proof of residency (utility bill, lease, CA driver\u2019s license). For screening, self\u2011report suffices but must be recorded.",
+        "source_ids": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "caveat": "Self\u2011report of CA residency is adequate for triage but county will verify with documents at application."
+      },
+      {
+        "criterion": "System/computed recipient age from Date of Birth (used for age\u2011based rules and child\u2011vs\u2011adult pathways)",
+        "pathway": "Any pathway that depends on recipient age (e.g., child under 18, young adult under 22, aged adults)",
+        "current_fields": [
+          "recipient.date_of_birth"
+        ],
+        "missing_facts": [
+          "Derived recipient.age used consistently by logic and forms in intake (the intake references recipient.age in some conditional logic but does not explicitly show a computed field)"
+        ],
+        "trigger": "Always \u2014 age affects certain eligibility questions and conditional prompts (e.g., lives_with_parent logic).",
+        "simple_questions": [
+          "Confirm recipient\u2019s date of birth so system can compute age."
+        ],
+        "document_lookup_when": "No document needed for screening beyond the provided DOB; if DOB is unknown, request a birth certificate or ID at application stage.",
+        "source_ids": [
+          "IHSS-MPP-30-700-764"
+        ],
+        "caveat": "This is primarily a data\u2011consistency/system gap: ensure intake UI computes and stores age from DOB and uses it in conditional logic instead of a separate manual age field."
+      }
+    ],
+    "application_only": [
+      "Provide originals or photocopies of government\u2011issued photo ID (recipient and caregiver) and SSN card(s) for county review (IHSS-CASE-ASSESSMENT-CHECKLIST).",
+      "Submit the completed SOC 873 or acceptable alternative dated within 60 days of submission (IHSS-MPP-30-700-764; IHSS-CASE-ASSESSMENT-CHECKLIST).",
+      "Provide SOC 321 or physician order for any paramedical tasks (IHSS-CASE-ASSESSMENT-CHECKLIST).",
+      "Complete provider enrollment steps (live scan/D O J CORI, payroll enrollment, employment eligibility verification) if caregiver will be paid (IHSS-MPP-30-765-785).",
+      "Supply Medi\u2011Cal award letter, SSA/SSI award letter, recent paystubs, bank statements, deeds or other asset documentation and any documents for transfers in the 30\u2011month look\u2011back (IHSS-FIELD-HANDBOOK; IHSS-MPP-30-700-764).",
+      "Proof of California residency (utility bill, lease, driver license) if county requests verification (IHSS-MPP-30-700-764).",
+      "VA documentation (award letters, PCAFC enrollment paperwork) if pursuing VA caregiver benefits \u2014 submit to VA for PCAFC pathway (specialist should not request VA file numbers during screening)."
+    ],
+    "visibility_gaps": [
+      "County system checks (CMIPS/ESP) for existing IHSS cases and official Medi\u2011Cal status \u2014 inaccessible to the intake specialist and must be verified by county.",
+      "DOJ CORI results and live scan outcomes for caregiver provider eligibility (county/public authority only).",
+      "Exact county computation of Share\u2011of\u2011Cost and hours assignment \u2014 counties apply HTGs and local discretion when assigning hours and SOC.",
+      "Internal county notes or prior IHSS assessments (SOC 293) and QA narratives that affect reassessment decisions \u2014 not visible in intake unless user supplies them."
+    ],
+    "unsupported_or_stale_claims": [
+      "Any blanket statement that citizenship or immigration status categorically excludes a person from all California Medi\u2011Cal or IHSS pathways. (MPP 30\u2011755.113 references immigration criteria and exceptions \u2014 do not assume ineligibility without recording status and consulting county/legal advice.)",
+      "Any assertion that self\u2011reported income ranges alone are sufficient to determine final Medi\u2011Cal/SSI eligibility \u2014 countable income/resource rules are more complex and require documentation and county verification."
+    ],
+    "scope_limits": [
+      "This screening is for preliminary eligibility triage and referral only \u2014 it does NOT replace county determinations or substitute for agency verification of documentation.",
+      "Do not use this intake to finalize Share\u2011of\u2011Cost, exact hour authorizations, or provider employment eligibility (those require county system checks, CORI results, and clinician orders).",
+      "The specialist must not request SSNs, live scan fingerprint images, or completed background checks during screening \u2014 flag them as application\u2011only steps instead.",
+      "Asset/transfer rules are date\u2011sensitive; historical documentation and exact dates are needed for look\u2011back calculations and are outside the scope of a basic intake unless provided.",
+      "VA PCAFC enrollment and county IHSS are separate systems; screening can identify candidates but cannot determine VA benefit eligibility or grant PCAFC status."
+    ]
+  },
+  "validation_issues": [
+    {
+      "criterion": "Signed IHSS Health Care Certification (SOC 873) or acceptable alternative, dated within 60 days",
+      "unmatched": [
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-CASE-ASSESSMENT-CHECKLIST",
+        "IHSS-MPP-30-700-764"
+      ]
+    },
+    {
+      "criterion": "Current Medi\u2011Cal / SSI / SSI\u2011criteria and monthly Share\u2011of\u2011Cost (SOC) \u2014 exact program status and countable income/assets",
+      "unmatched": [
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-MPP-30-700-764"
+      ]
+    },
+    {
+      "criterion": "Immigration/citizenship eligibility criterion that affects SSI/SSI\u2011criteria or Medi\u2011Cal countability",
+      "unmatched": [
+        "IHSS-MPP-30-700-764"
+      ]
+    },
+    {
+      "criterion": "Availability of government\u2011issued photo ID and Social Security Number for applicant/recipient",
+      "unmatched": [
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-CASE-ASSESSMENT-CHECKLIST"
+      ]
+    },
+    {
+      "criterion": "Caregiver provider\u2011enrollment readiness, DOJ/CORI exclusions, and prior denial history",
+      "unmatched": [
+        "IHSS-MPP-30-765-785",
+        "IHSS-CASE-ASSESSMENT-CHECKLIST"
+      ]
+    },
+    {
+      "criterion": "Paramedical task authorization (physician order / SOC 321) when skilled nursing tasks are needed",
+      "unmatched": [
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-CASE-ASSESSMENT-CHECKLIST"
+      ]
+    },
+    {
+      "criterion": "30\u2011month transfer (look\u2011back) details for institutionalized applicants affecting Medi\u2011Cal eligibility and resource counts",
+      "unmatched": [
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-MPP-30-700-764"
+      ]
+    },
+    {
+      "criterion": "Household composition, ages, relationships, and tax dependency for counting unit and for tax/benefit pathways",
+      "unmatched": [
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-MPP-30-700-764"
+      ]
+    },
+    {
+      "criterion": "California residency confirmation for jurisdiction and IHSS program applicability",
+      "unmatched": [
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-MPP-30-700-764"
+      ]
+    },
+    {
+      "criterion": "System/computed recipient age from Date of Birth (used for age\u2011based rules and child\u2011vs\u2011adult pathways)",
+      "unmatched": [
+        "IHSS-MPP-30-700-764"
+      ]
+    }
+  ]
+}

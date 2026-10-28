@@ -14,6 +14,7 @@ from __future__ import annotations
 from ..config import get_settings
 from ..models import CaseProfile, Citation, EligibilityResult, InteractionNote
 from ..rag.index import get_index
+from ..rag.scope import profile_scope
 
 # Program scopes whose docs describe how programs interact (coordination / routing / tax).
 INTERACTION_SCOPES = ["federal_routing", "medicare", "tax", "medical"]
@@ -35,7 +36,7 @@ _SCHEMA_HINT = (
 )
 
 
-def _retrieve(programs: list[str], k_per_scope: int = 3):
+def _retrieve(programs: list[str], profile: CaseProfile, k_per_scope: int = 3):
     index = get_index()
     query = (
         "how do these caregiver benefit programs interact, prerequisites, payer order, "
@@ -44,7 +45,7 @@ def _retrieve(programs: list[str], k_per_scope: int = 3):
     hits = []
     seen = set()
     for scope in INTERACTION_SCOPES:
-        for h in index.search(query, k=k_per_scope, program=scope):
+        for h in index.search(query, k=k_per_scope, scope=profile_scope(profile, scope)):
             key = (h.document_id or h.source, h.page)
             if key not in seen:
                 seen.add(key)
@@ -113,11 +114,11 @@ def _analyze(
     s = get_settings()
     if not s.has_llm:
         return _heuristic(active_set)
-    hits = _retrieve(active)
+    hits = _retrieve(active, profile)
     if not hits:
         return _heuristic(active_set)
     context = "\n\n".join(
-        f"[{h.title or h.source}" + (f", p.{h.page}" if h.page else "") + f"] {h.text}"
+        f"[{h.title or h.source}" + (f", p.{h.page}" if h.page else "") + f"] Policy metadata: {h.policy}\n{h.text}"
         for h in hits
     )
 

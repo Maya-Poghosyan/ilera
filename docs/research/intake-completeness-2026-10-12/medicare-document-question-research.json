@@ -1,0 +1,385 @@
+{
+  "program": "Medicare",
+  "doc_key": "medicare",
+  "generated_at": "2026-10-13T02:54:13.684667+00:00",
+  "execution": "Separate direct research invocation with Ilera Azure model and program-scoped RAG, not the hosted Durable endpoint",
+  "direct_question": "Audit the CURRENT refactored intake for completeness, not just documents. Can we make an accurate eligibility screening conclusion from these answers? List all missing facts, conditional visibility failures, precision gaps, program-specific eligibility-unit inputs, and mandatory unresolved criteria. Include concise simple followup wording and exactly when to ask it. Separate criteria facts from application paperwork.\nWhat external documents would possibly be needed, and what rules/triggers necessitate them? Give a concrete document-to-question matrix for your program. Show questions already in our intake, questions needing further detail, and questions belonging in the actual application session. Assess whether our intake supports accurate preliminary eligibility conclusions. Retrieve official sources before answering. ",
+  "result": {
+    "mappings": [
+      {
+        "document_name": "Medicare Savings Program policy (CMS Chapter 1) — verification rules (income/resources, citizenship, AVS/self-attestation)",
+        "program_or_pathway": "Medicare Savings Programs (QMB/SLMB/QI)",
+        "question": "Is the applicant’s household income and resources below MSP thresholds; are they enrolled in Medicare Part A or B; is the applicant a U.S. citizen or satisfactory immigration status?",
+        "subject_and_period": "Current monthly income and resources (most recent month / 12‑month lookback only if state requires), Medicare enrollment status (current), citizenship/immigration declaration (current)",
+        "intake_field_ids": [
+          "recipient.monthly_income_range",
+          "recipient.assets",
+          "recipient.household_size",
+          "recipient.medicaid_status",
+          "recipient.current_benefits"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Do you or the person you care for have Medicare Part A or B? Which parts and what are the claim/Medicare numbers? (If unknown, choose 'I'm not sure')",
+        "information_to_read": [
+          "CMS-MSP-CHAPTER-1:26:c8e587db33",
+          "CMS-MSP-CHAPTER-1:30:2889d87192",
+          "CMS-MSP-CHAPTER-1:52:8be4053458"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "States determine MSP eligibility using income and resource limits (see Appendix 1.A); CMS requires states to accept self-attestation for interest/dividend income and non‑liquid resources, but states may use AVS or request documentation; states must obtain a signed declaration of citizenship or satisfactory immigration status (if returned signed, US citizens need not be further verified).",
+        "trigger_for_asking_fact": "Any screening for MSPs or when user goal includes 'Medical coverage' or when recipient.current_benefits includes Medicare",
+        "trigger_for_document_lookup": "If self-attestation is ambiguous or state requires verification, or applicant indicates resources/assets that may be countable (e.g., savings/investments, life insurance cash value), or user indicates Medicaid application pending/denied",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes for many MSP-counted items per CMS (self-attestation acceptable for interest/dividend income and non-liquid resources); Medicare enrollment must be self-reported for screening but agency will verify",
+        "alternatives": [
+          "Self-reported Medicare part enrollment and income ranges for preliminary screen; agency verification via AVS or benefit letters at application"
+        ],
+        "source_ids": [
+          "CMS-MSP-CHAPTER-1:26:c8e587db33",
+          "CMS-MSP-CHAPTER-1:30:2889d87192",
+          "CMS-MSP-CHAPTER-1:52:8be4053458"
+        ],
+        "requirement_support": "CMS MSP Chapter 1 — self-attestation acceptance, citizenship declaration requirement, Appendix 1.A income/resource categories",
+        "retrieval_support": "CMS-MSP-CHAPTER-1 pages returned above",
+        "effective_date_or_jurisdiction_notes": "Applies nationally to MSPs; states may implement AVS or additional procedures by April 1, 2026 as noted in CMS doc",
+        "review_notes": "Intake collects rough monthly income ranges and household size (recipient.monthly_income_range, recipient.household_size) but lacks Medicare Part A/B enrollment and citizenship/immigration declaration questions; resource detail and spouse income not captured."
+      },
+      {
+        "document_name": "Medicare & You — MSP overview and state variability",
+        "program_or_pathway": "Medicare Savings Programs (state-administered)",
+        "question": "Does the state offer QMB/SLMB/QI and what benefits would the recipient get if eligible?",
+        "subject_and_period": "N/A (program design/state policy)",
+        "intake_field_ids": [
+          "case.goals",
+          "recipient.current_benefits"
+        ],
+        "intake_coverage": "missing",
+        "proposed_followup_question": "Which state Medicaid/medical assistance office handles MSPs for [recipient.address.state]? (We can look this up if you want.)",
+        "information_to_read": [
+          "MEDICARE-AND-YOU:92:0c2688f225"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "MSP names, income/resource limits, and benefits vary by state; applicants should contact state Medicaid office or apply through state process. Preliminary screening must treat MSPs as state‑specific.",
+        "trigger_for_asking_fact": "Any interest in help paying Medicare (case.goals includes 'Medical coverage') or mention of Medicare",
+        "trigger_for_document_lookup": "When preparing to recommend an application path or forms, lookup state's MSP program page",
+        "stage": "screening",
+        "documentary_requirement": "optional_lookup",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes to determine whether the person appears to fall into a national income/resource band, but state lookup required for exact thresholds and forms",
+        "alternatives": [
+          "Self-report eligibility flags; staff lookup of state MSP names and thresholds"
+        ],
+        "source_ids": [
+          "MEDICARE-AND-YOU:92:0c2688f225"
+        ],
+        "requirement_support": "Medicare & You explains MSPs are state-administered and thresholds vary",
+        "retrieval_support": "MEDICARE-AND-YOU page returned above",
+        "effective_date_or_jurisdiction_notes": "State variations important; this is national guidance",
+        "review_notes": "Intake does not capture state-specific program names or acceptance options for MSPs; needs a step to resolve state thresholds before application."
+      },
+      {
+        "document_name": "CMS MSP Chapter 1 — Asset Verification System (AVS) and what states may require",
+        "program_or_pathway": "Medicare Savings Programs — verification",
+        "question": "Does the applicant have countable resources (bank balances, cash value of life insurance, burial funds) and can they self-attest, or will the state need AVS verification?",
+        "subject_and_period": "Current resources and value; burial set-asides; life insurance cash value (current)",
+        "intake_field_ids": [
+          "recipient.assets",
+          "recipient.recent_transfers",
+          "recipient.household_size"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Please list the types of assets owned (savings, investment accounts, life insurance with cash value, property other than primary home). Do you know approximate values?",
+        "information_to_read": [
+          "CMS-MSP-CHAPTER-1:26:04c24b8a86",
+          "CMS-MSP-CHAPTER-1:26:917851b6cc"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "CMS requires states to either accept self-attestation of non-liquid resources and interest/dividend income or use AVS; states may require documentary proof if AVS or other verification fails. Burial funds treated differently between LIS and MSPs.",
+        "trigger_for_asking_fact": "When resources are reported (recipient.assets not 'None') or the recipient is applying for MSPs",
+        "trigger_for_document_lookup": "If user cannot self-attest values or state indicates AVS will be used, request bank statements, life insurance statements, property deeds at application/agency followup",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes for many items (CMS says self-attestation acceptable), but if applicant reports high/uncertain assets, agency may require documentation",
+        "alternatives": [
+          "Self-attestation for preliminary screen; request documents only if necessary at application"
+        ],
+        "source_ids": [
+          "CMS-MSP-CHAPTER-1:26:04c24b8a86",
+          "CMS-MSP-CHAPTER-1:26:917851b6cc"
+        ],
+        "requirement_support": "CMS MSP Chapter 1 sections on verification and AVS",
+        "retrieval_support": "CMS-MSP-CHAPTER-1 pages returned above",
+        "effective_date_or_jurisdiction_notes": "Applies nationally but states choose AVS vs self-attestation implementation",
+        "review_notes": "Intake asks asset types but not values, spouse assets or burial funds; no direct question on life insurance cash value — gap for MSP countable resources."
+      },
+      {
+        "document_name": "CMS MSP Chapter 1 — Citizenship/Immigration declaration rules",
+        "program_or_pathway": "MSP and Medicaid verification",
+        "question": "Is the applicant a U.S. citizen or do they have satisfactory immigration status? Has the applicant signed the required declaration?",
+        "subject_and_period": "Current citizenship/immigration status; signed declaration at application",
+        "intake_field_ids": [
+          "caregiver.address.state",
+          "recipient.address.state"
+        ],
+        "intake_coverage": "missing",
+        "proposed_followup_question": "Are you or the person you care for a U.S. citizen, U.S. national, or a non‑citizen with satisfactory immigration status? (This is required for MSP/Medicaid application.)",
+        "information_to_read": [
+          "CMS-MSP-CHAPTER-1:30:2889d87192"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "States must request a signed declaration of U.S. citizenship or satisfactory immigration status; if citizen returns signed declaration, no further verification required. Non‑citizens may require immigration documentation.",
+        "trigger_for_asking_fact": "When screening for MSPs or full Medicaid benefits",
+        "trigger_for_document_lookup": "If non‑citizen or citizenship uncertain, agency will request immigration documents (USCIS forms, green card, naturalization certificate) at application",
+        "stage": "application",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report is sufficient to screen preliminarily; signed declaration and documentary evidence may be required at application",
+        "alternatives": [
+          "Self-report for screening; declaration and agency verification for application"
+        ],
+        "source_ids": [
+          "CMS-MSP-CHAPTER-1:30:2889d87192"
+        ],
+        "requirement_support": "CMS MSP Chapter 1 citizenship verification section",
+        "retrieval_support": "CMS-MSP-CHAPTER-1 page returned above",
+        "effective_date_or_jurisdiction_notes": "Applies to MSPs nationally; state procedures for non‑citizens vary",
+        "review_notes": "Intake lacks any citizenship/immigration question — mandatory omission for MSP/Medicaid screening."
+      },
+      {
+        "document_name": "CMS MSP Chapter 1 Appendix 1.A — income/resource categories & thresholds (reference)",
+        "program_or_pathway": "MSP income/resource threshold mapping",
+        "question": "Does reported household income fall into QMB/SLMB/QI eligibility ranges once household size and unearned/in-kind rules are applied?",
+        "subject_and_period": "Monthly income (current); household composition (current)",
+        "intake_field_ids": [
+          "recipient.monthly_income_range",
+          "recipient.household_size",
+          "recipient.marital_status",
+          "recipient.spouse_living_situation"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Please provide monthly gross and net income amounts for the recipient and their spouse (if applicable) and indicate which household members contribute income.",
+        "information_to_read": [
+          "CMS-MSP-CHAPTER-1:52:8be4053458"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "MSP groups are defined by FPL percentages and resource limits that depend on household size; family size rules can affect eligibility and require precise household composition (see CMS memo referenced in Chapter 1).",
+        "trigger_for_asking_fact": "When recipient.monthly_income_range indicates low-income or when case.goals include MSP assistance",
+        "trigger_for_document_lookup": "If income range ambiguous or near thresholds, request paystubs, benefit letters, or tax returns during application or to verify",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "A monthly income range may be sufficient to place a person in a likely MSP band for preliminary recommendations, but precise dollar amounts and household composition are needed for a defensible eligibility conclusion",
+        "alternatives": [
+          "Self-reported ranges for preliminary screen; exact paystubs/SSA award letters for application verification"
+        ],
+        "source_ids": [
+          "CMS-MSP-CHAPTER-1:52:8be4053458"
+        ],
+        "requirement_support": "CMS Appendix 1.A provides income/resource banding and how coverage corresponds",
+        "retrieval_support": "CMS-MSP-CHAPTER-1 Appendix 1.A page returned above",
+        "effective_date_or_jurisdiction_notes": "Thresholds are state‑specific adjustments to federal FPL/resource bands",
+        "review_notes": "Intake uses income ranges (recipient.monthly_income_range) which are useful but too coarse for exact MSP thresholds and do not capture spouse income or countable in‑kind support."
+      },
+      {
+        "document_name": "Medicare & You — SSI and full Medicaid relationship overview",
+        "program_or_pathway": "SSI → Medicaid full‑benefit linkage",
+        "question": "Is the recipient receiving SSI or likely to be eligible for SSI, which would usually confer Medicaid eligibility?",
+        "subject_and_period": "Current SSI/SSDI receipt status and dates",
+        "intake_field_ids": [
+          "recipient.current_benefits",
+          "recipient.programs_touched",
+          "recipient.program_status"
+        ],
+        "intake_coverage": "sufficient_if_known",
+        "proposed_followup_question": "Are they currently receiving SSI payments? If yes, what is the most recent award date and monthly amount (or attach the award letter at application)?",
+        "information_to_read": [
+          "MEDICARE-AND-YOU:95:1c89f63216"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "SSI recipients generally qualify for Extra Help and are usually eligible for Medicaid; SSA award letter is primary evidence for SSI receipt.",
+        "trigger_for_asking_fact": "If recipient.current_benefits includes 'SSI' or user selects goals related to income support",
+        "trigger_for_document_lookup": "Agency will request SSA award letter or benefits verification for application; self-report usually OK for screening",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes — self-report that recipient receives SSI is sufficient for preliminary identification; SSA award letter required at application for formal determinations",
+        "alternatives": [
+          "Self-report for screening; SSA award letter for application"
+        ],
+        "source_ids": [
+          "MEDICARE-AND-YOU:95:1c89f63216"
+        ],
+        "requirement_support": "Medicare & You statement that SSI usually confers Medicaid and Extra Help",
+        "retrieval_support": "MEDICARE-AND-YOU page returned above",
+        "effective_date_or_jurisdiction_notes": "Federal program (SSI) links to state Medicaid eligibility in most states",
+        "review_notes": "Intake asks current_benefits and program status; if caller selects SSI, intake supports a strong preliminary identification."
+      },
+      {
+        "document_name": "(NOT RETRIEVED) VA Pension / Aid & Attendance rules and evidence — missing source",
+        "program_or_pathway": "VA pension with Aid & Attendance / VA caregiver programs (PCAFC)",
+        "question": "Does the veteran have a VA pension/Aid & Attendance award or a combined disability rating that triggers caregiver program eligibility?",
+        "subject_and_period": "VA decision letter (most recent), combined rating percentage, pension or Aid & Attendance status",
+        "intake_field_ids": [
+          "recipient.va_rating_assigned",
+          "recipient.va_rating",
+          "recipient.va_pension_status",
+          "recipient.va_six_month_care_need",
+          "caregiver.age_18_or_older",
+          "recipient.va_contact"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Do you have the VA decision letter that shows combined disability rating or a VA pension/Aid & Attendance award? If not, can you check with VA/your representative?",
+        "information_to_read": [],
+        "eligibility_rule_or_paperwork_requirement": "VA award letters or decision letters (combined rating) and pension/Aid & Attendance determinations are the controlling documents for VA caregiver/pension pathways; specific thresholds (e.g., 70%+) and continuous care needs are program triggers.",
+        "trigger_for_asking_fact": "When case.goals includes 'Finding VA caregiver benefits' or recipient.current_benefits includes VA benefits",
+        "trigger_for_document_lookup": "Agency/VA will require VA decision letter or pension award if applying for VA pension or caregiver benefits",
+        "stage": "application",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report of VA benefit receipt or rating can guide preliminary routing, but the VA decision letter is required to confirm eligibility at application",
+        "alternatives": [
+          "Self-report for screening; VA decision or award letter required for application"
+        ],
+        "source_ids": [],
+        "requirement_support": "Not established — authoritative VA sources not retrieved in this search",
+        "retrieval_support": "VA policy/documents were not retrieved; add VA resources (e.g., VHA, VBA regulations) to finalize mapping",
+        "effective_date_or_jurisdiction_notes": "VA is federal; rules and thresholds differ by program and require VA documents",
+        "review_notes": "Intake contains VA-related questions but no linked official sources were retrieved — this is a coverage gap for authoritative evidence and document triggers."
+      },
+      {
+        "document_name": "(NOT RETRIEVED) California IHSS / Medi‑Cal asset transfer and lookback rules — missing source",
+        "program_or_pathway": "Medi‑Cal long‑term services (including IHSS) — eligibility and transfer lookback",
+        "question": "Has the recipient transferred assets in the 30‑month lookback (or state-specified period) and does that affect Medi‑Cal eligibility?",
+        "subject_and_period": "Asset transfers during the preceding 30 months (or state lookback window)",
+        "intake_field_ids": [
+          "recipient.recent_transfers",
+          "recipient.living_setting"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Have any assets or property been transferred, sold for less than fair market value, or given away in the last 30 months? If yes, when and what was transferred?",
+        "information_to_read": [],
+        "eligibility_rule_or_paperwork_requirement": "Medi‑Cal has transfer-of-assets rules and lookback periods that can create penalties; documentary evidence (deeds, bank transfers) may be required at application.",
+        "trigger_for_asking_fact": "When recipient.living_setting indicates nursing home/skilled nursing facility or when applying for Medi‑Cal long‑term services",
+        "trigger_for_document_lookup": "Agency requires transfer documentation, property deeds, bank records during application if transfers reported or suspected",
+        "stage": "application",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report of transfers is necessary for triage but insufficient to calculate penalties — documents needed for final determination",
+        "alternatives": [
+          "Self-report for screening; gather deeds and transaction records for application"
+        ],
+        "source_ids": [],
+        "requirement_support": "Not established — California-specific Medi‑Cal and IHSS rules not retrieved",
+        "retrieval_support": "No California IHSS/Medi‑Cal documents returned in current retrieval — a coverage gap",
+        "effective_date_or_jurisdiction_notes": "California-specific; retrieval of state regs required to finalize.",
+        "review_notes": "Intake asks recipient.recent_transfers only for nursing home setting (show_when), but lacks follow-up detail (dates, amounts, recipient of transfer). This impedes a defensible Medi‑Cal preliminary eligibility conclusion."
+      },
+      {
+        "document_name": "(NOT RETRIEVED) SSA rules re: SSDI/SSI work credits and evidence (SSA POMS not retrieved)",
+        "program_or_pathway": "SSDI / SSI eligibility (work credits, medical evidence)",
+        "question": "Has the recipient worked and paid Social Security taxes sufficient to qualify for SSDI and do they meet SSA disability standards?",
+        "subject_and_period": "Work history (years/quarters) and medical evidence timeframe (current medical records)",
+        "intake_field_ids": [
+          "recipient.work_history_social_security",
+          "recipient.work_status",
+          "recipient.condition_documented",
+          "recipient.has_certifying_clinician"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Can you provide the recipient’s approximate work history (years and recent quarters when Social Security taxes were paid) or their SSA earnings record?",
+        "information_to_read": [],
+        "eligibility_rule_or_paperwork_requirement": "SSDI requires sufficient work credits and medical evidence according to SSA rules; SSI requires limited income and resources and disability per SSA criteria; SSA award letters and earnings records are required for application verification.",
+        "trigger_for_asking_fact": "When goals include 'Getting SSI, SSDI' or intake indicates disability affecting work",
+        "trigger_for_document_lookup": "At application, SSA will request medical records, employer earnings, and SSA earnings history (W2s, 1099, paystubs)",
+        "stage": "split",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report of work history and existing SSA benefits is sufficient for initial triage, but SSA records/medical evidence are required later",
+        "alternatives": [
+          "Self-report for screening; SSA earnings record and medical records for application verification"
+        ],
+        "source_ids": [],
+        "requirement_support": "Not established — SSA source documents (POMS, regs) were not retrieved in this session",
+        "retrieval_support": "No SSA/SSA POMS documents returned — add to retrievals",
+        "effective_date_or_jurisdiction_notes": "Federal SSA rules apply nationally",
+        "review_notes": "Intake asks some work/disability questions but lacks detailed work‑credit inputs (quarters of coverage, precise dates) required to estimate SSDI eligibility."
+      }
+    ],
+    "missing_eligibility_questions": [
+      "Medicare Part A and Part B enrollment status and Medicare claim numbers (add: 'Does the recipient have Medicare Part A or Part B? Which parts are active?')",
+      "U.S. citizenship or satisfactory immigration status and signed declaration (add: 'Is the recipient a U.S. citizen, national, or do they have satisfactory immigration status?')",
+      "Exact monthly/annual income amounts and breakdown by household member including spouse (add: 'Provide gross monthly income amounts for recipient and spouse, and indicate source: Social Security, wages, pension, VA, other')",
+      "Countable resource values and life insurance cash value (add: 'List approximate values for savings, investments, life insurance cash value, and other property — include owner and date')",
+      "Household composition details for eligibility unit (who is included in the Medicaid/MSP household) (add: 'List all household members, their relationship and whether they contribute income')",
+      "Social Security number (for application routing only) — not for screening (note: capture only at secure application stage)",
+      "If applying for Medi‑Cal / long‑term care: dates and amounts of any transfers in last 30 months, and recipient of transfers (add: 'Were any assets transferred in last 30 months? Describe dates, recipients, and amounts')",
+      "If pursuing VA benefits: VA claim/file number and copy of decision letter (add: 'Do you have the VA decision or award letter?')",
+      "If pursuing SSDI/SSI: detailed work history (years/quarters) for SSA credits (add: 'List years you worked and whether you paid Social Security taxes; can you access W-2s or SSA earnings record?')",
+      "Medicare enrollment proof and Social Security award letters as application-stage mandatory docs (indicate in application workflow)"
+    ],
+    "intake_sufficiency_assessment": "The current intake supports high‑level triage and prioritization but does NOT provide all facts needed for a defensible preliminary eligibility conclusion for all pathways covered. Strengths: collects recipient health needs, living setting, coarse income ranges, benefit flags (Medicaid, SSI, VA), household size, and VA-related flags. Major gaps prevent definitive MSP or Medi‑Cal conclusions: missing Medicare Part A/B enrollment, citizenship/immigration declaration, precise income amounts and spouse income, countable resource values (life insurance cash value, burial funds), household composition for determination of eligibility unit, and state‑specific program thresholds. For VA, IHSS, SSDI/SSI, and California Medi‑Cal long‑term care specifics authoritative sources were not retrieved and intake lacks critical numeric and documentation questions. Self‑report fields allow preliminary screening in many MSP instances (CMS permits self-attestation for certain items), but ranges and missing household composition make a defensible eligibility decision impossible without follow-up or application‑level verification.",
+    "coverage_gaps": [
+      "No question capturing Medicare Part A/Part B enrollment or Medicare claim number (intake missing)",
+      "No citizenship/immigration status question or signed declaration (required for MSP/Medicaid)",
+      "Income captured only as coarse ranges — missing precise gross/net monthly amounts and breakdown by household member/spouse",
+      "Assets captured as types only — missing approximate/current values and cash value of life insurance and burial funds",
+      "No detailed household composition (names/relationships/household income contributors) to define eligibility unit for MSP/Medicaid",
+      "VA documentary requirements and thresholds not retrieved — authoritative VA sources missing",
+      "California Medi‑Cal / IHSS documentation and transfer lookback rules not retrieved — state documents missing",
+      "SSA/SSI/SSDI work‑credit rules and required evidence not retrieved — SSA sources missing",
+      "Intake asks recipient.recent_transfers only when in nursing home — transfers can affect eligibility in other long‑term care contexts too",
+      "No explicit step to collect application‑level mandatory documents (SSA award letters, Medicare card, VA decision letters) though intake acknowledges some logics where 'I'm not sure' is acceptable"
+    ]
+  },
+  "retrieval_queries": [
+    "Medi-Cal (California) eligibility rules documentation and verification requirements; IHSS (In-Home Supportive Services) eligibility and required documents; Medicare Savings Programs (QMB, SLMB, QI) eligibility documentation and verification; Social Security Disability Insurance (SSDI) and Supplemental Security Income (SSI) evidence and work credits documentation; VA Pension and Aid & Attendance eligibility documentation and rules, and VA caregiver programs (PCAFC) eligibility and required evidence; California Paid Family Leave (PFL)/State Disability Insurance (SDI) medical certification and wage deduction proof."
+  ],
+  "retrieved_sources": {
+    "CMS-MSP-CHAPTER-1:30:2889d87192": {
+      "title": "Medicare Savings Program Eligibility and Enrollment — Chapter 1",
+      "url": "https://www.cms.gov/files/document/chapter-1-program-overview-and-policy.pdf",
+      "document_id": "CMS-MSP-CHAPTER-1",
+      "page": "30",
+      "text": "eligibility determination \nstates must request additional information from the individual to: \na. Obtain information for certain income and/or resources if the state has not aligned its \nmethodologies for them with LIS through the election of 1902(r)(2) disregards in its \nMedicaid State Plan. (As compared to methodologies used by SSI, LIS does not count \nin-kind support and maintenance, interest and dividend income, non-liquid resources, \nand the cash value of life insurance. While SSI methodologies disregard up to $1,500 \nof burial funds only if they are set aside in a separate account, LIS disregards up to \n$1,500 of burial funds even if they are comingled with other funds).   \n \nb. Verify the individual’s U.S. citizenship or satisfactory immigration status. In \naccordance with 42 CFR 435.406(a) and section 1137(d) of the Act, the state must \nrequest the individual complete a declaration of U.S. citizenship or satisfactory \nimmigration status. If the individual returns a signed declaration to the state, \nrequirements to verify the declaration are as follows:    \n   \n• US citizens: When a Medicare beneficiary returns a declaration of U.S. \ncitizenship, the state is not required to undertake further steps to verify \ncitizenship status. See section 1903(x) of the Act and 42 CFR \n435.406(a)(1)(iii). Since LIS requires Part A or Part B enrollment, the vast \nmajority of LIS applic"
+    },
+    "CMS-MSP-CHAPTER-1:26:04c24b8a86": {
+      "title": "Medicare Savings Program Eligibility and Enrollment — Chapter 1",
+      "url": "https://www.cms.gov/files/document/chapter-1-program-overview-and-policy.pdf",
+      "document_id": "CMS-MSP-CHAPTER-1",
+      "page": "26",
+      "text": "97, at \nhttps://www.medicaid.gov/sites/default/files/2019-12/medicaid-eligibilty-memo.pdf.\n\n\nof such resources without first attempting to verify them through AVS.29   \n \nDistinct requirements apply to the verification of certain income and resources for all MSPs \napplications (section 1.6.2.2) and to MSP applications the state receives from SSA through the \nLIS leads process (section 1.6.2.3).     \n \nScreen on all bases: State Medicaid agencies must generally determine an individual’s \neligibility for all Medicaid eligibility groups for which they may qualify. For Medicare \nbeneficiaries, these include full-benefit Medicaid eligibility groups and the MSPs. Accordingly, \nstates’ eligibility system hierarchy should be programmed to reflect both MSP eligibility \ndeterminations as well as full-benefit Medicaid eligibility groups. Note that some states may \nhave MSP-only applications that do not request the information necessary for categorical \nMedicaid determinations. Consistent with 42 CFR 435.911(c), by April 1, 2026, states must \nadhere to specific sequencing of eligibility determinations for individuals whose MSP \napplications originate with SSA transmittal of LIS leads data as described in CMS regulations at \n42 CFR 435.911(e)(9) and section 1.6.2.3. \n1.6.2.2 Verification of Certain Income and Resources for the Medicare \nSavings Programs \n(Rev. 7; Issued:01-16-2025;"
+    },
+    "CMS-MSP-CHAPTER-1:26:c8e587db33": {
+      "title": "Medicare Savings Program Eligibility and Enrollment — Chapter 1",
+      "url": "https://www.cms.gov/files/document/chapter-1-program-overview-and-policy.pdf",
+      "document_id": "CMS-MSP-CHAPTER-1",
+      "page": "26",
+      "text": "data as described in CMS regulations at \n42 CFR 435.911(e)(9) and section 1.6.2.3. \n1.6.2.2 Verification of Certain Income and Resources for the Medicare \nSavings Programs \n(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) \n \nNo later than April 1, 2026, states are required to implement enrollment simplification policies \nrelated to verification of certain income and resources that the MSPs count but LIS does not (i.e., \ninterest and dividend income; non-liquid resources, and the cash value of certain whole life \ninsurance policies). States must also simplify verification of burial funds, which the MSPs count \ndifferently than does LIS.  \n \nNOTE: The requirements below apply to all MSP applications, regardless of whether the \nindividual initiates the application by directly applying to the state Medicaid agency or the state \nreceives the application from SSA through the LIS leads process. Also, if CMS conducts audits \nrelated to state MSP eligibility determinations, CMS will not identify an error if the state follows \nthese requirements.  \nInterest and dividend income and non-liquid resources: States must accept self-attestation of \nthe value of any: 1) dividend and interest income earned by the applicant or the applicant’s \nspouse and 2) non-liquid resources owned by the applicant or the applicant’s spouse. 42 CFR \n435.952(e)(1) and (e)(2). States ma"
+    },
+    "CMS-MSP-CHAPTER-1:52:8be4053458": {
+      "title": "Medicare Savings Program Eligibility and Enrollment — Chapter 1",
+      "url": "https://www.cms.gov/files/document/chapter-1-program-overview-and-policy.pdf",
+      "document_id": "CMS-MSP-CHAPTER-1",
+      "page": "52",
+      "text": "/lnx/0600815042 , SSA \nPOMS HI 01005.001 at https://secure.ssa.gov/apps10/poms.nsf/lnx/0601005001, and SSA POMS HI 01005.015 at \nhttps://secure.ssa.gov/apps10/poms.nsf/lnx/0601005015.\n\n\n00805.180 at https://secure.ssa.gov/poms.nsf/lnx/0600805180 and SSA POMS HI \n00830.060 at https://secure.ssa.gov/apps10/poms.nsf/lnx/0600830060.\n\n\nAppendix 1.A Dual Eligibility Categories and Assistance with Medicare Part A and Part B Costs \n(Rev. 7; Issued:01-16-2025; Effective01-16-2025; Implementation: 01-16-2025) \n \nCategory Monthly \nIncome* \nResources* Covers \nPart A \npremium \n(when \napplicable) \nCovers \nPart B \npremium \nCovers \nPart B-\nID \npremium \nCovers \nParts A \nand B \ncost- \nsharing \nCovers \nPart B-\nID cost \nsharing \nFull-\nbenefit \nMedicaid \ncoverage** \nQMB-\nonly \nFPL ≤ 100%  <3 times the SSI \nresource limit, \nadjusted for \ninflation* \nX X  X*** \n \n  \nQMB- \nplus** \nFPL ≤ \n100%  \n<3 times the SSI \nresource limit, \nadjusted for \ninflation*  \nX X  X***  X \nQMB- \nPart B-\nID  \nFPL ≤ \n100% \n<3 times the SSI \nresource limit, \nadjusted for \ninflation*  \n  X  X  \nSLMB-\nonly \n  >\n100% FPL <\n120% \n<3 times the SSI \nresource limit, \nadjusted for \ninflation*  \n X     \nSLMB- \nplus** \n> 100% FPL\n< 120% \n<3 times the SSI \nresource limit, \nadjusted for \ninflation* \n X  Depends \non state \nplan***** \n X \nSLMB-\nPart B-\nID \n> 100% FPL\n< 120% \n<3 times the SSI \nresource limit, \nadjusted fo"
+    },
+    "MEDICARE-AND-YOU:92:0c2688f225": {
+      "title": "Medicare & You",
+      "url": "https://www.medicare.gov/publications/10050-medicare-and-you.pdf",
+      "document_id": "MEDICARE-AND-YOU",
+      "page": "92",
+      "text": "remium only. QI is only available \nfor people who don’t qualify for any other Medicaid coverage or benefits. \n4. Qualified Disabled and Working Individuals (QDWI): Covers Part A \npremium only. You may qualify for this program if you have a disability, \nyou’re working, and you lost your Social Security disability benefits and \npremium-free Part A because you returned to work.\nIf you sign up for the immunosuppressive drug benefit (page 52) and \nhave limited income and resources, but don’t have full Medicaid coverage, \nyou may qualify for help paying the costs through a QMB, SLMB, or QI \nprogram. Contact your State Medical Assistance (Medicaid) office to apply.\n\n\nSection 7: Get help paying your health & drug costs\n92\nIf you qualify for a QMB, SLMB, or QI Program, you qualify automatically for \nExtra Help (described below). \nImportant! Medicare Savings Programs are available through your \nstate. The names of these programs and how they work may vary by \nstate. Medicare Savings Programs aren’t available in Puerto Rico or the \nU.S. Virgin Islands. \nHow do I qualify? \n• In most cases, your income and resources must be below a certain limit to \nqualify for a Medicare Savings Program. Income and resource limits vary by \nstate. \n• Even if you don’t think you qualify, you should still apply. Contact your State \nMedical Assistance (Medicaid) office to get started.\n• To get the pho"
+    },
+    "CMS-MSP-CHAPTER-1:26:917851b6cc": {
+      "title": "Medicare Savings Program Eligibility and Enrollment — Chapter 1",
+      "url": "https://www.cms.gov/files/document/chapter-1-program-overview-and-policy.pdf",
+      "document_id": "CMS-MSP-CHAPTER-1",
+      "page": "26",
+      "text": "states may either elect to accept self-attestation of resources or to use an \nAsset Verification System (AVS) for the MSPs. If a state does not accept self-attestation of \nresources that can be verified through AVS, the state cannot require individuals to provide proof \n \n26 See final rule titled ‘‘Streamlining Medicaid: Medicare Savings Program Eligibility Determination and \nEnrollment” published in the September 21, 2023 Federal Register (88 FR 65320, 652 39) at \nhttps://www.govinfo.gov/content/pkg/FR-2023-09-21/pdf/2023-20382.pdf (“the September 21, 2023 MSP final \nrule”). States would only need to verify citizenship or immigration status obtain assignment of rights to medical \nsupport and third-party payers as described in section 1.6.2.3.  \n27 See sections 1905(p)(2)(A) and (B) (the QMB group), 1902(a)(10)(E)(iii) and (iv) (the SLMB and QI groups \nrespectively), and 1905(s)(2) (the QDWI group) of the Act. \n28 See Memorandum from Director, Center for Medicaid and State Operations, to Regional Administrator, re: \nMedicaid Eligibility—Policy Governing Family Size in Determining Eligibility for Qualified Medicaid \nBeneficiaries and Specified Low-Income Beneficiaries. October 2, 1997, at \nhttps://www.medicaid.gov/sites/default/files/2019-12/medicaid-eligibilty-memo.pdf.\n\n\nof such resources without first attempting to verify them through AVS.29   \n \nDistinct requirement"
+    },
+    "MEDICARE-AND-YOU:95:1c89f63216": {
+      "title": "Medicare & You",
+      "url": "https://www.medicare.gov/publications/10050-medicare-and-you.pdf",
+      "document_id": "MEDICARE-AND-YOU",
+      "page": "95",
+      "text": "o learn more about Pharmaceutical Assistance \nPrograms. \nProgram of All-inclusive Care for the Elderly (PACE) \nPACE is a Medicare and Medicaid program offered in many states for people \nwho need a nursing home-level of care, that provides services and supports \nallowing them to remain in the community for as long as possible. Go to \npage 74. \nSupplemental Security Income (SSI) payments \nSSI provides monthly payments to adults and children who are blind or have \na disability and have limited income and resources. SSI payments are also \nprovided to people 65 and older without disabilities who meet the financial \nqualifications. These payments aren’t the same as Social Security retirement \nbenefits. You may be able to get both SSI and Social Security benefits at the \nsame time if your Social Security benefit is less than the SSI federal benefit \nrate. If you’re eligible for SSI, you qualify automatically for Extra Help and are \nusually eligible for Medicaid.\nYou can visit SSA.gov/apply/ssi to find out if you’re eligible for SSI or other \nbenefits. \nNote: People who live in Puerto Rico, the U.S. Virgin Islands, Guam, or \nAmerican Samoa can’t get SSI. \nPrograms for people who live in the U.S. territories \nThere are programs in Puerto Rico, the U.S. Virgin Islands, Guam, the \nNorthern Mariana Islands, and American Samoa to help people with limited \nincome and resources pay their Medi"
+    },
+    "CMS-MSP-CHAPTER-1:55:483791015f": {
+      "title": "Medicare Savings Program Eligibility and Enrollment — Chapter 1",
+      "url": "https://www.cms.gov/files/document/chapter-1-program-overview-and-policy.pdf",
+      "document_id": "CMS-MSP-CHAPTER-1",
+      "page": "55",
+      "text": "security income (SSI) eligibility with adjustments for inflation, and are not \notherwise eligible for full-benefit Medicaid coverage. Medicaid pays their Medicare Part A \npremiums, if any, and Medicare Part B premiums. Medicare providers may not bill QMBs for \nMedicare Parts A and B cost-sharing amounts, including deductibles, coinsurance, and copays.50 \nProviders can bill Medicaid programs for these amounts, but states have the option to reduce or \neliminate the state’s Medicare cost-sharing payments by adopting policies that limit payment to \nthe lesser of (a) the Medicare cost-sharing amount, or (b) the difference between the Medicare \npayment and the Medicaid rate for the service.  \nIndividuals in the limited Part B-ID benefit may also qualify for the QMB eligibility group with \ncoverage limited to the Part B-ID premium and/or cost-sharing, a status known as QMB-Part B-\nID.   \nQMBs with full-benefit Medicaid (QMB-Plus – also known as QMB “full-benefit”) meet the \nQMB-related eligibility requirements described above and the eligibility requirements for a \nseparate categorical Medicaid eligibility group covered under the state plan. In addition to the \ncoverage for Medicare premiums and cost-sharing described above, QMB-plus individuals \nreceive the full range of Medicaid benefits applicable to the separate eligibility group for which \nthey qualify. Medicaid pays their Medica"
+    }
+  },
+  "validation_issues": [],
+  "retrieval_events": []
+}

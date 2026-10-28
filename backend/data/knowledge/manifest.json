@@ -18,7 +18,16 @@
       ],
       "source_ext": "docx",
       "text_path": "federal_routing/ACL-FED-CAREGIVER-INVENTORY.txt",
-      "chars": 176277
+      "chars": 176277,
+      "jurisdictions": [
+        "US"
+      ],
+      "applicable_programs": [
+        "federal_routing"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "ACL-NATIONAL-STRATEGY",
@@ -39,7 +48,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "federal_routing/ACL-NATIONAL-STRATEGY.txt",
-      "chars": 244369
+      "chars": 244369,
+      "jurisdictions": [
+        "US"
+      ],
+      "applicable_programs": [
+        "federal_routing"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "ACWDL-25-14",
@@ -59,7 +77,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medical/ACWDL-25-14.txt",
-      "chars": 40121
+      "chars": 40121,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "ACWDL-25-26",
@@ -80,7 +107,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medical/ACWDL-25-26.txt",
-      "chars": 6933
+      "chars": 6933,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "ACWDL-26-01",
@@ -100,7 +136,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medical/ACWDL-26-01.txt",
-      "chars": 5293
+      "chars": 5293,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "CMS-MSP-CHAPTER-1",
@@ -120,7 +165,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medicare/CMS-MSP-CHAPTER-1.txt",
-      "chars": 149634
+      "chars": 149634,
+      "jurisdictions": [
+        "US"
+      ],
+      "applicable_programs": [
+        "medicare"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "EDD-DE2475",
@@ -139,7 +193,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "pfl/EDD-DE2475.txt",
-      "chars": 6473
+      "chars": 6473,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "pfl"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "EDD-DE2511",
@@ -158,7 +221,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "pfl/EDD-DE2511.txt",
-      "chars": 4923
+      "chars": 4923,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "pfl"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "EDD-FMLA-CFRA-FAQ",
@@ -179,7 +251,16 @@
       ],
       "source_ext": "txt",
       "text_path": "pfl/EDD-FMLA-CFRA-FAQ.txt",
-      "chars": 3220
+      "chars": 3220,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "pfl"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "HCBA-APPROVED-WAIVER",
@@ -200,7 +281,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medical/HCBA-APPROVED-WAIVER.txt",
-      "chars": 365253
+      "chars": 365253,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "HCBS-WAIVER-INDEX",
@@ -221,7 +311,16 @@
       ],
       "source_ext": "txt",
       "text_path": "medical/HCBS-WAIVER-INDEX.txt",
-      "chars": 2569
+      "chars": 2569,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IHSS-ADVISEMENT-CHECKLIST",
@@ -241,7 +340,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "ihss/IHSS-ADVISEMENT-CHECKLIST.txt",
-      "chars": 1076
+      "chars": 1076,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "ihss"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IHSS-ANNOTATED-ASSESSMENT",
@@ -261,7 +369,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "ihss/IHSS-ANNOTATED-ASSESSMENT.txt",
-      "chars": 58610
+      "chars": 58610,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "ihss"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IHSS-CASE-ASSESSMENT-CHECKLIST",
@@ -281,7 +398,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "ihss/IHSS-CASE-ASSESSMENT-CHECKLIST.txt",
-      "chars": 2154
+      "chars": 2154,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "ihss"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IHSS-FIELD-HANDBOOK",
@@ -301,7 +427,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "ihss/IHSS-FIELD-HANDBOOK.txt",
-      "chars": 40067
+      "chars": 40067,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "ihss"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IHSS-HOURLY-TASK-GUIDELINES",
@@ -321,7 +456,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "ihss/IHSS-HOURLY-TASK-GUIDELINES.txt",
-      "chars": 2790
+      "chars": 2790,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "ihss"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IHSS-MPP-30-700-764",
@@ -340,7 +484,16 @@
       ],
       "source_ext": "docx",
       "text_path": "ihss/IHSS-MPP-30-700-764.txt",
-      "chars": 146168
+      "chars": 146168,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "ihss"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IHSS-MPP-30-765-785",
@@ -359,7 +512,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "ihss/IHSS-MPP-30-765-785.txt",
-      "chars": 226607
+      "chars": 226607,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "ihss"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IHSS-TRAINING-ACADEMY-INDEX",
@@ -379,7 +541,16 @@
       ],
       "source_ext": "txt",
       "text_path": "ihss/IHSS-TRAINING-ACADEMY-INDEX.txt",
-      "chars": 3196
+      "chars": 3196,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "ihss"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IRS-MEDICAID-WAIVER-FAQ",
@@ -399,7 +570,16 @@
       ],
       "source_ext": "txt",
       "text_path": "tax/IRS-MEDICAID-WAIVER-FAQ.txt",
-      "chars": 19819
+      "chars": 19819,
+      "jurisdictions": [
+        "US"
+      ],
+      "applicable_programs": [
+        "tax"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IRS-NOTICE-2014-7",
@@ -419,7 +599,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "tax/IRS-NOTICE-2014-7.txt",
-      "chars": 13523
+      "chars": 13523,
+      "jurisdictions": [
+        "US"
+      ],
+      "applicable_programs": [
+        "tax"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IRS-PUB-501",
@@ -438,7 +627,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "tax/IRS-PUB-501.txt",
-      "chars": 209466
+      "chars": 209466,
+      "jurisdictions": [
+        "US"
+      ],
+      "applicable_programs": [
+        "tax"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IRS-PUB-502",
@@ -457,7 +655,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "tax/IRS-PUB-502.txt",
-      "chars": 123099
+      "chars": 123099,
+      "jurisdictions": [
+        "US"
+      ],
+      "applicable_programs": [
+        "tax"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IRS-PUB-503",
@@ -476,7 +683,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "tax/IRS-PUB-503.txt",
-      "chars": 91880
+      "chars": 91880,
+      "jurisdictions": [
+        "US"
+      ],
+      "applicable_programs": [
+        "tax"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "IRS-PUB-926",
@@ -495,7 +711,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "tax/IRS-PUB-926.txt",
-      "chars": 89572
+      "chars": 89572,
+      "jurisdictions": [
+        "US"
+      ],
+      "applicable_programs": [
+        "tax"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "MEDICARE-AND-YOU",
@@ -515,7 +740,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medicare/MEDICARE-AND-YOU.txt",
-      "chars": 303885
+      "chars": 303885,
+      "jurisdictions": [
+        "US"
+      ],
+      "applicable_programs": [
+        "medicare"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "MEDIL-I-26-05",
@@ -537,7 +771,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medical/MEDIL-I-26-05.txt",
-      "chars": 5846
+      "chars": 5846,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "MEPM-ARTICLE-15",
@@ -557,7 +800,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medical/MEPM-ARTICLE-15.txt",
-      "chars": 118938
+      "chars": 118938,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "MEPM-ARTICLE-19",
@@ -577,7 +829,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medical/MEPM-ARTICLE-19.txt",
-      "chars": 205874
+      "chars": 205874,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "MEPM-ARTICLE-22",
@@ -597,7 +858,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medical/MEPM-ARTICLE-22.txt",
-      "chars": 217767
+      "chars": 217767,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "MEPM-ARTICLE-5L-5Z",
@@ -617,7 +887,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medical/MEPM-ARTICLE-5L-5Z.txt",
-      "chars": 376255
+      "chars": 376255,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "MEPM-ARTICLE-8",
@@ -638,7 +917,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medical/MEPM-ARTICLE-8.txt",
-      "chars": 307510
+      "chars": 307510,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "MEPM-ARTICLE-9",
@@ -658,7 +946,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "medical/MEPM-ARTICLE-9.txt",
-      "chars": 312105
+      "chars": 312105,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "MEPM-INDEX",
@@ -678,7 +975,16 @@
       ],
       "source_ext": "txt",
       "text_path": "medical/MEPM-INDEX.txt",
-      "chars": 2210
+      "chars": 2210,
+      "jurisdictions": [
+        "CA"
+      ],
+      "applicable_programs": [
+        "medical"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     },
     {
       "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
@@ -699,7 +1005,16 @@
       ],
       "source_ext": "pdf",
       "text_path": "va/VA-FEDERAL-BENEFITS-GUIDE.txt",
-      "chars": 211964
+      "chars": 211964,
+      "jurisdictions": [
+        "US"
+      ],
+      "applicable_programs": [
+        "va"
+      ],
+      "effective_from": null,
+      "effective_to": null,
+      "version": ""
     }
   ]
 }

@@ -24,6 +24,8 @@ _ROOTS: list[tuple[str, type[BaseModel]]] = [
     ("household", Household),
 ]
 
+_ELIGIBILITY_ONLY = frozenset({"care_recipient.living_setting", "care_recipient.health_coverage", "care_recipient.medicaid_status", "household.income_monthly_range", "household.reported_income_monthly", "care_recipient.income_sources", "care_recipient.gross_monthly_income", "care_recipient.employment_status", "caregiver.income_sources", "caregiver.gross_monthly_income", "care_recipient.us_citizen", "caregiver.us_citizen", "caregiver.age"})
+
 # Declared on the model but never written by intake.mapping, so they always resolve to
 # the empty default. Mapping a PDF field to one of these is worse than leaving it
 # unmapped: `resolve_fields` reports an empty value as `missing` rather than asking the
@@ -31,6 +33,8 @@ _ROOTS: list[tuple[str, type[BaseModel]]] = [
 # withheld at screening time (see intake.schema.DELAYED_QUESTIONS); forms that need them
 # must ask. `tests/test_profile_paths.py` fails if intake starts populating one.
 _NOT_COLLECTED = frozenset({
+    # Reported resident income is not a program-specific countable-income unit.
+    "household.income_monthly",
     "care_recipient.gender",
     "care_recipient.phone",
     "care_recipient.email",
@@ -79,7 +83,7 @@ _NON_ANSWERS = {"I'm not sure", "Prefer not to answer", "None of these"}
 
 def _intake_options(field_id: str) -> list[str]:
     schema = intake_schema.build_schema()
-    groups = [*schema["screens"], *schema["mini_modules"]]
+    groups = schema["screens"]
     for group in groups:
         for question in group["questions"]:
             if question["field_id"] == field_id:
@@ -123,7 +127,7 @@ def profile_paths() -> dict[str, str]:
     for prefix, model in _ROOTS:
         for name, field in model.model_fields.items():
             path = f"{prefix}.{name}"
-            if path in _NOT_COLLECTED:
+            if path in _NOT_COLLECTED or path in _ELIGIBILITY_ONLY:
                 continue
             paths[path] = _describe(field.annotation)
     return paths

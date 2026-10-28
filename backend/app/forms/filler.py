@@ -15,6 +15,9 @@ from pypdf import PdfReader, PdfWriter
 from pypdf.generic import BooleanObject, NameObject
 
 from ..models import CaseProfile
+from .pdf_store import get_pdf_bytes
+from .schema_store import all_schemas
+from .schema_store import load_schema as _load_schema_source
 
 SCHEMA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "form_schemas")
 FORMS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "forms")
@@ -41,22 +44,15 @@ def _transform(value: Any, transform: str) -> Any:
 
 
 def list_schemas() -> list[dict]:
-    """Return metadata for all available form schemas."""
+    """Return metadata for all available form schemas (DB-first, file fallback)."""
     schemas: list[dict] = []
-    if not os.path.isdir(SCHEMA_DIR):
-        return schemas
-    for fname in sorted(os.listdir(SCHEMA_DIR)):
-        if not fname.endswith(".json"):
-            continue
-        path = os.path.join(SCHEMA_DIR, fname)
-        with open(path, encoding="utf-8") as fh:
-            data = json.load(fh)
+    for data in all_schemas():
         meta = data.get("_meta", {})
         fields = data.get("fields", {})
         mapped_count = sum(1 for f in fields.values() if f.get("profile_path"))
         total_in_map = len(fields)
         schemas.append({
-            "form_id": meta.get("form_id", fname.replace(".json", "")),
+            "form_id": meta.get("form_id", ""),
             "title": meta.get("title", ""),
             "program": meta.get("program", ""),
             "agency": meta.get("agency", ""),
@@ -66,16 +62,12 @@ def list_schemas() -> list[dict]:
             "mapped_fields": mapped_count,
             "total_schema_fields": total_in_map,
         })
-    return schemas
+    return sorted(schemas, key=lambda s: s["form_id"])
 
 
 def load_schema(form_id: str) -> dict:
-    """Load a field-map schema by form_id (case-insensitive)."""
-    path = os.path.join(SCHEMA_DIR, f"{form_id.lower()}.json")
-    if not os.path.exists(path):
-        return {}
-    with open(path, encoding="utf-8") as fh:
-        return json.load(fh)
+    """Load a field-map schema by form_id (case-insensitive), DB-first with file fallback."""
+    return _load_schema_source(form_id)
 
 
 def resolve_fields(form_id: str, profile: CaseProfile) -> dict[str, Any]:
@@ -127,6 +119,13 @@ def resolve_fields(form_id: str, profile: CaseProfile) -> dict[str, Any]:
         if transform:
             value = _transform(value, transform)
 
+        if spec.get("format") == "date" and isinstance(value, str) and value:
+            from datetime import date
+            try:
+                value = date.fromisoformat(value).strftime("%m/%d/%Y")
+            except ValueError:
+                pass
+
         # Handle checkbox fields with check_when
         if field_type == "checkbox" and "check_when" in spec:
             check_when = spec["check_when"]
@@ -171,6 +170,11 @@ def _resolve_legacy(fields_map: dict[str, str], profile: CaseProfile) -> dict[st
 
 
 def _get_pdf_path(form_id: str) -> str | None:
+    """Local filesystem path to a form's PDF, if the bundled file exists.
+
+    Used by the authoring generators, which operate on local files. The runtime fill
+    path uses `_get_pdf_source`, which is blob-aware with a local fallback.
+    """
     schema = load_schema(form_id)
     meta = schema.get("_meta", {})
     pdf_rel = meta.get("pdf_path", "")
@@ -181,16 +185,24 @@ def _get_pdf_path(form_id: str) -> str | None:
     return None
 
 
+def _get_pdf_source(form_id: str) -> io.BytesIO | None:
+    """A PdfReader-ready byte stream for a form's PDF: blob-first, local fallback."""
+    schema = load_schema(form_id)
+    pdf_rel = schema.get("_meta", {}).get("pdf_path", "")
+    data = get_pdf_bytes(pdf_rel)
+    return io.BytesIO(data) if data is not None else None
+
+
 def fill_pdf(form_id: str, profile: CaseProfile) -> bytes:
     """Fill a PDF template with resolved CaseProfile values and return PDF bytes."""
-    pdf_path = _get_pdf_path(form_id)
-    if not pdf_path:
+    pdf_source = _get_pdf_source(form_id)
+    if pdf_source is None:
         raise FileNotFoundError(f"No PDF template found for form {form_id}")
 
     result = resolve_fields(form_id, profile)
     values = result["resolved"]
 
-    reader = PdfReader(pdf_path)
+    reader = PdfReader(pdf_source)
     writer = PdfWriter()
 
     # Clone via append to preserve AcroForm structure

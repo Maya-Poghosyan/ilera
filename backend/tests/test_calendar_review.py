@@ -14,7 +14,8 @@ os.environ["DATABASE_URL"] = os.environ.get("TEST_DATABASE_URL", "")
 
 from fastapi import HTTPException  # noqa: E402
 
-from app import auth, main, store  # noqa: E402
+from app import auth, store  # noqa: E402
+from app.routes import calendar as calendar_routes  # noqa: E402
 from app import calendar_events as cal  # noqa: E402
 from app import suggested_events as events  # noqa: E402
 from app.models import CaseProfile  # noqa: E402
@@ -57,8 +58,8 @@ def test_accept_persists_status_and_creates_calendar_event():
     case_id = _owned_case(user)
     suggestion = _suggestion(user, case_id)
 
-    updated = main.api_review_suggested_event(
-        suggestion.id, main.SuggestedEventReview(status="accepted"), user=user
+    updated = calendar_routes.api_review_suggested_event(
+        suggestion.id, calendar_routes.SuggestedEventReview(status="accepted"), user=user
     )
     assert updated.status == "accepted"
     # The status change is durable, not just returned.
@@ -78,8 +79,8 @@ def test_accept_is_idempotent():
     suggestion = _suggestion(user, case_id)
 
     for _ in range(3):
-        main.api_review_suggested_event(
-            suggestion.id, main.SuggestedEventReview(status="accepted"), user=user
+        calendar_routes.api_review_suggested_event(
+            suggestion.id, calendar_routes.SuggestedEventReview(status="accepted"), user=user
         )
     # Re-accepting must not create duplicate calendar events.
     assert len(cal.list_calendar_events(user_id=user.id)) == 1
@@ -91,13 +92,13 @@ def test_dismiss_removes_calendar_event():
     case_id = _owned_case(user)
     suggestion = _suggestion(user, case_id)
 
-    main.api_review_suggested_event(
-        suggestion.id, main.SuggestedEventReview(status="accepted"), user=user
+    calendar_routes.api_review_suggested_event(
+        suggestion.id, calendar_routes.SuggestedEventReview(status="accepted"), user=user
     )
     assert len(cal.list_calendar_events(user_id=user.id)) == 1
     # Changing the mind: dismiss should pull it off the calendar.
-    main.api_review_suggested_event(
-        suggestion.id, main.SuggestedEventReview(status="dismissed"), user=user
+    calendar_routes.api_review_suggested_event(
+        suggestion.id, calendar_routes.SuggestedEventReview(status="dismissed"), user=user
     )
     assert events.get_suggested_event(suggestion.id).status == "dismissed"
     assert cal.list_calendar_events(user_id=user.id) == []
@@ -113,8 +114,8 @@ def test_review_and_calendar_are_owner_isolated():
 
     # A stranger cannot review someone else's suggestion.
     try:
-        main.api_review_suggested_event(
-            suggestion.id, main.SuggestedEventReview(status="accepted"), user=stranger
+        calendar_routes.api_review_suggested_event(
+            suggestion.id, calendar_routes.SuggestedEventReview(status="accepted"), user=stranger
         )
         raise AssertionError("stranger should not review another user's suggestion")
     except HTTPException as exc:
@@ -122,13 +123,13 @@ def test_review_and_calendar_are_owner_isolated():
     assert events.get_suggested_event(suggestion.id).status == "pending"
 
     # Owner accepts, then the stranger must not see or delete the calendar event.
-    main.api_review_suggested_event(
-        suggestion.id, main.SuggestedEventReview(status="accepted"), user=owner
+    calendar_routes.api_review_suggested_event(
+        suggestion.id, calendar_routes.SuggestedEventReview(status="accepted"), user=owner
     )
     assert cal.list_calendar_events(user_id=stranger.id) == []
     accepted = cal.list_calendar_events(user_id=owner.id)[0]
     try:
-        main.api_delete_calendar_event(accepted.id, user=stranger)
+        calendar_routes.api_delete_calendar_event(accepted.id, user=stranger)
         raise AssertionError("stranger should not delete another user's calendar event")
     except HTTPException as exc:
         assert exc.status_code == 404
@@ -141,11 +142,11 @@ def test_delete_suggestion_also_removes_accepted_calendar_event():
     case_id = _owned_case(user)
     suggestion = _suggestion(user, case_id)
 
-    main.api_review_suggested_event(
-        suggestion.id, main.SuggestedEventReview(status="accepted"), user=user
+    calendar_routes.api_review_suggested_event(
+        suggestion.id, calendar_routes.SuggestedEventReview(status="accepted"), user=user
     )
     assert len(cal.list_calendar_events(user_id=user.id)) == 1
-    main.api_delete_suggested_event(suggestion.id, user=user)
+    calendar_routes.api_delete_suggested_event(suggestion.id, user=user)
     assert events.get_suggested_event(suggestion.id) is None
     assert cal.list_calendar_events(user_id=user.id) == []
 

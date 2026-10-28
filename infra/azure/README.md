@@ -43,6 +43,7 @@ vault ID and API identity), so apply `oauth` first.
 | `variables.tf` | Inputs; required inputs (worker image, OpenAI account) have no default |
 | `data.tf` | `oauth/` remote state, existing Container Apps env, existing Azure OpenAI |
 | `main.tf` | Service Bus (dedup/DLQ), scan worker Container App, sender/receiver + vault + OpenAI RBAC |
+| `jobs.tf` | Scheduled API housekeeping jobs (daily unclaimed-case purge) run from `api_image` |
 
 ## Prerequisites
 

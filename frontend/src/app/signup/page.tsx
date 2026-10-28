@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Logo } from "@/components/logo";
+import { SiteHeader } from "@/components/site-header";
 import { useAuth } from "@/lib/auth-context";
 import { clearPendingCaseId, getPendingCaseId } from "@/lib/pending-case";
 
@@ -42,11 +42,7 @@ export default function SignupPage() {
   };
 
   const header = (
-    <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
-        <Logo />
-      </div>
-    </header>
+    <SiteHeader actions={null} />
   );
 
   if (verificationSent) {

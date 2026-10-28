@@ -1,10 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ExternalLink } from "lucide-react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { QuestionField } from "@/components/intake/question-field";
 import { LoadFailure } from "@/components/load-failure";
 import { Button } from "@/components/ui/button";
+import { UncurlingArrow } from "@/components/uncurling-arrow";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/lib/auth-context";
@@ -14,23 +16,22 @@ import {
   type Answers,
   type AnswerValue,
   type IntakeSchema,
-  type MiniModule,
   type Question,
-  type Screen,
-  evalCondition,
+  cleanAnswers,
+  interpolateName,
   recipientName,
   validateQuestions,
 } from "@/lib/intake-schema";
 
-const MAX_PER_PAGE = 2;
-// Answers only reach the server on the final submit, so keep a local copy in the
-// meantime — a refresh mid-intake shouldn't cost the user everything they typed.
+import { buildPages, pageIndex, lastCompletedPage } from "@/lib/intake-flow";
+
+// Drafts persist only when the caregiver explicitly chooses Save progress.
 const DRAFT_KEY = "ilera_intake_draft";
-const HEAVY_OPTION_THRESHOLD = 5;
 
 interface Draft {
   answers: Answers;
-  stepIndex: number;
+  questionId: string | null;
+  version?: string;
 }
 
 function readDraft(): Draft | null {
@@ -39,68 +40,10 @@ function readDraft(): Draft | null {
     if (!raw) return null;
     const draft = JSON.parse(raw) as Draft;
     if (!draft.answers || Object.keys(draft.answers).length === 0) return null;
-    return { answers: draft.answers, stepIndex: draft.stepIndex ?? 0 };
+    return { answers: draft.answers, questionId: draft.questionId ?? null, version: draft.version };
   } catch {
     return null;
   }
-}
-
-interface Page {
-  key: string;
-  title: string;
-  isModule: boolean;
-  introText?: string;
-  showIntro: boolean;
-  questions: Question[];
-}
-
-function isHeavy(q: Question): boolean {
-  return (q.options?.length ?? 0) > HEAVY_OPTION_THRESHOLD;
-}
-
-function paginate(questions: Question[]): Question[][] {
-  if (questions.length === 0) return [];
-
-  // Collect consecutive runs of questions sharing the same group tag.
-  const runs: Question[][] = [];
-  let i = 0;
-  while (i < questions.length) {
-    const g = questions[i].group;
-    if (g) {
-      const run: Question[] = [];
-      while (i < questions.length && questions[i].group === g) {
-        run.push(questions[i]);
-        i++;
-      }
-      runs.push(run);
-    } else {
-      runs.push([questions[i]]);
-      i++;
-    }
-  }
-
-  const out: Question[][] = [];
-  let buf: Question[] = [];
-  for (const run of runs) {
-    const heavy = run.length === 1 && isHeavy(run[0]);
-    if (heavy) {
-      if (buf.length) { out.push(buf); buf = []; }
-      out.push(run);
-    } else if (run.length > MAX_PER_PAGE) {
-      // Group is bigger than a page — give it its own page.
-      if (buf.length) { out.push(buf); buf = []; }
-      out.push(run);
-    } else if (buf.length + run.length > MAX_PER_PAGE) {
-      // Won't fit — flush current buffer, start new page with this group.
-      if (buf.length) { out.push(buf); buf = []; }
-      buf.push(...run);
-    } else {
-      buf.push(...run);
-    }
-    if (buf.length >= MAX_PER_PAGE) { out.push(buf); buf = []; }
-  }
-  if (buf.length) out.push(buf);
-  return out;
 }
 
 // Stacked on narrow screens, side by side once there's room for readable fields.
@@ -139,6 +82,7 @@ function renderQuestions(
             <QuestionField
               key={iq.field_id}
               question={iq}
+              answers={answers}
               value={answers[iq.field_id] ?? null}
               name={name}
               error={errors[iq.field_id]}
@@ -153,6 +97,7 @@ function renderQuestions(
         <QuestionField
           key={cur.field_id}
           question={cur}
+          answers={answers}
           value={answers[cur.field_id] ?? null}
           name={name}
           error={errors[cur.field_id]}
@@ -170,34 +115,6 @@ function renderQuestions(
  * Rendered at 1 viewBox unit per px, so the head's translate matches the shaft's growth.
  * The box is only as wide as the resting art; the growth overflows into that padding.
  */
-function UncurlingArrow() {
-  return (
-    <svg
-      viewBox="0 0 14 12"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.25}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      className="h-3 w-[14px] overflow-visible"
-    >
-      {/* Drawn left to right: dashoffset trims the far end, so it extends rightwards. */}
-      <path
-        d="M1 6H21"
-        pathLength={1}
-        strokeDasharray={1}
-        strokeDashoffset={0.4}
-        className="transition-[stroke-dashoffset] duration-300 ease-out group-hover/button:[stroke-dashoffset:0]"
-      />
-      <path
-        d="M9 2l4 4-4 4"
-        className="transition-transform duration-300 ease-out group-hover/button:translate-x-[8px]"
-      />
-    </svg>
-  );
-}
-
 export default function IntakePage() {
   const router = useRouter();
   const { user, updateUser } = useAuth();
@@ -205,101 +122,86 @@ export default function IntakePage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [started, setStarted] = useState(false);
-  const [stepIndex, setStepIndex] = useState(0);
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Answers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [animating, setAnimating] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const [savedDraft, setSavedDraft] = useState<Draft | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   // Synchronous debounce: the `submitting` state only disables the button on the
   // next render, so a rapid double-click can call finish() twice before then. This
   // ref flips immediately, so the second call is dropped and only one intake POST
-  // (and thus one Band room) is ever created.
+  // (and thus one case) is ever created.
   const submittingRef = useRef(false);
   // County values we filled in from a ZIP lookup, so a prefill can be replaced by a
   // later ZIP but anything the user typed themselves is left alone.
   const [prefilledCounties, setPrefilledCounties] = useState<Record<string, string>>({});
 
-  const slide = useCallback((dir: "left" | "right", cb: () => void) => {
-    const el = cardRef.current;
-    if (!el) { cb(); return; }
-    setAnimating(true);
-    el.style.transition = "transform 250ms ease, opacity 250ms ease";
-    el.style.transform = dir === "left" ? "translateX(-40px)" : "translateX(40px)";
-    el.style.opacity = "0";
-    const onEnd = () => {
-      el.removeEventListener("transitionend", onEnd);
-      cb();
-      el.style.transition = "none";
-      el.style.transform = dir === "left" ? "translateX(40px)" : "translateX(-40px)";
-      el.style.opacity = "0";
-      void el.offsetHeight;
-      el.style.transition = "transform 250ms ease, opacity 250ms ease";
-      el.style.transform = "translateX(0)";
-      el.style.opacity = "1";
-      const onIn = () => { el.removeEventListener("transitionend", onIn); setAnimating(false); };
-      el.addEventListener("transitionend", onIn, { once: true });
-    };
-    el.addEventListener("transitionend", onEnd, { once: true });
-  }, []);
-
   useEffect(() => {
     getIntakeSchema()
       .then((loaded) => {
         setLoadError(null);
-        // Resume an interrupted intake. Restored alongside the schema so the first
-        // render with questions already has the draft in hand.
-        const draft = readDraft();
-        if (draft) {
-          setAnswers(draft.answers);
-          setStepIndex(draft.stepIndex);
-          setStarted(true);
-        }
+        setSavedDraft(readDraft());
         setSchema(loaded);
       })
       .catch(() => setLoadError("We couldn't load the intake questions just now."));
   }, [loadAttempt]);
 
-  useEffect(() => {
-    if (!started) return;
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIndex }));
-  }, [started, answers, stepIndex]);
+  const pages = useMemo(() => schema ? buildPages(schema, answers) : [], [schema, answers]);
 
-  // The active flow = all base screens + any triggered mini-modules (A–F), each
-  // split into pages of ≤5 visible questions. Recomputed from answers so
-  // conditional questions and mini-modules appear/disappear as the user responds.
-  const pages: Page[] = useMemo(() => {
-    if (!schema) return [];
-    const sections: { id: string; title: string; intro?: string; isModule: boolean; questions: Question[] }[] = [
-      ...schema.screens.map((s: Screen) => ({
-        id: s.id,
-        title: s.title,
-        intro: s.intro_text,
-        isModule: false,
-        questions: s.questions,
-      })),
-      ...schema.mini_modules
-        .filter((m: MiniModule) => evalCondition(m.trigger, answers))
-        .map((m: MiniModule) => ({ id: m.id, title: m.title, isModule: true, questions: m.questions })),
-    ];
-
-    const out: Page[] = [];
-    for (const section of sections) {
-      const visible = section.questions.filter((q) => evalCondition(q.show_when, answers));
-      const chunks = paginate(visible);
-      chunks.forEach((chunk, i) => {
-        out.push({
-          key: `${section.id}-${i}`,
-          title: section.title,
-          isModule: section.isModule,
-          introText: section.intro,
-          showIntro: i === 0,
-          questions: chunk,
-        });
-      });
+  function saveProgress() {
+    if (!schema || submittingRef.current) return;
+    const draft = { answers: cleanAnswers(schema, answers), questionId: activeQuestionId, version: schema.version };
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+      setSavedDraft(draft);
+      setSaveMessage("Saved!");
+    } catch {
+      setSaveMessage("We couldn’t save on this browser. Keep this tab open to retain your answers.");
     }
-    return out;
-  }, [schema, answers]);
+  }
+
+  function startOver() {
+    if (submittingRef.current) return;
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      setSaveMessage("We couldn’t clear your saved progress on this browser. Your answers have been kept.");
+      return;
+    }
+    setAnswers({});
+    setActiveQuestionId(null);
+    setErrors({});
+    setPrefilledCounties({});
+    setSavedDraft(null);
+    setSaveMessage(null);
+    setStarted(true);
+    window.scrollTo({ top: 0 });
+  }
+
+  function continueSavedDraft() {
+    if (!schema || !savedDraft) return;
+    const restored = cleanAnswers(schema, savedDraft.answers);
+    setAnswers(restored);
+    setActiveQuestionId(lastCompletedPage(buildPages(schema, restored), restored));
+    setStarted(true);
+  }
+
+  const onArrowNavigation = useEffectEvent((event: KeyboardEvent) => {
+    if (!started || !schema || submittingRef.current || event.defaultPrevented || event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    const target = event.target;
+    if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable="true"], [role="combobox"], [role="listbox"], [role="menu"], [role="slider"], [role="spinbutton"], [role="grid"], [role="dialog"]')) return;
+    if (event.key === 'ArrowRight' && isLast) return;
+    event.preventDefault();
+    if (event.key === 'ArrowLeft') back();
+    else next();
+  });
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => onArrowNavigation(event);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   if (loadError) {
     return (
@@ -322,25 +224,29 @@ export default function IntakePage() {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-6 py-16">
         <div className="space-y-6">
-          <h1 className="text-xl font-semibold">{schema.welcome.header}</h1>
+          <h1 className="text-xl">{schema.welcome.header}</h1>
           {schema.welcome.body && (
             <p className="text-sm text-muted-foreground">{schema.welcome.body}</p>
           )}
+          {savedDraft && <p className="text-sm text-muted-foreground">You have saved progress on this browser. Continue where you left off or start over.</p>}
           <Button
             size="lg"
-            onClick={() => setStarted(true)}
-            className="h-11 gap-1.5 px-3.5 text-base ring-primary/35 duration-300 ease-out hover:pr-6 active:ring-4"
+            onClick={() => savedDraft ? continueSavedDraft() : setStarted(true)}
+            className="hover:pr-6"
           >
-            {schema.welcome.button}
+            {savedDraft ? "Continue saved progress" : schema.welcome.button}
             <UncurlingArrow />
           </Button>
+          {savedDraft && <Button variant="ghost" onClick={startOver}>Start over</Button>}
+          {saveMessage && <p role="status" className="text-sm text-muted-foreground">{saveMessage}</p>}
         </div>
       </main>
     );
   }
 
-  const safeIndex = Math.min(stepIndex, pages.length - 1);
+  const safeIndex = pageIndex(pages, activeQuestionId);
   const page = pages[safeIndex];
+  const sectionTitle = pages.slice(0, safeIndex + 1).findLast((p) => p.kind === "intro")?.title;
   const visibleQuestions = page.questions;
 
   function prefillCounty(zipFieldId: string, zip: AnswerValue) {
@@ -353,7 +259,11 @@ export default function IntakePage() {
     lookupCounty(zip, typeof state === "string" ? state : "")
       .then(({ county }) => {
         if (!county) return;
-        setAnswers((prev) => ({ ...prev, [countyField]: county }));
+        setAnswers((prev) => {
+          if (prev[zipFieldId] !== zip || prev[`${prefix}state`] !== state) return prev;
+          if (prev[countyField] && prev[countyField] !== prefilledCounties[countyField]) return prev;
+          return cleanAnswers(schema!, { ...prev, [countyField]: county });
+        });
         setPrefilledCounties((prev) => ({ ...prev, [countyField]: county }));
       })
       .catch(() => { /* leave the field for the user to fill in */ });
@@ -361,26 +271,17 @@ export default function IntakePage() {
 
   const pct = ((safeIndex + 1) / pages.length) * 100;
   const isLast = safeIndex === pages.length - 1;
+  const showPageTitle = page.kind === "intro";
 
   function setAnswer(fieldId: string, value: AnswerValue) {
+    setSaveMessage(null);
     if (fieldId.endsWith(".address.zip")) {
       prefillCounty(fieldId, value);
     }
     setAnswers((prev) => {
       const next = { ...prev, [fieldId]: value };
-      // Derive recipient.age from date_of_birth so mini-module triggers work
-      if (fieldId === "recipient.date_of_birth" && typeof value === "string" && value) {
-        try {
-          const bd = new Date(value);
-          const today = new Date();
-          let age = today.getFullYear() - bd.getFullYear();
-          if (today.getMonth() < bd.getMonth() || (today.getMonth() === bd.getMonth() && today.getDate() < bd.getDate())) {
-            age--;
-          }
-          next["recipient.age"] = age;
-        } catch { /* ignore invalid dates */ }
-      }
-      return next;
+      if (fieldId === 'recipient.coverage_and_benefits' && Array.isArray(value)) next['recipient.medicaid_covered'] = value.includes('Medicaid' as never);
+      return cleanAnswers(schema!, next);
     });
     setErrors((prev) => {
       if (!prev[fieldId]) return prev;
@@ -402,27 +303,33 @@ export default function IntakePage() {
       void finish();
       return;
     }
-    slide("left", () => {
-      setStepIndex((s) => Math.min(s + 1, pages.length - 1));
-      setErrors({});
-      window.scrollTo({ top: 0 });
-    });
+    setActiveQuestionId(pages[safeIndex + 1].key);
+    setSaveMessage(null);
+    setErrors({});
+    window.scrollTo({ top: 0 });
   }
 
   function back() {
-    slide("right", () => {
-      setStepIndex((s) => Math.max(s - 1, 0));
-      setErrors({});
-      window.scrollTo({ top: 0 });
-    });
+    if (safeIndex === 0) return;
+    setActiveQuestionId(pages[safeIndex - 1].key);
+    setSaveMessage(null);
+    setErrors({});
+    window.scrollTo({ top: 0 });
   }
 
   async function finish() {
     if (submittingRef.current) return;
+    const errs = validateQuestions(pages.flatMap((p) => p.questions), answers);
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      const first = pages.find((p) => p.questions.some((q) => errs[q.field_id]));
+      if (first) setActiveQuestionId(first.key);
+      return;
+    }
     submittingRef.current = true;
     setSubmitting(true);
     try {
-      const created = await submitIntakeAnswers(answers);
+      const created = await submitIntakeAnswers(cleanAnswers(schema!, answers));
       localStorage.removeItem(DRAFT_KEY);
       localStorage.setItem("ilera_case_id", created.id);
       // Straight to the results screen — an account is offered there, once there is a strategy
@@ -434,15 +341,14 @@ export default function IntakePage() {
         void updateUser({ case_id: created.id }).catch(() => {});
       }
     } catch (err) {
-      // The draft is still in localStorage, so nothing they typed is lost — the button just
-      // becomes pressable again.
+      // Keep in-memory answers and any explicitly saved snapshot on a failed submit.
       submittingRef.current = false;
       setSubmitting(false);
       const transient = err instanceof ApiError && err.isTransient;
       alert(
         transient
-          ? "We couldn't save your answers just now — your place is saved, so please try again in a moment."
-          : "Something went wrong saving your answers. Your place is saved, so please try again.",
+          ? "We couldn't submit your answers just now. They are still in this tab; please try again in a moment."
+          : "Something went wrong submitting your answers. They are still in this tab; please try again.",
       );
     }
   }
@@ -450,28 +356,42 @@ export default function IntakePage() {
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-8 px-6 py-14">
       <div className="space-y-2">
+        {page.kind === "questions" && <h2 className="text-2xl">{interpolateName(sectionTitle ?? page.title, name)}</h2>}
         <Progress value={pct} />
       </div>
 
-      <Card ref={cardRef} className="overflow-visible text-base [--card-spacing:--spacing(7)]">
-        <CardHeader>
-          <CardTitle className="text-2xl">{page.title}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-7 overflow-visible -mt-3">
-          {page.showIntro && page.introText && (
-            <p className="text-base text-muted-foreground">{page.introText.replaceAll("[recipient name]", name)}</p>
-          )}
-          {renderQuestions(visibleQuestions, name, answers, errors, setAnswer)}
+      <Card key={page.key} className="overflow-visible text-base [--card-spacing:--spacing(7)]">
+        {showPageTitle && <CardHeader>
+          <CardTitle className="text-2xl">{interpolateName(page.title, name)}</CardTitle>
+        </CardHeader>}
+        <CardContent className={`space-y-7 overflow-visible ${showPageTitle ? "-mt-3" : ""}`}>
+          {page.kind === "questions" && (page.helperText || page.helperLink) && <div className="space-y-2">
+            {page.helperText && <p className="text-sm text-muted-foreground">{interpolateName(page.helperText, name)}</p>}
+            {page.helperLink && <a href={page.helperLink.href} target="_blank" rel="noreferrer" className="group flex w-fit items-center gap-1.5 text-sm text-primary">
+              <span className="relative after:absolute after:-bottom-0.5 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-300 group-hover:after:scale-x-100 group-focus-visible:after:scale-x-100">{page.helperLink.text}</span>
+              <ExternalLink className="size-3.5" aria-hidden="true" />
+            </a>}
+          </div>}
+          {page.kind === "intro" ? <p className="text-base text-muted-foreground">{page.introEmphasis && page.introText?.includes(page.introEmphasis) ? <>{page.introText.slice(0, page.introText.indexOf(page.introEmphasis))}<strong className="font-semibold">{page.introEmphasis}</strong>{page.introText.slice(page.introText.indexOf(page.introEmphasis) + page.introEmphasis.length)}</> : page.introText}</p> : renderQuestions(visibleQuestions, name, answers, errors, setAnswer)}
         </CardContent>
       </Card>
 
       <div className="flex justify-between">
-        <Button size="lg" variant="outline" className="h-11 px-5 text-base" disabled={stepIndex === 0} onClick={back}>
+        <Button size="lg" variant="outline" disabled={safeIndex === 0 || submitting} onClick={back}>
           Back
         </Button>
-        <Button size="lg" className="h-11 px-5 text-base" onClick={next} disabled={submitting}>
-          {submitting ? "Submitting…" : isLast ? schema.submit_button : "Next"}
+        <Button size="lg" onClick={next} disabled={submitting}>
+          {submitting ? "Submitting…" : isLast ? schema.submit_button : page.kind === "intro" ? "Continue" : "Next"}
         </Button>
+      </div>
+      <div className="space-y-2 border-t pt-4">
+        <div className="flex items-center justify-between gap-3">
+          <Button variant="ghost" disabled={submitting} onClick={startOver}>Start over</Button>
+          <div className="flex items-center gap-1">
+            {saveMessage && <span role="status" className="text-sm text-muted-foreground">{saveMessage}</span>}
+            <Button variant="ghost" disabled={submitting || Object.keys(answers).length === 0} onClick={saveProgress}>Save progress</Button>
+          </div>
+        </div>
       </div>
     </main>
   );

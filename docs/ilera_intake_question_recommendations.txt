@@ -1,0 +1,215 @@
+ILERA — INTAKE QUESTION ADDITIONS
+California-first caregiver benefits navigation
+Prepared October 12, 2026
+
+PURPOSE
+Keep the initial survey short. Add questions that identify benefits already received,
+applications in progress, urgent needs, and barriers to next steps. Show conditional
+questions only when relevant. Do not re-ask information already stored in CaseProfile.
+
+PART 1 — 12 HIGH-PRIORITY QUESTIONS
+(Use skip logic; these are not necessarily 12 additional screens.)
+
+1. What kind of support would help you most right now?
+   Type: Multi-select
+   Answers: Getting paid as a caregiver; Help paying for care; In-home assistance;
+   Medical coverage; Respite; Understanding existing benefits; Not sure.
+   Purpose: Prioritize recommendations and actions, not exclude other programs.
+
+2. Have you already applied for or received any benefits or care services for this person?
+   Type: Single-select
+   Answers: Yes; No; Not sure.
+   Purpose: Distinguish new applicants from existing cases.
+
+3. Which programs has the person receiving care already applied for or received?
+   Type: Multi-select
+   Answers: Medi-Cal; Medicare; IHSS; SSI; SSDI; Regional Center; VA benefits;
+   Other (specify); Not sure.
+   Trigger: Q2 = Yes or Not sure.
+   Purpose: Track cross-program dependencies and avoid duplicate applications.
+
+4. What is their current status with each selected program?
+   Type: Per-program single-select
+   Answers: Receiving benefits; Application submitted; Approved, waiting for services;
+   Denied; Benefits stopped; Renewal due; Not sure.
+   Trigger: One or more programs selected in Q3.
+   Purpose: Choose start, follow-up, appeal, renewal, or verification actions.
+
+5. Does the person receiving care currently have Medi-Cal coverage?
+   Type: Single-select
+   Answers: Yes; Applied, pending; No; Previously had it; Not sure.
+   Trigger: Only if Q3/Q4 did not establish this.
+   Purpose: Drive Medi-Cal/IHSS pathway.
+
+6. Does the person receiving care currently have Medicare?
+   Type: Single-select
+   Answers: Yes, Original Medicare; Yes, Medicare Advantage; No; Not sure.
+   Trigger: Only if not answered in existing intake/Q3.
+   Purpose: Identify coverage and potential dual-eligibility context.
+
+7. Where is the person receiving care currently living?
+   Type: Single-select
+   Answers: Own home; Family member's home; Assisted living; Nursing facility;
+   Hospital/rehabilitation; Other (specify).
+   Trigger: If not already collected.
+   Purpose: Determine relevant home-care and transition pathways.
+
+8. Is the person receiving care expected to move or leave a hospital or care facility soon?
+   Type: Single-select
+   Answers: Yes, within 7 days; Within 30 days; Later; No; Not sure.
+   Trigger: Facility residence, hospitalization, or planned move.
+   Purpose: Identify discharge/transition urgency.
+
+9. What activities does the person receiving care need help with?
+   Type: Multi-select
+   Answers: Bathing; Dressing; Eating; Toileting; Walking/transfers; Medication
+   management; Cooking; Cleaning; Shopping; Safety/supervision; Other.
+   Trigger: If existing functional-needs fields are insufficient.
+   Purpose: Guide care-needs and IHSS screening.
+
+10. Does the person receiving care need supervision to avoid unsafe situations?
+    Type: Single-select
+    Answers: Yes, frequently; Sometimes; No; Not sure.
+    Trigger: Cognitive issues or safety/supervision need.
+    Purpose: Flag need for additional supervision assessment.
+
+11. Have your caregiving responsibilities affected your employment or income?
+    Type: Single-select (or multi-select if concurrent conditions matter)
+    Answers: Stopped working; Reduced hours; Taking leave; Expect to take leave;
+    No change; Not employed; Other.
+    Purpose: Identify caregiver employment and wage-replacement pathways.
+
+12. Is there anything time-sensitive about your situation?
+    Type: Multi-select
+    Answers: Care or housing at risk; Hospital discharge; Loss of income;
+    Application deadline; Benefits ending; Immediate safety concern;
+    Nothing urgent; Other.
+    Purpose: Prioritize urgent action steps.
+
+PART 2 — 15 CONDITIONAL FOLLOW-UP QUESTIONS
+
+EXISTING APPLICATIONS / BENEFITS
+13. When did you submit your application or receive your most recent decision?
+    Answers: Date; I don't remember.
+    Trigger: Pending, denied, or recently changed status.
+
+14. If benefits were denied, stopped, or reduced, did you receive a written notice
+    explaining why?
+    Answers: Yes; No; Not sure.
+    Trigger: Denial, termination, or reduction.
+
+15. Does the notice include a deadline to respond or appeal?
+    Answers: Yes (collect deadline date); No; Not sure.
+    Trigger: Written adverse decision.
+
+16. Is there anything preventing you from moving forward with this application?
+    Answers: Missing documents; Medical certification; Financial eligibility;
+    Cannot reach agency; Waiting for appointment; Unclear instructions;
+    Other; Nothing. Multi-select.
+    Trigger: Existing application or application preparation.
+
+MEDI-CAL / FINANCIAL PATHWAYS
+17. Is the person receiving care married or in a registered domestic partnership?
+    Answers: Yes; No; Widowed; Separated/divorced; Not sure.
+    Trigger: If not already collected and financially relevant.
+
+18. If married, does their spouse or partner live at home or in a care facility?
+    Answers: At home; In a facility; Both in a facility; Other; Not sure.
+    Trigger: Married and long-term-care pathway relevant.
+
+19. Does the person receiving care own a home, additional property, or significant savings?
+    Answers: Primary home; Other property; Savings/investments; None; Not sure.
+    Multi-select.
+    Trigger: Asset-tested Medi-Cal pathway; skip if already collected.
+
+20. Has the person receiving care given away or transferred money or property
+    within the last 30 months?
+    Answers: Yes; No; Not sure; Prefer not to answer.
+    Trigger: Nursing-facility long-term-care planning; not a universal gate.
+    Purpose: Flag need for careful program-specific review, not disqualification.
+
+IHSS / PROTECTIVE SUPERVISION
+21. Does the person receiving care have difficulty recognizing dangerous situations
+    or understanding how to stay safe?
+    Answers: Yes; Sometimes; No; Not sure.
+    Trigger: Safety/supervision concern.
+
+22. Have they behaved in ways that could accidentally put them in danger?
+    Answers: Wandering; Leaving appliances on; Unsafe use of objects;
+    Other hazardous behavior; No; Not sure. Multi-select where applicable.
+    Trigger: Cognitive or safety concerns.
+
+23. Is there a doctor or licensed health professional who can assess and document
+    their care needs?
+    Answers: Yes; Need help finding one; No; Not sure.
+    Trigger: IHSS application preparation.
+
+CALIFORNIA PAID FAMILY LEAVE
+24. When did you begin taking leave or losing wages because of caregiving?
+    Answers: Date; Haven't started yet; Not sure.
+    Trigger: Work interruption or leave expected.
+
+25. Have you had California State Disability Insurance (CASDI/SDI) deductions
+    from your paychecks during the last 18 months?
+    Answers: Yes; No; Not sure.
+    Trigger: Potential California PFL.
+
+26. Can a medical professional certify that your family member has a serious
+    health condition requiring care?
+    Answers: Yes; Need to arrange this; No; Not sure.
+    Trigger: Potential PFL care claim.
+
+REGIONAL CENTER
+27. Did the person's developmental condition or related difficulties begin
+    before age 18?
+    Answers: Yes; No; Not sure.
+    Trigger: Developmental disability or childhood developmental concerns.
+
+PART 3 — EXISTING FIELDS TO VERIFY BEFORE ADDING DUPLICATES
+- Recipient date of birth / age.
+- Recipient state, county, ZIP, and living arrangement.
+- Caregiver relationship to recipient.
+- Caregiver employment and relevant recent work history.
+- Recipient income amounts, frequencies, and sources.
+- Asset categories and approximate values.
+- Health conditions AND actual daily functional limitations.
+- Immigration/citizenship facts only where required for specific rules.
+- Veteran/service member status.
+- Existing care services.
+- Whether the caregiver is authorized to assist with applications (collect
+  documentation later when required).
+
+PART 4 — IMPLEMENTATION PRIORITIES
+P0: Add/review Q1–Q12, especially existing enrollment, program statuses,
+    deadlines, living situation, care needs, and employment disruption.
+P1: Add Q13–Q27 behind explicit conditional triggers.
+P2: Collect detailed form-specific information through authenticated,
+    action-scoped follow-up questionnaires.
+
+DATA MODEL GUIDANCE
+For each answer store: stable question ID, canonical CaseProfile field, value,
+source (user-reported / document-extracted / agency-verified), last-confirmed
+date, and optional supporting evidence.
+Support "unknown" distinctly from "no"; never treat a skipped item as false.
+
+Ask intake questions based on missing facts, not one questionnaire per program.
+The action planner should distinguish:
+- Eligibility-critical missing information
+- Application-critical missing information
+- Process-critical missing information
+
+The eligibility preview should remain preliminary. Official agencies decide
+eligibility and services; user-completed tasks do not automatically establish
+that benefits were approved.
+
+OFFICIAL REFERENCE SOURCES (verify effective dates before production use)
+IHSS: https://www.cdss.ca.gov/in-home-supportive-services
+Medi-Cal asset guidance:
+https://www.dhcs.ca.gov/medi-cal/help/asset-limit-frequently-asked-questions/
+PFL eligibility: https://edd.ca.gov/pfleligibility
+Regional Center: https://www.dds.ca.gov/general/Eligibility/
+VA caregiver program:
+https://www.va.gov/family-and-caregiver-benefits/health-and-disability/comprehensive-assistance-for-family-caregivers/
+
+Scope: California-first recommendations, not an exhaustive legal rulebook.
+The exact add-versus-modify list still requires inspecting current intake code.

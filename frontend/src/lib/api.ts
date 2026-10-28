@@ -62,13 +62,6 @@ async function sendOnce<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export function submitIntake(profile: Partial<CaseProfile>): Promise<CaseProfile> {
-  return request<CaseProfile>("/api/intake", {
-    method: "POST",
-    body: JSON.stringify({ profile }),
-  });
-}
-
 export function getIntakeSchema(): Promise<IntakeSchema> {
   return request<IntakeSchema>("/api/intake/schema");
 }

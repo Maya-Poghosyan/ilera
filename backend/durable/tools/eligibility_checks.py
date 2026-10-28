@@ -28,6 +28,7 @@ from __future__ import annotations
 from typing import Callable
 
 from app.models import CaseProfile
+from app.eligibility.facts import known_fact
 
 # pydantic-ai is only installed where the specialist agent actually runs (the Durable
 # Function App). It is imported for real when available so that `make_gate_tool`'s tool
@@ -54,63 +55,32 @@ def _norm(values) -> set[str]:
     return {str(v).strip().lower() for v in (values or []) if str(v).strip()}
 
 
+def _evidence(profile: CaseProfile, path: str, answer_id: str):
+    """Canonical evidence wins; use explicit older answers only without metadata."""
+    if path in profile.fact_metadata:
+        available, value = known_fact(profile, path)
+        return value if available else None
+    return profile.answers.get(answer_id)
+
+
 def check_enrolled(profile: CaseProfile, doc_key: str) -> GateResult:
-    """Return a positive gate result when the recipient already receives `doc_key`.
-
-    A program the care recipient explicitly reports currently receiving is, by
-    definition, one they are eligible for — so we skip the LLM specialist and record a
-    "very_likely" finding with a plain-language reason.  Returns skip=False when there
-    is no clear enrollment signal, letting the normal disqualification checks and/or the
-    specialist LLM decide.
-
-    Signals are read from the structured profile fields that intake.mapping projects
-    from the screening answers:
-      - care_recipient.insurance        ("medi-cal" / "medicare")
-      - care_recipient.current_benefits (free-text benefit labels)
-      - care_recipient.veteran          (VA)
-    plus the raw screening answers (health_coverage, medicaid_status) which carry the
-    most explicit "enrolled now" signal.
-    """
-    cr = profile.care_recipient
-    answers = profile.answers or {}
-    insurance = (cr.insurance or "").strip().lower()
-    benefits = _norm(cr.current_benefits)
-    coverage = _norm(answers.get("recipient.health_coverage"))
-    medicaid_status = str(answers.get("recipient.medicaid_status") or "").strip().lower()
-
-    enrolled = False
+    """Current coverage signals are specific to the program and evidence source."""
+    coverage = _norm(_evidence(profile, "care_recipient.health_coverage", "recipient.health_coverage"))
+    status = _evidence(profile, "care_recipient.medicaid_status", "recipient.medicaid_status")
     if doc_key == "medical":
-        # Medi-Cal / Medicaid.
-        enrolled = (
-            insurance == "medi-cal"
-            or medicaid_status == "enrolled now"
-            or bool(coverage & {"medicaid", "both medicare and medicaid"})
-            or "medicaid home- and community-based services" in benefits
-        )
+        # Contradictory enrollment answers require review rather than a shortcut.
+        if status not in (None, "", "Enrolled now", "I'm not sure"):
+            return False, "", "none"
+        enrolled = status == "Enrolled now" or bool(coverage & {"medicaid", "both medicare and medicaid"})
     elif doc_key == "medicare":
-        enrolled = (
-            insurance == "medicare"
-            or bool(coverage & {"medicare", "both medicare and medicaid"})
-        )
-    elif doc_key == "va":
-        # VA Caregiver Support: only treat as enrolled when a VA benefit/coverage is
-        # explicitly present — the bare `veteran` flag means potentially eligible, not
-        # enrolled, so that case is left to the specialist.
-        enrolled = (
-            "va health care" in coverage
-            or bool(benefits & {
-                "va disability compensation",
-                "va pension or aid and attendance",
-            })
-        )
-
+        if "Neither" in (profile.answers.get("recipient.medicare_parts") or []):
+            return False, "", "none"
+        enrolled = bool(coverage & {"medicare", "both medicare and medicaid"})
+    else:
+        # VA health care/pension/compensation never prove caregiver enrollment.
+        enrolled = False
     if enrolled:
-        return (
-            True,
-            f"{profile_program_label(doc_key)} is already active for the care recipient, "
-            "so they are eligible.",
-            _ENROLLED_MATCH_LEVEL,
-        )
+        return True, f"{profile_program_label(doc_key)} is already active for the care recipient, so they are eligible.", _ENROLLED_MATCH_LEVEL
     return False, "", "none"
 
 
@@ -136,7 +106,8 @@ def check_ihss(profile: CaseProfile) -> GateResult:
     Skip immediately if the care recipient's state is explicitly set to something
     other than CA / California.  Unknown / empty state → let specialist decide.
     """
-    state = (profile.care_recipient.state or "").strip()
+    available, value = known_fact(profile, "care_recipient.state")
+    state = (value or "").strip() if available else ""
     if state and state.upper() not in {"CA", "CALIFORNIA"}:
         return (
             True,
@@ -147,137 +118,36 @@ def check_ihss(profile: CaseProfile) -> GateResult:
 
 
 def check_va(profile: CaseProfile) -> GateResult:
-    """VA Caregiver Support programs require the care recipient to be a veteran.
+    """Only an explicit absence of military connection can rule this route out.
 
-    The `veteran` flag defaults to False, so only skip when it is explicitly False
-    (not just unset).  The CareRecipient model has `veteran: bool = False`, so this
-    is reliable.
-
-    An explicit VA benefit/coverage signal short-circuits to "very_likely" first.
+    Default False, VA health coverage, a pension, or compensation do not establish
+    caregiver-program eligibility. Active medical-discharge cases need review too.
     """
-    enrolled = check_enrolled(profile, "va")
-    if enrolled[0]:
-        return enrolled
-
-    if not profile.care_recipient.veteran:
-        return (
-            True,
-            "VA Caregiver Support programs require the care recipient to be a veteran",
-            "none",
-        )
+    coverage = _norm(_evidence(profile, "care_recipient.health_coverage", "recipient.health_coverage"))
+    benefits = _norm(_evidence(profile, "care_recipient.current_benefits", "recipient.current_benefits"))
+    has_va_signal = "va health care" in coverage or any(v.startswith("va ") for v in benefits)
+    if profile.answers.get("recipient.military_status") == "None of these" and not has_va_signal:
+        return True, "No military connection was reported for the care recipient", "none"
     return False, "", "none"
 
 
 def check_medicare(profile: CaseProfile) -> GateResult:
-    """Skip Medicare if the care recipient is clearly too young and not enrolled.
+    """Existing Medicare is actionable; age alone cannot eliminate all pathways."""
+    return check_enrolled(profile, "medicare")
 
-    The 55-year threshold is well below the standard age-65 eligibility threshold,
-    giving room for the specialist to assess SSDI early-enrollment pathways.
-    If age is unknown we do not skip — the specialist will ask.
+
+def check_pfl(profile: CaseProfile) -> GateResult:  # noqa: ARG001
+    """Covered wage history and leave facts need program review.
+
+    Residence is not work state, and current unemployment/retirement does not prove
+    absence of qualifying base-period wages or labor-market attachment at leave.
     """
-    cr = profile.care_recipient
-    age = cr.age  # may be None
-    insurance = (cr.insurance or "").lower()
-
-    # Already on Medicare — enrollment proves eligibility; short-circuit positive.
-    enrolled = check_enrolled(profile, "medicare")
-    if enrolled[0]:
-        return enrolled
-    if insurance == "medicare":
-        return False, "", "none"
-
-    # Age known and clearly below the conservative threshold.
-    if age is not None and age < 55:
-        return (
-            True,
-            f"Care recipient age {age} is below the minimum Medicare threshold (55)",
-            "none",
-        )
-
-    return False, "", "none"
-
-
-def check_pfl(profile: CaseProfile) -> GateResult:
-    """Skip CA Paid Family Leave only when employment status clearly disqualifies.
-
-    PFL pays wage replacement out of CA State Disability Insurance (SDI), so it
-    requires SDI-covered wages.  Unemployed and retired caregivers have no wages and
-    are ineligible.  Self-employed caregivers are NOT hard-skipped — they can opt into
-    SDI via Disability Insurance Elective Coverage (DIEC) — so the specialist decides.
-
-    Two independent deterministic disqualifiers:
-      1. The caregiver works in a state other than California (CA PFL covers CA
-         wages only).
-      2. The caregiver is unemployed or retired (no SDI-covered wages, any state).
-
-    Unknown / empty employment status → do not skip; let the specialist ask.
-    """
-    cg = profile.caregiver
-    status = (cg.employment_status or "").strip().lower()
-    state = (cg.state or "").strip().upper()
-
-    # Case 2: out-of-state caregiver — CA PFL covers CA wages only.
-    if state and state not in {"CA", "CALIFORNIA"}:
-        return (
-            True,
-            f"CA Paid Family Leave covers California wages; caregiver works in "
-            f"'{cg.state}', not California",
-            "none",
-        )
-
-    if not status:
-        # No employment info: conservative, let specialist handle.
-        return False, "", "none"
-
-    # Case 1: unemployed / retired caregivers have no wages at all, so no SDI
-    # coverage, in any state.  Self-employed is deliberately NOT a hard skip:
-    # self-employed people can opt into CA SDI via Disability Insurance Elective
-    # Coverage (DIEC), so that case is left to the specialist to assess.
-    ineligible_statuses = {"unemployed", "retired", "not employed", "not working"}
-
-    if status in ineligible_statuses:
-        return (
-            True,
-            f"CA Paid Family Leave requires SDI-covered wages; caregiver employment "
-            f"status '{cg.employment_status}' means no SDI-covered wages",
-            "none",
-        )
-
     return False, "", "none"
 
 
 def check_medical(profile: CaseProfile) -> GateResult:
-    """Skip Medi-Cal only when household income far exceeds any realistic threshold.
-
-    Uses a very conservative $12,000/month × household-size ceiling to avoid false
-    positives — the actual income limits are much lower, but the specialist will
-    apply the real FPL-based thresholds.  Missing income data → do not skip.
-
-    An already-enrolled recipient short-circuits to "very_likely" and is checked
-    first — current Medi-Cal enrollment proves eligibility regardless of a reported
-    income range.
-    """
-    enrolled = check_enrolled(profile, "medical")
-    if enrolled[0]:
-        return enrolled
-
-    hh = profile.household
-    income = hh.income_monthly
-    size = hh.size or 1
-
-    if income is None:
-        return False, "", "none"
-
-    ceiling = 12_000.0 * size
-    if income > ceiling:
-        return (
-            True,
-            f"Household income ${income:,.0f}/month significantly exceeds Medi-Cal limits "
-            f"for a household of {size}",
-            "none",
-        )
-
-    return False, "", "none"
+    """Honor current coverage; do not invent an income ceiling or budget unit."""
+    return check_enrolled(profile, "medical")
 
 
 def check_tax(profile: CaseProfile) -> GateResult:  # noqa: ARG001

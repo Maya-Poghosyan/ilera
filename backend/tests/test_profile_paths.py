@@ -19,7 +19,8 @@ from app.forms.filler import _dig  # noqa: E402
 from app.forms.profile_paths import _NOT_COLLECTED, profile_paths  # noqa: E402
 from app.intake import schema as intake_schema  # noqa: E402
 from app.intake.mapping import apply_account_contact, map_answers_to_profile  # noqa: E402
-from app.models import CaseProfile  # noqa: E402
+from app.models import CaseProfile
+from tests.intake_helpers import household_answers  # noqa: E402
 
 # Answers that have to be specific for the derivation under test to produce a value;
 # everything else is filled generically from the question's declared type/options.
@@ -28,7 +29,8 @@ _PINNED: dict[str, object] = {
     "caregiver.address.state": "CA",
     "caregiver.address.zip": "90001",
     "caregiver.address.county": "Los Angeles",
-    "recipient.household_size": 3,
+    "recipient.coverage_and_benefits": ["Medicaid", "SSI"],
+    **household_answers(),
 }
 
 # Option labels that mean "no answer" — picking one would leave the profile field unset.
@@ -40,15 +42,13 @@ def _all_questions() -> list[dict]:
     questions: list[dict] = []
     for screen in schema["screens"]:
         questions.extend(screen["questions"])
-    for module in schema["mini_modules"]:
-        questions.extend(module["questions"])
     return questions
 
 
 def _synthetic_answer(question: dict) -> object:
     options = [o for o in (question.get("options") or []) if o not in _NON_ANSWERS]
     qtype = question["type"]
-    if qtype == "multi_select":
+    if qtype in ("multi_select", "tag_input"):
         return options[:2] or ["Other"]
     if qtype == "single_select":
         return options[0] if options else "Yes"

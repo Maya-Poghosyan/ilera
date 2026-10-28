@@ -1,0 +1,327 @@
+{
+  "program": "Paid Family Leave",
+  "doc_key": "pfl",
+  "generated_at": "2026-10-13T02:53:12.881489+00:00",
+  "execution": "Separate direct research invocation with Ilera Azure model and program-scoped RAG, not the hosted Durable endpoint",
+  "direct_question": "Audit the CURRENT refactored intake for completeness, not just documents. Can we make an accurate eligibility screening conclusion from these answers? List all missing facts, conditional visibility failures, precision gaps, program-specific eligibility-unit inputs, and mandatory unresolved criteria. Include concise simple followup wording and exactly when to ask it. Separate criteria facts from application paperwork.\nWhat external documents would possibly be needed, and what rules/triggers necessitate them? Give a concrete document-to-question matrix for your program. Show questions already in our intake, questions needing further detail, and questions belonging in the actual application session. Assess whether our intake supports accurate preliminary eligibility conclusions. Retrieve official sources before answering. ",
+  "result": {
+    "mappings": [
+      {
+        "document_name": "Earned at least $300 in past 5–18 months (wage history)",
+        "program_or_pathway": "California Paid Family Leave (EDD PFL)",
+        "question": "Have you earned at least $300 in the 5–18 months before your claim begins?",
+        "subject_and_period": "Caregiver earnings in the 5–18 months prior to claim start",
+        "intake_field_ids": [
+          "caregiver.sdi_deductions",
+          "caregiver.employment_status",
+          "caregiver.leave_start"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "In the 5 to 18 months before your leave began, did you earn at least $300 in total?",
+        "information_to_read": [
+          "EDD-DE2511:2:7858fd7205"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "To qualify for PFL you must have earned at least $300 in the past 5 to 18 months (source says “Have earned at least $300 in the past 5 to 18 months”).",
+        "trigger_for_asking_fact": "Caregiving claim where caregiver reports stopping work, reduced hours, taking leave, or expecting to take leave.",
+        "trigger_for_document_lookup": "If applicant answers 'no' or 'I'm not sure' or wants help estimating, request recent pay stubs or wage history for the 5–18 month lookback; if applicant answers 'yes', self-report is sufficient for a preliminary screen but agency will verify.",
+        "stage": "screening",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes — a clear yes/no answer suffices for preliminary screening. If 'I'm not sure' or estimate needed, request pay statements for verification during application or agency follow-up.",
+        "alternatives": [
+          "Wage summary from employer, pay stubs, myEDD wage history, IRS 1099/ W-2 showing earnings in the period",
+          "EDD/State wage records — agency verification"
+        ],
+        "source_ids": [
+          "EDD-DE2511:2:7858fd7205"
+        ],
+        "requirement_support": "EDD facts sheet states the $300 earnings threshold (DE2511 page referencing earned at least $300 in past 5–18 months).",
+        "retrieval_support": "DE2511 (Facts About Paid Family Leave)",
+        "effective_date_or_jurisdiction_notes": "California (EDD Paid Family Leave) — requirement from EDD factsheet.",
+        "review_notes": "Intake asks about CASDI/SDI deductions but not the explicit $300 test or numeric wage period; add single required question and guidance to compute if caregiver affected employment."
+      },
+      {
+        "document_name": "Medical certification (provider-completed Part D of DE 2501F)",
+        "program_or_pathway": "California Paid Family Leave (caregiving claim)",
+        "question": "Is there a licensed health professional who can complete the medical certification for the care recipient, and can you provide their contact & license type?",
+        "subject_and_period": "Provider certification for current care needs (dates should cover the leave period)",
+        "intake_field_ids": [
+          "recipient.condition_documented",
+          "recipient.adl_needs",
+          "caregiver.pfl_medical_certification",
+          "recipient.has_certifying_clinician"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Please give the clinician’s name, professional title/license type (MD, DO, NP, PA, etc.), phone number, and whether they can complete the PFL medical form (DE 2501F Part D) covering the dates you need.",
+        "information_to_read": [
+          "EDD-DE2475:2:7406ca3f40",
+          "EDD-DE2511:2:0078a64999"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "Caregiving PFL claims require medical certification from the care recipient’s licensed health professional. Parts A, C, and D of the DE 2501F are required for a complete caregiving claim; the provider must complete Part D (Guide for Completing a Paid Family Leave Claim).",
+        "trigger_for_asking_fact": "Any caregiving claim (caregiver indicates they are caring for seriously ill family member or marked employment impact such as stopped working or taking leave).",
+        "trigger_for_document_lookup": "If caregiver cannot provide clinician info or is unsure, request the provider’s written medical certification (DE 2501F Part D completed by clinician) at application stage. For preliminary screening a yes/no plus clinician contact suffices.",
+        "stage": "split",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Partial — simply answering 'Yes, there is a clinician' allows preliminary eligibility screening; application requires the provider-completed medical certification for agency decision.",
+        "alternatives": [
+          "Clinician-completed DE 2501F Part D (preferred)",
+          "Office letter on clinic letterhead describing need for care and dates (EDD may accept during processing but DE 2501F Part D is required)"
+        ],
+        "source_ids": [
+          "EDD-DE2475:2:7406ca3f40",
+          "EDD-DE2511:2:0078a64999"
+        ],
+        "requirement_support": "Guide instructs that Part D must be completed and signed by the care recipient’s physician/practitioner; EDD factsheet reiterates medical certification requirement.",
+        "retrieval_support": "DE2475 (Guide for Completing a PFL Claim) and DE2511 (Facts About PFL).",
+        "effective_date_or_jurisdiction_notes": "California — provider certification is a mandatory part of DE 2501F for caregiving claims.",
+        "review_notes": "Intake asks whether conditions are 'documented' and whether there is 'a doctor' but lacks fields for clinician identity, license type, and explicit willingness to complete DE 2501F Part D; add these to screening when caregiving claim is indicated."
+      },
+      {
+        "document_name": "Claim form and required signature parts (DE 2501F Parts A, C, D)",
+        "program_or_pathway": "California Paid Family Leave (EDD PFL)",
+        "question": "Can the care recipient sign Part C of the DE 2501F, or do you need to file as their authorized representative?",
+        "subject_and_period": "Care recipient consent/signature for the claim at time of filing",
+        "intake_field_ids": [
+          "case.has_applied_or_received",
+          "recipient.condition_documented",
+          "recipient.adl_needs"
+        ],
+        "intake_coverage": "missing",
+        "proposed_followup_question": "Can the care recipient complete and sign the PFL claim (DE 2501F Part C)? If not, do you have legal authorization (power of attorney) or will you call EDD for instructions to file as an authorized representative?",
+        "information_to_read": [
+          "EDD-DE2475:2:7406ca3f40"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "DE 2501F caregiving claims require completion and signature of Part C by the care recipient (or special process if incapacitated). If the care recipient cannot sign due to disability, call EDD for instructions and forms; Parts A, C, and D are required for a complete claim.",
+        "trigger_for_asking_fact": "Any caregiving PFL claim where DE 2501F will be filed.",
+        "trigger_for_document_lookup": "If care recipient cannot sign, EDD requires additional forms or instructions — this is application-stage agency process; request power of attorney or note that agency follow-up is required.",
+        "stage": "application",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "No — knowing whether the care recipient can sign is necessary to determine whether special filing steps are needed; preliminary yes/no can be given by applicant but the application will require signatures or formal representative documentation.",
+        "alternatives": [
+          "Care recipient signature on Part C of DE 2501F",
+          "If incapacitated, EDD-authorized representative process and required supporting forms"
+        ],
+        "source_ids": [
+          "EDD-DE2475:2:7406ca3f40"
+        ],
+        "requirement_support": "Guide indicates Parts A, C (care recipient signature), and D (provider) are required for a complete caregiving claim; if care recipient cannot sign, contact EDD for instructions.",
+        "retrieval_support": "DE2475 (Guide for Completing a PFL Claim).",
+        "effective_date_or_jurisdiction_notes": "California EDD — signature requirement noted in guide.",
+        "review_notes": "Intake misses any question about signature capability or authorized representative status; add this to screening when caregiving claim indicated so user can be told about authorization steps before application."
+      },
+      {
+        "document_name": "Qualifying relationship for caregiving or bonding",
+        "program_or_pathway": "California Paid Family Leave (caregiving and bonding)",
+        "question": "Is the person you will care for a qualifying family member for PFL (child, parent, parent-in-law, grandparent, grandchild, sibling, spouse, registered domestic partner)?",
+        "subject_and_period": "Caregiver relationship to care recipient at time of leave",
+        "intake_field_ids": [
+          "caregiver.relationship"
+        ],
+        "intake_coverage": "sufficient_if_known",
+        "proposed_followup_question": "Confirm: Are you taking leave to care for a qualifying family member (select one): child, parent, parent-in-law, grandparent, grandchild, sibling, spouse, or registered domestic partner?",
+        "information_to_read": [
+          "EDD-DE2511:1:079f7e3ff8",
+          "EDD-DE2475:1:717626b3ad"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "PFL caregiving claims are limited to specified family relationships; bonding claims require birth certificate, adoptive placement, or foster placement records for a new child (DE2511 and DE2475).",
+        "trigger_for_asking_fact": "Any PFL claim (caregiving or bonding).",
+        "trigger_for_document_lookup": "If bonding claim: request birth certificate, adoptive placement agreement, or foster placement record at application; if caregiving claim and relationship is nonqualifying (friend/neighbor), PFL is not available — no document will make them eligible.",
+        "stage": "screening",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes — relationship self-report is sufficient to determine preliminary eligibility; if bonding claim, documentation will be required at application.",
+        "alternatives": [
+          "Bonding: child’s birth certificate, adoptive placement agreement, foster care placement record (application stage)",
+          "Caregiving: no additional relationship document usually required, but care recipient and provider forms are required"
+        ],
+        "source_ids": [
+          "EDD-DE2511:1:079f7e3ff8",
+          "EDD-DE2475:1:717626b3ad"
+        ],
+        "requirement_support": "DE2511 and DE2475 explicitly list qualifying relationships and bonding documentation requirements.",
+        "retrieval_support": "DE2511 facts sheet and DE2475 guide.",
+        "effective_date_or_jurisdiction_notes": "California — relationships defined by EDD PFL rule.",
+        "review_notes": "Intake already asks caregiver.relationship but does not validate against allowed list or surface ineligibility when user selects non-qualifying relationship (e.g., friend). Add explicit validation and messaging."
+      },
+      {
+        "document_name": "Timeliness of filing (41-day filing deadline) and leave start date evidence",
+        "program_or_pathway": "California Paid Family Leave (EDD PFL)",
+        "question": "What was the first day you lost wages or began leave for caregiving?",
+        "subject_and_period": "Claim start / first day of leave and 41-day filing deadline",
+        "intake_field_ids": [
+          "caregiver.leave_start",
+          "caregiver.caregiving_employment_impact",
+          "case.time_sensitive"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "What was the first day you began losing wages or taking family leave for caregiving? (We’ll use this to tell you if a PFL claim must be filed within 41 days.)",
+        "information_to_read": [
+          "EDD-DE2511:2:7858fd7205"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "PFL claims must be submitted no later than 41 days after the first day of family leave; do not file before the first day of leave (DE2511).",
+        "trigger_for_asking_fact": "When caregiver reports stopped working, reduced hours, taking leave, or expecting to take leave.",
+        "trigger_for_document_lookup": "If date is uncertain or applicant is past the deadline, request pay stubs or employer statement showing first day of wage loss for application or appeals; preliminary self-report is used to determine timeliness.",
+        "stage": "screening",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes — self-reported date suffices to identify urgency and whether they are within the 41-day window. Agency will require evidence during application if claim is filed.",
+        "alternatives": [
+          "Pay stubs showing wage loss beginning date, employer leave notice, or payroll records for application/agency verification"
+        ],
+        "source_ids": [
+          "EDD-DE2511:2:7858fd7205"
+        ],
+        "requirement_support": "Facts sheet states claim must be submitted no later than 41 days after leave begins and not before leave starts.",
+        "retrieval_support": "DE2511 (Facts About Paid Family Leave).",
+        "effective_date_or_jurisdiction_notes": "California EDD — 41-day deadline noted in EDD materials.",
+        "review_notes": "Intake includes leave_start but it is not required and is sometimes optional; for accurate preliminary eligibility this field should be required when caregiving employment impact is selected."
+      },
+      {
+        "document_name": "Partial benefits / continuing to work while claiming (documentation and employer notice)",
+        "program_or_pathway": "California Paid Family Leave (EDD PFL)",
+        "question": "Will you continue to work (part-time) while claiming PFL, resulting in a partial wage loss?",
+        "subject_and_period": "Work status and partial wage loss during the claimed leave period",
+        "intake_field_ids": [
+          "caregiver.caregiving_employment_impact",
+          "caregiver.pfl_medical_certification",
+          "caregiver.employment_status"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Do you expect to continue working some hours while also claiming PFL (yes/no)? If yes, provide how many hours per week you will work and a short letter describing the partial work schedule for application.",
+        "information_to_read": [
+          "EDD-DE2475:2:efb6604ccc"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "If you continue to work during family care leave and have a wage loss, you must indicate this on the DE 2501F and attach a letter explaining the part-time work schedule; agency requires evidence to calculate partial benefits (DE2475).",
+        "trigger_for_asking_fact": "If caregiver indicates 'Reduced hours', 'Taking leave', or 'Expect to take leave' in caregiving_employment_impact.",
+        "trigger_for_document_lookup": "At application stage request a letter describing part-time work schedule and pay statements showing wage reduction; for preliminary screening a yes/no suffices to flag the need.",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes for flagging; no for final benefit amount — agency will need verification and possible employer letter.",
+        "alternatives": [
+          "Letter describing part-time schedule attached to DE 2501F, recent pay stubs, employer statement verifying reduced hours"
+        ],
+        "source_ids": [
+          "EDD-DE2475:2:efb6604ccc"
+        ],
+        "requirement_support": "Guide instructs marking partial benefits on the claim and attaching a letter if continuing to work part-time while claiming PFL.",
+        "retrieval_support": "DE2475 (Guide for Completing a PFL Claim).",
+        "effective_date_or_jurisdiction_notes": "California EDD — partial benefits procedure documented.",
+        "review_notes": "Intake captures reduced hours but does not collect the specific planned ongoing hours or guidance about the employer letter; add a short follow-up when reduced-hours selected."
+      },
+      {
+        "document_name": "Bonding proof for new child (birth or placement documents)",
+        "program_or_pathway": "California Paid Family Leave (bonding claim)",
+        "question": "Are you claiming PFL to bond with a new child? If yes, can you provide birth certificate or placement records?",
+        "subject_and_period": "Child placement/birth verification within 12 months of birth or placement",
+        "intake_field_ids": [
+          "case.goals",
+          "caregiver.relationship"
+        ],
+        "intake_coverage": "missing",
+        "proposed_followup_question": "Are you filing to bond with a new child? If yes, at application you will need the child’s birth certificate, adoptive placement agreement, or foster care placement record that shows the child’s name and date of birth/placement.",
+        "information_to_read": [
+          "EDD-DE2475:2:7406ca3f40",
+          "EDD-DE2511:1:079f7e3ff8"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "Bonding claims require verification of relationship to the child (birth certificate, adoptive placement agreement, or foster care placement record). Bonding leave is payable within one year of the child’s birth or placement (DE2475 and DE2511).",
+        "trigger_for_asking_fact": "If user selects bonding/new child as a goal or caregiving relationship is child/new placement.",
+        "trigger_for_document_lookup": "Application stage — request birth certificate or placement documentation to attach to DE 2501F. For preliminary screening a self-report that the child is new suffices to route to bonding pathway.",
+        "stage": "application",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes for screening (to route to bonding pathway). For application the specified documents are mandatory.",
+        "alternatives": [
+          "Birth certificate, adoptive placement agreement, foster care placement record (application)"
+        ],
+        "source_ids": [
+          "EDD-DE2475:2:7406ca3f40",
+          "EDD-DE2511:1:079f7e3ff8"
+        ],
+        "requirement_support": "DE2475 clearly lists required documents for bonding claims; DE2511 references bonding documentation and 12‑month limit.",
+        "retrieval_support": "DE2475 and DE2511 guides.",
+        "effective_date_or_jurisdiction_notes": "California EDD — bonding documentation required within one year of birth or placement.",
+        "review_notes": "Intake does not include a direct bonding-claim question or collection of child documentation fields; add explicit bonding screening question when goal indicates bonding."
+      }
+    ],
+    "missing_eligibility_questions": [
+      "(Screening — ask when caregiving_employment_impact includes stopped work/reduced/taking leave) \"In the 5 to 18 months before your leave began, did you earn at least $300 in total?\" (required for preliminary PFL eligibility routing).",
+      "(Screening — ask when caregiving claim) \"Please provide the name, professional title/licensure (MD/DO/NP/PA/etc.), and phone number of the health professional who can complete the PFL medical form (DE 2501F Part D).\"",
+      "(Screening — ask when caregiving claim) \"What was the first day you began losing wages or taking leave for caregiving?\" (use to determine 41-day filing window).",
+      "(Screening — ask when caregiving claim) \"Can the person you care for sign Part C of the PFL claim (DE 2501F)? If not, do you have authorization to file on their behalf?\"",
+      "(Screening — ask when relationship is 'friend' or 'other') \"Is the person you care for one of the qualifying family members for PFL? (child, parent, parent-in-law, grandparent, grandchild, sibling, spouse, registered domestic partner)\"",
+      "(Screening — ask when reduced hours) \"Will you continue to work part-time while claiming PFL? If yes, how many hours per week will you work during the claim?\"",
+      "(Application stage) \"If claiming bonding: attach child’s birth certificate, adoptive placement agreement, or foster placement record.\"",
+      "(Application stage) \"If claiming military assist: attach proof of covered active duty and documentation of the qualifying event (orders or official notice).\""
+    ],
+    "intake_sufficiency_assessment": "Current intake collects many relevant facts (employment status, CASDI/SDI deductions, relationship, condition categories, whether a clinician exists, some leave info), but it does not capture several mandatory eligibility facts and application-readiness items needed for a defensible preliminary PFL eligibility conclusion across all pathways. Key missing screening facts are: explicit $300 earnings test for 5–18 month lookback, clinician identity/license and willingness to complete DE 2501F Part D, whether the care recipient can sign Part C (or whether a representative is needed), timeliness (first day of leave) as a required field, explicit confirmation that the relationship is a qualifying family member, and a short plan description if continuing to work (partial benefits). Without these, you cannot reliably determine eligibility or urgency for PFL in all cases.",
+    "coverage_gaps": [
+      "No explicit 5–18 month $300 earnings question (caregiver.sdi_deductions exists but is not a substitute).",
+      "Leave start date (caregiver.leave_start) is optional — must be required when caregiver reports employment impact to check 41‑day deadline.",
+      "No fields collecting clinician name, license type, or contact and whether they will complete DE 2501F Part D (only 'Is there a doctor?' is present).",
+      "No field asking whether the care recipient can sign Part C or whether the caregiver is an authorized representative (signature/authorization gap).",
+      "No direct bonding-claim routing question nor capture of the child documentation fields (birth certificate/placement) in screening; these belong in application.",
+      "Voluntary plan coverage (employer voluntary plan in lieu of SDI) is not asked — intake asks employer type/size but not whether the worker is under a voluntary plan (relevant for where to file).",
+      "No capture of employer voluntary plan details or proof; intake should ask whether employer has a voluntary plan and, if yes, to contact employer (DE2511 notes voluntary plans).",
+      "No explicit detection of nonqualifying caregiving relationship (e.g., friend) to immediately rule out PFL caregiving eligibility."
+    ]
+  },
+  "retrieval_queries": [
+    "California Paid Family Leave eligibility documentation requirements medical certification SDI CASDI deductions 18 months work history employer size 75 miles 1,250 hours EDD PFL application proof verification 'Paid Family Leave' California EDD medical certification forms proof of relationship caring for family member documents needed 'proof' 'eligibility' 'application' 'documents' 'verification' 'EDD 2024' 'source_id'"
+  ],
+  "retrieved_sources": {
+    "EDD-DE2511:2:0078a64999": {
+      "title": "Facts About Paid Family Leave",
+      "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2511.pdf",
+      "document_id": "EDD-DE2511",
+      "page": "2",
+      "text": ". Learn more at File a Paid Family Leave \nClaim by Mail (edd.ca.gov/en/disability/How_to_\nFile_a_PFL_Claim_by_Mail).\nCaregiving Claims\nProvide medical certification for your seriously \nill family member who requires your care. This \ncertification needs to be from their licensed health \nprofessional. You must also provide information \nabout the family member you are caring for and \ntheir signature.\nBonding Claims\nProvide documents that show your relationship to \nyour child. This can be a copy of your child’s birth \ncertificate, adoptive placement agreement, or foster \ncare placement record.\nIf you are currently receiving pregnancy-related \nDisability Insurance benefits, it is not necessary to \nrequest a Paid Family Leave claim form. The form \nto file for bonding will be sent through your myEDD \n(myedd.edd.ca.gov) account or by mail when your \npregnancy-related disability claim ends.\nMilitary Assist Claims\nMilitary assist claims require two types of \nsupporting documents. This can be proof of \ncovered active duty or call to covered active duty \nand documentation of the qualifying event.\nVoluntary Plans\nIf you are covered by a voluntary plan, contact your \nemployer for information about your coverage and \ninstructions on how to apply for benefits.\nDo I Qualify for  \nPaid Family Leave?\nTo qualify for Paid Family Leave benefits, you must: \n• Take time off from work to care for a ser"
+    },
+    "EDD-DE2511:1:079f7e3ff8": {
+      "title": "Facts About Paid Family Leave",
+      "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2511.pdf",
+      "document_id": "EDD-DE2511",
+      "page": "1",
+      "text": "For more information, visit  \nPaid Family Leave  \n(edd.ca.gov/PaidFamilyLeave).\nThe EDD is an equal opportunity employer/program. Auxiliary aids and services \nare available upon request to individuals with disabilities. Requests for services, \naids, and/or alternate formats need to be made by calling 1-866-490-8879 \n(voice). TTY users, please call the California Relay Service at 711.\nPaid Family Leave \nHelping \nCalifornians  \nbe present for \nthe moments  \nthat matter.\nAbout Paid Family Leave\nPaid Family Leave program was created for the \nmoments that matter. Benefits are available to care \nfor a seriously ill family member, to bond with a new \nchild, or participate in a qualifying military event.\nFacts About  \nPaid Family Leave\n• Provides up to eight weeks of partial-wage-\nreplacement benefits. Leave doesn’t have to be\ntaken all at once.\n• Provides approximately 70 to 90 percent of your\nweekly salary.\n• Funded through your State Disabilit y Insurance\ntax withholding, noted as “CASDI” on paystubs,\nor a qualifying voluntary plan paid into in the past\n5 to 18 months.\n• To bond with a new child, leave can be taken\nanytime within the first 12 months of a child\nentering your family.\n• Citizenship and immigration status do not\naffect eligibility.\nWhat if My Claim Is Denied?\nIf your claim is denied, you have the right to:\n• Know the reason for denial.\n• Appeal decisions about"
+    },
+    "EDD-DE2511:2:2205497372": {
+      "title": "Facts About Paid Family Leave",
+      "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2511.pdf",
+      "document_id": "EDD-DE2511",
+      "page": "2",
+      "text": "ily.\n• Citizenship and immigration status do not\naffect eligibility.\nWhat if My Claim Is Denied?\nIf your claim is denied, you have the right to:\n• Know the reason for denial.\n• Appeal decisions about your eligibility for\nbenefits. Visit Appeals  (edd.ca.gov/en/Disability/\nAppeals) for more information.\nAll claim information is confidential except for \npurposes allowed by law.\nPaid Family Leave\nBe there for the moments that matter.\nPFL Phone Number\nOur toll-free number is 1-877-238-4373 . \nRepresentatives are available Monday \nthrough Friday from 8 a.m. to 5 p.m., \nexcept on holidays. After a brief \nmessage, you must select a language. \n• Press 1 for English\n• Press 2 for Spanish\n• Press 3 for All Other Languages.\nInterpreter services are available\nfree of charge.\nTTY Phone Number \nOur toll-free number is 1-880-445-1312 . \nFor more information, visit State \nDisability Insurance (edd.ca.gov/en/\nDisability/Contact_SDI) \nDE 2511 Rev. 23 (5-25) (INTERNET) Page 1 of 2\n\n\nHow Do I Apply for Benefits? \nYou can apply for Paid Family Leave benefits at \nmyEDD (myedd.edd.ca.gov).\nTo file by mail, you must complete and submit a \nClaim for Paid Family Leave (PFL) Benefits (DE \n2501F) form. Learn more at File a Paid Family Leave \nClaim by Mail (edd.ca.gov/en/disability/How_to_\nFile_a_PFL_Claim_by_Mail).\nCaregiving Claims\nProvide medical certification for your seriously \nill family memb"
+    },
+    "EDD-DE2511:2:7858fd7205": {
+      "title": "Facts About Paid Family Leave",
+      "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2511.pdf",
+      "document_id": "EDD-DE2511",
+      "page": "2",
+      "text": "ut your coverage and \ninstructions on how to apply for benefits.\nDo I Qualify for  \nPaid Family Leave?\nTo qualify for Paid Family Leave benefits, you must: \n• Take time off from work to care for a seriously \nill family member, to bond with a new child or to \nparticipate in a qualifying military event.\n• Be covered by State Disability Insurance or a \nvoluntary plan in lieu of State Disability Insurance.\n• Have earned at least $300 in the past \n5 to 18 months.\n• Submit your claim no later than 41 days after you \nbegin your family leave. Do not file before your \nfirst day of leave.\nHow Are Benefit \nAmounts Calculated?\nBenefits are 70 to 90 percent of your highest \nquarterly earnings 5 to 18 months before \nyour claim begins.\nEstimate your benefits at Disability Insurance and \nPaid Family Leave Calculator  \n(edd.ca.gov/PFL_Calculator).\nDoes Paid Family Leave \nProvide Job Protection?\nPaid Family Leave does not provide job protection. \nJob protection may be provided if you qualify \nunder other laws:\n• Federal Family and Medical Leave Act  \n(dol.gov/agencies/whd/fmla).\n• California Family Rights Act. Civil Rights \nDepartment (calcivilrights.ca.gov).\nNotify your employer of your plan to take leave \nand the reason for taking leave according to your \ncompany’s policy.\nDE 2511 Rev. 23 (5-25) (INTERNET) Page 2 of 2"
+    },
+    "EDD-DE2475:2:efb6604ccc": {
+      "title": "Guide for Completing a Paid Family Leave Claim",
+      "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2475.pdf",
+      "document_id": "EDD-DE2475",
+      "page": "2",
+      "text": "a.gov/disability).\nThe EDD is an equal opportunity employer/program. Auxiliary aids and services are available upon request to \nindividuals with disabilities. Requests for services, aids, and/or alternate formats need to be made by calling \n1-866-490-8879 (voice) or through the California Relay Service at 711.\nThese guidelines are for general information only and do not have the force and effect of law, rule, or regulation.\nMilitary Assist To participate in a qualifying event as a result of a spouse, registered domestic \npartner, parent, or child’s military deployment to a foreign country. \n• Complete and sign Part A on page 1 and Part E on pages 5 and 6 of the Claim for\nPaid Family Leave (PFL) Benefits (DE 2501F), and mail no later than 41 days from\nthe date you wish to begin your military assist claim.\n• Proof of covered active duty or call to covered active duty of the family member\n(listed in Box E10) must be attached along with documentation that supports the\nqualifying event for leave.\nPartial Benefits If you have reduced your work schedule and have a wage loss.\n• Please mark “yes” on the Claim for Paid Family Leave (PFL) Benefits (DE 2501F),\nquestion A13 or on the Claim for Paid Family Leave (PFL) Benefits – New Mother,\n(DE 2501FP), question 6 if you continue to work during your family care leave.\n• Attach a separate letter if you will be working part-time or taking leav"
+    },
+    "EDD-DE2475:1:717626b3ad": {
+      "title": "Guide for Completing a Paid Family Leave Claim",
+      "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2475.pdf",
+      "document_id": "EDD-DE2475",
+      "page": "1",
+      "text": "CU\nDE 2475 Rev. 10 (12-20) Page 1 of 2\nGUIDE FOR COMPLETING A CLAIM FORM FOR \nPAID FAMILY LEAVE (PFL) BENEFITS\nState Disability Insurance (SDI) offers secure and convenient online options for filing Paid Family Leave (PFL) claims. \nFor faster processing, submit a claim form and documentation on SDI Online (edd.ca.gov/SDI_Online).\nTo avoid delays when filing a claim using the paper application, please follow the general guidelines below. Allow \nsufficient time for claim processing (generally two weeks). For more information, read the yellow instruction and \ninformation sheet provided with the Claim for Paid Family Leave (PFL) Benefits (DE 2501F) contact the PFL office at \n1-877-238-4373, or visit State Disability Insurance (edd.ca.gov/disability).\nClaim Type PFL provides benefits to eligible workers who need to take time off work to care for a \nseriously ill family member, to bond with a new child, or to participate in a qualifying \nevent as a result of a family member’s military deployment to a foreign country. Do not  \nfile for more than one claim type on the same claim form or for the same period of time.\nBonding with a New \nBaby after a Disability \nInsurance (DI) \nPregnancy-Related \nClaim\nFor new mothers who received pregnancy-related DI benefits prior to filing for PFL \nbenefits.\n• The Claim for Paid Family Leave (PFL) Benefits – New Mother (DE 2501FP) will\nautomat"
+    },
+    "EDD-DE2475:2:7406ca3f40": {
+      "title": "Guide for Completing a Paid Family Leave Claim",
+      "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2475.pdf",
+      "document_id": "EDD-DE2475",
+      "page": "2",
+      "text": "º Birth verification must clearly show the child’s name, date of birth, gender, and\nthe name of the parent claiming benefits.\n º New placement of foster care or adoption documentation must verify the date\nthe child was placed in your custody.\n• Bonding benefits are payable within one year of the child’s birth or placement, if\neligible.\nCare To provide care for a seriously ill child, parent, parent-in-law, grandparent, grandchild, \nsibling, spouse, or registered domestic partner.\n• Submit a Claim for Paid Family Leave (PFL) Benefits (DE 2501F):\n º Complete and sign Part A on page 1.\n º Have the care recipient complete Part C on page 3.\n º Have the care recipient’s physician/practitioner complete and sign Part D on page 4.\n• If the care recipient cannot complete and sign Part C on page 3 due to their\ndisability, or if you are an authorized representative filing for benefits on behalf of an\nincapacitated or deceased claimant, call 1-877-238-4373 for instructions and\nrequired forms prior to submitting a claim. Parts A, C, and D are required to be\nconsidered a complete claim.\n(INTERNET)\n\n\nCU\nPage 2 of 2\nFor additional information, please visit State Disability Insurance (edd.ca.gov/disability).\nThe EDD is an equal opportunity employer/program. Auxiliary aids and services are available upon request to \nindividuals with disabilities. Requests for services, aids, and/or alter"
+    },
+    "EDD-FMLA-CFRA-FAQ:unknown:b812661c84": {
+      "title": "FMLA and CFRA Frequently Asked Questions",
+      "url": "https://edd.ca.gov/en/disability/faqs-fmla-cfra/",
+      "document_id": "EDD-FMLA-CFRA-FAQ",
+      "page": "",
+      "text": "Insurance or Paid Family Leave benefits.\nDisability Insurance and Paid Family Leave Benefits\nState Disability Insurance (SDI)\nDisability Insurance (DI)\nElective Coverage (DIEC)\nPaid Family Leave (PFL)\nFind DI Information for You\nPhysicians/Practitioners\nState Employees\nEmployers and Self-Employed/Independent Contractor\nEmployers/Employees of Voluntary Plan\nRegister for myEDD\nCreating an account is an important step in this process. With myEDD, you can apply for Disability Insurance and manage your claim in SDI Online\n.\nCreate Account\nLog In\nDisability Resources\nRates and Withholding\nPayroll Taxes\nAppeals\nBenefit Overpayments and Penalties\nForms and Publications\nFamily and Medical Leave Act and California Family Rights Act FAQs\nTax Form 1099G\nDisability and Paid Family Leave Calculator\nEmployers Overview\nHelp"
+    }
+  },
+  "validation_issues": [],
+  "retrieval_events": []
+}

@@ -1,0 +1,50 @@
+{
+  "program_id": "ihss",
+  "program_name": "In-Home Supportive Services",
+  "ruleset_version": "2026-10-draft",
+  "pathways": [
+    {
+      "pathway_id": "ihss.standard",
+      "description": "Standard IHSS eligibility: a Medi-Cal recipient who needs in-home help to live safely at home.",
+      "criteria": [
+        {
+          "criterion_id": "ihss.resident_of_ca",
+          "description": "The care recipient resides in California.",
+          "kind": "deterministic",
+          "facts": ["care_recipient.state"],
+          "rule": "care_recipient.state in ['CA', 'California']"
+        },
+        {
+          "criterion_id": "ihss.has_medi_cal",
+          "description": "The care recipient has Medi-Cal (IHSS generally requires it).",
+          "kind": "deterministic",
+          "facts": ["care_recipient.medicaid_status"],
+          "failure_effect": "remediable",
+          "rule": "care_recipient.medicaid_status == 'Enrolled now'"
+        },
+        {
+          "criterion_id": "ihss.lives_at_home",
+          "description": "The care recipient lives in their own home, not a hospital or facility.",
+          "kind": "deterministic",
+          "facts": ["care_recipient.living_setting"],
+          "rule": "care_recipient.living_setting in ['Own home', \"Family member's home\"]"
+        },
+        {
+          "criterion_id": "ihss.needs_assistance",
+          "description": "The recipient's functional limitations meet IHSS's need-for-assistance standard.",
+          "kind": "llm_assisted",
+          "facts": ["care_recipient.care_needs", "care_recipient.conditions"],
+          "policy_scope": "ihss",
+          "question": "Do the recipient's reported daily-living limitations and conditions meet the IHSS standard for needing in-home supportive services to remain safely at home?"
+        },
+        {
+          "criterion_id": "ihss.county_assessment",
+          "description": "A county social worker assesses functional needs and authorizes service hours.",
+          "kind": "external",
+          "facts": [],
+          "external_note": "The county IHSS office conducts an in-home assessment to determine authorized hours. Ilera cannot establish this; it can only help the applicant prepare."
+        }
+      ]
+    }
+  ]
+}

@@ -360,17 +360,17 @@ export default function CalendarPage() {
       {/* Header */}
       <div className="space-y-6">
         <div className="space-y-3">
-          <h1 className="text-4xl font-bold">Care Calendar</h1>
+          <h1 className="text-4xl">Care Calendar</h1>
           <p className="max-w-xl text-sm text-muted-foreground">
             Email scanning will surface care appointments and deadlines here.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button className="px-10 hover:font-bold">+ Appointment</Button>
-          <Button className="px-10 hover:font-bold">+ Visit</Button>
-          <Button className="px-10 hover:font-bold">+ Deadline</Button>
+          <Button className="px-8">+ Appointment</Button>
+          <Button className="px-8">+ Visit</Button>
+          <Button className="px-8">+ Deadline</Button>
           <Button
-            className="px-10 hover:font-bold"
+            className="px-8"
             onClick={() => {
               resetForm();
               setShowReminderForm(true);
@@ -501,7 +501,7 @@ export default function CalendarPage() {
       <div className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="size-4" />
-            <h3 className="text-sm font-semibold">Suggested Events</h3>
+            <h3 className="text-sm">Suggested Events</h3>
           </div>
           {eventsFailed ? (
             <div className="flex items-center justify-between rounded-lg border border-dashed border-red-300 bg-card px-3 py-2.5">
@@ -585,7 +585,7 @@ export default function CalendarPage() {
       {/* Month-view calendar grid */}
       <div className="overflow-hidden rounded-xl border border-brand-subtle bg-card shadow-xs">
         <div className="flex items-center justify-between border-b border-brand-subtle bg-brand-subtle/40 px-4 py-3">
-          <h2 className="text-lg font-semibold">
+          <h2 className="text-lg">
             {monthName} {viewYear}
           </h2>
           <div className="flex items-center gap-1">
@@ -683,7 +683,7 @@ export default function CalendarPage() {
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-primary">
             <CalendarDays className="size-4" />
-            <h3 className="text-sm font-semibold">Saved Reminders</h3>
+            <h3 className="text-sm">Saved Reminders</h3>
           </div>
           <p className="text-xs text-muted-foreground">Reminders are saved only. Automatic delivery is unavailable.</p>
           {reminders.map((r) => (

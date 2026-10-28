@@ -1,0 +1,267 @@
+{
+  "program": "Caregiver Tax Relief",
+  "result": {
+    "conclusion": "No. The current intake collects many useful screening signals for the federal tax pathways (dependent-care credit, household\u2011employee issues) and flags for Medicaid\u2011waiver payments and several program tracks (VA, CA, SSA). However it does NOT gather all facts needed to make a defensible preliminary eligibility conclusion for any pathway you attempt to evaluate. The intake is sufficient to 'flag' plausible pathways and to identify what documents or brief follow\u2011ups are required, but multiple targeted gaps remain that must be answered (self\u2011report or document) before a defensible preliminary eligibility finding can be made.",
+    "screening_gaps": [
+      {
+        "criterion": "Tax filing status and approximate AGI (affects dependent-care credit eligibility and phaseouts)",
+        "pathway": "Federal tax \u2014 Dependent-Care Credit & related household-employee rules",
+        "current_fields": [
+          "tax.paid_care_to_work",
+          "tax.provides_over_half_support",
+          "tax.lived_together_over_half_year",
+          "recipient.monthly_income_range"
+        ],
+        "missing_facts": [
+          "Taxpayer's expected federal filing status for the tax year (Single, MFJ, MFS, HoH, QW)",
+          "Approximate Adjusted Gross Income (AGI) or AGI range for the tax year"
+        ],
+        "trigger": "case.goals includes 'Tax credits, deductions, or dependent-care benefits' OR tax.paid_care_to_work = 'Yes'",
+        "simple_questions": [
+          "What will your federal filing status be for tax year YYYY? (Single / Married filing jointly / Married filing separately / Head of household / Qualifying widow(er))",
+          "What is your best estimate of AGI for tax year YYYY? (choose range: <$25k; $25\u201350k; $50\u2013100k; $100\u2013200k; >$200k; I'm not sure)"
+        ],
+        "document_lookup_when": "Application-only or tax-preparation stage when preparing a return or giving definitive eligibility advice; use actual prior-year tax return or pay/benefit statements to confirm AGI.",
+        "source_ids": [
+          "IRS-PUB-503"
+        ],
+        "caveat": "A rough AGI range and filing status are adequate for a defensible preliminary screen; exact AGI is application-only."
+      },
+      {
+        "criterion": "Identity, relationship, work location, and TIN availability of the paid care provider (determines whether credit is allowed and whether employment taxes/Schedule H apply)",
+        "pathway": "Federal tax \u2014 Dependent-Care Credit; household-employee tax obligation",
+        "current_fields": [
+          "caregiver.relationship",
+          "caregiver.payment_status",
+          "tax.paid_care_to_work"
+        ],
+        "missing_facts": [
+          "Name and relationship of the person paid to care for the recipient (who was paid)",
+          "Whether that person worked in their own home or in the taxpayer's home (location)",
+          "Whether the paid provider can supply an SSN or EIN (TIN) for reporting (or refuses)"
+        ],
+        "trigger": "tax.paid_care_to_work = 'Yes' OR case.goals includes tax credits",
+        "simple_questions": [
+          "Who did you pay to provide care? (Name and relationship to you)",
+          "Did that person provide the care in their own home or in your home?",
+          "Can that care provider provide their SSN or EIN for tax-reporting purposes, or would they refuse?"
+        ],
+        "document_lookup_when": "Application-only (tax return filing): provider TIN is required on the return; payroll records or invoices are needed to determine Schedule H/employment taxes if the worker is a household employee.",
+        "source_ids": [
+          "IRS-PUB-503"
+        ],
+        "caveat": "Self-report of relationship and location is sufficient for a preliminary screen; TIN availability is an application-only barrier to claiming the credit without extra steps."
+      },
+      {
+        "criterion": "Dates, hours and nature of paid care (well\u2011being/protection test and 'work\u2011related' requirement for credit)",
+        "pathway": "Federal tax \u2014 Dependent-Care Credit and qualifying expense characterization",
+        "current_fields": [
+          "recipient.adl_needs",
+          "recipient.condition_documented",
+          "tax.paid_care_to_work",
+          "tax.unreimbursed_medical_expenses"
+        ],
+        "missing_facts": [
+          "Specific dates or date ranges when care was paid/received during the tax year",
+          "Average hours per week of paid care and whether care was primarily for personal care (ADLs/ supervision) versus incidental items (food, lodging)",
+          "Existence of contemporaneous records: invoices, timesheets, care plans, provider notes, or medical statements describing need"
+        ],
+        "trigger": "tax.paid_care_to_work = 'Yes' OR tax.unreimbursed_medical_expenses = 'Yes' OR case.goals includes tax credits",
+        "simple_questions": [
+          "During tax year YYYY, for what dates did you pay for care for [recipient name] (approximate start/stop)?",
+          "On average, how many hours per week was paid care provided?",
+          "Do you have any invoices, timesheets, care plans, or a short provider note describing services and dates? (Yes / No / I'm not sure)"
+        ],
+        "document_lookup_when": "Before claiming the credit on a return or when substantiating a deduction \u2014 collect invoices, medical statements or contemporaneous logs.",
+        "source_ids": [
+          "IRS-PUB-503"
+        ],
+        "caveat": "IRS guidance accepts self\u2011report for screening, but contemporaneous records are needed to substantiate on a return if audited."
+      },
+      {
+        "criterion": "Whether public payments are from an approved 1915(c) Medicaid Home and Community-Based Services (HCBS) waiver or other state program that qualifies under IRC \u00a7131",
+        "pathway": "Federal tax \u2014 IRS Notice 2014-7 treatment of Medicaid waiver payments (IRC \u00a7131 difficulty-of-care exclusion)",
+        "current_fields": [
+          "caregiver.payment_status",
+          "tax.waiver_payment_cophysical_residence"
+        ],
+        "missing_facts": [
+          "Exact program name and paying agency (state/county program identifier)",
+          "Whether payments are under an approved 1915(c) HCBS waiver or other qualifying Medicaid waiver authority",
+          "Plan-of-care approval and state/provider certification evidence, and payment start dates"
+        ],
+        "trigger": "caregiver.payment_status = 'Yes, through Medicaid, a waiver, IHSS, or another public program' OR case.goals includes tax credits or waiver-payment tax treatment",
+        "simple_questions": [
+          "What is the exact name of the program paying you (example: County IHSS; State HCBS waiver program name) and which state or county pays it?",
+          "When did those payments begin? (approximate month/year)",
+          "Can you obtain an award/payment letter or the plan-of-care approval from the paying agency? (Yes / No / I'm not sure)"
+        ],
+        "document_lookup_when": "Before concluding that payments are excludable under IRC \u00a7131 \u2014 verify with the state award/benefit letter, plan-of-care approval, or program documentation showing 1915(c) waiver authority.",
+        "source_ids": [
+          "IRS-NOTICE-2014-7",
+          "IRS-MEDICAID-WAIVER-FAQ"
+        ],
+        "caveat": "Self-report flags a possible \u00a7131 pathway; IRS Notice 2014-7 requires state waiver/plan-of-care evidence for a defensible preliminary conclusion."
+      },
+      {
+        "criterion": "VA caregiver program eligibility & caregiver designation (PCAFC / Aid & Attendance / VA pension) \u2014 enrollment, VA decision(s), and caregiver coresidence or designation",
+        "pathway": "VA caregiver benefits (PCAFC, Aid & Attendance, VA pension interactions with caregiver payments/tax issues)",
+        "current_fields": [
+          "recipient.military_status",
+          "recipient.va_contact",
+          "recipient.va_rating_assigned",
+          "recipient.va_rating",
+          "recipient.military_discharge_status",
+          "recipient.va_six_month_care_need",
+          "recipient.va_pension_status",
+          "caregiver.age_18_or_older"
+        ],
+        "missing_facts": [
+          "Official VA decision letter(s), award letter(s), or claim number showing combined disability rating, pension/Aid & Attendance award, and dates",
+          "Whether VA has enrolled the caregiver (PCAFC) or designated them for paid caregiver support and any coresidence or primary provider designation required by VA rules",
+          "Exact VA program names and whether the caregiver has been certified/approved by VA for caregiver supports"
+        ],
+        "trigger": "case.goals includes 'Finding VA caregiver benefits' OR recipient.military_status not 'None' OR recipient.current_benefits includes VA items",
+        "simple_questions": [
+          "Has VA issued a decision or award letter for the recipient? (Yes / No / I'm not sure)",
+          "Do you or the recipient have a VA claim or file number you can provide at application time? (Optional at screening)",
+          "Has VA formally enrolled or designated you as a caregiver (PCAFC) or paid caregiver? (Yes / No / I'm not sure)"
+        ],
+        "document_lookup_when": "Application stage: obtain VA decision letter(s), award letters, and VA caregiver-designation/enrollment evidence. For screening, self-report suffices to flag pathway but cannot support a defensible eligibility conclusion without VA documents.",
+        "source_ids": [],
+        "caveat": "No VA authoritative sources were retrieved during the audit \u2014 this is a coverage gap. You must retrieve and map VA PCAFC / Aid & Attendance rules to translate intake answers into defensible screening criteria."
+      },
+      {
+        "criterion": "California-specific public-pay caregiver documentation (IHSS, Medi\u2011Cal waiver identification) and SDI/PFL eligibility evidence (CASDI paystub deductions, medical certification)",
+        "pathway": "California \u2014 IHSS / Medi\u2011Cal waiver income/tax and PFL/SDI interactions",
+        "current_fields": [
+          "caregiver.payment_status",
+          "caregiver.sdi_deductions",
+          "caregiver.pfl_medical_certification",
+          "caregiver.work_state"
+        ],
+        "missing_facts": [
+          "Exact California program name (county IHSS, state waiver) and county identifier or provider number",
+          "Pay stubs or employer records showing CASDI/SDI deductions in last 18 months, if claiming CA PFL/SDI eligibility",
+          "IHSS provider number, timesheets, or county award letters and the state/county program authority"
+        ],
+        "trigger": "caregiver.payment_status indicates payment through a public program AND caregiver.work_state = 'California' OR case.goals includes applying for PFL/SDI or public-pay caregiver guidance",
+        "simple_questions": [
+          "If you are paid by a public program, what is the exact name of the program and which county/state agency pays you?",
+          "Can you check a recent pay stub for CASDI/SDI deductions in the last 18 months? (Yes / No / I'm not sure)",
+          "Do you have an IHSS provider number, timesheet, or county payment notice? (Yes / No / I'm not sure)"
+        ],
+        "document_lookup_when": "For a defensible preliminary eligibility conclusion about CA PFL/SDI or IHSS\u2011based issues, obtain pay stubs, IHSS provider records, and county award letters \u2014 these are application-only verifications.",
+        "source_ids": [],
+        "caveat": "No California official sources (EDD, DHCS, county IHSS) were retrieved in this audit \u2014 treat this as a coverage gap requiring retrieval of CA guidance to map intake to eligibility rules."
+      },
+      {
+        "criterion": "Household composition, ages, relationships, tax dependency and income ownership (affects qualifying person tests and unit for tax credits and benefits)",
+        "pathway": "Federal tax \u2014 Dependent-Care Credit; state benefit programs that depend on household unit",
+        "current_fields": [
+          "recipient.household_size",
+          "recipient.monthly_income_range",
+          "tax.provides_over_half_support",
+          "tax.lived_together_over_half_year"
+        ],
+        "missing_facts": [
+          "Household roster with each member's age and relationship to the taxpayer/recipient",
+          "Who will claim the recipient as a dependent on the federal return",
+          "Whether recipient filed a joint return and recipient's gross income (for dependent-tests)"
+        ],
+        "trigger": "case.goals includes 'Tax credits' OR any pathway where dependency/status affects eligibility (e.g., SSI/Medicaid, household tax credits)",
+        "simple_questions": [
+          "Please list all household members (first name or initial is fine), relationship, and age.",
+          "Will you claim [recipient name] as a dependent for tax year YYYY? (Yes / No / I'm not sure)",
+          "Did the recipient file a joint federal return for tax year YYYY? (Yes / No / I'm not sure)"
+        ],
+        "document_lookup_when": "Application-only or when preparing a return: verify with tax returns, birth dates, and benefit letters.",
+        "source_ids": [
+          "IRS-PUB-503"
+        ],
+        "caveat": "Household roster is essential to compute qualifying-person status and to decide which unit should be used for income/credit calculations; a short roster + DOBs is sufficient for a defensible preliminary screen."
+      },
+      {
+        "criterion": "Assets, transfers and date-sensitive rules for Medicaid/SSI (countable resources, look-back periods)",
+        "pathway": "Medi\u2011Cal / Medicaid eligibility; SSI means-test and Medicaid institutional rules",
+        "current_fields": [
+          "recipient.assets",
+          "recipient.recent_transfers"
+        ],
+        "missing_facts": [
+          "Approximate values of assets (savings/investments, property equity), ownership (in whose name), and dates of any transfers/gifts",
+          "Full transfer history for the state look-back period (30 months for many Medicaid nursing-home rules) with dates and recipient names"
+        ],
+        "trigger": "recipient.living_setting = 'Nursing home or skilled nursing facility' OR recipient.medicaid_status indicates application pending OR case.goals includes Medicaid eligibility or SSI",
+        "simple_questions": [
+          "Please list each major asset (home, other property, savings/investments) with estimated current value and whose name it's in.",
+          "Have any assets or property been transferred/given away in the last 30 months? If yes, what (approximate date and value)?"
+        ],
+        "document_lookup_when": "Application stage: obtain bank statements, deeds, transfer documents, and benefit award letters; asset rules are date-sensitive so confirm with state Medicaid guidance.",
+        "source_ids": [],
+        "caveat": "Asset rules are state- and program-specific and date-sensitive; this audit did not retrieve authoritative state Medicaid or SSA asset/look-back guidance (coverage gap)."
+      }
+    ],
+    "application_only": [
+      "Obtain care provider TIN (SSN or EIN) or documented refusal (required on tax return) \u2014 tax return stage",
+      "Collect provider invoices, timesheets, payroll records or Schedule H paperwork (if household employee) \u2014 tax filing or payroll compliance stage",
+      "Obtain official state/county award letters, plan-of-care approval, or IHSS provider enrollment/timesheets to confirm waiver payments are under an approved 1915(c) HCBS waiver \u2014 agency verification stage",
+      "Retrieve VA decision letters, award letters, claim numbers, and PCAFC caregiver enrollment/designation documentation \u2014 VA application stage",
+      "Collect pay stubs showing CASDI/SDI deductions for CA PFL/SDI claims (last 18 months) and medical certification forms \u2014 CA application stage",
+      "Obtain SSA earnings record (W-2s, SSA earnings statement) and bank statements for SSI asset verification \u2014 SSA application stage",
+      "Get prior-year tax return or AGI documentation to confirm filing status and AGI used in final tax eligibility advice"
+    ],
+    "visibility_gaps": [
+      "Gating on case.goals: Many tax- and program\u2011specific questions only appear if the user picks a related goal. If a user fails to select the relevant goal (or chooses 'Not sure'), you can miss critical screening facts. Add a brief passive probe when 'Not sure' is chosen to surface tax and public-pay flags.",
+      "\u2018I'm not sure\u2019 choices reduce immediate screening power \u2014 the intake should include one or two tight follow\u2011ups asking for short facts (roster, filing status, program name) before deferring to later.",
+      "VA PCAFC/designation and VA enrollment are distinct from general VA contact; intake currently mixes these signals. Make a clear branching question: 'Do you want help with VA caregiver enrollment (PCAFC) specifically?' to surface required VA documents and caregiver-designation facts.",
+      "Age computation: DOB is captured but many conditional rules use 'age' (e.g., child under 13 or under 18). Ensure the system derives and uses computed age for eligibility gating rather than an additional question."
+    ],
+    "unsupported_or_stale_claims": [
+      "No VA authoritative sources retrieved in the prior audit \u2014 statement that intake can determine VA eligibility is unsupported until VA program pages and 38 CFR or official VA publications are read (coverage gap).",
+      "No California authoritative sources (EDD, DHCS, county IHSS) were retrieved \u2014 any definitive CA PFL/SDI or IHSS documentary requirement mapping is unsupported.",
+      "No SSA/SSI authoritative sources were retrieved \u2014 claims about work\u2011credit or SSI asset rules are not supported by cited SSA sources.",
+      "IRS Pub 502 (medical-expense deduction rules) was not retrieved; mapping of tax.unreimbursed_medical_expenses to deduction rules lacks that specific citation."
+    ],
+    "scope_limits": [
+      "This audit evaluates whether the intake gathers the facts needed for defensible preliminary eligibility screening only; it does NOT assess final eligibility, application readiness, or legal advice.",
+      "Preliminary screening conclusions require accurate self-report; for any definitive eligibility decision or filing advice, application-only documents listed above are required.",
+      "Where source_ids are empty for a gap, the audit identifies a coverage gap: authoritative program rules must be retrieved before the intake can support defensible conclusions for that pathway.",
+      "The intake explicitly avoids collecting SSNs, BICs, account numbers, clinician contacts, uploads, completed certifications or background checks; where those items are needed they are listed as application-only evidence.",
+      "Asset, waiver, and program\u2011enrollment rules are date-sensitive \u2014 historical document sources (award letters, plan-of-care dates, transfer dates) are required to resolve look-back or effective-date issues; the intake must include short date fields or prompts to capture those dates."
+    ]
+  },
+  "validation_issues": [
+    {
+      "criterion": "Tax filing status and approximate AGI (affects dependent-care credit eligibility and phaseouts)",
+      "unmatched": [
+        "IRS-PUB-503"
+      ]
+    },
+    {
+      "criterion": "Identity, relationship, work location, and TIN availability of the paid care provider (determines whether credit is allowed and whether employment taxes/Schedule H apply)",
+      "unmatched": [
+        "IRS-PUB-503"
+      ]
+    },
+    {
+      "criterion": "Dates, hours and nature of paid care (well\u2011being/protection test and 'work\u2011related' requirement for credit)",
+      "unmatched": [
+        "IRS-PUB-503"
+      ]
+    },
+    {
+      "criterion": "Whether public payments are from an approved 1915(c) Medicaid Home and Community-Based Services (HCBS) waiver or other state program that qualifies under IRC \u00a7131",
+      "unmatched": [
+        "IRS-MEDICAID-WAIVER-FAQ",
+        "IRS-NOTICE-2014-7"
+      ]
+    },
+    {
+      "criterion": "Household composition, ages, relationships, tax dependency and income ownership (affects qualifying person tests and unit for tax credits and benefits)",
+      "unmatched": [
+        "IRS-PUB-503"
+      ]
+    }
+  ]
+}

@@ -10,10 +10,10 @@
   },
   "fields": {
     "SOC 426 Pg 3 2": {
-      "profile_path": null,
+      "profile_path": "caregiver.date_of_birth",
       "label": "Date of birth",
-      "needs_user_input": true,
-      "confidence": "medium"
+      "confidence": "medium",
+      "format": "date"
     },
     "SOC 426 Pg 3 1": {
       "profile_path": "caregiver.name",
@@ -179,20 +179,6 @@
     }
   },
   "groups": [
-    {
-      "id": "provider_date_of_birth",
-      "prompt": "What is your date of birth?",
-      "inputs": [
-        {
-          "key": "date_of_birth",
-          "label": "Date of birth",
-          "type": "date",
-          "fields": [
-            "SOC 426 Pg 3 2"
-          ]
-        }
-      ]
-    },
     {
       "id": "provider_gender",
       "prompt": "What is your gender?",

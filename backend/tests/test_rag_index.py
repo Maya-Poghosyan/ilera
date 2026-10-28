@@ -8,13 +8,23 @@ bounded batches.
 Runs with no services. Run directly or via pytest.
 """
 import os
+from datetime import date
 import sys
+
+import pytest
 
 os.environ.pop("DATABASE_URL", None)
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.config import get_settings  # noqa: E402
 from app.rag import embeddings, index  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def offline_embedding_identity(monkeypatch):
+    # Fingerprint tests exercise invalidation, not model downloads/API access.
+    monkeypatch.setattr(index, "embedding_provider", lambda: "test")
+    monkeypatch.setattr(index, "embedding_id", lambda: "test-model")
 
 
 def _reset_settings() -> None:
@@ -27,7 +37,7 @@ def test_cold_index_reports_empty_instead_of_building() -> None:
     idx.build = lambda: calls.append(1) or 0  # type: ignore[method-assign]
     assert idx.ensure() == 0
     assert not calls, "a serving process must never embed the corpus on demand"
-    assert idx.search("ihss hours") == []
+    assert idx.search("ihss hours", scope=index.RetrievalScope("ihss", "CA", date(2026, 10, 14))) == []
 
 
 def test_get_index_never_builds(monkeypatch) -> None:

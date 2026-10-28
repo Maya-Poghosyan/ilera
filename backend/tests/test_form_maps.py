@@ -53,6 +53,7 @@ def _filled_profile() -> CaseProfile:
         ),
         caregiver=Caregiver(
             name="Test Caregiver",
+            date_of_birth="1980-01-01",
             first_name="Test",
             last_name="Caregiver",
             relationship="Adult child",

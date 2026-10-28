@@ -26,7 +26,22 @@ def main() -> None:
         action="store_true",
         help="re-embed every document instead of only the changed ones",
     )
+    parser.add_argument("--metadata-only", action="store_true", help="Migrate/update document scope metadata without re-embedding")
     args = parser.parse_args()
+    if args.rebuild and args.metadata_only:
+        parser.error("--rebuild and --metadata-only cannot be combined")
+    if args.metadata_only:
+        from app.config import get_settings
+        from .index import PgVectorIndex
+        settings = get_settings()
+        if not settings.has_postgres:
+            parser.error("--metadata-only requires DATABASE_URL")
+        index = PgVectorIndex(settings.database_url)
+        try:
+            print(f"Updated scope metadata for {index.sync_metadata()} documents; vectors unchanged.")
+        finally:
+            index._pool.close()
+        return
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     by_program: Counter[str] = Counter()

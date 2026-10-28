@@ -1,0 +1,353 @@
+{
+  "program": "Caregiver Tax Relief",
+  "doc_key": "tax",
+  "generated_at": "2026-10-13T02:54:05.528557+00:00",
+  "execution": "Separate direct research invocation with Ilera Azure model and program-scoped RAG, not the hosted Durable endpoint",
+  "direct_question": "Audit the CURRENT refactored intake for completeness, not just documents. Can we make an accurate eligibility screening conclusion from these answers? List all missing facts, conditional visibility failures, precision gaps, program-specific eligibility-unit inputs, and mandatory unresolved criteria. Include concise simple followup wording and exactly when to ask it. Separate criteria facts from application paperwork.\nWhat external documents would possibly be needed, and what rules/triggers necessitate them? Give a concrete document-to-question matrix for your program. Show questions already in our intake, questions needing further detail, and questions belonging in the actual application session. Assess whether our intake supports accurate preliminary eligibility conclusions. Retrieve official sources before answering. ",
+  "result": {
+    "mappings": [
+      {
+        "document_name": "IRS Publication 503 — Child and Dependent Care Expenses (recordkeeping; provider identification; qualifying person tests)",
+        "program_or_pathway": "Federal Tax — Dependent Care Credit & Household Employee rules",
+        "question": "Is the care expense eligible for the dependent-care tax credit and who is the care provider (TIN/EIN)?",
+        "subject_and_period": "Tax year being claimed; provider identity at time care paid",
+        "intake_field_ids": [
+          "tax.paid_care_to_work",
+          "tax.provides_over_half_support",
+          "tax.lived_together_over_half_year",
+          "caregiver.payment_status",
+          "recipient.date_of_birth",
+          "recipient.current_benefits"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Did you (or your spouse) claim a dependent exemption or will you claim [recipient name] as a dependent on your federal tax return for tax year YYYY? If yes, will you be filing jointly or separately?",
+        "information_to_read": [
+          "IRS-PUB-503"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "IRS requires records proving the care was for a qualifying person and for work-related reasons; the IRS also requires identification of the care provider (SSN or EIN) for the return and recordkeeping.",
+        "trigger_for_asking_fact": "case.goals includes 'Tax credits, deductions, or dependent-care benefits' or caregiver.employment_status indicates working and tax.paid_care_to_work = Yes",
+        "trigger_for_document_lookup": "If tax.paid_care_to_work = Yes or caregiver was paid through a program and the caregiver is not the taxpayer, request provider TIN/EIN or written invoice; if provider refuses, further steps are required per IRS guidance.",
+        "stage": "screening",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report of 'paid care to work' and provider relationship is sufficient to flag eligibility pathway but not to confirm credit amount or completeness; provider TIN/EIN is required on an actual tax return (application-only).",
+        "alternatives": [
+          "Written receipts showing provider name, address, dates and amounts (preliminary), invoice plus agency payment records, provider TIN/EIN during application stage"
+        ],
+        "source_ids": [
+          "IRS-PUB-503"
+        ],
+        "requirement_support": "Publication 503 describes qualifying person tests, provider identification, and recordkeeping requirements for the credit (see provider ID and recordkeeping sections).",
+        "retrieval_support": "IRS-PUB-503 (source_id: IRS-PUB-503)",
+        "effective_date_or_jurisdiction_notes": "Federal IRS rules; depends on the tax year claimed. State tax treatment may differ.",
+        "review_notes": "Intake includes core questions (paid care to work, lived together, support) but lacks taxpayer filing status, taxpayer AGI, provider TIN request and provider relationship specificity for tax rules."
+      },
+      {
+        "document_name": "IRS Notice 2014-7 — Treatment of Medicaid Waiver Payments under IRC §131",
+        "program_or_pathway": "Federal Tax — Treatment of Medicaid waiver payments to family caregivers (excludable difficulty-of-care payments)",
+        "question": "Are payments being received under a state Medicaid Home and Community-Based Services (1915(c)) waiver for care provided in the caregiver's home?",
+        "subject_and_period": "Payment program and period when payments received (dates); whether payments are from a qualified 1915(c) waiver",
+        "intake_field_ids": [
+          "caregiver.payment_status",
+          "tax.waiver_payment_cophysical_residence"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Are the payments for your personal care provided under a state Medicaid waiver program (1915(c))? Can you name the state program or agency that pays you and the start date of those payments?",
+        "information_to_read": [
+          "IRS-NOTICE-2014-7",
+          "IRS-MEDICAID-WAIVER-FAQ"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "Notice 2014-7 treats qualified Medicaid waiver payments as excludable difficulty-of-care payments under IRC §131, but only when payments are made under an approved waiver plan of care and the state certifies/oversees the provider and plan.",
+        "trigger_for_asking_fact": "caregiver.payment_status equals 'Yes, through Medicaid, a waiver, IHSS, or another public program' or case.goals includes tax-related assistance about payments",
+        "trigger_for_document_lookup": "If caregiver.payment_status indicates Medicaid or waiver payments, lookup state award letters, provider enrollment/certification, plan-of-care approval, and payment notices to confirm 1915(c) basis and dates.",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report that payments are from a Medicaid waiver is sufficient to flag possible IRC §131 treatment, but NOT sufficient to conclude exclusion for tax purposes — agency/state documents or the program name are needed to confirm it's a 1915(c) waiver.",
+        "alternatives": [
+          "State award letter or benefit letter naming the program, contract or provider enrollment ID, plan-of-care approval memo; payroll remittance or program payment notices"
+        ],
+        "source_ids": [
+          "IRS-NOTICE-2014-7",
+          "IRS-MEDICAID-WAIVER-FAQ"
+        ],
+        "requirement_support": "Notice 2014-7 and IRS waiver FAQ specifically require the payments to be under an approved Medicaid waiver program and tied to an approved plan-of-care; state certification/oversight is described.",
+        "retrieval_support": "IRS-NOTICE-2014-7 (source_id: IRS-NOTICE-2014-7), IRS-MEDICAID-WAIVER-FAQ (source_id: IRS-MEDICAID-WAIVER-FAQ)",
+        "effective_date_or_jurisdiction_notes": "Federal tax treatment applies nationwide; whether the state program is a 1915(c) waiver is a state-specific fact and must be verified against state agency records.",
+        "review_notes": "Intake asks caregiver.payment_status and whether caregiver lives in same home (tax.waiver_payment_cophysical_residence) — good initial flags — but lacks program name, payment dates, and state certification fields."
+      },
+      {
+        "document_name": "IRS Publication 503 — Documentation and recordkeeping for qualifying person and care purpose",
+        "program_or_pathway": "Federal Tax — Records supporting that the care was primarily for recipient’s well‑being and protection (qualifying person/well-being test)",
+        "question": "Was the main purpose of the care expense the recipient's well‑being and protection (i.e., it was personal care rather than food/lodging) and are there records of the nature/length of disability?",
+        "subject_and_period": "Care dates and nature of disability during tax year being claimed",
+        "intake_field_ids": [
+          "recipient.condition_categories",
+          "recipient.adl_needs",
+          "recipient.condition_documented",
+          "tax.unreimbursed_medical_expenses",
+          "tax.paid_care_to_work"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Please describe the types of assistance you paid for (personal care e.g., bathing, dressing) and approximate dates and hours per week. Do you have any written care plans, provider notes, or medical statements describing the need for care?",
+        "information_to_read": [
+          "IRS-PUB-503"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "IRS treats expenses as qualifying only when they are for care (well‑being and protection). The taxpayer should keep records showing nature, length, and cost of care and evidence of disability where applicable.",
+        "trigger_for_asking_fact": "tax.paid_care_to_work = Yes or case.goals includes tax-related assistance for medical expenses or dependent care",
+        "trigger_for_document_lookup": "If the taxpayer wishes to claim the credit or deduction, request care invoices, medical notes, plan-of-care, or contemporaneous records showing dates/hours and nature of care.",
+        "stage": "screening",
+        "documentary_requirement": "optional_lookup",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report of care types and that care was for well‑being is sufficient to identify the pathway; documentation is required to substantiate claims on a return and may be requested by IRS later.",
+        "alternatives": [
+          "Care provider invoices, medical certification, contemporaneous logs, agency service authorizations"
+        ],
+        "source_ids": [
+          "IRS-PUB-503"
+        ],
+        "requirement_support": "Publication 503 states expenses are qualifying only if main purpose was well‑being and protection and recommends recordkeeping to show nature and length of disability where relevant.",
+        "retrieval_support": "IRS-PUB-503 (source_id: IRS-PUB-503)",
+        "effective_date_or_jurisdiction_notes": "Federal tax rule; documentation expectations apply to return substantiation.",
+        "review_notes": "Intake captures ADLs and whether condition documented, but does not capture hours/dates or provider invoices; add follow-up question to gather these facts for screening precision."
+      },
+      {
+        "document_name": "Provider identification and relative-provider rules (IRS Publication 503)",
+        "program_or_pathway": "Federal Tax — Payments to relatives and household-employee rules (affects tax filing obligations and credit eligibility)",
+        "question": "Is the person you paid to care for [recipient name] a relative, household employee, or an external provider?",
+        "subject_and_period": "Care provider identity and employment relationship during period when payments were made",
+        "intake_field_ids": [
+          "caregiver.relationship",
+          "caregiver.payment_status",
+          "tax.paid_care_to_work"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Who was paid to provide care? (Name and relationship to you; did they work in their own home or in your home?)",
+        "information_to_read": [
+          "IRS-PUB-503"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "IRS distinguishes relatives, household employees, and independent providers when determining whether employment taxes apply and whether the dependent-care credit applies. Provider TIN is required for the credit; payments to certain relatives may be disallowed.",
+        "trigger_for_asking_fact": "tax.paid_care_to_work = Yes and case.goals about tax credits/deductions",
+        "trigger_for_document_lookup": "If paid to a relative or household employee, check payroll records, receipts, and whether employer reporting (Schedule H) is required when preparing tax return.",
+        "stage": "screening",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report of relationship and whether care occurred in taxpayer's home is sufficient for a preliminary screen; final tax determination requires provider TIN and sometimes payroll documentation.",
+        "alternatives": [
+          "Invoices showing care location, simple written statement from provider, payroll records if treated as employee"
+        ],
+        "source_ids": [
+          "IRS-PUB-503"
+        ],
+        "requirement_support": "Publication 503 discusses household employee definitions and recordkeeping and warns about payments to relatives and refusal to provide TINs.",
+        "retrieval_support": "IRS-PUB-503 (source_id: IRS-PUB-503)",
+        "effective_date_or_jurisdiction_notes": "Federal IRS guidance; state payroll rules may differ.",
+        "review_notes": "Intake collects caregiver.relationship and payment_status but lacks explicit question asking whether payments were made to a relative/provider name and whether the worker worked in taxpayer's home vs theirs."
+      },
+      {
+        "document_name": "(MISSING) VA PCAFC / VA caregiver benefit eligibility and documentation",
+        "program_or_pathway": "VA Caregiver Support / PCAFC / Aid & Attendance interactions with tax/payment eligibility",
+        "question": "Does the recipient/caregiver meet VA PCAFC or Aid & Attendance program criteria (disability rating, combined rating %, continuous care need, VA pension status)?",
+        "subject_and_period": "VA rating decision letters, dates of discharge, VA pension/Aid & Attendance award letters",
+        "intake_field_ids": [
+          "recipient.military_status",
+          "recipient.va_contact",
+          "recipient.va_rating_assigned",
+          "recipient.va_rating",
+          "recipient.va_pension_status",
+          "recipient.va_six_month_care_need",
+          "caregiver.age_18_or_older"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "If you want VA-specific support, can you provide the VA decision letter (disability rating), VA award letter (pension/Aid & Attendance), or the VA claim number and dates?",
+        "information_to_read": [
+          "SOURCE NOT RETRIEVED — VA official program pages needed"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "VA programs require VA decision letters showing combined disability rating, evidence of service connection, and medical evidence of need for personal care; Aid & Attendance/pension have income/asset and care-need documentation requirements (official VA guidance needed).",
+        "trigger_for_asking_fact": "recipient.military_status not 'None of these' or case.goals includes 'Finding VA caregiver benefits'",
+        "trigger_for_document_lookup": "If VA pathway is relevant, verify with VA decision letter, award letter, and medical evidence; agency-issued letters are mandatory for program enrollment/benefit changes.",
+        "stage": "application",
+        "documentary_requirement": "not_established",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report flags pathway (military status, reported VA benefits) but is NOT sufficient to determine eligibility for VA caregiver programs or pension; official VA documents are required to confirm.",
+        "alternatives": [
+          "VA decision letter, VA award letter, VA claim file"
+        ],
+        "source_ids": [],
+        "requirement_support": "No VA sources were retrieved during search; this is a coverage gap. Official VA program rules must be read to map exact documents and triggers.",
+        "retrieval_support": "MISSING — need to retrieve VA PBS/PCAFC program pages, 38 CFR citations, and VA pension documentation.",
+        "effective_date_or_jurisdiction_notes": "Federal VA rules — state irrelevant; benefit-specific effective dates matter.",
+        "review_notes": "Intake contains many VA-focused questions (good visibility) but we did not retrieve VA authoritative docs; therefore we cannot reliably state which intake answers are sufficient or which documents are mandatory."
+      },
+      {
+        "document_name": "(MISSING) California IHSS / Medi‑Cal waiver / SDI/PFL documentary rules",
+        "program_or_pathway": "California — IHSS paid caregiver documentation; Medi‑Cal waiver eligibility and verification; CA SDI/PFL medical certification and payroll deduction evidence",
+        "question": "Is the caregiver paid through IHSS or a county Medi‑Cal waiver and are there medical certifications or authorization records (and SDI/PFL payroll deduction evidence)?",
+        "subject_and_period": "IHSS provider enrollment, timesheets/audits, Medi‑Cal waiver award letters, CA SDI/PFL medical certification (last 18 months for CASDI query)",
+        "intake_field_ids": [
+          "caregiver.payment_status",
+          "caregiver.sdi_deductions",
+          "caregiver.pfl_medical_certification",
+          "caregiver.work_state",
+          "caregiver.employment_status"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "If you are paid through IHSS or a Medi‑Cal waiver, what is the program name and can you provide an IHSS provider number, county award letter, or recent timesheet/payment notice? If claiming SDI/PFL eligibility, can you check pay stubs for CASDI or SDI deductions in the last 18 months?",
+        "information_to_read": [
+          "SOURCE NOT RETRIEVED — CA IHSS, Medi‑Cal waiver, and EDD SDI/PFL pages required"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "California programs require medical certification for leave (PFL/PDL), pay stub evidence of SDI/CASDI deductions for PFL/SDI claims, and IHSS provider enrollment and timesheets for proof of public-pay caregiver status.",
+        "trigger_for_asking_fact": "caregiver.payment_status indicates public program or caregiver.caregiving_employment_impact indicates stopped work/reduced hours and caregiver.sdi_deductions indicates 'Yes' or 'I'm not sure'",
+        "trigger_for_document_lookup": "If public-pay caregiver, request county IHSS provider enrollment ID, timesheets, authorization/award letters; for PFL/SDI claims, request pay stubs showing CASDI/SDI deductions and medical certification.",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report is sufficient to flag possible California program pathways but not sufficient to determine benefit eligibility — agency documents or pay stubs are needed for definitive eligibility and for any payroll-tax or income-tax interactions.",
+        "alternatives": [
+          "Pay stubs (showing CASDI deductions), IHSS award letters, county timesheets, Medi‑Cal waiver award letters"
+        ],
+        "source_ids": [],
+        "requirement_support": "No California sources were retrieved; coverage gap. Need EDD SDI/PFL guidance, CA DHCS (Medi‑Cal) and county IHSS documentation rules to finalize mappings.",
+        "retrieval_support": "MISSING — request retrieval of CA official sources.",
+        "effective_date_or_jurisdiction_notes": "California-specific programs; state rules and timelines apply.",
+        "review_notes": "Intake includes useful CA-focused fields (sdi_deductions, pfl_medical_certification, caregiver.payment_status) but missing program name capture and document-capture flags."
+      },
+      {
+        "document_name": "(MISSING) SSI / SSDI evidence and Social Security work‑credit documentation",
+        "program_or_pathway": "Federal — SSI/SSDI eligibility proof (work credits, medical evidence, onset dates)",
+        "question": "Has the recipient worked long enough to have Social Security work credits for SSDI, or are they applying for SSI with asset/income proofs?",
+        "subject_and_period": "Work history for Social Security earnings (years/quarters), medical onset documentation, bank asset statements for SSI means test",
+        "intake_field_ids": [
+          "recipient.work_history_social_security",
+          "recipient.condition_limits_work",
+          "recipient.condition_categories",
+          "recipient.current_benefits"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "If you want help with SSDI/SSI, can you provide the recipient's Social Security earnings record (W‑2s or SSA earnings statement) or dates/years worked? Do you have recent bank statements or asset listings to help estimate countable resources?",
+        "information_to_read": [
+          "SOURCE NOT RETRIEVED — SSA program pages for SSDI and SSI required"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "SSA requires work-credit history for SSDI and strict asset/income verification for SSI; medical documentation and detailed work history are part of the application.",
+        "trigger_for_asking_fact": "case.goals includes 'Getting SSI, SSDI, or other income support' or recipient.current_benefits does not include SSDI/SSI and recipient.condition_limits_work = Yes",
+        "trigger_for_document_lookup": "Lookup SSA earnings record, W‑2s, tax returns, medical records and bank statements when proceeding to application assistance.",
+        "stage": "application",
+        "documentary_requirement": "not_established",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "No — self-report of past work is helpful for screening but exact SSA earnings records are required for eligibility determination.",
+        "alternatives": [
+          "W‑2s, 1099s, SSA earnings statement, medical records, bank statements"
+        ],
+        "source_ids": [],
+        "requirement_support": "No SSA sources were retrieved; this is a coverage gap in retrieval and so the mapping is provisional.",
+        "retrieval_support": "MISSING — need SSA program documentation.",
+        "effective_date_or_jurisdiction_notes": "Federal SSA rules; timing of onset and work-credit computations matter.",
+        "review_notes": "Intake asks work_history_social_security and condition_limits_work (good), but lacks a field for years worked / W‑2s and explicit asset details required for SSI screening."
+      }
+    ],
+    "missing_eligibility_questions": [
+      "taxpayer.filing_status — 'What is your expected federal filing status for tax year YYYY? (Single, Married filing jointly, Married filing separately, Head of household, Qualifying widow(er))' — ask at screening when case.goals includes tax assistance; required to determine dependent-care credit eligibility and filing interactions.",
+      "taxpayer.adjusted_gross_income_range — 'What is your approximate adjusted gross income (AGI) for tax year YYYY?' — ask at screening for tax-pathway prioritization; a range is sufficient for screening but not for final calculations.",
+      "provider.name_and_relationship — 'Please give the name and relationship of any paid care provider for [recipient name]. Did they work in your home or their home?' — ask when tax.paid_care_to_work = Yes.",
+      "provider.TIN_availability — 'Can the care provider give their SSN or EIN for tax reporting (required on your tax return)?' — ask at screening if paid care to work; provider TIN is application-only for tax return but needed to advise whether credit can be claimed without triggering additional steps.",
+      "state_medicaid_program_name — 'If you are paid through Medicaid or a waiver, what is the exact program name and paying agency (e.g., County IHSS, State waiver name)?' — ask when caregiver.payment_status indicates public payments; required to determine whether payments fall under 1915(c) waiver rules.",
+      "care_dates_and_hours — 'Approximate dates and average hours per week of paid care for which you paid or received payments in tax year YYYY' — ask when tax.paid_care_to_work = Yes; needed to evaluate whether expenses meet 'work-related' test and to estimate credit.",
+      "recipient.dependency_tests (gross income, joint return) — 'Did the recipient file a joint tax return for the year or have gross income above the IRS dependent threshold?' — ask when claiming tax credits; necessary to determine qualifying person status (application-only verification may be needed).",
+      "program_documents_available — 'Can you obtain written evidence (award letter, timesheet, payment notice) from the program that pays or authorized payments?' — ask when caregiver.payment_status indicates public payments; required for agency verification and for substantiating IRC §131 treatment."
+    ],
+    "intake_sufficiency_assessment": "For Ilera's Caregiver Tax Relief pathway (federal tax: dependent-care credit and Medicaid‑waiver payment tax treatment), the current intake provides useful screening signals (tax.paid_care_to_work, tax.provides_over_half_support, tax.lived_together_over_half_year, caregiver.payment_status, ADL fields). However, it is NOT sufficient to reach fully defensible preliminary eligibility conclusions for tax filing or program application because: - Key tax facts are missing (taxpayer filing status, AGI range, provider TIN availability). - For Medicaid waiver exclusion under IRC §131, the intake flags possible eligibility but lacks program name, state waiver confirmation, dates, and state certification evidence — these require external records and cannot be self‑certified for a definitive conclusion. - For VA, CA, and SSA pathways the intake includes many helpful questions, but we did not retrieve authoritative program rules during this audit; therefore we cannot confirm whether captured facts meet program-specific thresholds (coverage gap). Preliminary screening conclusions that a user 'may qualify' are possible; definitive eligibility or filing advice requires follow-up questions and documentary verification.",
+    "coverage_gaps": [
+      "No VA official sources were retrieved — cannot confirm VA-specific documentary triggers (VA PCAFC, Aid & Attendance, VA pension).",
+      "No California official sources (IHSS, Medi‑Cal waivers, EDD SDI/PFL) were retrieved — intake fields exist but documentary rules not mapped to sources.",
+      "No SSA (SSI/SSDI) sources were retrieved — work‑credit and asset-verification rules are not cited.",
+      "Medical-expense deduction authoritative source (IRS Pub 502) was not retrieved; tax.unreimbursed_medical_expenses lacks official mapping.",
+      "Some IRS specifics about provider TIN consequences and exact refusal rules are summarized but full procedural detail should be read in Publication 503 and Notice 2014-7 (we cited Pub 503 and Notice 2014-7 where available)."
+    ]
+  },
+  "retrieval_queries": [
+    "Retrieve official program passages for eligibility facts, document requirements, verification and application paperwork for: VA PCAFC caregiver eligibility and documentation (including VA disability rating, Aid & Attendance, paid caregiver eligibility, 6-month care need, discharge status); VA Pension (Aid and Attendance) documentation and rules; IRS dependent care credit and qualifying relative/support tests and proof; IRS medical expense deduction rules for care recipients; California IHSS eligibility and documentation (authorization, medical verification), Medi-Cal long-term services and supports (waiver) eligibility and asset/income verification; SSI and SSDI eligibility documentation and proof of work credits; California State Disability Insurance (SDI)/PFL eligibility, proof (medical certification) and employer CASDI deduction evidence; Medicaid waiver paid caregiver documentation and proof of payment; and standard agency application paperwork requirements (ID, SSN, proof of residence, medical certs) for these programs. Include any official source IDs."
+  ],
+  "retrieved_sources": {
+    "IRS-NOTICE-2014-7:3:03c5e92be2": {
+      "title": "IRS Notice 2014-7",
+      "url": "https://www.irs.gov/pub/irs-drop/n-14-07.pdf",
+      "document_id": "IRS-NOTICE-2014-7",
+      "page": "3",
+      "text": "rmediate care facility (eligible individuals).  Home \nor community-based services include personal care services, habilitation \nservices, and other services that are “cost effective and necessary to avoid \ninstitutionalization.”  See 42 C.F.R. § 440.180.  Personal care services are \ndefined under rules of the Centers for Medicare and Medicaid Services to include \nassistance with eating, bathing, dressing, toileting, transferring, maintaining \ncontinence, personal hygiene, light housework, laundry, meal preparation, \ntransportation, grocery shopping, using the telephone, medication management, \nand money management.  Skilled services that only a health professional may \nperform are not personal care services.  Habilitation services, defined in 42\n\n\n3\nU.S.C. § 1396n(c)(5)(A), assist individuals in acquiring, retaining, and improving \nthe self-help, socialization, and adaptive skills necessary to reside successfully in \nhome and community-based settings.   \nMedicaid waiver programs generally do not compensate a family member for \nproviding personal care services to an eligible individual if the family member is \nlegally responsible for the individual (for example, a minor child).  See 42 C.F.R. \n§ 440.167(a)(2) and (b).  Some states compensate family members, as well as \nunrelated individual care providers, for residential habilitation, foster/companion \ncare, or transport"
+    },
+    "IRS-MEDICAID-WAIVER-FAQ:unknown:bed39da884": {
+      "title": "Certain Medicaid Waiver Payments May Be Excludable From Income",
+      "url": "https://www.irs.gov/individuals/certain-medicaid-waiver-payments-may-be-excludable-from-income",
+      "document_id": "IRS-MEDICAID-WAIVER-FAQ",
+      "page": "",
+      "text": "idual care provider questions\nQ1. I receive payments under a state Medicaid program other than a Medicaid Home and Community-Based Services waiver program for the personal care of my adult disabled son in our home. May I exclude these payments from gross income?\nA1. Whether the Service will treat payments under a state program other than a state Medicaid Home and Community-Based Services waiver program as difficulty of care payments excludable from gross income will depend on the nature of the payments and the purpose and design of the program.\nQ2. I moved into my elderly mother's home to care for her, and I do not have a separate home where I reside. I receive payments under a state Medicaid Home and Community-Based Services waiver program for personal care and supportive home care. Am I considered to be providing care in \"the provider's home\" for purposes of Notice 2014-7?\nA2. Yes. Under § 131, \"the provider's home\" means the place where the provider resides and regularly performs the routines of the provider's private life, such as shared meals and holidays with family. See Stromme v. Commissioner, 138 T.C. 213 (2012). In this situation, the mother's home became the provider's home because it is where the provider resides and regularly performs the routines of the provider's private life.\nQ3. I am an individual who cares for an unrelated elderly person five days a week in he"
+    },
+    "IRS-PUB-503:7:3c81c8dc9b": {
+      "title": "Publication 503 — Child and Dependent Care Expenses",
+      "url": "https://www.irs.gov/pub/irs-pdf/p503.pdf",
+      "document_id": "IRS-PUB-503",
+      "page": "7",
+      "text": "er care provider is available at no cost.\n6 Publication 503 (2025)\n\n\nPage 7 of 20  Fileid: … cation-503/2025/a/xml/cycle04/source 13:10 - 18-Nov-2025\nThe type and rule above prints on all proofs including departmental reproduction proofs. MUST be removed before printing.\nExpenses are for the care of a qualifying person only if \ntheir main purpose is the person's well -being and \nprotection.\nExpenses for household services qualify if part of the \nservices is for the care of qualifying persons. See House-\nhold Services, later.\nExpenses not for care.  Expenses for care don't include \namounts you pay for food, lodging, clothing, education, \nand entertainment. However, you can include small \namounts paid for these items if they are incidental to and \ncan't be separated from the cost of caring for the qualify-\ning person. Otherwise, see the discussion under Expen-\nses partly work related, later.\nChild support payments aren't for care and don't qualify \nfor the credit.\nEducation. Expenses for a child in nursery school, pre-\nschool, or similar programs for children below the level of \nkindergarten are expenses for care.\nExpenses to attend kindergarten or a higher grade \naren't expenses for care. Don't use these expenses to fig-\nure your credit.\nHowever, expenses for before- or after-school care of a \nchild in kindergarten or a higher grade may be expenses \nfor care.\nSummer scho"
+    },
+    "IRS-NOTICE-2014-7:5:4949150a66": {
+      "title": "IRS Notice 2014-7",
+      "url": "https://www.irs.gov/pub/irs-drop/n-14-07.pdf",
+      "document_id": "IRS-NOTICE-2014-7",
+      "page": "5",
+      "text": "d, which are \nprovided pursuant to a plan of care to an individual otherwise at risk of being \ninstitutionalized and who would, in the absence of such services be institutionalized”).  \nBoth programs require state approval and oversight of the care of the individual in the \nprovider’s home.  The programs share the objective of enabling individuals who \notherwise would be institutionalized to live in a family home setting rather than in an \ninstitution, and both difficulty of care payments and Medicaid waiver payments \ncompensate for the additional care required.     \nGUIDANCE \nTreatment of qualified Medicaid waiver payments under § 131 \nTo achieve consistent federal tax treatment of Medicaid waiver payments among \nthe states and individual care providers, this notice provides that as of January 3, 2014, \nthe Service will treat qualified Medicaid waiver payments as difficulty of care payments \nunder § 131(c) that are excludable under § 131, and this treatment will apply whether \nthe care provider is related or unrelated to the eligible individual.  Accordingly, as of \nJanuary 3, 2014, the Service will no longer assert the position in PMTA 2010-007, or \napply Alexander, Bannon, or Harper, to conclude that a caregiver of a biological relative \nreceiving qualified Medicaid waiver payments may not qualify as a foster care provider \nunder § 131.  For purposes of this notice, qualifie"
+    },
+    "IRS-NOTICE-2014-7:3:7d53ee1625": {
+      "title": "IRS Notice 2014-7",
+      "url": "https://www.irs.gov/pub/irs-drop/n-14-07.pdf",
+      "document_id": "IRS-NOTICE-2014-7",
+      "page": "3",
+      "text": "d).  See 42 C.F.R. \n§ 440.167(a)(2) and (b).  Some states compensate family members, as well as \nunrelated individual care providers, for residential habilitation, foster/companion \ncare, or transportation services provided as a part of an eligible individual’s plan \nof care.  A plan of care is a term defined by the state, but generally means an \nindividualized plan of treatment, services, and/or providers.   \nA state, directly or indirectly through an agency under contract with the state, \ncertifies individuals and entities as Medicaid providers to provide services to eligible \nindividuals.  An entity that is a certified Medicaid provider may contract with an \nindividual care provider to care for an eligible individual in the care provider’s home.  A \nstate or an agency under contract with the state approves the plan of care for the \neligible individual in the provider’s home and monitors the eligible individual’s care. \nState agencies, certified Medicaid provider entities, and individual care providers \nhave asked whether Medicaid waiver payments for the care of eligible individuals, who \nare related or unrelated to the individual care provider, in the individual care provider’s \nhome may be treated as difficulty of care payments excludable under § 131.   \nCurrent treatment of government-funded payments for home care     \nThe Service historically has challenged the excludabil"
+    },
+    "IRS-PUB-503:20:eae72f56de": {
+      "title": "Publication 503 — Child and Dependent Care Expenses",
+      "url": "https://www.irs.gov/pub/irs-pdf/p503.pdf",
+      "document_id": "IRS-PUB-503",
+      "page": "20",
+      "text": "oking for work 6\nPart-time work 6\nPrepaid expenses 10\nPrisoner 4\nPublications (See T ax help)\nQ\nQualifying child 3\nQualifying person:\nCare for 6\nExpenses not for care 7\nR\nRecordkeeping requirements 14\nReduced dollar limit 12\nT ests to claim credit2\nRefusal by provider to give \ninformation 9\nReimbursed expenses 10\nRelatives, payments to 2, 8\nReligious faiths opposed to social \nsecurity programs 4\nS\nSchool expenses 7\nSelf-employed persons 11\nSeparated parents 3, 8\nSeparated spouse 11\nSick days 6\nSocial security 14\n(See also Employment taxes)\nReligious faiths opposed to 4\nSocial security numbers (SSNs) 9\nSpouse:\nBoth spouses qualifying 12\nPublication 503 (2025) 19\n\n\nPage 20 of 20  Fileid: … cation-503/2025/a/xml/cycle04/source 13:10 - 18-Nov-2025\nThe type and rule above prints on all proofs including departmental reproduction proofs. MUST be removed before printing.\nDeath of 9\nNonworking, earned income 4\nNot able to care for self 3, 4, 6, 11\nQualifying person 3\nSeparated 11\nStudent 4, 11\nSurviving 11\nWorking 11\nStudents:\nFull-time 4\nSpouse 4, 11\nT\nTax help 14\nTaxes on wages (See Employment \ntaxes)\nTaxpayer identification numbers \n(TINs) 1, 3\nAdoption 3\nAliens 3\nProviders 9\nTemporary absence 6\nTests to claim credit 2, 10\nDetermination 2\nEarned income 4\nQualifying persons 3\nWork-related expenses 6\nTransportation 7\nTrump account 1\nU\nUnearned income 4\nV\nVacation 6\nVolunteer w"
+    },
+    "IRS-PUB-503:14:27f4dc2805": {
+      "title": "Publication 503 — Child and Dependent Care Expenses",
+      "url": "https://www.irs.gov/pub/irs-pdf/p503.pdf",
+      "document_id": "IRS-PUB-503",
+      "page": "14",
+      "text": "lves, your records \nshould show both the nature and length of the disability. \nOther records you should keep to support your claim for \nthe credit are described under Care Provider Identification \nT est, earlier.\nDo You Have Household \nEmployees?\nIf you pay someone to come to your home and care for \nyour dependent or spouse and you can control not only \nwhat work is done, but how it is done, that person is prob-\nably a household employee and you may need to file \nSchedule H (Form 1040), with your tax return and pay \nhousehold employment taxes. If you are a household em-\nployer, you will need an EIN. If the individuals who work in \nyour home are self -employed, you aren't liable for any of \nthe taxes discussed in this section. Self -employed per-\nsons who are in business for themselves aren't household \nemployees. Usually, you aren't a household employer if \nthe person who cares for your dependent or spouse does \nso at their home or place of business. For example, nan-\nnies are generally household employees, while daycare \ncenters are not.\nIf you use a placement agency that exercises control \nover what work is done and how it will be done by a baby-\nsitter or companion who works in your home, the worker \nisn't your employee. This control could include providing \nrules of conduct and appearance and requiring regular re-\nports. In this case, you don't have to pay employment \ntaxes"
+    },
+    "IRS-MEDICAID-WAIVER-FAQ:unknown:e5b93911b7": {
+      "title": "Certain Medicaid Waiver Payments May Be Excludable From Income",
+      "url": "https://www.irs.gov/individuals/certain-medicaid-waiver-payments-may-be-excludable-from-income",
+      "document_id": "IRS-MEDICAID-WAIVER-FAQ",
+      "page": "",
+      "text": "On January 3, 2014, the Internal Revenue Service issued Notice 2014-7, 2014-4 I.R.B. 445. Notice 2014-7 provides guidance on the federal income tax treatment of certain payments to individual care providers for the care of eligible individuals under a state Medicaid Home and Community-Based Services waiver program described in section 1915(c) of the Social Security Act (Medicaid Waiver payments).\nSection 1915(c) enables individuals who otherwise would require care in a hospital, nursing facility, or intermediate care facility to receive care in the individual care provider's home. The notice provides that the Service will treat these Medicaid waiver payments as difficulty of care payments excludable from gross income under § 131 of the Internal Revenue Code.\nIndividual care providers who receive Medicaid waiver payments for the care of eligible individuals in their homes and payers of Medicaid waiver payments have raised several questions not addressed in\nNotice 2014-7\n. The following questions and answers clarify the notice and provide guidance on the information reporting requirements, and the employment tax requirements for Medicaid waiver payments described in the notice.\nIndividual care provider questions\nQ1. I receive payments under a state Medicaid program other than a Medicaid Home and Community-Based Services waiver program for the personal care of my adult disabled so"
+    }
+  },
+  "validation_issues": [
+    {
+      "row": 1,
+      "unmatched_source_ids": [
+        "IRS-PUB-503"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 2,
+      "unmatched_source_ids": [
+        "IRS-MEDICAID-WAIVER-FAQ",
+        "IRS-NOTICE-2014-7"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 3,
+      "unmatched_source_ids": [
+        "IRS-PUB-503"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 4,
+      "unmatched_source_ids": [
+        "IRS-PUB-503"
+      ],
+      "unknown_intake_fields": []
+    }
+  ],
+  "retrieval_events": []
+}

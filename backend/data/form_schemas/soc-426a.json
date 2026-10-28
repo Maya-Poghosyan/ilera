@@ -39,10 +39,10 @@
       "label": "Provider’s Telephone Number"
     },
     "pg1-7": {
-      "profile_path": null,
+      "profile_path": "caregiver.date_of_birth",
       "label": "Provider’s Date of Birth",
-      "needs_user_input": true,
-      "confidence": "medium"
+      "confidence": "medium",
+      "format": "date"
     },
     "pg1-8": {
       "profile_path": null,
@@ -101,14 +101,13 @@
       "profile_path": "caregiver.relationship",
       "label": "Provider’s Relationship to Recipient: Parent",
       "type": "checkbox",
-      "check_when": "Parent"
+      "check_when": "Child"
     },
     "Pg 1_11": {
-      "profile_path": null,
+      "profile_path": "caregiver.relationship",
       "label": "Provider’s Relationship to Recipient: Child",
       "type": "checkbox",
-      "needs_user_input": true,
-      "confidence": "low"
+      "check_when": "Parent"
     },
     "Pg1_12": {
       "profile_path": "caregiver.relationship",
@@ -127,7 +126,6 @@
       "profile_path": null,
       "label": "Provider’s Relationship to Recipient: Guardian",
       "type": "checkbox",
-      "check_when": "Legal guardian or authorized representative",
       "needs_user_input": true,
       "confidence": "medium"
     },
@@ -169,17 +167,9 @@
     },
     {
       "id": "provider_personal",
-      "prompt": "Provider's date of birth, Social Security number, gender, and the date they will start providing services",
+      "prompt": "Provider's Social Security number, gender, and the date they will start providing services",
       "help": "The SSN is required to verify identity and work authorization.",
       "inputs": [
-        {
-          "key": "date_of_birth",
-          "label": "Provider's date of birth",
-          "type": "date",
-          "fields": [
-            "pg1-7"
-          ]
-        },
         {
           "key": "ssn",
           "label": "Provider's Social Security number",
@@ -228,9 +218,6 @@
             "Other"
           ],
           "option_fields": {
-            "Child": [
-              "Pg 1_11"
-            ],
             "Conservator": [
               "Pg1_13"
             ],

@@ -1,0 +1,279 @@
+{
+  "program": "VA Caregiver Support",
+  "result": {
+    "conclusion": "No. The current intake collects many relevant signals (VA contact, ADLs, basic income range, caregiver coresidence and relationship) but does NOT gather all facts needed for a defensible preliminary eligibility conclusion for the VA pathways you actually screen for (PCAFC and VA Pension including Aid & Attendance/Housebound). It is only sufficient for triage. Below are focused screening gaps (<=12) that must be closed to reach a defensible preliminary conclusion, followed by application-only actions, visibility gaps, unsupported/stale claims, and scope limits.",
+    "screening_gaps": [
+      {
+        "criterion": "Minimum active-duty/wartime service and character of discharge",
+        "pathway": "VA Pension (and Aid & Attendance eligibility presupposes pension eligibility)",
+        "current_fields": [
+          "recipient.military_status",
+          "recipient.military_discharge_status"
+        ],
+        "missing_facts": [
+          "Exact active-duty entry and separation dates",
+          "Whether service included at least one day during a recognized wartime period (dates/locations)",
+          "Character of discharge (was it under conditions other than dishonorable?)"
+        ],
+        "trigger": "User indicates 'Veteran' (recipient.military_status) or selects Pension/Aid & Attendance as a goal",
+        "simple_questions": [
+          "What were the veteran\u2019s active-duty start and end dates (MM/YYYY)?",
+          "Do you have the veteran\u2019s DD214 or other discharge paperwork? If not, was the discharge 'other than dishonorable'?"
+        ],
+        "document_lookup_when": "If veteran appears income/asset-eligible for pension or requests A&A screening, request DD214 or VA service record to verify service/wartime and discharge facts before concluding eligibility.",
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:45:9ec6aec9ad",
+          "VA-FEDERAL-BENEFITS-GUIDE:46:d8c7218979"
+        ],
+        "caveat": "The Federal Benefits Guide describes service and discharge requirements but does not give the granular exceptions; verify with VA records or DD214."
+      },
+      {
+        "criterion": "VA health-care enrollment status and VA facility/PACT (VA enrollment distinct from any VA contact)",
+        "pathway": "PCAFC and other VA caregiver supports (PGCSS/PCAFC)",
+        "current_fields": [
+          "recipient.va_contact",
+          "recipient.health_coverage"
+        ],
+        "missing_facts": [
+          "Whether the veteran is actively enrolled in VA health care (not just prior contact)",
+          "VA facility/PACT managing care or VA patient identifier (VHIC/VA file number)"
+        ],
+        "trigger": "Case.goals includes 'Finding VA caregiver benefits' OR recipient.va_contact = 'Yes'/'I'm not sure'",
+        "simple_questions": [
+          "Is the veteran currently enrolled in VA health care (Yes/No)?",
+          "If Yes: what VA facility or PACT manages their care (name/city) and do they have a VHIC or VA patient ID?"
+        ],
+        "document_lookup_when": "If the user wants PCAFC or enhanced VA caregiver services, read caregiver.va.gov or pull VA enrollment records to confirm enrollment and PACT before claiming eligibility.",
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:33:b75e51512c",
+          "VA-FEDERAL-BENEFITS-GUIDE:33:abe7dd19a9",
+          "VA-FEDERAL-BENEFITS-GUIDE:4:5d73ea8968"
+        ],
+        "caveat": "VA contact in intake can mean many things; PCAFC eligibility requires enrollment and specific VA case management\u2014caregiver.va.gov must be consulted (not present in the retrieved pages)."
+      },
+      {
+        "criterion": "PCAFC primary family caregiver designation, coresidence and actual caregiving hours",
+        "pathway": "Program of Comprehensive Assistance for Family Caregivers (PCAFC)",
+        "current_fields": [
+          "caregiver.coresidence",
+          "caregiver.relationship",
+          "caregiver.age_18_or_older",
+          "recipient.va_six_month_care_need"
+        ],
+        "missing_facts": [
+          "Whether caregiver is or will be designated the veteran\u2019s Primary Family Caregiver under PCAFC",
+          "Typical hours of hands-on personal care provided (hours/day or hrs/week)",
+          "Detailed co-residence timing (whether they live together continuously when PCAFC requires it)"
+        ],
+        "trigger": "User selects 'Finding VA caregiver benefits' or indicates VA contact/enrollment",
+        "simple_questions": [
+          "Are you the veteran\u2019s primary family caregiver who provides most of their personal care (Yes/No)?",
+          "About how many hours per day or per week do you provide hands-on care?",
+          "Do you currently live with the veteran full-time, part-time, or not at all?"
+        ],
+        "document_lookup_when": "Before recommending PCAFC as likely \u2014 consult caregiver.va.gov eligibility criteria and VA case manager guidance to confirm caregiver-role/coresidence rules.",
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:33:b75e51512c",
+          "VA-FEDERAL-BENEFITS-GUIDE:33:abe7dd19a9"
+        ],
+        "caveat": "The Federal Benefits Guide points to caregiver.va.gov for PCAFC rules; the intake must capture primary-caregiver facts that the guide enforces but does not enumerate here."
+      },
+      {
+        "criterion": "VA disability/service-connection rating details required to evaluate PCAFC/related supports",
+        "pathway": "PCAFC and other VA benefits that consider disability rating",
+        "current_fields": [
+          "recipient.va_rating_assigned",
+          "recipient.va_rating",
+          "recipient.current_benefits"
+        ],
+        "missing_facts": [
+          "Exact combined VA disability rating percentage and service-connection details",
+          "Date of rating decision and copy of decision letter"
+        ],
+        "trigger": "recipient.va_rating_assigned = 'Yes' or case.goals includes VA caregiver benefits",
+        "simple_questions": [
+          "Has VA assigned a combined disability percentage? If so, what is the combined percent (e.g., 70%)?",
+          "Do you have the VA decision letter or rating notice?"
+        ],
+        "document_lookup_when": "When caregiver/PCAFC screening is positive or near threshold \u2014 obtain VA decision letter to confirm rating and its effective date.",
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:33:b75e51512c",
+          "VA-FEDERAL-BENEFITS-GUIDE:4:5d73ea8968"
+        ],
+        "caveat": "PCAFC eligibility rules depend on specific service-connected conditions and ratings; the Federal Guide does not provide PCAFC\u2019s full rating criteria \u2014 consult caregiver.va.gov or the PCAFC spec."
+      },
+      {
+        "criterion": "Precise gross annual household income and countable net worth (not just monthly ranges)",
+        "pathway": "VA Pension (means-tested eligibility and A&A countable income calculations)",
+        "current_fields": [
+          "recipient.monthly_income_range",
+          "recipient.assets"
+        ],
+        "missing_facts": [
+          "Total gross annual household income (all sources) for the veteran and spouse",
+          "Approximate total countable assets/net worth (specifying exclusions such as primary residence if applicable)",
+          "Unreimbursed medical expenses total for the relevant year (to reduce countable income)"
+        ],
+        "trigger": "User selects Pension/Aid & Attendance or monthly income range suggests low income",
+        "simple_questions": [
+          "What is the household\u2019s gross annual income (all sources) for the last 12 months?",
+          "Approximately what is the veteran\u2019s total countable assets/net worth (exclude primary residence if known)?",
+          "List unreimbursed medical/LTC expenses in the past 12 months and annual total."
+        ],
+        "document_lookup_when": "Before a defensible pension eligibility conclusion; financial documents or agency calculations are required for accuracy.",
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:46:d8c7218979",
+          "VA-FEDERAL-BENEFITS-GUIDE:4:5d73ea8968",
+          "VA-FEDERAL-BENEFITS-GUIDE:4:2deb359a49"
+        ],
+        "caveat": "Monthly income ranges in intake are adequate for triage but insufficient for a defensible preliminary means-test determination."
+      },
+      {
+        "criterion": "Medical evidence and clinician willingness to complete VA Form 21-2680 (Aid & Attendance / Housebound)",
+        "pathway": "VA Pension \u2014 Aid & Attendance or Housebound allowance",
+        "current_fields": [
+          "recipient.adl_needs",
+          "recipient.has_certifying_clinician"
+        ],
+        "missing_facts": [
+          "Whether an attending physician will complete VA Form 21-2680 and provide a detailed medical report describing ADL limitations",
+          "Specific ADL-level evidence linked to A&A definitions (which ADLs and how often assistance is required)"
+        ],
+        "trigger": "ADL dependence reported or applicant expresses interest in Aid & Attendance",
+        "simple_questions": [
+          "Is there an attending physician willing to complete VA Form 21-2680 (Examination for Housebound Status or Permanent Need for Regular Aid and Attendance)?",
+          "Which ADLs does the veteran need help with and how frequently?"
+        ],
+        "document_lookup_when": "If user intends to pursue A&A, request VA Form 21-2680 and physician/nursing reports before concluding eligibility.",
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:82:a1847a637a",
+          "VA-FEDERAL-BENEFITS-GUIDE:47:e3f77b29f7",
+          "VA-FEDERAL-BENEFITS-GUIDE:45:9ec6aec9ad"
+        ],
+        "caveat": "Self-report of ADLs is usable for triage only; the Form 21-2680 and clinician report are mandatory at application to establish A&A."
+      },
+      {
+        "criterion": "Household composition, tax dependency and which incomes are countable",
+        "pathway": "Means-tested programs: VA Pension income calculations, SSI/SSDI/Medicaid interactions",
+        "current_fields": [
+          "recipient.household_size",
+          "tax.provides_over_half_support",
+          "recipient.spouse_living_situation"
+        ],
+        "missing_facts": [
+          "A roster of household members with ages and relationships (to compute household unit)",
+          "Who claims whom on taxes (tax dependency and filing status)",
+          "Which income streams belong to the veteran vs spouse/other household members"
+        ],
+        "trigger": "Any means-test pathway or tax-credit/tax-benefit goal selected",
+        "simple_questions": [
+          "List everyone living in the household (name or initials), age, relationship to veteran, and whether they are claimed as a tax dependent.",
+          "Which incomes (Social Security, pensions, wages) are the veteran\u2019s vs spouse\u2019s?"
+        ],
+        "document_lookup_when": "When income or asset totals are near eligibility thresholds; tax returns or benefit letters may be required for verification.",
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:46:d8c7218979",
+          "VA-FEDERAL-BENEFITS-GUIDE:4:5d73ea8968"
+        ],
+        "caveat": "Household composition materially changes countable income/net worth and the eligibility unit; intake must collect these to reach defensible conclusions."
+      },
+      {
+        "criterion": "State and immigration/residency facts needed for Medicaid/Medi-Cal pathways (do not assume citizenship excludes CA Medi\u2011Cal)",
+        "pathway": "Medicaid / Medi\u2011Cal and programs that coordinate with VA (state-level eligibility)",
+        "current_fields": [
+          "recipient.medicaid_status",
+          "recipient.health_coverage"
+        ],
+        "missing_facts": [
+          "State of residence (if intake is national), duration of residency in state, and specific state program name (Medi\u2011Cal in CA)",
+          "Immigration/citizenship or lawful presence status relevant to state Medicaid eligibility"
+        ],
+        "trigger": "recipient.medicaid_status is not 'Enrolled now' or user asks about Medicaid/Medi\u2011Cal eligibility",
+        "simple_questions": [
+          "What state does the veteran live in (state name)?",
+          "Are they a U.S. citizen or do they have lawful immigrant status (Yes/No/Prefer not to say)?",
+          "How long have they lived continuously in this state?"
+        ],
+        "document_lookup_when": "If user wants Medi\u2011Cal guidance or state Medicaid long\u2011term care screening, consult state-specific Medi\u2011Cal rules and current state policy pages.",
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:4:5d73ea8968",
+          "VA-FEDERAL-BENEFITS-GUIDE:4:2deb359a49"
+        ],
+        "caveat": "Do NOT assume citizenship uniformly excludes California Medi\u2011Cal pathways; state rules can carve out pathways for certain non\u2011citizen categories \u2014 check state sources."
+      },
+      {
+        "criterion": "Asset transfer timing and amounts relevant to state Medicaid (lookback) and other programs",
+        "pathway": "State Medicaid / long\u2011term\u2011care eligibility (Medi\u2011Cal), and any pathway where past transfers change countable assets",
+        "current_fields": [
+          "recipient.recent_transfers"
+        ],
+        "missing_facts": [
+          "Whether transfers/gifts occurred and exact dates and amounts during the relevant state/program lookback period (often 30 months for some Medicaid LTC programs but varies by state and time)",
+          "Recipient of transfers and legal documentation"
+        ],
+        "trigger": "recipient.living_setting = 'Nursing home or skilled nursing facility' OR user interested in Medicaid long\u2011term care",
+        "simple_questions": [
+          "Has the veteran transferred or given away money/property in the last 30 months? If Yes: list dates, amounts, and recipients.",
+          "Have any transfers been for fair value (sale) vs gift?"
+        ],
+        "document_lookup_when": "Before concluding Medicaid/Medi\u2011Cal LTC eligibility; check state policy for lookback period and penalty calculations.",
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:4:5d73ea8968"
+        ],
+        "caveat": "Asset transfer rules are date-sensitive and state-specific; the Federal Benefits Guide is not exhaustive for state Medicaid transfer rules."
+      },
+      {
+        "criterion": "Expected continuous, long-term need for personal care (timeline / prognosis) required by PCAFC and A&A screening",
+        "pathway": "PCAFC; VA Aid & Attendance (the VA six\u2011month/continuous care requirement)",
+        "current_fields": [
+          "recipient.va_six_month_care_need",
+          "recipient.adl_needs"
+        ],
+        "missing_facts": [
+          "Clinical prognosis or expected duration of continuous in-person care and whether need is expected to continue at least 6 months",
+          "Specific pattern (continuous daily in-person personal care vs intermittent supervision)"
+        ],
+        "trigger": "Case.goals includes PCAFC or A&A or recipient.va_six_month_care_need = 'I'm not sure'",
+        "simple_questions": [
+          "Is the need for continuous in\u2011person personal care expected to last at least 6 months? (Yes/No/I'm not sure) If Yes: approximate expected end date or prognosis.",
+          "Is the care primarily hands\u2011on (bathing, dressing, transfers) or supervision for safety?"
+        ],
+        "document_lookup_when": "When screening positive for PCAFC or A&A; request clinician prognosis or care-plan notes for a defensible conclusion.",
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:33:b75e51512c",
+          "VA-FEDERAL-BENEFITS-GUIDE:82:a1847a637a"
+        ],
+        "caveat": "Intake question exists but is binary; you need more detail and clinical corroboration to rely on it."
+      }
+    ],
+    "application_only": [
+      "Obtain VA Form 21-2680 completed by an attending physician (Examination for Housebound Status or Permanent Need for Regular Aid and Attendance) \u2014 see VA-FEDERAL-BENEFITS-GUIDE:82:a1847a637a and VA-FEDERAL-BENEFITS-GUIDE:47:e3f77b29f7.",
+      "Obtain VA Form 21P-527EZ (Application for Veterans Pension) and supporting financial documentation (bank statements, benefit award letters, tax returns) \u2014 see VA-FEDERAL-BENEFITS-GUIDE:46:d8c7218979 and VA-FEDERAL-BENEFITS-GUIDE:4:5d73ea8968.",
+      "Request DD214 or equivalent service/medical discharge documentation to verify service dates and character of discharge (application stage for pension) \u2014 see VA-FEDERAL-BENEFITS-GUIDE:45:9ec6aec9ad.",
+      "Obtain VA rating decision letters or award notices to confirm combined disability percentage and service\u2011connection details (application/supporting evidence for PCAFC) \u2014 see VA-FEDERAL-BENEFITS-GUIDE:33:b75e51512c.",
+      "Gather detailed financial schedules and an asset inventory (dates and values) including any transfers for Medicaid/Medi\u2011Cal long\u2011term care determinations (state forms and lookback documentation).",
+      "Collect clinician narratives or facility reports describing ADL dependence and prognosis (physician or nursing home reports) to support A&A or PCAFC claims \u2014 see VA-FEDERAL-BENEFITS-GUIDE:82:a1847a637a.",
+      "If pursuing PCAFC, obtain VA caregiver-designation paperwork and coordinate with VA case manager/PACT to confirm enrollment routes via caregiver.va.gov (Federal Benefits Guide points to that site: VA-FEDERAL-BENEFITS-GUIDE:33:b75e51512c)."
+    ],
+    "visibility_gaps": [
+      "Household roster with ages and relationships (needed to compute eligibility unit and countable income): intake asks household size but not member ages/relationships.",
+      "Tax dependency and who claims whom on tax returns (affects dependent status and income unit): intake asks support and living together questions but not tax-filing relationships.",
+      "Clear ownership and attribution of income streams (which income is veteran\u2019s vs spouse\u2019s vs other household members): intake uses household income ranges only.",
+      "Precise VA enrollment details (facility/PACT and patient ID) \u2014 intake records VA contact but not enrollment or PACT assignment.",
+      "Caregiver primary\u2011designation and exact caregiving hours \u2014 intake asks relationship and some coresidence but not formal designation or hours quantified."
+    ],
+    "unsupported_or_stale_claims": [
+      "Implying that any 'VA contact' equals VA health\u2011care enrollment and therefore PCAFC eligibility \u2014 intake equates contact with potential PCAFC pathway without confirming enrollment. (See VA-FEDERAL-BENEFITS-GUIDE:33:b75e51512c and :33:abe7dd19a9 which point to caregiver.va.gov for PCAFC criteria.)",
+      "Using a coarse monthly income range as sufficient to determine VA Pension eligibility \u2014 VA pension requires annual income/net\u2011worth review and unreimbursed medical expenses to compute countable income (see VA-FEDERAL-BENEFITS-GUIDE:46:d8c7218979).",
+      "Assuming asset/transfer rules are uniform and that a 30\u2011month transfer question is definitive \u2014 asset lookback and transfer penalty rules are state\u2011sensitive (for Medicaid/Medi\u2011Cal) and date\u2011sensitive; the Federal Guide does not define state lookbacks (see VA-FEDERAL-BENEFITS-GUIDE:4:5d73ea8968).",
+      "Treating 'recipient.va_six_month_care_need' checkbox as equivalent to clinical documentation \u2014 the Guide requires physician reports/VA Form 21-2680 for A&A (VA-FEDERAL-BENEFITS-GUIDE:82:a1847a637a)."
+    ],
+    "scope_limits": [
+      "This audit evaluates only whether the intake collects the facts needed for a defensible preliminary screening conclusion (triage). It does NOT determine final eligibility, make application decisions, or advise on appeals or legal strategy.",
+      "PCAFC and some VA decisions depend on VA clinical review and case\u2011management determinations (caregiver.va.gov and VA case managers); the Federal Benefits Guide references caregiver.va.gov but does not contain PCAFC\u2019s full adjudicative criteria \u2014 you must consult caregiver.va.gov or VA policy for final rules (see VA-FEDERAL-BENEFITS-GUIDE:33:b75e51512c).",
+      "State Medicaid/Medi\u2011Cal rules (lookback periods, transfer penalty treatment, non\u2011citizen eligibility) are state and date sensitive; the Federal Benefits Guide provides links but not exhaustive state policy\u2014state sources must be consulted for Medicaid decisions (see VA-FEDERAL-BENEFITS-GUIDE:4:2deb359a49 and :4:5d73ea8968).",
+      "The intake purposely avoids requesting sensitive identifiers (SSNs, BICs, account numbers) \u2014 that limits automatic verification and means more document collection at the application stage will be required."
+    ]
+  },
+  "validation_issues": []
+}

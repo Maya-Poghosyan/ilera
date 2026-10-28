@@ -7,11 +7,11 @@ interface Props {
   suggestions: string[];
   value: string[];
   onChange: (tags: string[]) => void;
+  placeholder?: string;
 }
 
-export function TagInput({ suggestions, value, onChange }: Props) {
+export function TagInput({ suggestions, value, onChange, placeholder }: Props) {
   const [query, setQuery] = useState("");
-  const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const filtered = query.trim()
@@ -27,6 +27,7 @@ export function TagInput({ suggestions, value, onChange }: Props) {
     if (!trimmed || value.includes(trimmed)) return;
     onChange([...value, trimmed]);
     setQuery("");
+    inputRef.current?.focus();
   }
 
   function removeTag(tag: string) {
@@ -43,7 +44,7 @@ export function TagInput({ suggestions, value, onChange }: Props) {
     }
   }
 
-  const showDropdown = focused && filtered.length > 0;
+  const showDropdown = filtered.length > 0;
 
   return (
     <div className="relative space-y-2">
@@ -74,10 +75,8 @@ export function TagInput({ suggestions, value, onChange }: Props) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setTimeout(() => setFocused(false), 200)}
           onKeyDown={handleKeyDown}
-          placeholder="Type to search or add..."
+          placeholder={placeholder ?? "Type to search or add..."}
           className={cn(
             "h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none",
             "placeholder:text-muted-foreground",
@@ -86,14 +85,14 @@ export function TagInput({ suggestions, value, onChange }: Props) {
         />
 
         {showDropdown && (
-          <div className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-lg border bg-background shadow-md">
+          <div className="mt-3 flex flex-wrap gap-2">
             {filtered.map((s) => (
               <button
                 key={s}
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => addTag(s)}
-                className="block w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                className="rounded-full border border-input px-3 py-2 text-left text-sm hover:bg-muted"
               >
                 {s}
               </button>

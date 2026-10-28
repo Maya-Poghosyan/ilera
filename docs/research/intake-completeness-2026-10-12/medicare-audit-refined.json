@@ -1,0 +1,257 @@
+{
+  "program": "Medicare",
+  "result": {
+    "conclusion": "No \u2014 the current intake does not collect all facts needed for a defensible preliminary eligibility conclusion for every pathway you attempt to cover. It supports high\u2011level triage (flags, rough prioritization) and allows some preliminary MSP screening because CMS permits self\u2011attestation for certain items, but important, program\u2011determinative facts are missing (Medicare Part A/B status, citizenship/declaration, precise income and ownership by household member, asset values including life insurance cash value and burial funds, household composition/eligibility unit, and authoritative VA/California/SSA references). Below are focused screening gaps (<=12) that, if resolved in intake or immediate follow\u2011up, would allow a defensible preliminary eligibility determination for the pathways you actually screen (MSPs, full\u2011benefit Medicaid/Medi\u2011Cal, VA caregiver/pension triage, SSDI/SSI triage).",
+    "screening_gaps": [
+      {
+        "criterion": "Medicare Part A and/or Part B enrollment (which part(s) are active)",
+        "pathway": "Medicare Savings Programs (QMB/SLMB/QI) and LIS-related routing",
+        "current_fields": [
+          "recipient.health_coverage (multi_select: 'Medicare' or 'Both Medicare and Medicaid')"
+        ],
+        "missing_facts": [
+          "Whether recipient has Medicare Part A and/or Part B (Part A enrollment can be dispositive for LIS/MSP pathways)",
+          "If unknown, a clear 'I'm not sure' option is present but intake lacks a targeted follow\u2011up question to resolve it"
+        ],
+        "trigger": "case.goals includes 'Medical coverage' or recipient.health_coverage includes 'Medicare' or intake attempts MSP screening",
+        "simple_questions": [
+          "Does [recipient name] have Medicare Part A (hospital) and/or Part B (medical)? (Choose 'Part A only', 'Part B only', 'Both A & B', 'No Medicare', 'I'm not sure')"
+        ],
+        "document_lookup_when": "If user answers 'I'm not sure' or if MSP eligibility appears near a threshold \u2014 look up SSA/Medicare enrollment or request Medicare card at application.",
+        "source_ids": [
+          "CMS-MSP-CHAPTER-1:26:c8e587db33"
+        ],
+        "caveat": "For preliminary screening self\u2011report is permissible, but agency verification will occur at application."
+      },
+      {
+        "criterion": "U.S. citizenship or satisfactory immigration status and signed declaration",
+        "pathway": "MSPs and Medicaid/full\u2011benefit Medicaid (including state MSPs)",
+        "current_fields": [
+          "caregiver.address.state",
+          "recipient.address.state"
+        ],
+        "missing_facts": [
+          "Self\u2011reported citizenship/immigration status (citizen, U.S. national, satisfactory immigration status, or not)",
+          "Whether the applicant will complete the signed declaration required by states"
+        ],
+        "trigger": "Any screening for MSPs or state Medicaid, or when case.goals includes 'Medical coverage'",
+        "simple_questions": [
+          "Is [recipient name] a U.S. citizen, U.S. national, or a non\u2011citizen with satisfactory immigration status? (Yes / No / I'm not sure)",
+          "Will they be able to sign the state declaration of citizenship/immigration status if needed? (Yes / No / I'm not sure)"
+        ],
+        "document_lookup_when": "If non\u2011citizen or 'I'm not sure' \u2014 lookup state requirements and identify which immigration documents will be required at application.",
+        "source_ids": [
+          "CMS-MSP-CHAPTER-1:30:2889d87192"
+        ],
+        "caveat": ""
+      },
+      {
+        "criterion": "Precise monthly income amounts and ownership by household member (gross/net) and spouse income",
+        "pathway": "MSPs (QMB/SLMB/QI) and Medicaid income\u2011based eligibility",
+        "current_fields": [
+          "recipient.monthly_income_range (coarse buckets)",
+          "recipient.household_size",
+          "recipient.marital_status"
+        ],
+        "missing_facts": [
+          "Exact gross monthly income (recipient and spouse/partner), and which household members contribute income",
+          "Breakdown by income source (SSA, wages, pension, VA, interest/dividends)"
+        ],
+        "trigger": "recipient.monthly_income_range not 'No income' OR case.goals includes MSP/Medical coverage OR income range is near MSP thresholds",
+        "simple_questions": [
+          "Please enter gross monthly income for [recipient name], and for spouse/partner if applicable; specify the source for each amount (Social Security, wages, pension, VA, other).",
+          "Which household members contribute income and are included in the Medicaid/MSP household?"
+        ],
+        "document_lookup_when": "If amounts are near state thresholds or intake must make a defensible conclusion \u2014 request paystubs/SSA award letters or perform state threshold lookup before final recommendation.",
+        "source_ids": [
+          "CMS-MSP-CHAPTER-1:52:8be4053458",
+          "CMS-MSP-CHAPTER-1:26:c8e587db33"
+        ],
+        "caveat": "CMS allows self\u2011attestation for some items, but precise dollar amounts and household composition are necessary to place someone reliably into a specific MSP band for a defensible preliminary conclusion."
+      },
+      {
+        "criterion": "Household composition and eligibility unit (names/ages/relationships/tax dependency)",
+        "pathway": "MSPs and Medicaid household size rules (family size can change MSP banding)",
+        "current_fields": [
+          "recipient.household_size (number only)",
+          "caregiver.coresidence (yes/no)",
+          "recipient.marital_status"
+        ],
+        "missing_facts": [
+          "List of household members with relationship to recipient and ages",
+          "Which household members are claimed as tax dependents or contribute income (affects eligibility unit)"
+        ],
+        "trigger": "When computing FPL percentage for MSPs or when household size could change eligibility band",
+        "simple_questions": [
+          "List everyone who lives in the household with [recipient name], their relationship, and ages (include whether each contributes income or is claimed on taxes)."
+        ],
+        "document_lookup_when": "If household composition is ambiguous or unusual (e.g., non\u2011spouse adult relatives), lookup state/memo guidance (see CMS memo referenced in Chapter 1) or request tax returns at application.",
+        "source_ids": [
+          "CMS-MSP-CHAPTER-1:52:8be4053458"
+        ],
+        "caveat": "Family-size rules can be state\u2011sensitive; ask explicitly about tax dependency and income ownership to compute the correct eligibility unit."
+      },
+      {
+        "criterion": "Countable resources: approximate current values, life insurance cash value, and burial funds (owner & dates)",
+        "pathway": "MSPs and Medicaid resource tests",
+        "current_fields": [
+          "recipient.assets (types only: primary home, other property, savings/investments, None, I'm not sure)"
+        ],
+        "missing_facts": [
+          "Approximate current values for savings, investment account balances, cash value of life insurance, burial funds (and whether burial funds are in a separate account), and ownership (recipient or spouse)",
+          "Whether assets have been transferred and when (if relevant to resource calculation)"
+        ],
+        "trigger": "recipient.assets includes any asset types other than 'None' OR case.goals includes MSP/Medicaid long\u2011term care",
+        "simple_questions": [
+          "For each asset type selected, please provide an approximate current value and who owns it (recipient, spouse, other).",
+          "Does the life insurance policy have a cash surrender value? If yes, approximate amount.",
+          "Are burial funds in a separate account or commingled?"
+        ],
+        "document_lookup_when": "If values approach resource limits, or state uses AVS \u2014 request bank statements, life insurance statements, property valuations at application or perform AVS lookup if allowed.",
+        "source_ids": [
+          "CMS-MSP-CHAPTER-1:26:04c24b8a86",
+          "CMS-MSP-CHAPTER-1:26:917851b6cc",
+          "CMS-MSP-CHAPTER-1:26:c8e587db33"
+        ],
+        "caveat": "CMS requires states to accept self\u2011attestation for interest/dividends and some non\u2011liquid resources but states may use AVS or request verification; ask values to judge likely countability and whether verification will be requested."
+      },
+      {
+        "criterion": "State of residence tied to state MSP names, thresholds, and verification rules",
+        "pathway": "State\u2011administered MSPs (QMB/SLMB/QI) and state variations",
+        "current_fields": [
+          "caregiver.address.state (required)",
+          "recipient.address.state (if different)"
+        ],
+        "missing_facts": [
+          "Explicit mapping from the recipient's state to the state MSP program name, state thresholds, and whether the state uses AVS or additional verification beyond CMS guidance"
+        ],
+        "trigger": "case.goals includes 'Medical coverage' or interest in help paying Medicare",
+        "simple_questions": [
+          "Confirm the recipient's state of residence for benefit lookup (if different from caregiver). Would you like us to look up the state's MSP name and income/resource thresholds now?"
+        ],
+        "document_lookup_when": "Always: when preparing to recommend applying or to determine exact MSP thresholds and verification requirements, perform a state MSP lookup.",
+        "source_ids": [
+          "MEDICARE-AND-YOU:92:0c2688f225",
+          "CMS-MSP-CHAPTER-1:52:8be4053458"
+        ],
+        "caveat": "State differences are material \u2014 intake must either collect the state and trigger a lookup or embed a state\u2011specific threshold table in screening logic."
+      },
+      {
+        "criterion": "Asset transfers / lookback (dates, amounts, recipients) relevant to Medi\u2011Cal long\u2011term care eligibility",
+        "pathway": "Medi\u2011Cal long\u2011term services (including IHSS referral and nursing home eligibility) \u2014 transfer penalty rules",
+        "current_fields": [
+          "recipient.recent_transfers (asked only when living_setting == 'Nursing home or skilled nursing facility')",
+          "recipient.living_setting"
+        ],
+        "missing_facts": [
+          "Whether any transfers occurred in the state lookback period (date of transfer, amount, who received the transfer, reason)",
+          "Transfers outside nursing home context (transfers can also affect other long\u2011term care eligibility)"
+        ],
+        "trigger": "recipient.living_setting indicates nursing home or case.goals includes long\u2011term care/Medi\u2011Cal help; also trigger when applicant requests IHSS or other Medi\u2011Cal long\u2011term services",
+        "simple_questions": [
+          "Have any assets or property been transferred, sold for less than fair market value, or given away in the last 30 months? If yes, list dates, amounts, and recipients.",
+          "If transfers occurred more than 30 months ago, please state dates and amounts."
+        ],
+        "document_lookup_when": "If any transfers are reported or suspected, collect transaction records, deeds, or other proofs at application and lookup California Medi\u2011Cal IHSS transfer/lookback rules if the resident is in CA.",
+        "source_ids": [],
+        "caveat": "This is jurisdiction\u2011sensitive (California rules differ and the team did not retrieve CA IHSS/Medi\u2011Cal sources). Marked as a visibility gap; authoritative state docs required to complete this criterion."
+      },
+      {
+        "criterion": "VA evidence and caregiver relationship / coresidence for VA pension/Aid & Attendance and PCAFC caregiver pathways",
+        "pathway": "VA pension (Aid & Attendance) and VA caregiver programs (PCAFC)",
+        "current_fields": [
+          "recipient.military_status",
+          "recipient.va_contact",
+          "recipient.va_rating_assigned",
+          "recipient.va_rating",
+          "recipient.va_pension_status",
+          "recipient.va_six_month_care_need",
+          "caregiver.age_18_or_older",
+          "caregiver.coresidence"
+        ],
+        "missing_facts": [
+          "VA decision or award letter (combined rating, pension/Aid & Attendance award)",
+          "VA claim/file number (application\u2011only acceptable to collect later)",
+          "Precise evidence of caregiver coresidence/relationship when required by PCAFC (if pursuing PCAFC) and whether caregiver is the primary in\u2011home provider"
+        ],
+        "trigger": "case.goals includes 'Finding VA caregiver benefits' or recipient.current_benefits includes VA pension/aid & attendance",
+        "simple_questions": [
+          "Do you have the VA decision letter or pension/Aid & Attendance award letter? (Yes / No / I'm not sure)",
+          "Does the caregiver live with the veteran and provide primary, continuous personal care? (Yes / No / I'm not sure)"
+        ],
+        "document_lookup_when": "If applying or making a firm eligibility determination, request VA decision/award letters and look up the specific VA program eligibility rules (VBA/VHA guidance).",
+        "source_ids": [],
+        "caveat": "Authoritative VA source documents were not retrieved in the prior audit \u2014 this gap prevents defensible VA pathway conclusions and must be resolved with VA regulations/decision letters."
+      },
+      {
+        "criterion": "Detailed SSA work credits and medical evidence timing needed to triage SSDI eligibility",
+        "pathway": "SSDI (work credits) and SSI (income/resources + disability) triage",
+        "current_fields": [
+          "recipient.work_history_social_security (coarse: 'Yes, for several years' / 'Yes, but briefly' / 'No')",
+          "recipient.work_status",
+          "recipient.condition_documented"
+        ],
+        "missing_facts": [
+          "Number of quarters of coverage / years in which Social Security taxes were paid (or clear statement that SSA earnings record can be accessed)",
+          "Whether medical documentation exists and approximate dates for onset (needed for medical CDR timing)"
+        ],
+        "trigger": "case.goals includes 'Getting SSI, SSDI' or recipient.condition_limits_work == 'Yes'",
+        "simple_questions": [
+          "List the years you worked and indicate whether Social Security taxes were paid in those years (or say if you can get your SSA earnings record).",
+          "Is there a medical record or physician who can document disability onset and severity? (Yes / No / I'm not sure)"
+        ],
+        "document_lookup_when": "If pursuing SSDI/SSI application or making a preliminary close call, check SSA guidance/POMS for quarters of coverage and obtain SSA earnings record or W\u20112s at application.",
+        "source_ids": [],
+        "caveat": "SSA authoritative sources (POMS/regulations) were not retrieved in the prior audit \u2014 treat SSDI/SSI triage as provisional until those sources are consulted or the applicant provides SSA award/earnings records."
+      },
+      {
+        "criterion": "Verification method (AVS vs. self\u2011attestation) and whether state will use AVS for reported assets/income",
+        "pathway": "MSP verification process and potential documentary requests",
+        "current_fields": [
+          "recipient.assets (types only)",
+          "recipient.monthly_income_range"
+        ],
+        "missing_facts": [
+          "Whether the recipient's state accepts self\u2011attestation for non\u2011liquid resources and interest/dividend income, or whether the state will use AVS and thus may request documentation",
+          "If AVS will be used, which accounts/resources are covered by AVS (bank accounts, life insurance, etc.)"
+        ],
+        "trigger": "Any reported assets or when case.goals includes MSPs/Medical coverage",
+        "simple_questions": [
+          "Would you like us to check whether your state accepts self\u2011attestation for assets or uses AVS verification? (Yes / No)",
+          "If you prefer, provide permission to attempt AVS lookup (application stage) \u2014 otherwise, please provide approximate asset values now."
+        ],
+        "document_lookup_when": "Perform a state policy lookup for AVS use and request documents only if AVS fails or state requires evidence.",
+        "source_ids": [
+          "CMS-MSP-CHAPTER-1:26:04c24b8a86",
+          "CMS-MSP-CHAPTER-1:26:917851b6cc"
+        ],
+        "caveat": "CMS requires states to implement simplifications but states have until specific implementation timelines and may vary in practice."
+      }
+    ],
+    "application_only": [
+      "Collect signed citizenship/immigration declaration and immigration documents (if non\u2011citizen) \u2014 application stage mandatory (CMS-MSP-CHAPTER-1:30:2889d87192).",
+      "Request Medicare card or SSA/Medicare enrollment evidence if needed for agency verification (application stage).",
+      "Request SSA award letters (SSI/SSDI) and SSA earnings record or W\u20112s/1099s to confirm SSDI work credits (application stage).",
+      "Gather bank statements, life insurance policy statements (cash surrender values), and property deeds/valuations when assets approach state resource limits (application).",
+      "Obtain VA decision/award letters and VA claim/file numbers if pursuing VA pension/Aid & Attendance or PCAFC (application stage).",
+      "Collect documentation of any asset transfers (deeds, transaction records) when transfers may trigger Medi\u2011Cal lookback penalties (application stage).",
+      "Do not request SSNs, account numbers, or BIC routing numbers in screening; collect those only through secure application processes as required by the agency."
+    ],
+    "visibility_gaps": [
+      "Authoritative VA policy/regulatory sources (VBA/VHA guidance and eligibility regs) were not retrieved in the prior audit \u2014 needed to map exact VA thresholds and caregiver relationship/coresidence requirements.",
+      "California-specific Medi\u2011Cal/IHSS transfer/lookback, asset treatment, and long\u2011term care eligibility rules were not retrieved \u2014 intake cannot produce a defensible CA Medi\u2011Cal long\u2011term care conclusion without these.",
+      "SSA authoritative guidance (POMS/regulations) on quarters of coverage, SSDI technical work\u2011credit calculations, and SSI resource rules were not retrieved \u2014 intake lacks the source basis to compute SSDI likelihood from coarse work history."
+    ],
+    "unsupported_or_stale_claims": [
+      "Prior audit entries referring to VA thresholds and CA IHSS/Medi\u2011Cal transfer rules were recorded but no authoritative VA or California state documents were retrieved to support those mappings (see the '(NOT RETRIEVED)' items in prior audit). Treat VA/CA claims as unverified until authoritative sources are added.",
+      "The intake assumes self\u2011attestation is broadly sufficient for preliminary MSP screening \u2014 this is supported by CMS for many items, but the state\u2011by\u2011state verification practice (AVS use) can change the documentary burden; rely on CMS-MSP-CHAPTER-1 sections but confirm state practice."
+    ],
+    "scope_limits": [
+      "This audit addresses only whether intake collects facts required to form a defensible preliminary eligibility conclusion, not whether an application is ready or should be approved.",
+      "Asset rules and transfer\u2011penalty calculations are date\u2011sensitive and jurisdiction\u2011sensitive; for any historical assets/transfers the audit flags the need for documentary review and authoritative state rules (e.g., California Medi\u2011Cal).",
+      "Self\u2011report is acceptable for many preliminary MSP screening items per CMS \u2014 but a defensible preliminary conclusion that a person will be approved by the agency requires precise income, asset values, household composition, and sometimes documentary evidence; intake must collect these facts or trigger an immediate lookup.",
+      "This audit does not compute eligibility or produce binary determinations \u2014 it identifies what specific missing facts prevent defensible preliminary conclusions across the covered pathways."
+    ]
+  },
+  "validation_issues": []
+}

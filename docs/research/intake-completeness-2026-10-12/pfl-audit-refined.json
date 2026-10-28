@@ -1,0 +1,225 @@
+{
+  "program": "Paid Family Leave",
+  "result": {
+    "conclusion": "No. The current intake does not collect all facts needed for a defensible preliminary eligibility determination across the Paid Family Leave (PFL) pathways the intake attempts to cover (caregiving, bonding, military assist, voluntary-plan coverage, and partial-benefits). It contains many useful fields, but several mandatory screening facts are missing or optional, and a few visibility and gating items (household/tax unit, income ownership, representative authorization) are absent. Below are the focused gaps (\u226412) you must add or make required for a defensible preliminary screen, followed by application-only actions, visibility gaps, unsupported/stale-claim notes, and scope limits.",
+    "screening_gaps": [
+      {
+        "criterion": "Earnings threshold \u2014 earned at least $300 in the 5\u201318 months before the claim",
+        "pathway": "All PFL claims (eligibility requires SDI or voluntary-plan coverage and $300 minimum earnings in the 5\u201318 month lookback)",
+        "current_fields": [
+          "caregiver.sdi_deductions (Yes/No/Unsure)",
+          "caregiver.employment_status"
+        ],
+        "missing_facts": [
+          "Explicit yes/no whether the claimant earned at least $300 in the 5\u201318 months before the claim start",
+          "If possible, gross earnings (or ledger of pay periods) in that 5\u201318 month window and claim start date to locate the lookback window"
+        ],
+        "trigger": "caregiver.caregiving_employment_impact includes any of: Stopped working, Reduced hours, Taking leave, Expect to take leave; or applicant selects PFL-related goals",
+        "simple_questions": [
+          "In the 5 to 18 months before the date you want your PFL claim to begin, did you earn at least $300 in total? (Yes / No / I'm not sure)",
+          "If yes or unsure: enter the claim start date (first day of wage loss) so we can compute the exact 5\u201318 month lookback and, if you know it, the total gross earnings in that window."
+        ],
+        "document_lookup_when": "If user answers 'No' or 'I'm not sure' or wants a benefits estimate, request recent pay stubs, W-2, 1099s, employer wage summary, or myEDD wage history for the 5\u201318 month period",
+        "source_ids": [
+          "EDD-DE2511:2:7858fd7205"
+        ],
+        "caveat": ""
+      },
+      {
+        "criterion": "Timeliness \u2014 claim must be filed no later than 41 days after first day of leave",
+        "pathway": "All PFL claims (timeliness gating rule)",
+        "current_fields": [
+          "caregiver.leave_start (date \u2014 currently optional)",
+          "case.time_sensitive"
+        ],
+        "missing_facts": [
+          "Required: the claimant\u2019s first day of wage loss or first day of family leave (to check the 41\u2011day filing window)",
+          "Whether the claimant intends to file immediately (within 41 days)"
+        ],
+        "trigger": "caregiver.caregiving_employment_impact includes any of: Stopped working, Reduced hours, Taking leave, Expect to take leave",
+        "simple_questions": [
+          "What was the first day you began losing wages or taking family leave for caregiving? (MM/DD/YYYY)",
+          "Do you plan to submit a PFL claim within 41 days of that date? (Yes / No / Unsure)"
+        ],
+        "document_lookup_when": "If date is uncertain or user is past 41 days, request employer statement or pay stub showing wage loss start for application or appeals",
+        "source_ids": [
+          "EDD-DE2511:2:7858fd7205"
+        ],
+        "caveat": ""
+      },
+      {
+        "criterion": "Medical certification \u2014 licensed health professional identity and ability to complete DE 2501F Part D",
+        "pathway": "Caregiving PFL claims (provider-completed Part D of DE 2501F required for preliminary eligibility routing)",
+        "current_fields": [
+          "recipient.has_certifying_clinician (Yes/Need to arrange/No/I'm not sure)",
+          "caregiver.pfl_medical_certification (Yes/Need to arrange/No/I'm not sure)"
+        ],
+        "missing_facts": [
+          "Clinician name, professional title/license type (MD, DO, NP, PA, etc.), phone number/contact, and whether they will complete DE 2501F Part D covering the dates needed"
+        ],
+        "trigger": "Any caregiving claim or case.goals indicating caregiving for a seriously ill family member",
+        "simple_questions": [
+          "Is there a clinician who can complete the PFL medical form (DE 2501F Part D)? (Yes / No / I'm not sure)",
+          "If yes: clinician name, license type (MD/DO/NP/PA), clinic phone number, and can they sign DE 2501F Part D? (Yes/No/Unsure)"
+        ],
+        "document_lookup_when": "If user is unsure or clinician says no, request the clinician-completed DE 2501F Part D at application; for preliminary routing a confirmed clinician contact suffices",
+        "source_ids": [
+          "EDD-DE2475:2:7406ca3f40",
+          "EDD-DE2511:2:0078a64999"
+        ],
+        "caveat": "A user saying 'Yes' to a clinician is sufficient for preliminary routing but not for agency decision."
+      },
+      {
+        "criterion": "Care recipient signature / authorized representative \u2014 Part C signature or authorized-rep protocol",
+        "pathway": "Caregiving PFL claims (Part C must be completed and signed by care recipient or follow EDD authorized-rep instructions)",
+        "current_fields": [],
+        "missing_facts": [
+          "Whether the care recipient can personally complete and sign DE 2501F Part C, or whether the filer is an authorized representative and has/needs a power of attorney or will call EDD for representative filing instructions"
+        ],
+        "trigger": "Any caregiving claim that will file DE 2501F",
+        "simple_questions": [
+          "Can the person you care for sign the PFL claim (DE 2501F Part C) themselves? (Yes / No / Unsure)",
+          "If no: do you have legal authorization (power of attorney) or will you call EDD to file as an authorized representative? (Yes / No / Unsure)"
+        ],
+        "document_lookup_when": "If care recipient cannot sign, user must follow EDD instructions and may need to supply proof of authorization at application; request POA or contact EDD for forms",
+        "source_ids": [
+          "EDD-DE2475:2:7406ca3f40"
+        ],
+        "caveat": "Preliminary screen can flag the need for representative steps but cannot deem claim complete without signatures or EDD confirmation."
+      },
+      {
+        "criterion": "Qualifying relationship \u2014 confirm claim is for an eligible family member",
+        "pathway": "Caregiving vs. non-qualifying care (PFL limited to specified family relationships)",
+        "current_fields": [
+          "caregiver.relationship (multi-options including 'Friend' or 'Other')"
+        ],
+        "missing_facts": [
+          "Explicit validation that the named relationship is one of PFL\u2019s qualifying relationships, and immediate ineligibility messaging if non-qualifying (friend/neighbor) selected"
+        ],
+        "trigger": "Any caregiving claim",
+        "simple_questions": [
+          "Confirm: Are you caring for one of these qualifying family members: child, parent, parent\u2011in\u2011law, grandparent, grandchild, sibling, spouse, or registered domestic partner? (Select one)",
+          "If your relationship is 'Friend/Neighbor' \u2014 note: PFL caregiving is not available for non\u2011qualifying relationships."
+        ],
+        "document_lookup_when": "No document will convert a non\u2011qualifying relationship to qualifying \u2014 this is a screening gate. For bonding, request birth/placement docs at application.",
+        "source_ids": [
+          "EDD-DE2511:1:079f7e3ff8",
+          "EDD-DE2475:1:717626b3ad"
+        ],
+        "caveat": ""
+      },
+      {
+        "criterion": "Bonding claim gating \u2014 explicit bonding intent and child placement/birth date",
+        "pathway": "Bonding with a new child (PFL bonding pathway)",
+        "current_fields": [
+          "case.goals (multi_select includes various goals but no direct 'Bonding' label)",
+          "caregiver.relationship (may indicate child)"
+        ],
+        "missing_facts": [
+          "Direct screening question: is the PFL claim for bonding with a new child, and if yes, the child\u2019s date of birth or placement date and whether the claimant has birth certificate or placement records"
+        ],
+        "trigger": "case.goals indicating bonding/new child (or relationship 'Child under 18' with recent birth/placement)",
+        "simple_questions": [
+          "Are you filing PFL to bond with a new child? (Yes / No)",
+          "If yes: what is the child\u2019s date of birth or placement? Do you have the birth certificate or placement record? (Yes / No / Unsure)"
+        ],
+        "document_lookup_when": "Application stage \u2014 require birth certificate, adoptive placement agreement, or foster placement record; for screening a self\u2011report that the child is new is sufficient to route",
+        "source_ids": [
+          "EDD-DE2475:2:7406ca3f40",
+          "EDD-DE2511:1:079f7e3ff8"
+        ],
+        "caveat": "Bonding benefits are payable within one year of birth/placement; need date to check window."
+      },
+      {
+        "criterion": "Voluntary Plan (VP) coverage \u2014 whether employer uses a VP instead of SDI and where to file",
+        "pathway": "Any PFL claimant whose employer may have a voluntary plan in lieu of State Disability Insurance",
+        "current_fields": [
+          "caregiver.employer_type",
+          "caregiver.employer_size_75_miles",
+          "caregiver.employer_tenure"
+        ],
+        "missing_facts": [
+          "Explicit question whether the claimant is covered under an employer Voluntary Plan (VP) for SDI/PFL and, if yes, the employer's benefits contact or VP name (this changes where/how the claim is filed)"
+        ],
+        "trigger": "Any employed claimant or when caregiver.sdi_deductions is 'No' or 'I'm not sure'",
+        "simple_questions": [
+          "Does your employer provide SDI/PFL benefits through a Voluntary Plan instead of state SDI? (Yes / No / I'm not sure)",
+          "If yes: employer or HR contact name and phone/email (or employer name so we can advise to contact HR)"
+        ],
+        "document_lookup_when": "If yes, instruct claimant to contact employer/HR for VP filing instructions or request VP contact/plan documents at application",
+        "source_ids": [
+          "EDD-DE2511:2:0078a64999"
+        ],
+        "caveat": "A volunteer-plan notice from employer is needed at application \u2014 preliminary screening just needs to detect VP coverage so we can route them correctly."
+      },
+      {
+        "criterion": "Partial\u2011benefits calculation gating \u2014 continued work while claiming and expected hours",
+        "pathway": "PFL partial benefits (reduced hours while claiming)",
+        "current_fields": [
+          "caregiver.caregiving_employment_impact (includes 'Reduced hours')",
+          "caregiver.pfl_medical_certification"
+        ],
+        "missing_facts": [
+          "Whether the claimant intends to continue working during the claim, and if yes, expected hours per week and brief description of the part\u2011time schedule (needed to flag partial benefit calculation and the required employer/employee letter)"
+        ],
+        "trigger": "caregiver.caregiving_employment_impact includes 'Reduced hours' or 'Taking leave' while reporting ongoing work",
+        "simple_questions": [
+          "Will you continue to work while claiming PFL? (Yes / No)",
+          "If yes: how many hours per week will you work during the claim? Please briefly describe your expected part\u2011time schedule."
+        ],
+        "document_lookup_when": "At application request a separate letter describing the part\u2011time schedule and pay stubs showing wage loss; for screening a yes/no and hours estimate are sufficient to route",
+        "source_ids": [
+          "EDD-DE2475:2:efb6604ccc"
+        ],
+        "caveat": ""
+      },
+      {
+        "criterion": "Worksite/payroll state and withholding \u2014 where CASDI/SDI taxes were paid",
+        "pathway": "Any employed claimant (affects whether CA PFL is appropriate and where SDI was paid)",
+        "current_fields": [
+          "caregiver.work_state",
+          "caregiver.employment_status"
+        ],
+        "missing_facts": [
+          "Explicit payroll/pay\u2011stub state (state where CASDI/SDI was withheld) or confirmation that CA CASDI was withheld in the lookback period"
+        ],
+        "trigger": "Any employed claimant or when caregiver.sdi_deductions is 'Yes'/'No'/'I'm not sure'",
+        "simple_questions": [
+          "In which state were CASDI/SDI deductions withheld from your paychecks during the 5\u201318 month lookback? (State name / Unsure)",
+          "If unsure: do you have a recent pay stub showing a CASDI/SDI line? (Yes / No)"
+        ],
+        "document_lookup_when": "If uncertain, request pay stub(s) for the lookback period to verify CASDI/SDI withholdings and whether a voluntary plan applies",
+        "source_ids": [
+          "EDD-DE2511:1:079f7e3ff8",
+          "EDD-DE2511:2:7858fd7205"
+        ],
+        "caveat": "Self\u2011report of CASDI deductions is acceptable for screening but payroll records are needed for verification and exact benefit calculations."
+      }
+    ],
+    "application_only": [
+      "Clinician\u2011completed DE 2501F Part D (medical certification) for caregiving claims \u2014 mandatory",
+      "Care recipient signature on DE 2501F Part C or EDD authorized\u2011representative forms if recipient cannot sign \u2014 mandatory",
+      "Birth certificate, adoptive placement agreement, or foster placement record for bonding claims \u2014 mandatory",
+      "Proof of covered active duty and qualifying event documents for military assist claims \u2014 mandatory",
+      "Employer Voluntary Plan documentation or HR contact if employer provides VP in lieu of SDI \u2014 application step",
+      "Separate letter describing part\u2011time work schedule and recent pay stubs to document partial benefits/wage loss"
+    ],
+    "visibility_gaps": [
+      "Household composition details needed for some downstream benefit interactions are incomplete: intake asks household size but does not collect household member ages/relationships, tax dependency status, or income ownership (who earned the reported household income). These are often needed to compute household unit for other programs or to advise on tax/dependent\u2011care questions.",
+      "Tax dependency and income ownership: recipient.monthly_income_range is collected as a household total but the intake does not ask who owns the income, how much each household member earns, or whether the recipient is the tax dependent \u2014 this hampers routing to certain tax credits and to programs where benefit unit matters.",
+      "Asset-rule timing: intake collects asset types but not acquisition dates or historical transfers beyond an optional 30\u2011month transfer question (only shown in nursing home cases). Asset eligibility rules (for example for other programs) are date\u2011sensitive; intake must flag when asset history or dates are needed and request dates when relevant."
+    ],
+    "unsupported_or_stale_claims": [
+      "No unsupported claims for California PFL were identified in the intake fields above. The EDD factsheet explicitly states that citizenship and immigration status do not affect PFL eligibility (see EDD-DE2511:1:079f7e3ff8) \u2014 that statement is supported.",
+      "Caution: Do not generalize that citizenship/immigration status 'does not affect eligibility' to other programs (for example, Medi\u2011Cal has different rules and the intake currently does not collect the facts needed to assess Medi\u2011Cal eligibility). Treat cross\u2011program citizenship effect as program\u2011specific and flag uncertainty."
+    ],
+    "scope_limits": [
+      "This audit evaluates only preliminary screening facts needed to route PFL claims and to form a defensible preliminary eligibility conclusion; it does not determine final approval or application readiness.",
+      "We assume date of birth is available and age can be computed from it; where age gating matters include an explicit derived age field in logic rather than separate age questions.",
+      "We do not request SSNs, bank account numbers, BIC numbers, clinician contact forms, or other sensitive identifiers at screening \u2014 those are application\u2011stage items.",
+      "Benefit amounts, exact eligibility decisions, and agency determinations require wage\u2011level data, insurer/voluntary\u2011plan documentation, clinician\u2011signed forms, and official agency verification; preliminary routing may be possible without those, but cannot be definitive.",
+      "Asset\u2011based eligibility rules for other programs are time\u2011sensitive; the intake should surface when historical documents or transfer dates are required and avoid making final claims about asset eligibility without dates and documentary support."
+    ]
+  },
+  "validation_issues": []
+}

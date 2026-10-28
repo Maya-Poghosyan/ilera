@@ -1,0 +1,381 @@
+{
+  "program": "Medi-Cal",
+  "doc_key": "medical",
+  "generated_at": "2026-10-13T02:52:10.844741+00:00",
+  "execution": "Separate direct research invocation with Ilera Azure model and program-scoped RAG, not the hosted Durable endpoint",
+  "direct_question": "Audit the CURRENT refactored intake for completeness, not just documents. Can we make an accurate eligibility screening conclusion from these answers? List all missing facts, conditional visibility failures, precision gaps, program-specific eligibility-unit inputs, and mandatory unresolved criteria. Include concise simple followup wording and exactly when to ask it. Separate criteria facts from application paperwork.\nWhat external documents would possibly be needed, and what rules/triggers necessitate them? Give a concrete document-to-question matrix for your program. Show questions already in our intake, questions needing further detail, and questions belonging in the actual application session. Assess whether our intake supports accurate preliminary eligibility conclusions. Retrieve official sources before answering. ",
+  "result": {
+    "mappings": [
+      {
+        "document_name": "MEPM Article 9 — Property (excerpt)",
+        "program_or_pathway": "Medi‑Cal long‑term care / asset evaluation",
+        "question": "Does [recipient name] own a primary residence, other real property, savings or investments, and what are current values and ownership details (sole, joint, trust)?",
+        "subject_and_period": "Current ownership and values; date acquired; ownership form (sole/joint/trust).",
+        "intake_field_ids": [
+          "recipient.assets",
+          "recipient.monthly_income_range"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Please list each asset the recipient owns (primary home with address, other real estate with address, bank/account/investment type) and give an approximate current value and date of acquisition for each. Note joint owners and whether any property is held in a trust.",
+        "information_to_read": [
+          "MEPM-ARTICLE-9"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "County must evaluate real and personal property values when determining Medi‑Cal eligibility; applicants may be denied for failure to provide required proof of asset values.",
+        "trigger_for_asking_fact": "Any application or potential eligibility screening for Medi‑Cal long‑term services, waivers, or institutional Medi‑Cal; flagged when recipient.assets indicates property or savings.",
+        "trigger_for_document_lookup": "If self‑reported values approach program asset limits, if recipient is institutionalized or applying for Medi‑Cal LTC, or if county requests proof; or if applicant reports 'I'm not sure'.",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes for a rough screening and to triage risk if values are clearly far below or far above likely thresholds; No for a defensible eligibility conclusion if values are near limits or transfers are possible.",
+        "alternatives": [
+          "Self‑reported estimated values (screening)",
+          "Page‑or‑account summaries, property tax bill, deed, escrow statement, brokerage statement (application/agency verification)"
+        ],
+        "source_ids": [
+          "MEPM-ARTICLE-9",
+          "ACWDL-25-14"
+        ],
+        "requirement_support": "MEPM-ARTICLE-9 describes property verification and the need to provide proof of real/personal property; ACWDL-25-14 shows denial/discontinuance can occur for failure to provide proof of assets.",
+        "retrieval_support": "MEPM-ARTICLE-9 (property verification rules), ACWDL-25-14 (notice/denial for failure to provide proof)",
+        "effective_date_or_jurisdiction_notes": "California Department of Health Care Services (Medi‑Cal) rules; county will request documentation per MEPM.",
+        "review_notes": "Intake asks only asset types (recipient.assets) without values, ownership form, dates, or estimated amounts. That prevents a defensible LTC/waiver eligibility decision."
+      },
+      {
+        "document_name": "MEPM Article 9 — Property (excerpt) / 30‑month lookback implications",
+        "program_or_pathway": "Nursing‑facility (institutional) Medi‑Cal — transfer lookback",
+        "question": "Has the recipient given away or transferred money or property within the last 30 months? If yes: describe what, value, date, and recipient of transfer.",
+        "subject_and_period": "Transfers/gifts within 30 months prior to institutional Medi‑Cal application.",
+        "intake_field_ids": [
+          "recipient.recent_transfers",
+          "recipient.living_setting"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "If yes, for each transfer provide: what was transferred, approximate value, date (mm/dd/yyyy), and to whom (name and relationship). If unsure, say 'unsure' and whether you have any supporting documents (deed, canceled checks, trust instruments).",
+        "information_to_read": [
+          "MEPM-ARTICLE-9"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "Transfers within the lookback period may create a penalty period (period of ineligibility). The county must review transfers; failure to disclose/document can cause application denial.",
+        "trigger_for_asking_fact": "Recipient is institutionalized or applying for nursing‑facility Medi‑Cal (recipient.living_setting = nursing home or skilled nursing facility).",
+        "trigger_for_document_lookup": "If transfers reported or 'I'm not sure' selected, or if assets appear to have been reduced shortly before application.",
+        "stage": "screening",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self‑report can flag potential penalty exposure, but is NOT sufficient for a defensible eligibility calculation of penalty period length — agency review and documents required.",
+        "alternatives": [
+          "Self‑report for triage",
+          "Deeds, canceled checks, trust documents, statements of sale/gift, probate/trust reports (agency verification)"
+        ],
+        "source_ids": [
+          "MEPM-ARTICLE-9"
+        ],
+        "requirement_support": "MEPM-ARTICLE-9 explains property and transfer verification procedures and the lookback implications for Medi‑Cal institutional eligibility.",
+        "retrieval_support": "MEPM-ARTICLE-9",
+        "effective_date_or_jurisdiction_notes": "California Medi‑Cal institutional rules (MEPM guidance).",
+        "review_notes": "Intake only asks Yes/No/Unsure; it does not gather transfer descriptions, dates, or values required to estimate penalty periods."
+      },
+      {
+        "document_name": "MEPM Article 19 — Special Services (waiver/county referral)",
+        "program_or_pathway": "HCBS waivers / AL waiver / DDS waiver (Medi‑Cal waivers)",
+        "question": "Is there a certifying clinician or medical documentation that can attest to the recipient's need for services (functional limitation / medical necessity)?",
+        "subject_and_period": "Current medical documentation or clinician able to produce an assessment for waiver eligibility or nursing‑facility discharge planning.",
+        "intake_field_ids": [
+          "recipient.condition_documented",
+          "recipient.has_certifying_clinician",
+          "recipient.adl_needs"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Provide the certifying clinician's name, clinic, phone, date of last visit, and whether a written functional assessment (physician's statement, DHS form, home health or IHSS assessment) is available or can be obtained.",
+        "information_to_read": [
+          "MEPM-ARTICLE-19"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "Waivers require medical/functional eligibility determinations and county referrals; some waivers ignore parental income or apply spousal impoverishment rules; county must receive waiver documentation and determine Medi‑Cal eligibility.",
+        "trigger_for_asking_fact": "Applicant seeks waiver services, or recipient is institutionalized and may be referred for waiver-based Medi‑Cal; recipient.adl_needs indicates need for assistance.",
+        "trigger_for_document_lookup": "If medical documentation is required for waiver admission or to support IHSS, county will request clinician's assessment, DHS waiver forms, or functional assessment.",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes to indicate potential medical eligibility and to triage to county waiver contact; No for final eligibility — county medical determination and formal documentation required.",
+        "alternatives": [
+          "Self‑reported condition and clinician contact (screening)",
+          "Physician statement, DHS 7071 or equivalent waiver forms, home health assessments, IHSS assessment (application/agency follows)"
+        ],
+        "source_ids": [
+          "MEPM-ARTICLE-19"
+        ],
+        "requirement_support": "MEPM-ARTICLE-19 describes waiver referral process and that county will determine Medi‑Cal eligibility based on medical/functional evidence.",
+        "retrieval_support": "MEPM-ARTICLE-19",
+        "effective_date_or_jurisdiction_notes": "California Medi‑Cal waiver procedures and county role.",
+        "review_notes": "Intake captures whether conditions are documented and whether a clinician exists but lacks clinician contact details, dates, or the form/type of documentation — needed for a defensible medical eligibility claim."
+      },
+      {
+        "document_name": "ACWDL 25‑14 excerpt (re: asset verification notices)",
+        "program_or_pathway": "Medi‑Cal asset verification and notice process",
+        "question": "Can the recipient provide verifiable proof of asset values (bank statements, deeds, insurance summaries) when requested?",
+        "subject_and_period": "Documentation covering current asset balances and recent history as requested by county during application/renewal.",
+        "intake_field_ids": [
+          "recipient.assets",
+          "case.application_barriers"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "If asked by the county, can you obtain written proof of property values or account balances (e.g., recent bank or brokerage statements, property tax or deed)? If not, which documents are missing?",
+        "information_to_read": [
+          "ACWDL-25-14"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "County may deny or discontinue Medi‑Cal for failure to provide required proof of assets; applicants must produce documentation when requested.",
+        "trigger_for_asking_fact": "County requests proof or the intake indicates missing documents as an application barrier.",
+        "trigger_for_document_lookup": "If applicant indicates 'Missing documents' in case.application_barriers or if the county issues a request for proof.",
+        "stage": "application",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self‑report sufficient to note barriers but not sufficient for county approval; county will require originals or certified copies.",
+        "alternatives": [
+          "Self‑report (screening)",
+          "Official asset proofs: bank statements, property deeds, insurance settlement letters (application)"
+        ],
+        "source_ids": [
+          "ACWDL-25-14"
+        ],
+        "requirement_support": "ACWDL 25‑14 shows county notices and denials for failure to provide proof of assets.",
+        "retrieval_support": "ACWDL-25-14",
+        "effective_date_or_jurisdiction_notes": "California county verification and notice rules for Medi‑Cal asset verification.",
+        "review_notes": "Intake flags 'Missing documents' in case.application_barriers but does not map which documents are missing; intake should collect which asset proofs exist."
+      },
+      {
+        "document_name": "MEPM Article 19 — Special Services (waiver county contact & spousal impoverishment)",
+        "program_or_pathway": "Waiver pathways with special eligibility rules (e.g., AL Waiver, DDS Waiver)",
+        "question": "Is the recipient married? If yes, what are the spouse's living situation, income and asset details (so spousal impoverishment rules can be applied)?",
+        "subject_and_period": "Current spouse status, residence, income and assets at application time.",
+        "intake_field_ids": [
+          "recipient.marital_status",
+          "recipient.spouse_living_situation",
+          "recipient.household_size"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "If married/partnered, provide spouse's name, whether spouse lives at home, spouse's monthly income types and approximate amounts, and whether spouse owns property or accounts jointly with the recipient.",
+        "information_to_read": [
+          "MEPM-ARTICLE-19"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "Some waivers use special deeming/spousal impoverishment rules; county referral is required and spousal information is used to apply those rules.",
+        "trigger_for_asking_fact": "Recipient indicates married/registered domestic partner or waiver pathway is being sought.",
+        "trigger_for_document_lookup": "If married, county will require marriage certificate, spouse's proof of income and asset documentation to apply spousal impoverishment protections.",
+        "stage": "screening",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self‑report sufficient for initial triage; not sufficient for final spousal impoverishment calculation.",
+        "alternatives": [
+          "Self‑reported spouse income and assets (screening)",
+          "Marriage certificate, spouse paystubs, SSA letters, bank statements (application)"
+        ],
+        "source_ids": [
+          "MEPM-ARTICLE-19"
+        ],
+        "requirement_support": "MEPM‑ARTICLE‑19 describes waiver rules and that counties apply spousal impoverishment rules for certain waivers.",
+        "retrieval_support": "MEPM-ARTICLE-19",
+        "effective_date_or_jurisdiction_notes": "California waiver-specific eligibility rules processed by county waiver contacts.",
+        "review_notes": "Intake records marital status and spouse living situation but omits spouse income/asset amounts and ownership details needed for spousal calculations."
+      },
+      {
+        "document_name": "MEPM Article 19 — Special Services (county referral, program status)",
+        "program_or_pathway": "Medi‑Cal / Waiver eligibility — proof of current Medi‑Cal enrollment, case number, and notices",
+        "question": "Is the recipient currently enrolled in Medi‑Cal (BIC/case number) or has an active application/denial notice? Provide dates and case number if available.",
+        "subject_and_period": "Current or recent Medi‑Cal status, last decision or application date (case control).",
+        "intake_field_ids": [
+          "recipient.medicaid_status",
+          "recipient.programs_touched",
+          "recipient.program_status",
+          "case.last_application_or_decision_date",
+          "case.adverse_notice_received",
+          "case.notice_deadline_date"
+        ],
+        "intake_coverage": "sufficient_if_known",
+        "proposed_followup_question": "If the recipient is enrolled or has a case, enter the county case number or Benefits Identification Card (BIC) number and the effective dates or last decision date. If there is an adverse notice, upload or state the notice date and the appeal/deadline date.",
+        "information_to_read": [
+          "MEPM-ARTICLE-19",
+          "ACWDL-25-14"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "County will use existing Medi‑Cal case details, BIC, and notices to determine eligibility and deadlines for appeals; waiver referrals use county contacts.",
+        "trigger_for_asking_fact": "Any self‑report of current enrollment or prior application/denial; especially if applicant reports adverse notice or pending application.",
+        "trigger_for_document_lookup": "County will request benefit letters, approval/denial notices, or BIC for verification and to track deadlines.",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self‑report is sufficient to triage and prioritize urgent deadlines; however, exact case numbers/documents are required for agency followup and appeals.",
+        "alternatives": [
+          "Self‑reported status and dates (screening)",
+          "Benefit letter, BIC, county notice, denial/approval letters (application/agency)"
+        ],
+        "source_ids": [
+          "MEPM-ARTICLE-19",
+          "ACWDL-25-14"
+        ],
+        "requirement_support": "MEPM-ARTICLE-19 outlines county role and referral; ACWDL-25-14 shows notices for failure to provide documentation.",
+        "retrieval_support": "MEPM-ARTICLE-19, ACWDL-25-14",
+        "effective_date_or_jurisdiction_notes": "California Medi‑Cal county-managed benefits and notices.",
+        "review_notes": "Intake collects general program status but not case/BIC numbers or copies of notices — needed for precise appeals or to avoid missed deadlines."
+      },
+      {
+        "document_name": "MEPM Article 19 — Special Services (institutional timelines & facility info)",
+        "program_or_pathway": "Institutional Medi‑Cal / discharge planning / waiver referral",
+        "question": "What is the facility admission date, expected length of stay or discharge date, and facility name/address?",
+        "subject_and_period": "Exact facility admission date and any planned discharge within 7/30/90 days.",
+        "intake_field_ids": [
+          "recipient.living_setting",
+          "recipient.move_timeline",
+          "recipient.facility_length_of_stay"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Enter facility name, admission date (mm/dd/yyyy), and whether a discharge is planned (and date). If discharge is imminent, note the planned residence after discharge.",
+        "information_to_read": [
+          "MEPM-ARTICLE-19"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "Some waiver/eligibility processes may be initiated while the applicant is institutionalized; county waiver contact will coordinate eligibility while in facility.",
+        "trigger_for_asking_fact": "If living_setting indicates hospital, nursing home, rehab, or group home and move_timeline indicates imminent discharge.",
+        "trigger_for_document_lookup": "Facility admission records, discharge summaries, facility paperwork will be requested by county for institutional Medi‑Cal eligibility or waiver referral.",
+        "stage": "screening",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self‑report of dates is sufficient to triage urgency; agency will require facility records for formal processing.",
+        "alternatives": [
+          "Self‑reported admission/discharge dates (screening)",
+          "Facility admission forms, discharge summaries, hospital records (agency followup)"
+        ],
+        "source_ids": [
+          "MEPM-ARTICLE-19"
+        ],
+        "requirement_support": "MEPM‑ARTICLE‑19 discusses county waivers and eligibility initiation while institutionalized and the need to coordinate with county waiver contacts.",
+        "retrieval_support": "MEPM-ARTICLE-19",
+        "effective_date_or_jurisdiction_notes": "California county waiver referral and institutional processing.",
+        "review_notes": "Intake captures general timeframe categories but not exact admission/discharge dates or facility identity needed for county processing and penalty/start date calculations."
+      }
+    ],
+    "missing_eligibility_questions": [
+      "Citizenship / immigration / lawful presence status of the recipient (required for Medi‑Cal eligibility in many categories) — add: 'Is the recipient a U.S. citizen, a lawfully present immigrant, or other/unknown? If not a citizen, what is their immigration status and date of entry?' (application stage will require documents).",
+      "Exact asset values, dates of acquisition, ownership form, and whether assets are jointly owned or in trust (recipient.assets currently only captures types).",
+      "Full transfer history details for any transfers within the lookback period (dates, values, recipients, documentation) rather than only a 30‑month yes/no flag.",
+      "Spouse/partner income and assets breakdown when recipient is married (needed to apply spousal impoverishment rules): spouse name, monthly incomes, asset types and approximate values.",
+      "Specific identification of Medi‑Cal case or BIC, county case number, and dates of recent decisions or notices (case.control data).",
+      "Exact facility admission date (mm/dd/yyyy) when institutionalized (not just categorical length of stay) to compute eligibility and penalty/timelines.",
+      "Clarify the eligibility unit / who should be counted in Medi‑Cal determination (names and relationships of household members, ages) — intake only asks household_size number, not detailed composition.",
+      "Whether the recipient has an active power of attorney or legal representative and contact information (relevant for signatures and outreach during application)."
+    ],
+    "intake_sufficiency_assessment": "The current intake collects many high‑level facts useful for triage (addresses, living setting, ADL needs, rough income band, asset types, program statuses, whether conditions are documented). However it does NOT collect the precise facts required to make a defensible preliminary eligibility determination for Medi‑Cal institutional or waiver pathways: missing are precise asset values and ownership details, transfer descriptions/dates, immigration/citizenship status, spouse income/asset details, exact facility admission dates, and clinician contact/document specifics. For routine non‑LTC MAGI Medi‑Cal screening the intake may be adequate to flag likely eligibility, but for long‑term‑care, waiver, or nursing‑home Medi‑Cal pathways the intake lacks the precision and mandatory application facts needed for a defensible conclusion. Many documentary requirements are application/agency followup, but the intake should capture the missing facts that trigger those followups.",
+    "coverage_gaps": [
+      "No question about recipient citizenship/lawful presence (critical for eligibility determination).",
+      "Asset questions only record presence/type (recipient.assets) not values, acquisition dates, ownership form, or account specifics — prevents preliminary calculation of asset compliance or likely share of cost.",
+      "Transfer lookback is a single yes/no/unsure without details (value, date, recipient) — can't estimate penalty period.",
+      "Spouse information insufficient (no spouse income/asset amounts) to apply spousal impoverishment rules.",
+      "Medical documentation and clinician contact details are not captured (only whether documented/has clinician) — prevents assessing whether medical evidence exists for waiver/waiver referrals.",
+      "Household composition lacks roster (names, ages, relationships) needed to determine Medi‑Cal eligibility unit vs household for income counting.",
+      "No intake capture of case/BIC numbers, benefit letters, or adverse notice copies/dates to reliably triage deadlines (intake captures that a notice exists but not its content or dates).",
+      "Identity and residency documentary requirements are not shown in retrieved sources and the intake does not prompt whether the user has acceptable forms of ID or residency proof — a visibility gap for application readiness."
+    ]
+  },
+  "retrieval_queries": [
+    "California Medi-Cal eligibility verification documents required assets income transfers 30-month lookback institutional nursing facility spousal impoverishment IHSS application required documents proof Medi-Cal long-term services home-and-community-based services documentation medical need physician statement functional assessment 'proof of identity' 'proof of residency' 'proof of income' list of acceptable documents site:ca.gov OR 'Medi-Cal' 'DHCS'"
+  ],
+  "retrieved_sources": {
+    "MEPM-ARTICLE-9:105:ba5ad77e0f": {
+      "title": "MEPM Article 9 — Property",
+      "url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article9-Property.pdf",
+      "document_id": "MEPM-ARTICLE-9",
+      "page": "105",
+      "text": "verification which is intended for \nestate recovery purposes, or if a person handling the deceased individual's estate \ninquiries, the verification should be sent to: \nDepartment of Health Services \nThird Party Liability Branch \nRecovery Section - ER \nMS 4720 \nP.O. Box 997425 \nSacramento, CA 95899-7425 \nSECTION NO.: 50453.7,58023, MANUAL LETTER NO.: 298 DATE: 10/04/05 9F-10 \n58024,58082\n\n\nMEDI-CAL ELIGIBILITY PROCEDURES MANUAL \nEm rnmcd IY27m \nSAMPLE 'SEXVICE SL%314.RY' (Use the company le::erhud wi:h :he company seal ) \n*Name of Insured *Dare of Binh \n*Social Security Nurr.5~: \n*Add= of Insurd \n*Policy Number *Isme Date \n*Insuranct Company \n~~~~ 'Ihe Tod Amount of Benefits Paid for \nLong-Term Care Services Countabie toward the Medi-CaI \n- Propeny Exemprim \nTO the bed: rtris provides you with a total amount of insurance payments tbat \nco~t towards the Mcdi-U Prop- Exemption to be appIied in deramining digibility \nfor the State of California's Medicaid (hfedi-Cai) prom Please exmine this summary \nand carcfUy cornpan your cumnt asset total with the amount If the amount of your \nMcdi-CaI Property Exemption is dose to the amount of rhe you currtntty have, ycux \nmy be dgibie for the Medi-Cd program It is your rrsponsiiiky to make application to \nthe Counry (usudy the Depment of Sod Services) for such efigiibiliry. At the time of \nyour applicatioq a dnerminarion wJ1 be made"
+    },
+    "MEPM-ARTICLE-19:8:cbd9bb857a": {
+      "title": "MEPM Article 19 — Special Services",
+      "url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article19-SpecialServices.pdf",
+      "document_id": "MEPM-ARTICLE-19",
+      "page": "8",
+      "text": "91 DATE: 09/03/04 19D-1\n\n\nMEDI-CAL ELIGIBILITY PROCEDURES MANUAL \nProgram (MSSP), and Department of Developmental Services (DDS) waivers (as described later in \nthese procedures) disregard parental income and resources and also apply spousal impoverishment \nprovisions, the IHSS-residual program does not. Therefore, a beneficiary who is ineligible for the \nIHSS-residual program solely because the IHSS-residual program counted parental income and \nresources or did not apply the spousal impoverishment provisions can receive PCSP if otherwise \neligible. \nII. OVERVIEW \nIf the applicant is in a waiver that uses special eligibility rules and helshe has been determined \nmedically eligible or potentially medically eligible for a particular waiver, the agency responsible for \nthe waiver will refer the applicant to the county contact for a Medi-Cal determination if helshe is not \nalready receiving Medi-Cal with no monthly share of cost. Depending on the circumstances, this \ndetermination may be initiated while the applicant is still institutionalized or in a living arrangement \ndifferent from the setting covered by the waiver. \nThose persons who are applying for waivers that do not follow special eligibility rules, ( Acquired \nImmune Deficiency Syndrome Waiver) or persons who do not or would not have excess property or a \nmonthly share of cost using regular Medi-Cal rules will not"
+    },
+    "MEPM-ARTICLE-19:59:34efce13d0": {
+      "title": "MEPM Article 19 — Special Services",
+      "url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article19-SpecialServices.pdf",
+      "document_id": "MEPM-ARTICLE-19",
+      "page": "59",
+      "text": "a parent is not used in the determination for the applicant or beneficiary child. Institutional \ndeeming rules apply if the waiver applicant is living at home with a spouse. \n0 You are eligible for this program at no cost. \na You are eligible for this program with a monthly share-of-cost of $ \nYou do not have to fill out monthly or quarterly status reports to get Medi-Cal. \nYou must report within ten days any changes in your income, property, medical condition, or \nhousehold situation. \nYou will have to complete a form for your Medi-Cal annual review. \nGetting Medi-Cal does not reduce any time limits for the CalWORKS program. \nPlease notify your worker if there are any changes in your medical condition, living situation, income, \nor property. \nAlways present your Benefits Identification Card (BlC) to your medical provider whenever you need \ncare. This card is good as long as you are eligible for Medi-Cal. DO NOT THROW AWAY YOUR \nBIC. \nThe regulation which requires this action is California Code of Regulations, Title 22, Section 51 346. \ncc: In-Home Operations \nSECTION NO.: 51346 MANUAL LETTER NO.: 291 DATE: 09/03/04 19D-31\n\n\nMEDI-CAL ELIGIBILIN PROCEDURES MANUAL \nSlae of WiiMaHh and HwMn Savhes Agemy E-?wimmt of Health \nMedbC* P- \nNOTIFICACION DE LA ACCION r \nDE MEDI-CAL \n1 \nAPROBACI~N DE BENEFlClOS PARA OBTENER UNA \nEXTENSION A LOS SERVlClOS DE MEDI-CAL PARA EL \nCUIDA"
+    },
+    "MEPM-ARTICLE-19:91:b5584a000c": {
+      "title": "MEPM Article 19 — Special Services",
+      "url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article19-SpecialServices.pdf",
+      "document_id": "MEPM-ARTICLE-19",
+      "page": "91",
+      "text": "isabled housing.  Such individuals must have sufficient funds to pay \nfor their board and room and care and supervision, with some funds remaining to meet \npersonal and incidental needs. In determining Medi-Cal eligibility for individuals who are \napplying for enrollment into the AL Waiver, AL Waiver rules are used, including special AL \nwaiver deeming rules for most married persons.   \n \n You do not have to fill out monthly or quarterly status reports for Medi-Cal. \n You must report to your Medi-Cal worker within 10 days if there are any changes in your \nincome, property, medical                                                                                                                       \nconditions, household situation, or living conditions.  \n You will have to complete a form for your Medi-Cal annual review. \n \nAlways present your Benefits Identification Card (BIC) to your medical provider whenever you \nneed care.  This card is good for as long as you are eligible for Medi-Cal.  DO NOT THROW \nAWAY YOUR BIC.   \n \nThis action is required by Welfare and Institutions Code Section 14132.26.  \n \nIf you have any questions, ask your worker.   \n \nState Hearing:  If you think this action is wrong, you can ask for a hearing.  The back of this \npage tells you how.  \n \ncc:  AL Waiver liaison DHCS Monitoring and Oversight Section \nMC 240\n\n\nMEDI-CAL ELIGIBILITY PROCEDUR"
+    },
+    "ACWDL-25-14:11:3157a90690": {
+      "title": "ACWDL 25-14 — Reinstatement of the Non-MAGI Asset Test",
+      "url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/25-14.pdf",
+      "document_id": "ACWDL-25-14",
+      "page": "11",
+      "text": "Notice Type  English Text Snippet  \nMedi-Cal  \nDenial for  \nFailure to \nProvide Proof \nof Assets  \nWe reviewed your application to see if you are eligible for the Medi-Cal \nprogram. We determined that you are not eligible for the Medi-Cal program for the \nmonth of <MonthYear1>  Here is why:  \n  \n<Person>  you failed to give us required proof of the value of real and/or personal \nproperty that you and your family own to show you are under the asset limit for the \nMedi-Cal program.  \n  \nWe asked you to send us some important information, but we have not received it yet. \nThis information is important to see if you can get Medi-Cal.   \n  \n Keep your Benefits Identification Card (BIC) If you have a plastic Benefits  \nIdentification Card (BIC), be sure to keep it. You will use your BIC number again if you \nqualify for Medi-Cal in the future.   \n  \nBased on California Code of Regulations, Title 22, sections 50175 and 50179.  \nMedi-Cal  \nDiscontinuance \nfor Failure to \nProvide Proof \nof Assets  \nWe reviewed your case to see if you are still eligible for the Medi-Cal program.  \nWe determined that you are not eligible for the Medi-Cal program and the last day of \nyour Medi-Cal is <mm/dd/yyy>  Here is why:  \n  \n<Person>  you failed to give us required proof of the value of real and/or personal \nproperty that you and your family own to show you are under the asset limit for th"
+    },
+    "MEPM-ARTICLE-19:40:f89f7d8b58": {
+      "title": "MEPM Article 19 — Special Services",
+      "url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article19-SpecialServices.pdf",
+      "document_id": "MEPM-ARTICLE-19",
+      "page": "40",
+      "text": "HEALTH SERVICES: Please verify that the above child is currently receiving Medi-Cal \nbenefits and receiving waiver services. \nCcunty adaress (number Nee11 \nSlgnaure 01 state authcfmng -n \nC~ty \n> \nWhite: Parent copy \nDHS 7071 (1104) \n( 1 \nState address (numb% Sueell \nYellow- County copy \nStale \nTele~hone Rlnled name \nSECTION NO.: 51346 MANUAL LETTER NO.: 29 1 DATE: 09/03/04 19D-17 \nZIP me \nlitle \nCll y \n( ) \nStale ZIP code\n\n\n-- - \nMEDI-CAL ELIGIBILITY PROCEDURES MANUAL \nStale ol CaofcmlbHeenh and Hman Sewer Agency \nMEDI-CAL r \nNOTICE OF ACTION \nDepartment of Developmental Services \nWaiver \nApproval for Benefits \nDepartment 01 Healm Savlce. \n7 \n(COUNPT STAMP) \n1 \nNotice date: \nCase number: \nWorker name: \nWorker number: ' \nWorker telephone number: \nJ \nOffice hours: \nNotice for: \nThe Department of Developmental Services Waiver program is limited to developmentally disabled persons \nwho live at home and meet the admission criteria for an intermediate care facility for the developmentally \ndisabled. \n0 You are eligible for this program at no cost. \n0 You are eligible for this program with a monthly share-of-cost of $ \nPlease notify your worker if there are any changes in your medical condition, living situation, income, or \nproperty. \nAlways present your Benefits Identification Card (BIC) to your medical provider whenever you need care. This \ncard is good as long as you are"
+    },
+    "MEPM-ARTICLE-19:41:dc48ce0239": {
+      "title": "MEPM Article 19 — Special Services",
+      "url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article19-SpecialServices.pdf",
+      "document_id": "MEPM-ARTICLE-19",
+      "page": "41",
+      "text": "edical condition, living situation, income, or \nproperty. \nAlways present your Benefits Identification Card (BIC) to your medical provider whenever you need care. This \ncard is good as long as you are eligible for Medi-Cal. DO NOT THROW AWAY YOUR BIC. \nThe regulation which requires this action is California Code of Regulations, Title 22, Section 51346. \ncc: Regional Center \nPLEASE READ THE REVERSE SIDE OF THIS NOTICE. \nkc341 ~8102) \n-- --- \nSECTION NO.: 51346 MANUAL LETTER NO.: 29 1 DATE: 09/03/04 19D-18\n\n\nMEDI-CAL ELIGIBILITY PROCEDURES MANUAL \nslate d Califmda-H&h and Hunan Services Agwnl 0- d H&h \nNOTIFICACI~N DE ACCION r \nDE MEDI-CAL \n1 \nAprobaci6n de la Extensi6n de Beneficios \ndel Departamento de Se~icios para Personas \ncon lncapacidades Adquiridas al Nacer o \nDurante el Desarrolo L \n(COUNTY STAMP) \n_I \n1 \nFecha de la notificaci6n: \nNumero del caso: \nNombre del trabajador: \nNbmero del trabajador: \nNumero de telefqno del trabajador: \nJ \nHoras hlbiles: \nNotificacbn para: \nEl programa de Extensibn de Beneficios del Departamento de Servicios a Personas con lncapacidades \nAdquiridas al Nacer o Durante el Desarrollo se limita a personas incapacitadas, desde el punto de vista del \ndesarrollo, que viven en el hogar, y que cumplen con 10s criterios de ingreso de un centro de convalecencia de \ncuidados intermedios para las personas incapacitadas desde el punto de vista del"
+    },
+    "MEPM-ARTICLE-19:9:04bd946a81": {
+      "title": "MEPM Article 19 — Special Services",
+      "url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article19-SpecialServices.pdf",
+      "document_id": "MEPM-ARTICLE-19",
+      "page": "9",
+      "text": "TE: Some people may not lose \nMedi-Cal, may not have a share of cost or will continue on SSI and SSI-based Medi- \ncal upon returning home because the family incomelproperty is below the Medi-cal \nor SSI limit. Persons who continue to be or are eligible for SSI or qualify for a zero \nSOC Medi-Cal because the family incomelproperty is below the limit do not need to \nbe determined using special eligibility rules for the HCBS, MSSP, or DDS waivers. \nB. County Contact \nEach county shall designate a waiver contact person. The county waiver contact person will \nreceive the request for a Medi-Cal eligibility determination from the referring agency, \ncoordinate the Medi-Cal eligibility determination, and answer questions about the program \neven though the actual determination may be made by other county staff. The contact for \neach county is attached to these procedures. It is important that applicants be directed to \nthe county contacts because they understand how to process those waivers that disregard \nparental income and resources and apply spousal impoverishment rules. Once the county \nreceives a referral, the county will determine Medi-Cal eligibility based on the criteria for the \nappropriate waiver including the living arrangement covered by the waiver. \nI \n111. WAIVERS TYPES \nThere are four types of waivers that are discussed in these Procedures. The first three may have \nspeci"
+    }
+  },
+  "validation_issues": [
+    {
+      "row": 1,
+      "unmatched_source_ids": [
+        "ACWDL-25-14",
+        "MEPM-ARTICLE-9"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 2,
+      "unmatched_source_ids": [
+        "MEPM-ARTICLE-9"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 3,
+      "unmatched_source_ids": [
+        "MEPM-ARTICLE-19"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 4,
+      "unmatched_source_ids": [
+        "ACWDL-25-14"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 5,
+      "unmatched_source_ids": [
+        "MEPM-ARTICLE-19"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 6,
+      "unmatched_source_ids": [
+        "ACWDL-25-14",
+        "MEPM-ARTICLE-19"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 7,
+      "unmatched_source_ids": [
+        "MEPM-ARTICLE-19"
+      ],
+      "unknown_intake_fields": []
+    }
+  ],
+  "retrieval_events": []
+}

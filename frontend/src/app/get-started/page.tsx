@@ -10,7 +10,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Logo } from "@/components/logo";
+import { SiteHeader } from "@/components/site-header";
 import { useAuth } from "@/lib/auth-context";
 
 export default function GetStartedPage() {
@@ -35,11 +35,7 @@ export default function GetStartedPage() {
 
   return (
     <main className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
-          <Logo />
-        </div>
-      </header>
+      <SiteHeader actions={null} />
 
       <section className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
           <Card className="w-full px-8 py-6">
@@ -55,7 +51,7 @@ export default function GetStartedPage() {
               </p>
             </CardHeader>
             <CardContent>
-              <Button className="w-full py-3 text-base" render={<Link href={nextHref} />}>
+              <Button size="lg" className="w-full" render={<Link href={nextHref} />}>
                 {user.case_id ? "See my results" : "Start benefits intake"}
                 <ArrowRight className="size-4" />
               </Button>

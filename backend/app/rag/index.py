@@ -26,6 +26,7 @@ from ..config import get_settings
 from .embeddings import dim, embed, embed_one
 from .embeddings import model_id as embedding_id
 from .embeddings import provider as embedding_provider
+from .scope import PolicyMetadata, RetrievalScope
 
 _DATA = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 KNOWLEDGE_DIR = os.path.join(_DATA, "knowledge")
@@ -48,6 +49,7 @@ class Chunk:
     document_id: str = ""
     page: str = ""
     vector: list[float] = field(default_factory=list)
+    policy: PolicyMetadata = field(default_factory=PolicyMetadata)
 
 
 @dataclass
@@ -60,13 +62,14 @@ class Document:
     title: str = ""
     source_url: str = ""
     legacy: bool = False
+    policy: PolicyMetadata = field(default_factory=PolicyMetadata)
 
     def chunks(self) -> list[Chunk]:
         if self.legacy:
             text = self.text.replace("\x00", "")
             return [
                 Chunk(id=f"{self.program}:{i}", program=self.program, text=piece,
-                      source=self.document_id, document_id=self.document_id)
+                      source=self.document_id, document_id=self.document_id, policy=self.policy)
                 for i in range(0, len(text), CHUNK_CHARS)
                 if (piece := text[i : i + CHUNK_CHARS].strip())
             ]
@@ -80,6 +83,7 @@ class Document:
                 source_url=self.source_url,
                 document_id=self.document_id,
                 page=str(page),
+                policy=self.policy,
             )
             for n, (piece, page) in enumerate(_chunk_text(self.text))
         ]
@@ -109,6 +113,7 @@ class Retrieved:
     source_url: str = ""
     document_id: str = ""
     page: str = ""
+    policy: dict = field(default_factory=dict)
 
 
 def _chunk_text(text: str) -> list[tuple[str, str]]:
@@ -130,23 +135,21 @@ def _chunk_text(text: str) -> list[tuple[str, str]]:
 
 
 def _iter_corpus_documents() -> Iterator[Document]:
-    manifest_path = os.path.join(KNOWLEDGE_DIR, "manifest.json")
-    if not os.path.exists(manifest_path):
-        return
-    with open(manifest_path, encoding="utf-8") as fh:
-        manifest = json.load(fh)
-    for doc in manifest.get("docs", []):
-        path = os.path.join(KNOWLEDGE_DIR, doc["text_path"])
-        if not os.path.exists(path):
-            continue
-        with open(path, encoding="utf-8") as fh:
-            text = fh.read()
+    """The authored RAG corpus, DB-first (reference.rag_sources) with a file fallback.
+
+    Source of truth moved into Postgres; this maps each source row/file to the Document
+    the chunker consumes. The embedded vectors remain in public.rag_chunks.
+    """
+    from .source_store import iter_sources
+
+    for src in iter_sources():
         yield Document(
-            document_id=doc["document_id"],
-            program=doc["program"],
-            text=text,
-            title=doc.get("title", ""),
-            source_url=doc.get("source_url", ""),
+            document_id=src.document_id,
+            program=src.program,
+            text=src.text,
+            title=src.title,
+            source_url=src.source_url,
+            policy=src.policy,
         )
 
 
@@ -266,7 +269,7 @@ class RagIndex:
             return len(self._chunks)
         return _no_build(self.backend)
 
-    def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
+    def search(self, query: str, k: int = 4, *, scope: RetrievalScope) -> list[Retrieved]:
         if not self._chunks:
             return []
         qv = embed_one(query)
@@ -274,9 +277,10 @@ class RagIndex:
             Retrieved(
                 text=c.text, program=c.program, source=c.source, score=_cosine(qv, c.vector),
                 title=c.title, source_url=c.source_url, document_id=c.document_id, page=c.page,
+                policy=c.policy.evidence(),
             )
             for c in self._chunks
-            if not program or c.program == program
+            if c.policy.allows(scope)
         ]
         results.sort(key=lambda r: r.score, reverse=True)
         return results[:k]
@@ -322,6 +326,10 @@ class PgVectorIndex:
         n = self._count()
         if n:
             self._check_dim()
+            with self._pool.connection() as conn:
+                row = conn.execute("SELECT to_regclass('rag_document_scopes')").fetchone()
+            if not row or row[0] is None:
+                raise RuntimeError("Policy scope catalog missing; run app.rag.ingest --metadata-only before serving.")
             self._size = n
             return n
         return _no_build(self.backend)
@@ -379,6 +387,50 @@ class PgVectorIndex:
         conn.execute(f"CREATE INDEX ON {self.TABLE} (program)")  # noqa: S608
         conn.execute(f"CREATE INDEX ON {self.TABLE} (document_id)")  # noqa: S608
 
+    def _create_scope_schema(self, conn) -> None:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS rag_document_scopes (
+                document_id text PRIMARY KEY,
+                applicable_programs text[] NOT NULL,
+                jurisdictions text[] NOT NULL,
+                effective_from date,
+                effective_to date,
+                authority_level text NOT NULL DEFAULT '',
+                version text NOT NULL DEFAULT '',
+                CHECK (effective_from IS NULL OR effective_to IS NULL OR effective_to > effective_from)
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS rag_scope_programs ON rag_document_scopes USING gin (applicable_programs)")
+        conn.execute("CREATE INDEX IF NOT EXISTS rag_scope_jurisdictions ON rag_document_scopes USING gin (jurisdictions)")
+
+    def _write_scope(self, conn, doc: Document) -> None:
+        policy = doc.policy
+        if not policy.jurisdictions:
+            logger.warning("Excluding unclassified document from retrieval: %s", doc.document_id)
+        conn.execute("""
+            INSERT INTO rag_document_scopes
+                (document_id, applicable_programs, jurisdictions, effective_from,
+                 effective_to, authority_level, version)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (document_id) DO UPDATE SET
+                applicable_programs = EXCLUDED.applicable_programs,
+                jurisdictions = EXCLUDED.jurisdictions,
+                effective_from = EXCLUDED.effective_from,
+                effective_to = EXCLUDED.effective_to,
+                authority_level = EXCLUDED.authority_level,
+                version = EXCLUDED.version
+        """, (doc.document_id, list(policy.applicable_programs), list(policy.jurisdictions),
+              policy.effective_from, policy.effective_to, policy.authority_level, policy.version))
+
+    def sync_metadata(self) -> int:
+        """Add/update scope metadata without changing vectors or source text."""
+        docs = list(iter_documents())  # validate all metadata before starting writes
+        with self._pool.connection() as conn:
+            self._create_scope_schema(conn)
+            for doc in docs:
+                self._write_scope(conn, doc)
+        return len(docs)
+
     def _write_document(self, conn, doc: Document, fingerprint: str) -> int:
         """Replace one document's rows. Delete-then-insert so removed chunks don't linger."""
         conn.execute(f"DELETE FROM {self.TABLE} WHERE document_id = %s", (doc.document_id,))  # noqa: S608
@@ -403,7 +455,9 @@ class PgVectorIndex:
     def build(self) -> int:
         with self._pool.connection() as conn:
             self._create_schema(conn)
+            self._create_scope_schema(conn)
             for doc in iter_documents():
+                self._write_scope(conn, doc)
                 self._write_document(conn, doc, doc.fingerprint())
         self._size = self._count()
         return self._size
@@ -416,6 +470,7 @@ class PgVectorIndex:
         merge rather than hand-triggering a 17-minute rebuild.
         """
         with self._pool.connection() as conn:
+            self._create_scope_schema(conn)
             stored_dim = self._stored_dim(conn)
             if stored_dim and stored_dim != self._dim:
                 # A different-width vector column can't be written into or compared against.
@@ -436,6 +491,7 @@ class PgVectorIndex:
             changed = 0
             seen: set[str] = set()
             for doc in iter_documents():
+                self._write_scope(conn, doc)
                 seen.add(doc.document_id)
                 fingerprint = doc.fingerprint()
                 if existing.get(doc.document_id) == fingerprint:
@@ -451,26 +507,37 @@ class PgVectorIndex:
         self._size = self._count()
         return SyncResult(changed=changed, removed=len(removed), total=self._size)
 
-    def search(self, query: str, k: int = 4, program: str | None = None) -> list[Retrieved]:
+    def search(self, query: str, k: int = 4, *, scope: RetrievalScope) -> list[Retrieved]:
         if not self._size:
             return []  # never ingested: the table may not even exist
         qv = _vector_literal(embed_one(query))
-        sql = (
-            "SELECT text, program, source, title, source_url, document_id, page, "
-            f"1 - (embedding <=> %s::vector) AS score FROM {self.TABLE} "  # noqa: S608
-        )
-        params: list[object] = [qv]
-        if program:
-            sql += "WHERE program = %s "
-            params.append(program)
-        sql += "ORDER BY embedding <=> %s::vector LIMIT %s"
-        params += [qv, k]
+        # Materialize the eligible subset before ranking. A global ANN scan followed
+        # by selective state/program filters can underfill top-k and lose relevant hits.
+        # Exact ranking is deliberate for today's corpus; benchmark partitions before
+        # switching to approximate search as it grows.
+        sql = f"""
+            WITH eligible AS MATERIALIZED (
+                SELECT c.*, m.applicable_programs, m.jurisdictions, m.effective_from,
+                       m.effective_to, m.authority_level, m.version
+                FROM {self.TABLE} c JOIN rag_document_scopes m USING (document_id)
+                WHERE m.applicable_programs @> %s::text[]
+                  AND m.jurisdictions && %s::text[]
+                  AND (m.effective_from IS NULL OR m.effective_from <= %s::date)
+                  AND (m.effective_to IS NULL OR %s::date < m.effective_to)
+            )
+            SELECT text, program, source, title, source_url, document_id, page,
+                   1 - (embedding <=> %s::vector), applicable_programs, jurisdictions,
+                   effective_from, effective_to, authority_level, version
+            FROM eligible ORDER BY embedding <=> %s::vector LIMIT %s
+        """
+        params = [[scope.program], scope.jurisdictions, scope.as_of, scope.as_of, qv, qv, k]
         with self._pool.connection() as conn:
             rows = conn.execute(sql, params).fetchall()
         return [
             Retrieved(
                 text=r[0], program=r[1], source=r[2], title=r[3], source_url=r[4],
                 document_id=r[5], page=r[6], score=float(r[7]),
+                policy=PolicyMetadata(tuple(r[8]), tuple(r[9]), r[10], r[11], r[12], r[13]).evidence(),
             )
             for r in rows
         ]
@@ -497,12 +564,13 @@ def _make_index(*, force: bool):
             idx = PgVectorIndex(settings.database_url)
             idx.build()
             return idx
+        idx = PgVectorIndex(settings.database_url)
         try:
-            idx = PgVectorIndex(settings.database_url)
             idx.ensure()
-            return idx
         except Exception:
-            logger.exception("pgvector index unavailable — falling back")
+            idx._pool.close()
+            raise
+        return idx
     idx = RagIndex()
     idx.build() if force else idx.ensure()
     return idx

@@ -113,6 +113,13 @@ def main() -> None:
             "source_url": md.get("resolved_url") or md.get("url", ""),
             "priority": md.get("priority", ""),
             "authority_level": md.get("authority_level", ""),
+            # Scope must be curated in source metadata; missing jurisdictions are
+            # excluded from retrieval rather than inferred from agency/program names.
+            "jurisdictions": md.get("jurisdictions", []),
+            "applicable_programs": md.get("applicable_programs", [program]),
+            "effective_from": md.get("effective_from"),
+            "effective_to": md.get("effective_to"),
+            "version": md.get("version", ""),
             "distribution": "not_shareable" if distribution_dir == "not_shareable" else "shareable",
             "tags": md.get("tags", []),
             "source_ext": os.path.splitext(chosen)[1].lower().lstrip("."),

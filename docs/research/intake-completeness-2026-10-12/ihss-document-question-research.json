@@ -1,0 +1,445 @@
+{
+  "program": "IHSS",
+  "doc_key": "ihss",
+  "generated_at": "2026-10-13T02:52:19.171708+00:00",
+  "execution": "Separate direct research invocation with Ilera Azure model and program-scoped RAG, not the hosted Durable endpoint",
+  "direct_question": "Audit the CURRENT refactored intake for completeness, not just documents. Can we make an accurate eligibility screening conclusion from these answers? List all missing facts, conditional visibility failures, precision gaps, program-specific eligibility-unit inputs, and mandatory unresolved criteria. Include concise simple followup wording and exactly when to ask it. Separate criteria facts from application paperwork.\nWhat external documents would possibly be needed, and what rules/triggers necessitate them? Give a concrete document-to-question matrix for your program. Show questions already in our intake, questions needing further detail, and questions belonging in the actual application session. Assess whether our intake supports accurate preliminary eligibility conclusions. Retrieve official sources before answering. ",
+  "result": {
+    "mappings": [
+      {
+        "document_name": "IHSS Program Health Care Certification (SOC 873) or acceptable alternative",
+        "program_or_pathway": "California IHSS initial medical eligibility",
+        "question": "Is there a signed IHSS health-care certification (SOC 873) or equivalent medical statement for [recipient name], dated within the last 60 days?",
+        "subject_and_period": "Recipient functional/medical need; certification date within 60 days of application submission",
+        "intake_field_ids": [
+          "recipient.condition_documented",
+          "recipient.has_certifying_clinician"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Do you have a completed IHSS Health Care Certification (SOC 873) or a medical note from an approved clinician dated within the last 60 days?",
+        "information_to_read": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-CASE-ASSESSMENT-CHECKLIST",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "CDSS requires a department-approved Health Care Certification (SOC 873) or acceptable alternative; the certification must not be dated more than 60 days prior to submission (MPP 30-754 .12 and .2, and SOC checklist lists SOC 873 as a required form).",
+        "trigger_for_asking_fact": "Any initial screening for IHSS eligibility or when recipient.condition_documented is Yes/I'm not sure; when applicant requests help applying.",
+        "trigger_for_document_lookup": "If applicant reports documented condition, or reports a certifying clinician; also when planning to submit an application or scheduling county visit.",
+        "stage": "split",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes — a 'Yes' plus clinician existence supports a preliminary medical-eligibility referral, but date precision matters (self-report of 'has a recent SOC 873 dated <60 days' makes a stronger preliminary determination).",
+        "alternatives": [
+          "Medical note from listed clinician types (physician, PA, RN, OT, PT, psychiatrist, psychologist, optometrist/ophthalmologist, public health nurse, LCSW, MFT) meeting CDSS alternative-document criteria (see MPP 30-754 .21)."
+        ],
+        "source_ids": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-CASE-ASSESSMENT-CHECKLIST",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "requirement_support": "MPP 30-754 (.12/.2/.21) requires SOC 873 or acceptable alternative and 60‑day recency; Case Assessment Checklist lists SOC 873 as required form.",
+        "retrieval_support": "IHSS-MPP-30-700-764; IHSS-CASE-ASSESSMENT-CHECKLIST",
+        "effective_date_or_jurisdiction_notes": "California IHSS rules per CDSS. Refer to most recent CDSS MPP (Div.30) as cited.",
+        "review_notes": "Intake asks whether needs are documented and whether a certifying clinician exists, but lacks a direct question about SOC 873 existence, clinician license type, and date — add question to reduce county follow-up."
+      },
+      {
+        "document_name": "Proof of identity and SSN card for Applicant/Recipient",
+        "program_or_pathway": "IHSS application and provider enrollment",
+        "question": "Can you provide a government-issued photo ID and the Social Security Number (SSN) card for the applicant/recipient?",
+        "subject_and_period": "Recipient identity and SSN at time of application; original or photocopy viewed at intake/home visit",
+        "intake_field_ids": [
+          "caregiver.first_name",
+          "caregiver.last_name",
+          "caregiver.address.state",
+          "recipient.first_name",
+          "recipient.last_name",
+          "recipient.date_of_birth"
+        ],
+        "intake_coverage": "missing",
+        "proposed_followup_question": "Do you have a government-issued photo ID (e.g., CA ID or driver license) and the recipient’s Social Security Number or SSN card available for the application?",
+        "information_to_read": [
+          "IHSS-CASE-ASSESSMENT-CHECKLIST",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "Case Assessment Checklist and Field Handbook record that social workers must view original or photocopy of government-issued photo ID and SSN card during the visit and include these forms in the application package.",
+        "trigger_for_asking_fact": "Always at application intake or when aiming to reach a definitive eligibility decision; identity and SSN are prerequisites for enrollment, benefits verification and provider hire checks.",
+        "trigger_for_document_lookup": "If the user cannot self-report SSN or lacks ID, county will request originals; Ilera should flag as application-only required documents.",
+        "stage": "application",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "No — for a defensible preliminary eligibility decision you can accept self-report for screening, but final eligibility and provider enrollment require viewing ID/SSN by county.",
+        "alternatives": [
+          "County may accept alternate ID or duplicate evidence per county policy; but SOC checklist expects ID and SSN card.",
+          "If SSN not available, county procedures differ — agency follow-up required."
+        ],
+        "source_ids": [
+          "IHSS-CASE-ASSESSMENT-CHECKLIST",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "requirement_support": "SOC checklist explicitly lists government-issued photo ID and SSN card as validation items.",
+        "retrieval_support": "IHSS-CASE-ASSESSMENT-CHECKLIST",
+        "effective_date_or_jurisdiction_notes": "County social worker must view originals/photocopies at home visit or application appointment.",
+        "review_notes": "Intake currently collects names, addresses and DOB but not explicit availability of ID/SSN; add an application-stage prompt and flag for county."
+      },
+      {
+        "document_name": "Medi-Cal proof / Benefit award letter / Share-of-cost",
+        "program_or_pathway": "IHSS eligibility depends on Medi-Cal/SSI/SSP status",
+        "question": "Is [recipient name] currently enrolled in Medi‑Cal (Medi‑Cal card or award letter), and if not enrolled, do they meet SSI/SSP criteria or have a documented share‑of‑cost?",
+        "subject_and_period": "Recipient current Medi‑Cal status and any share‑of‑cost for the month of application",
+        "intake_field_ids": [
+          "recipient.medicaid_status",
+          "recipient.current_benefits",
+          "recipient.monthly_income_range",
+          "recipient.assets"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Do you have a Medi‑Cal award letter or Medi‑Cal ID card for [recipient name], or documentation of SSI/SSP enrollment? If not enrolled, do you know the recipient’s share‑of‑cost (if any)?",
+        "information_to_read": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-FIELD-HANDBOOK",
+          "IHSS-TRAINING-ACADEMY-INDEX"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "IHSS eligibility ties to SSI/SSP criteria or Medi‑Cal; MPP 30‑755.11 lists categories (receives SSI/SSP, meets SSI/SSP criteria but not receiving, meets criteria except income, etc.). County must check Medi‑Cal eligibility and share‑of‑cost during intake and assessment.",
+        "trigger_for_asking_fact": "Always for IHSS screening — recipient.medicaid_status is already asked but additional precision (award letter, SOC) is required when self‑report is uncertain or income/assets near program limits.",
+        "trigger_for_document_lookup": "If recipient reports being enrolled, request Medi‑Cal award letter or card at application stage; if not enrolled but appears to meet SSI/SSP criteria, request full income and asset details and documentation.",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Partial — an enrollment self-report can support a preliminary referral, but exact SOC and asset details are agency verification tasks; ranges for income may be insufficient.",
+        "alternatives": [
+          "Benefit letters, Medi‑Cal ID, county Medi‑Cal system lookup by county.",
+          "If self‑reported income is a wide range, request paystubs/benefit letters for accuracy during application."
+        ],
+        "source_ids": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "requirement_support": "MPP 30‑755.1 eligibility categories; Field Handbook step 1 advises checking current Medi‑Cal eligibility and share‑of‑cost.",
+        "retrieval_support": "IHSS-MPP-30-700-764; IHSS-FIELD-HANDBOOK",
+        "effective_date_or_jurisdiction_notes": "State rules — applicant must be California resident and fit one of listed eligibility categories; documentation handled at county.",
+        "review_notes": "Intake asks medicaid_status and monthly income range but lacks SOC, exact income and asset dollar amounts and household income breakdown needed for accurate SSI/SSI‑related screening."
+      },
+      {
+        "document_name": "Proof of California residency (address documentation)",
+        "program_or_pathway": "IHSS residency requirement",
+        "question": "Does [recipient name] live in California? Can you provide proof (utility bill, lease, mailing address) if requested?",
+        "subject_and_period": "Recipient residence — current address; proof dated near application",
+        "intake_field_ids": [
+          "caregiver.address.state",
+          "recipient.address.state",
+          "caregiver.coresidence"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "What is [recipient name]’s current address and state? If not in California, do they plan to move to California?",
+        "information_to_read": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "MPP 30‑755.1 states eligibility for IHSS requires California residency (living in own home in California). County staff must verify residency during intake/assessment.",
+        "trigger_for_asking_fact": "Always — to determine jurisdiction and whether county IHSS applies.",
+        "trigger_for_document_lookup": "If address indicates out‑of‑state or ambiguous, request proof of residence documentation at application stage or county will verify.",
+        "stage": "screening",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Yes for preliminary screening (self‑reported state can be used), but county will verify with documentation at application.",
+        "alternatives": [
+          "Driver license, utility bill, lease, official mail.",
+          "If caregiver and recipient co‑reside, caregiver address suffices for preliminary screening but county will verify."
+        ],
+        "source_ids": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "requirement_support": "MPP specifies California resident requirement for IHSS eligibility.",
+        "retrieval_support": "IHSS-MPP-30-700-764",
+        "effective_date_or_jurisdiction_notes": "California only.",
+        "review_notes": "Intake captures addresses for caregiver and recipient contingent on coresidence, so coverage is mostly sufficient if date_of_birth is used to compute age and state fields are filled. Add explicit residency confirmation question to remove ambiguity."
+      },
+      {
+        "document_name": "Provider enrollment records and DOJ/CORI background check results",
+        "program_or_pathway": "IHSS provider eligibility / employment verification",
+        "question": "Are you (caregiver) eligible and willing to complete provider enrollment, including DOJ background check and employment eligibility verification?",
+        "subject_and_period": "Caregiver provider enrollment at time of hire/application; CORI is agency‑run criminal history check",
+        "intake_field_ids": [
+          "caregiver.payment_status",
+          "caregiver.employment_status",
+          "caregiver.employer_type"
+        ],
+        "intake_coverage": "missing",
+        "proposed_followup_question": "If you want to be paid through IHSS, are you able to complete provider enrollment (identity, SSN, and background check)? Have you ever been denied employment as an IHSS provider due to criminal history?",
+        "information_to_read": [
+          "IHSS-MPP-30-765-785",
+          "IHSS-CASE-ASSESSMENT-CHECKLIST"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "MPP sections (30‑777/30‑778) govern provider employment eligibility verification and general exceptions; county conducts DOJ CORI and may exclude certain convictions. County/local public authority performs provider enrollment.",
+        "trigger_for_asking_fact": "If caregiver.payment_status indicates they are or want to be paid through IHSS or if user asks about paid care pathway.",
+        "trigger_for_document_lookup": "County requests identity documents, SSN and completes CORI; Ilera should flag as application/agency task rather than gathering documents in screening.",
+        "stage": "application",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "No — self‑report that you want to be paid is sufficient for pathway recommendation, but provider eligibility depends on agency background checks and documentation.",
+        "alternatives": [
+          "County Public Authority enrollment forms, live scan fingerprints, DOJ results; if previously enrolled, provider ID may suffice for verification."
+        ],
+        "source_ids": [
+          "IHSS-MPP-30-765-785",
+          "IHSS-CASE-ASSESSMENT-CHECKLIST"
+        ],
+        "requirement_support": "MPP sections on Provider Employment Eligibility and General Exception Requirements; Case Checklist includes provider forms.",
+        "retrieval_support": "IHSS-MPP-30-765-785",
+        "effective_date_or_jurisdiction_notes": "County-controlled enforcement; policy updated per MPP.",
+        "review_notes": "Intake asks whether caregiver is paid through IHSS but does not collect provider enrollment readiness or previous denial history; add targeted question to flag potential CORI exclusion early."
+      },
+      {
+        "document_name": "SOC 321 (Request for Order and Consent – Paramedical Services) or physician orders",
+        "program_or_pathway": "IHSS paramedical/medical tasks authorization",
+        "question": "Does [recipient name] require paramedical tasks (e.g., catheter care, tracheostomy care) that would require a SOC 321 or physician order?",
+        "subject_and_period": "Paramedical service need at time of assessment; orders as current medical documentation",
+        "intake_field_ids": [
+          "recipient.adl_needs",
+          "recipient.condition_categories",
+          "recipient.has_certifying_clinician"
+        ],
+        "intake_coverage": "missing",
+        "proposed_followup_question": "Do they currently require paramedical treatments (e.g., wound care, catheter care, injections) that would require a physician’s order or an SOC 321 form? If yes, who provided the order and when?",
+        "information_to_read": [
+          "IHSS-CASE-ASSESSMENT-CHECKLIST",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "The Case Checklist and Assessment tools list SOC 321 (Request for Order and Consent – Paramedical Services) as a required form when paramedical services are requested/authorized.",
+        "trigger_for_asking_fact": "If applicant selects any ADL/task that potentially includes paramedical treatment or responds Yes to needing skilled care.",
+        "trigger_for_document_lookup": "If paramedical need reported — request SOC 321 signed by authorized clinician at application/agency stage.",
+        "stage": "application",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "No — self‑report flags the need, but paramedical services require provider-signed orders for authorization by county.",
+        "alternatives": [
+          "Physician order, signed medical note, SOC 321 form."
+        ],
+        "source_ids": [
+          "IHSS-CASE-ASSESSMENT-CHECKLIST",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "requirement_support": "SOC checklist lists SOC 321 as required when paramedical services are needed.",
+        "retrieval_support": "IHSS-CASE-ASSESSMENT-CHECKLIST",
+        "effective_date_or_jurisdiction_notes": "Paramedical tasks have stricter documentation and clinician-type requirements per field handbook.",
+        "review_notes": "Intake captures ADL tasks but does not explicitly ask about paramedical tasks or require clinician order details; add to avoid county follow‑up."
+      },
+      {
+        "document_name": "Asset documentation and transfer history for institutionalized applicants (look‑back)",
+        "program_or_pathway": "IHSS eligibility for nursing‑home transfers and share‑of‑cost determinations",
+        "question": "Has [recipient name] transferred or given away money/property in the last 30 months? Can you provide dates/amounts/recipients?",
+        "subject_and_period": "Transfers within the 30‑month lookback period prior to application (if in nursing home) and current asset balances",
+        "intake_field_ids": [
+          "recipient.recent_transfers",
+          "recipient.assets",
+          "recipient.living_setting",
+          "recipient.facility_length_of_stay"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "If they are in a nursing facility, did they transfer money or property in the last 30 months? If yes, when and what was transferred (describe)?",
+        "information_to_read": [
+          "IHSS-FIELD-HANDBOOK",
+          "IHSS-MPP-30-700-764"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "When applicant is in a nursing facility, transfers within the look‑back period may affect Medi‑Cal/Medi‑Cal eligibility; the intake checklist includes asking about transfers for nursing‑home applicants.",
+        "trigger_for_asking_fact": "Show when living_setting = Nursing home or skilled nursing facility (intake already does); ask for details if recipient.recent_transfers = Yes or I'm not sure.",
+        "trigger_for_document_lookup": "If transfers reported or suspected, county requests bank/property records, deeds, affidavits during application/agency follow‑up.",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self‑report suffices to flag risk/need for assistance; precise amounts/dates require documentation for determinations.",
+        "alternatives": [
+          "Property deeds, bank statements, transfer documents, trust documents."
+        ],
+        "source_ids": [
+          "IHSS-FIELD-HANDBOOK",
+          "IHSS-MPP-30-700-764"
+        ],
+        "requirement_support": "Field handbook and MPP reference transfer look‑back and asset review for institutionalized applicants; intake already asks a limited question but lacks required precision.",
+        "retrieval_support": "IHSS-FIELD-HANDBOOK",
+        "effective_date_or_jurisdiction_notes": "County-level verification; California look‑back applies to Medi‑Cal program rules relevant to IHSS eligibility for institutionalized applicants.",
+        "review_notes": "Intake asks whether transfers occurred but does not capture dates, amounts or recipients — add follow‑ups when indicated."
+      },
+      {
+        "document_name": "Household composition and income documentation (for SSI/Medi‑Cal counting)",
+        "program_or_pathway": "SSI/SSP or Medi‑Cal financial‑eligibility screening relevant to IHSS",
+        "question": "Who else lives in the household (relationship and income sources)? Can you provide recent pay stubs, benefit letters, or bank statements to confirm monthly household income and assets?",
+        "subject_and_period": "Household members, current month/year income and assets (recent 1–12 months as needed)",
+        "intake_field_ids": [
+          "recipient.household_size",
+          "recipient.marital_status",
+          "recipient.spouse_living_situation",
+          "recipient.monthly_income_range",
+          "recipient.assets"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "List household members and their relationship to the recipient. Do any household members receive income (wages, SSI/SSDI, pensions, VA, etc.)?",
+        "information_to_read": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "Financial eligibility for SSI/SSP‑based categories and Medi‑Cal may require counting household income and assets; county verifies income/asset thresholds and household composition.",
+        "trigger_for_asking_fact": "When monthly_income_range is near program limits, or when recipient.medicaid_status = 'Has not applied' but may qualify; also for tax‑related pathways.",
+        "trigger_for_document_lookup": "If self‑reported income/assets are incomplete or near thresholds, request pay stubs, benefit letters, bank statements at application stage.",
+        "stage": "split",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Ranges are sufficient for high‑level triage (e.g., likely ineligible if $5,000+/mo), but insufficient for precise financial eligibility due to countable income rules and asset/resource limits.",
+        "alternatives": [
+          "Recent pay stubs, SSA award letters, bank statements, property titles."
+        ],
+        "source_ids": [
+          "IHSS-MPP-30-700-764",
+          "IHSS-FIELD-HANDBOOK"
+        ],
+        "requirement_support": "MPP ties IHSS eligibility to SSI/SSP criteria and Medi‑Cal; county must confirm income/asset thresholds and household composition.",
+        "retrieval_support": "IHSS-MPP-30-700-764; IHSS-FIELD-HANDBOOK",
+        "effective_date_or_jurisdiction_notes": "County applies Medi‑Cal and SSI/SSP financial rules; ranges in intake may permit preliminary triage but not final determinations.",
+        "review_notes": "Intake asks household_size and an income range, but lacks household member details and exact income/asset figures needed for defensible financial conclusions."
+      }
+    ],
+    "missing_eligibility_questions": [
+      "Is there a completed IHSS SOC 873 (Health Care Certification) or equivalent medical note for [recipient name], and what is its date? (add field)",
+      "Does the recipient have a Social Security Number (SSN) and can they provide the SSN card? (application-only field)",
+      "Is the caregiver willing and able to complete IHSS provider enrollment and background check? (add field: caregiver.provider_enrollment_readiness)",
+      "Exact household member list (name, relationship, monthly income) — to compute financial eligibility (add household_member_list composite field)",
+      "What is the recipient’s share‑of‑cost for Medi‑Cal this month (if any)? (add field)",
+      "Does the recipient require paramedical services that require a physician order (SOC 321)? (add field)",
+      "What is the recipient’s immigration/citizenship status for Medi‑Cal/SSI eligibility? (add field)",
+      "Do you have proof of California residence (utility bill, lease) available? (application-only)",
+      "If in nursing facility: exact dates and amounts of any transfers in the last 30 months (add fields for date/amount/recipient)"
+    ],
+    "intake_sufficiency_assessment": "The current intake captures many high‑level facts relevant to IHSS (medical needs via ADLs, living setting, Medi‑Cal status, and whether caregiver is paid). However, it does not gather all facts necessary to reach a defensible preliminary eligibility conclusion for IHSS in California. Key gaps include: recency and existence of the SOC 873 medical certification, exact income and asset amounts and household composition (needed to assess SSI/SSP‑related eligibility or share‑of‑cost), documented SSN/identity availability, readiness for provider enrollment/background checks, paramedical service orders, and immigration/citizenship status. With the current intake you can perform reliable triage and identify pathways to pursue, but you cannot make a fully defensible preliminary eligibility decision in borderline financial or medical documentation cases or for provider‑enrollment readiness without follow‑up.",
+    "coverage_gaps": [
+      "No explicit SOC 873 existence/date question (intake fields: recipient.condition_documented, recipient.has_certifying_clinician are insufficient).",
+      "No capture of recipient SSN or caregiver SSN/ID availability (application paperwork missing).",
+      "Household composition and exact income/assets not captured — monthly range is insufficient when near SSI/Medi‑Cal thresholds.",
+      "No question about immigration/citizenship status relevant to Medi‑Cal/SSI eligibility.",
+      "No direct capture of paramedical needs/orders (SOC 321) despite IHSS requiring SOC 321 when paramedical tasks exist.",
+      "Provider enrollment readiness and previous exclusions due to criminal history are not asked (important for paid caregiver pathway).",
+      "Inconsistency: intake uses recipient.age in logic but only collects recipient.date_of_birth — add computed age field or explicit age question."
+    ]
+  },
+  "retrieval_queries": [
+    "California IHSS eligibility rules documentation verification application required documents \"In-Home Supportive Services\" eligibility caregiver provider documentation medical certification county social services proof residency income assets spouse cohabitation IHSS application form requirements source_id"
+  ],
+  "retrieved_sources": {
+    "IHSS-CASE-ASSESSMENT-CHECKLIST:1:4ff0fdaa10": {
+      "title": "IHSS Social Worker Case Assessment Checklist",
+      "url": "https://www.cdss.ca.gov/Portals/9/IHSS/ITA/IHSS%20Tools/SWCaseAssessmentChecklist.pdf",
+      "document_id": "IHSS-CASE-ASSESSMENT-CHECKLIST",
+      "page": "1",
+      "text": "Page 1 of 2 \nIHSS Social Worker Case Assessment Checklist \nI. Validation of\n Applicant/Recipient Identification\n Social worker viewed original or photocopy of government-issued photo ID \n(e.g., CDL, CA ID, etc.). \n Applicant’s/recipient’s SSN card \n SSN card and/or government-issued photo ID was NOT available during \nhome visit \nII. Reasonable Accommodations\n Social worker asked about recipient’s need for reasonable \naccommodations, alternative formats, translated documents, or \ninterpretation. \nIII. Forms (signed by Applicant/Recipient and/or the Authorized\nRepresentative/Guardian, as applicable)\n Application for IHSS (SOC 295) \n IHSS Program Health Care Certification Form (SOC 873) \n IHSS Recipient/Employer Responsibility Checklist (SOC 332) \n IHSS Program Individualized Back-Up Plan and Risk Assessment (SOC \n864) \n Request for Order and Consent – Paramedical Services (SOC 321) \n Assessment of Need for Protective Supervision for IHSS Program (SOC \n821) \n PS 24-Hours-A-Day Coverage Plan (SOC 825) \n Medical/ Healthcare Authorization Release Forms \nIV. Recipient Educational Fact Sheets (handed out to the applicant/recipient,\nas needed) – also available at the State website:\nhttp://www.cdss.ca.gov/inforesources/IHSS/Fact-Sheets\n Overview of the IHSS Services \n IHSS Authorized Tasks \n Paramedical Services \n Share-of-Cost \n Teaching and Demonstration \n Interviewing, Hiring"
+    },
+    "IHSS-MPP-30-765-785:85:e9cd49595a": {
+      "title": "IHSS MPP Regulations Division 30, Sections 30-765 through 30-785",
+      "url": "https://www.cdss.ca.gov/Portals/9/Regs/ssman3.pdf",
+      "document_id": "IHSS-MPP-30-765-785",
+      "page": "85",
+      "text": "EMPLOYMENT ELIGIBILITY VERIFICATION \nCALIFORNIA-DSS-MANUAL-SS\n \nMANUAL LETTER NO. SS-16-01 Effective 1/1/16\n \nPage 141.15\n\n\nSOCIAL SERVICES STANDARDS\n \nRegulations SERVICE PROGRAM NO. 7: IN HOME SUPPORT SERVICES 30-778 (Cont.)\n \n30-778  GENERAL EXCEPTION REQUIREMENTS\t  30-778 \n.1\t  For the purposes of Section 30-778, the following definitions shall apply:  \n.11\t  Applicant provider means an individual who is seeking a general exception to his/her  \nexclusion as a provider due to the Criminal Offender Record Information results as specified  \nin Welfare and Institutions Code section 12305.87(e).  \n.12\t  County means the county IHSS office, or any other organization or agency, such as the county  \nIHSS Public Authority, or Non-Profit Consortium, designated by the county to perform  \nprovider enrollment functions.  \n.13\t  Criminal Offender Record Information (CORI) means the criminal offender record  \ninformation search response, as provided to the county by the California Department of Justice  \n(DOJ).  \n.14\t  Denial notice means the notice provided by a county to an individual informing him/her that  \nhe/she is ineligible to serve as a provider as specified in Section 30-776.63.  \n.15\t  Family member  means a person who is related to an applicant provider either through blood or  \nmarriage.  \n.16\t  General exception means a general exception to the exclusion of an appl"
+    },
+    "IHSS-MPP-30-700-764:unknown:7ce453c905": {
+      "title": "IHSS MPP Handbook Division 30, Sections 30-700 through 30-764",
+      "url": "https://www.cdss.ca.gov/Portals/9/Regs/Man/SS/ssman2.docx",
+      "document_id": "IHSS-MPP-30-700-764",
+      "page": "",
+      "text": "(1)\tA Physician;  \n\t\t\t\t(2)\tA Physician Assistant;  \n\t\t\t\t(3)\tA Regional Center Clinician or Clinician Supervisor;  \n\t\t\t\t(4)\tAn Occupational therapist;  \n\t\t\t\t(5)\tA Physical Therapist;  \n\t\t\t\t(6)\tA Psychiatrist;  \n\t\t\t\t(7)\tA Psychologist;  \n\t\t\t\t(8)\tAn Optometrist;  \n\t\t\t\t(9)\tAn Ophthalmologist;  \n\t\t\t\t(10)\tA Public Health Nurse;  \n\t\t\t\t(11)\tA Licensed Clinical Social Worker; or  \n\t\t\t\t(12)\tA Marriage and Family Therapist.  \n\tHANDBOOK ENDS HERE\t\n\tCALIFORNIA-DSS-MANUAL-SS\nMANUAL LETTER NO. SS-16-02\tEffective   10/1/16\n\tPage 61.1a\n\tSOCIAL SERVICES STANDARDS\n30-754 (Cont.)\tSERVICE PROGRAM NO. 7:  IHSS\tRegulations\n30-754\tHEALTH CARE CERTIFICATION\t30-754\n\t\t(Continued)\n\t.12\tThe completed and signed health care certification shall not be dated more than 60 days prior to the date it is submitted to the county.  \n\t.13\tThe health care certification shall not be required on subsequent reassessments.  \n.2\tThe health care certification shall be provided on a department-approved form, incorporated in its entirety herein by reference, the California Department of Social Services In-Home Supportive Services Program Health Care Certification (SOC 873 (10/16)).  \n\t.21\tThe county shall accept alternative documentation in place of the SOC 873 (10/16) provided that the alternative documentation meets the following criteria:  \n\t\t.211\tAlternative documentation shall include all of the following elements:"
+    },
+    "IHSS-FIELD-HANDBOOK:3:f6c68f15ac": {
+      "title": "IHSS Social Worker Assessment Field Handbook",
+      "url": "https://www.cdss.ca.gov/Portals/9/IHSS/ITA/IHSS%20Tools/SWAssessmentFieldHandbook.pdf",
+      "document_id": "IHSS-FIELD-HANDBOOK",
+      "page": "3",
+      "text": "as the Quality Assurance \n(QA) Initiative, county social workers shall \nevaluate program eligibility at the initial intake \nassessment and annual reassessment.  The \nCDSS has provided the below guidelines to \nassist social workers in completing quality \nIHSS assessments. \n1. Understand the necessary steps to complete an IHSS assessment and prepare\naccordingly.\n2. Discuss all IHSS program services with the applicant/recipient using the\nAnnotated Assessment Criteria (AAC), Functional Index (FI) Ranking/Hourly\nTask Guidelines (HTGs), and IHSS Needs Assessment (SOC 293), where\napplicable.\n3. Determine the FI ranking for each applicable program service category.\n4. Apply the HTGs and assign the necessary number of hours, between the low and\nhigh ranges of time, based on the applicant’s/recipient’s level of need for\nassistance with that service.\n5. Document the need for service using the tools in this handbook, as needed,\nwhen the applicant’s/recipient’s assessed hours fall outside of the HTG range.\nSocial Worker Assessment Field Handbook (Attachment C) Page 1\n\n\nSTEPS TO COMPLETING THE IHSS NEEDS ASSESSMENT \nStep Task Checklist \n1 Prepare for the \nHome Visit \n Schedule appointment by letter or phone. \n Check for current Medi-Cal eligibility, share of \ncost. \n Arrange for interpreter as needed. \n Review case information (SOC 873, recent \nassessment, case notes, any critical i"
+    },
+    "IHSS-FIELD-HANDBOOK:2:458bde84bf": {
+      "title": "IHSS Social Worker Assessment Field Handbook",
+      "url": "https://www.cdss.ca.gov/Portals/9/IHSS/ITA/IHSS%20Tools/SWAssessmentFieldHandbook.pdf",
+      "document_id": "IHSS-FIELD-HANDBOOK",
+      "page": "2",
+      "text": "CDSS Adult Programs Division \nAttachment C \nIn-Home Supportive Services (IHSS) \nSocial Worker Assessment Field\nHandbook \nCalifornia Department of Social Services \nAdult Programs Division \nCMIPS & System Enhancements Branch \nSystem Enhancements Bureau \nTraini\nng & Development\n Unit\nNovember 2020\n\n\nINTRODUCTION \nCalifornia’s In-Home Supportive Services (IHSS) program makes it possible for qualified \naged, blind, and/or disabled individuals to remain safely in their own homes, where they \ncan enjoy personal freedom and independence, and continue being part of their \ncommunity.  As a county IHSS social worker, you perform in-home assessments to \ndetermine the needs of these individuals so that they can continue to direct their own \ncare and avoid institutionalization. The California Department of Social Services (CDSS) \nappreciates the invaluable work that you do to assist IHSS applicants/recipients receive \ncontinuous quality care. \nThis handbook provides \nyou with optional \nprogram assessment tools to properly perform \nuniform assessments and authorize services in \na consistent manner. In accordance with \nSenate Bill 1104, (Chapter 229, Statutes of \n2004), also known as the Quality Assurance \n(QA) Initiative, county social workers shall \nevaluate program eligibility at the initial intake \nassessment and annual reassessment.  The \nCDSS has provided the below guide"
+    },
+    "IHSS-TRAINING-ACADEMY-INDEX:unknown:2a623050c7": {
+      "title": "IHSS Training Academy — Official Index",
+      "url": "https://www.cdss.ca.gov/inforesources/ihss/training-academy",
+      "document_id": "IHSS-TRAINING-ACADEMY-INDEX",
+      "page": "",
+      "text": "se materials are also available in the Learning Management System:\nIn-Home Supportive Services (IHSS) 101\nIn-Home Supportive Services (IHSS) 102\nDisabilities Awareness\nFLSA\nState Hearings\nProgram Integrity\nMedical Implications\nIHSS Tools\nIHSS Annotated Assessment Criteria\nIHSS Assessment Narrative Tool\n- Please note that there is no requirement to use this tool, and counties may recreate the elements from the tool in any format they choose.\nHow to Copy Text from a Password Protected Document\n- For instructions on how to copy text from the Assessment Narrative Tool, please read these instructions.\nFunctional Index Ranks/Hourly Task Guidelines Grid (revised 5/29/19)\nIHSS Applicant/Recipient Advisement Checklist\nIHSS Social Worker Case Assessment Checklist\nIHSS Social Worker State Hearings Checklist\nIHSS Social Worker Assessment Field Handbook\nIHSS MPP Handbook Div. 30, Ch. 30-700 (IHSS) thru Sec. 30-764 – Social Service Standards Manual (7-1-2024)\nIHSS MPP Regulation Div. 30, Ch. 30-765 through 30-785 – Social Service Standards Manual (07-19-19)\nIn-Home Supportive Services (IHSS) 101 Pre-Requisite Packet\nQuick Links\nGet Services IHSS\nCounty IHSS Offices\nMedi-Cal Offices\nCounty Public Authority\nIHSS Recipients:\nIHSS Training/Information:\nResources\n,\nFact Sheets\nand\nEducational Videos\nElectronic Services Portal (ESP)\nElectronic Visit Verification for Recipients and Providers\nIHSS P"
+    },
+    "IHSS-MPP-30-700-764:unknown:766a5ff2b2": {
+      "title": "IHSS MPP Handbook Division 30, Sections 30-700 through 30-764",
+      "url": "https://www.cdss.ca.gov/Portals/9/Regs/Man/SS/ssman2.docx",
+      "document_id": "IHSS-MPP-30-700-764",
+      "page": "",
+      "text": "been conducted, the county shall provide the applicant a Notice of Action as required pursuant to Section 10-116 which shall confer the right to a hearing pursuant to Section 10-117.  \nNOTE:  Authority Cited:  Sections 10553 and 10554, Welfare and Institutions Code.  Reference:  Section 12309.1, Welfare and Institutions Code.\n\tCALIFORNIA-DSS-MANUAL-SS\nMANUAL LETTER NO. SS-16-02\tEffective   10/1/16\n\tPage 61.1e\nSOCIAL SERVICES STANDARDS\n30-755\tSERVICE PROGRAM NO. 7:  IHSS\tRegulations\n30-755\t\tPERSONS SERVED BY THE NON-PCSP IHSS PROGRAM\t30-755\n.1\tEligibility\n.11\tA person is eligible for IHSS who is a California resident living in his/her own home, and who meets one of the following conditions:\n.111\tCurrently receives SSI/SSP benefits.\n.112\tMeets all SSI/SSP eligibility criteria including income, but does not receive SSI/SSP benefits.\n.113\tMeets all SSI/SSP eligibility criteria, except for income in excess of SSI/SSP eligibility standard or immigration criteria, and meets applicable share of cost obligations. \n\t\t\t(a)\tA person must meet immigration status criteria as provided in 20 CFR Part 416, subpart P, or must meet the state program noncitizen status criteria as provided in PP Section 30-770.51.\n.114\tWas once eligible for SSI/SSP benefits, but became ineligible because of engaging in substantial gainful activity, and meets all of the following conditions:\n(a)\tThe individual was o"
+    },
+    "IHSS-MPP-30-700-764:unknown:73c6ff3ac6": {
+      "title": "IHSS MPP Handbook Division 30, Sections 30-700 through 30-764",
+      "url": "https://www.cdss.ca.gov/Portals/9/Regs/Man/SS/ssman2.docx",
+      "document_id": "IHSS-MPP-30-700-764",
+      "page": "",
+      "text": "Continued)\n\tSection   \nProvider Employment Eligibility Verification\t   30-777   \nGeneral Exception Requirements\t   30-778   \nPersonal Care Services Program (PCSP) Eligibility\t   30-780   \nIn-Home Supportive Services (IHSS) Plus Waiver Program \t   30-785   \n\tCALIFORNIA-DSS-MANUAL-SS\nMANUAL LETTER NO. SS-19-01\tEffective   7/1/19\n\tPage 50.1\n\tSOCIAL SERVICES STANDARDS\nRegulations\tSERVICE PROGRAM NO. 7:  IN-HOME SUPPORT SERVICES\t30-700 \n30-700\tPROGRAM DEFINITION\t\t\t30-700\n.1\tThe In-Home Supportive Services (IHSS) Program provides assistance to those eligible aged, blind and disabled individuals who are unable to remain safely in their own homes without this assistance. IHSS is an alternative to out-of-home care.  Eligibility and services are limited by the availability of funds.\n.2\tThe Personal Care Services Program (PCSP) provides personal care services to eligible Medi-Cal beneficiaries pursuant to Welfare and Institutions Code Section 14132.95 and Title 22, California Code of Regulations, Division 3 and is subject to all other provisions of Medi-Cal statutes and regulations.  The program is operated pursuant to Division 30.\n.3\tThe IHSS Plus Waiver program provides IHSS Plus Waiver services, to eligible Medi-Cal beneficiaries, subject to Medi-Cal provisions, statutes and regulations, pursuant to Welfare and Institutions Code Section 14132.951 and Title 22, California Code of Regula"
+    }
+  },
+  "validation_issues": [
+    {
+      "row": 1,
+      "unmatched_source_ids": [
+        "IHSS-CASE-ASSESSMENT-CHECKLIST",
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-MPP-30-700-764"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 2,
+      "unmatched_source_ids": [
+        "IHSS-CASE-ASSESSMENT-CHECKLIST",
+        "IHSS-FIELD-HANDBOOK"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 3,
+      "unmatched_source_ids": [
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-MPP-30-700-764"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 4,
+      "unmatched_source_ids": [
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-MPP-30-700-764"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 5,
+      "unmatched_source_ids": [
+        "IHSS-CASE-ASSESSMENT-CHECKLIST",
+        "IHSS-MPP-30-765-785"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 6,
+      "unmatched_source_ids": [
+        "IHSS-CASE-ASSESSMENT-CHECKLIST",
+        "IHSS-FIELD-HANDBOOK"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 7,
+      "unmatched_source_ids": [
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-MPP-30-700-764"
+      ],
+      "unknown_intake_fields": []
+    },
+    {
+      "row": 8,
+      "unmatched_source_ids": [
+        "IHSS-FIELD-HANDBOOK",
+        "IHSS-MPP-30-700-764"
+      ],
+      "unknown_intake_fields": []
+    }
+  ],
+  "retrieval_events": []
+}

@@ -7,10 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, -apple-system,
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-source-serif), ui-serif, Georgia, "Times New Roman",
+  --font-heading: var(--font-newsreader), ui-serif, Georgia, "Times New Roman",
     serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -65,12 +65,12 @@
   --brand-subtle: #eaf1ed;   /* faint green tint for surfaces/badges */
 
   /* Neutrals */
-  --background: #fffdfa;     /* warm off-white */
-  --foreground: #1a211d;     /* near-black, slightly green */
-  --card: #fffdfa;
-  --card-foreground: #1a211d;
-  --popover: #fffdfa;
-  --popover-foreground: #1a211d;
+  --background: #fef9ef;     /* warm off-white (Function Health beige) */
+  --foreground: #2a2b2f;     /* soft near-black ink */
+  --card: #fef9ef;
+  --card-foreground: #2a2b2f;
+  --popover: #fef9ef;
+  --popover-foreground: #2a2b2f;
 
   /* Primary = brand green */
   --primary: #1e3d2f;
@@ -79,9 +79,9 @@
 
   /* Light tan / amber surfaces (warm neutrals) */
   --secondary: #efe7d6;
-  --secondary-foreground: #1a211d;
-  --muted: #f6f1e7;
-  --muted-foreground: #6e6450;  /* warm muted text, AA on the off-white background */
+  --secondary-foreground: #2a2b2f;
+  --muted: #f5eee1;
+  --muted-foreground: #515151;  /* neutral grey secondary text, AA on cream */
   --accent: #eaf1ed;            /* green-tinted accent surface */
   --accent-foreground: #1e3d2f;
 
@@ -100,8 +100,8 @@
   --radius: 0.625rem;
 
   /* Sidebar — warm tan surface with green accents */
-  --sidebar: #f6f1e7;
-  --sidebar-foreground: #1a211d;
+  --sidebar: #f5eee1;
+  --sidebar-foreground: #2a2b2f;
   --sidebar-primary: #1e3d2f;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #eaf1ed;
@@ -173,11 +173,29 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+/* Editorial headings: light display serif in ink, not bold green. Unlayered,
+   so this wins over per-page font-bold/font-semibold utilities. */
+/* Newsreader switches letterforms by size (opsz axis); pin the display cut so the
+   wordmark, card titles and hero all read as the same serif. */
+h1,
+h2,
+h3,
+.ilera-wordmark,
+[data-slot="card-title"] {
+  font-variation-settings: "opsz" 72;
+}
 h1,
 h2,
 h3 {
   font-family: var(--font-heading);
-  color: var(--brand);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--foreground);
+  text-wrap: balance;
+}
+h1 {
+  font-weight: 300;
+  line-height: 1.1;
 }
 ::selection {
   background-color: var(--brand-subtle);
@@ -185,7 +203,7 @@ h3 {
 }
 .ilera-wordmark {
   font-family: var(--font-heading);
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: -0.01em;
   color: var(--brand);
 }

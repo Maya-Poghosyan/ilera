@@ -1,0 +1,194 @@
+ILERA — ELIGIBILITY EVALUATION & RESOLUTION PLANNING
+Architecture and implementation checkpoint — 2026-10-12
+
+GOAL
+After shared intake, explain each program's preliminary eligibility conclusion and
+turn missing, user-answerable information into concrete screening-resolution tasks.
+A caregiver may answer immediately, look up a record, or return later. Resolving a
+fact updates the canonical profile and reevaluates every program that consumes it.
+Application work and agency determinations belong to the later benefit-pursuit flow.
+
+1. TWO LAYERS OF SCREENING
+Layer 1: shared initial intake — information the caregiver can supply now.
+Layer 2: screening-resolution tasks — information they must retrieve or clarify.
+A missing financial detail, coverage status, or functional-need description belongs
+to layer 2. A submitted application awaiting approval does not.
+
+Not every gap needs a document. Self-report can be sufficient for preliminary
+screening. Uploads must not be mandatory unless a reviewed criterion actually
+requires documentary verification. Some gaps need a targeted question, others a
+retrieval walkthrough with an official link or contact.
+
+2. EVALUATION DIMENSIONS
+ProgramEvaluation.screening_status: complete | incomplete
+  Is user-answerable screening evidence available for the needed viable pathways?
+ProgramEvaluation.eligibility_status:
+  likely_eligible | conditionally_eligible | likely_ineligible | undetermined
+  What does the available evidence support?
+
+An external agency decision can remain pending while user screening is complete.
+Unavailable model review can leave eligibility undetermined without generating a
+fake user task. CaseProfile.eligibility_status remains the separately named legacy
+orchestration lifecycle (idle/processing/complete/error), not a program conclusion.
+
+3. ONE CANONICAL FACT SPINE
+Facts live at typed CaseProfile paths, such as care_recipient.medicaid_status.
+Raw intake field IDs project to those paths. Criterion IDs identify rules, not facts.
+FactMetadata is keyed by the same path and records availability, source, precision,
+timestamp and revision. No metadata means unknown to the new evaluator, even when
+legacy model defaults are CA or False. Explicit false, zero and empty selections
+are distinguishable from missing answers.
+
+write_fact validates before mutation and is idempotent for identical evidence.
+Skipped/unknown/conflicting values clear stale evidence. Intake projection preserves
+facts resolved outside intake and advances revisions for changed tracked answers.
+Financial ranges are retained as buckets, not converted to numeric midpoints.
+Only an explicit exact amount or “No income” establishes a numeric income fact. Multiple
+coverage types are retained rather than inferred from the legacy primary insurance.
+SSN is excluded from persistent resolution writes under its existing in-memory-only
+contract. Form-local inputs need reviewed canonical bindings before affecting eligibility.
+
+The eligibility registry and form-map vocabulary share typed models. The latter is
+a deliberately permitted subset; newly typed eligibility-only fields are not silently
+offered to existing PDF map generation.
+
+4. AUTHORED POLICY AND SAFE EVALUATION
+ProgramPolicy contains OR pathways; each pathway contains AND criteria.
+Criteria are deterministic, llm_assisted, or external. Validation rejects undeclared
+paths, duplicate IDs, empty routes, incompatible kind fields and unsafe rule syntax.
+Deterministic expressions use an allowlisted AST interpreter; no Python eval/calls.
+
+CriterionResult records state, reason, consumed_fact_paths, required_fact_paths,
+evidence_refs and resolution_kind. Missing inputs are collected across the criterion,
+not stopped at the first missing fact. Inexact financial inputs remain unknown until
+rules explicitly support their precision. Evaluation errors remain unknown/review.
+
+A supported disqualifying failure eliminates that pathway. Remediable prerequisite
+failure leaves it conditional. All eliminated routes -> likely_ineligible; any satisfied
+route -> likely_eligible; a viable route with only prerequisite/external conditions ->
+conditionally_eligible; otherwise -> undetermined. Unknown alternate routes do not
+block an already supported route. Unknown user-fact requirements determine screening
+incompleteness; outstanding agency work does not.
+
+Current assisted criteria remain unknown until a validated citation-constrained adapter
+exists. External criteria remain pending; completing a user task is not an agency approval.
+The IHSS seed is still a draft requiring reviewed sources and effective dates.
+
+5. RESOLUTION TASKS
+ResolutionTask is the implemented model for screening work. It contains:
+  id, case_id, profile_path,
+  primary_program_id, related_program_ids, criterion_ids, reasons,
+  title, description, guided_steps,
+  resources, acceptable_evidence_types, methods, input_schema,
+  template_id, category: financial | coverage | medical | household | employment | general,
+  state: available | deferred | resolved | superseded,
+  completed_at, reopen_reason.
+
+Generate one stable case/fact task across needed viable pathways/programs. A program
+association is a structured ID. Program filtering includes related links. Completing
+one shared record updates all views. Do not generate collection tasks for eliminated
+routes, irrelevant alternate routes, external decisions or model-review failures.
+
+Current tasks have one typed fact input. Future compound walkthroughs can coordinate
+several fact tasks without inventing another fact store. Subject identity is already
+part of the canonical path; multiple recipients require a richer case/subject model
+before supporting that expansion.
+
+6. HOW-TO CONTENT IS A SEPARATE REVIEWED TEMPLATE
+ResolutionTemplate binds a canonical path to title/description, guided_steps,
+acceptable_evidence_types, methods and resources. Each GuidanceResource has a stable
+ID, kind, title, URL/phone/instructions, source URL and date checked. Resource kinds:
+portal | form | document | contact | instructions.
+
+Category groups the information being resolved; it does not change eligibility rules.
+Templates have stable IDs but no version field. Only reviewed templates are published. Draft content is validated but withheld. There
+is at most one reviewed template per path in the current California pilot. Research
+will supply the real resources later; there are no invented links or deadlines now.
+Fallback cards allow manual entry with no unsupported retrieval instructions.
+
+The task input schema comes from the typed fact definition, not an LLM or content file.
+Manual entry and targeted_question completion are supported. Document upload remains a
+reserved method rejected until ingestion/extraction/user-confirmation is implemented.
+Research can inform evidence requirements but cannot silently add a policy requirement
+through task prose. Jurisdiction-aware selection is required before broadening scope.
+
+7. COMPLETION AND RECONCILIATION
+All service mutations work on a copy. The persistence boundary commits case facts,
+tasks and completion receipts together or rolls back on failure.
+
+Completion:
+1. Authorize case access; compare expected fact/task revisions.
+2. Validate the selected method and typed value against the active task.
+3. Write the canonical fact with a task provenance reference.
+4. Reevaluate loaded policies and reconcile tasks.
+5. Mark the task resolved only when no current fact requirement remains; return updated
+   evaluations and tasks. A resolved fact may reveal ineligibility rather than qualification.
+
+An idempotency receipt stores task ID, request digest and resulting fact revision; no
+second copy of raw answer values. Reusing a key for different results is a conflict.
+Identical retries do not replay writes and return the current projection.
+
+Repeated planning preserves task IDs and deferral. Obsolete tasks are superseded rather
+than falsely completed. Corrected evidence can reopen a resolved obligation, with an
+explanation and prior completion history retained. Deferral never changes evidence.
+Current reevaluation is synchronous across loaded policies; selective dependencies and
+a durable work outbox are future work.
+
+8. STORAGE AND API
+ResolutionState lives within existing CaseProfile JSON storage; no parallel task database
+is introduced. Postgres resolution mutations lock the case row in a transaction. The
+in-memory development store uses a process lock. Older read/modify/save code paths still
+need conversion to revision-aware transactions for full cross-flow concurrency protection.
+
+Implemented API, with existing case authorization:
+  GET  /api/eligibility-resolution/{case_id}[?program_id=...]
+       current projection without persistence
+  POST /api/eligibility-resolution/{case_id}/refresh
+       persist reconciled tasks
+  POST /api/eligibility-resolution/{case_id}/tasks/{task_id}/result
+       typed value, method, idempotency key, expected revisions
+  POST /api/eligibility-resolution/{case_id}/tasks/{task_id}/defer
+       expected task revision
+
+Responses include case ID, fact/task revisions, evaluations, tasks and policy coverage.
+Coverage explicitly identifies loaded policies; a missing policy is not ineligibility.
+See docs/eligibility-resolution-api.md for payloads and content authoring instructions.
+
+9. HOME AND PROGRAM PROJECTIONS
+Intended home screen: available screening tasks first, deferred tasks visible, completed
+history accessible. A card explains the missing information, its program associations,
+how to obtain it, and how to provide the result. Program detail uses the same task records.
+Do not mix "complete your eligibility assessment" with "apply for this benefit."
+
+The API supplies these projections; the frontend home/card UI is not connected yet.
+Current ordering is available/deferred/history, shared-program impact and stable ID.
+Real observed deadlines can be added later with evidence; the planner does not guess them.
+
+10. IMPLEMENTATION CHECKPOINT
+Implemented:
+- Typed policy models/loader and draft IHSS rules.
+- Canonical fact writes/provenance/revisions for initial policy input bindings.
+- Safe deterministic shadow evaluator and two-dimensional program results.
+- Structured resolution models, reviewed file templates, shared task planning/reconciliation.
+- Typed completion, deferral, conflict/idempotency handling and case persistence boundary.
+- Authorized resolution API plus lifecycle, validation, deduplication and API tests.
+
+Remaining:
+- Research and review actual policy/resource content; domain-specific answer constraints.
+- Comprehensive intake provenance and legacy evidence backfill.
+- Frontend home/task cards and program-view integration.
+- Validated assisted review and document ingestion/extraction/confirmation adapters.
+- Evaluation history, agency records and separate application action planning.
+- Migration from legacy MatchLevel/Durable presentation and transaction-safe legacy writes.
+- Multi-jurisdiction/program coverage and dependency-driven durable reevaluation.
+
+11. ACCEPTANCE INVARIANTS
+- Defaults and unknown answers never silently satisfy or disqualify a rule.
+- A shared missing fact generates one task across programs.
+- Every surfaced collection task has a typed submission method and instructions; links
+  appear only from reviewed content.
+- A task completion cannot establish agency approval or silently invent evidence.
+- Invalid/stale submissions do not partially persist; exact retries do not duplicate writes.
+- Deferred tasks stay deferred on refresh; corrected evidence can reopen resolved tasks.
+- No task is created from an eliminated route or an agency/model-review obligation.
+- User screening can be complete while eligibility still depends on an external decision.

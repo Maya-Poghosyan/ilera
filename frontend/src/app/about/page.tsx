@@ -1,13 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Logo } from "@/components/logo";
-import { useAuth } from "@/lib/auth-context";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 
 function LinkedInIcon({ className }: { className?: string }) {
   return (
@@ -48,38 +45,12 @@ const TEAM: Member[] = [
 ];
 
 export default function AboutPage() {
-  const { user, loading } = useAuth();
-
   return (
     <main className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
-          <Logo />
-          <div className="flex items-center gap-2">
-            <nav className="mr-2 flex items-center gap-1">
-              <Button variant="ghost" size="sm" render={<Link href="/" />}>
-                Home
-              </Button>
-              <Button variant="ghost" size="sm" render={<Link href="/about" />}>
-                About
-              </Button>
-            </nav>
-            {!loading && user ? (
-              <Button render={<Link href="/dashboard" />}>Dashboard</Button>
-            ) : (
-              <>
-                <Button variant="outline" render={<Link href="/login" />}>
-                  Sign in
-                </Button>
-                <Button render={<Link href="/intake" />}>Get started</Button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="mx-auto flex max-w-3xl flex-col items-center gap-5 px-6 py-20 text-center">
-        <h1 className="text-balance text-4xl font-bold tracking-tight text-primary sm:text-5xl">
+        <h1 className="text-balance text-4xl sm:text-5xl">
           About Ilera
         </h1>
         <p className="max-w-2xl text-pretty text-lg text-muted-foreground">
@@ -102,7 +73,7 @@ export default function AboutPage() {
             </div>
             <CardContent className="space-y-3 py-5">
               <div className="space-y-1">
-                <h2 className="text-xl font-semibold">{member.name}</h2>
+                <h2 className="text-xl">{member.name}</h2>
                 <p className="text-sm font-medium text-muted-foreground">{member.role}</p>
               </div>
               <p className="text-sm text-muted-foreground">{member.bio}</p>
@@ -120,15 +91,7 @@ export default function AboutPage() {
         ))}
       </section>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
-          <Logo size="sm" />
-          <Button variant="outline" size="sm" render={<Link href="/" />}>
-            Back home
-            <ArrowRight className="size-4" />
-          </Button>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

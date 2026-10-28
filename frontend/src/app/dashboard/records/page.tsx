@@ -317,7 +317,7 @@ export default function RecordsPage() {
   if (!caseId && !loading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-4xl font-bold">Records &amp; Renewal</h1>
+        <h1 className="text-4xl">Records &amp; Renewal</h1>
         <Card>
           <CardContent className="py-6">
             <p className="text-sm text-muted-foreground">
@@ -334,7 +334,7 @@ export default function RecordsPage() {
     <div className="space-y-6">
       <fieldset disabled={pending || loading || loadError} className="space-y-6 min-w-0">
       <div className="flex flex-wrap gap-3 items-center justify-between">
-        <h1 className="text-4xl font-bold">Records &amp; Renewal</h1>
+        <h1 className="text-4xl">Records &amp; Renewal</h1>
       </div>
 
       <div className="flex flex-wrap items-end gap-4">
@@ -360,7 +360,7 @@ export default function RecordsPage() {
       <section className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-xl font-semibold">Renewals</h2>
+            <h2 className="text-xl">Renewals</h2>
             {overdueCount > 0 && (
               <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 border border-red-300">
                 {overdueCount} overdue
@@ -465,7 +465,7 @@ export default function RecordsPage() {
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <h2 className="text-xl font-semibold">Timesheets</h2>
+              <h2 className="text-xl">Timesheets</h2>
               <a
                 href="https://www.etimesheets.ihss.ca.gov"
                 target="_blank"
@@ -616,7 +616,7 @@ export default function RecordsPage() {
         {/* Care journal */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Care journal</h2>
+            <h2 className="text-xl">Care journal</h2>
             <Button size="sm" variant="outline" onClick={() => { setEditingJn(null); setJnDate(""); setJnText(""); setShowJnForm(true); }}>
               + Entry
             </Button>

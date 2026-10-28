@@ -168,7 +168,7 @@ rather than 403 to avoid confirming the case exists. Unclaimed cases are deleted
 | GET | `/health` | status + Postgres/LLM config + RAG chunk count |
 | GET | `/healthz` | liveness (no dependencies touched) |
 | GET | `/readyz` | readiness — 503 while Postgres is unreachable |
-| POST | `/api/intake` | create or update a CaseProfile (no account required) |
+| POST | `/api/intake` | create a CaseProfile from validated intake answers (no account required) |
 | POST | `/api/eligibility/{id}` | run routing + specialists, return ranked results |
 | GET | `/api/eligibility/{id}` | poll for results |
 | GET | `/api/case/{id}` | fetch a CaseProfile (owner only) |

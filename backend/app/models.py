@@ -2,6 +2,9 @@ from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
+from .eligibility.fact_models import FactMetadata
+from .eligibility.resolution_models import ResolutionState
+
 
 class CareRecipient(BaseModel):
     name: str = ""  # first and last together, for prose
@@ -9,6 +12,7 @@ class CareRecipient(BaseModel):
     last_name: str = ""
     date_of_birth: str = ""  # ISO date (YYYY-MM-DD)
     age: Optional[int] = None
+    us_citizen: Optional[bool] = None
     gender: str = ""
     state: str = "CA"
     street_address: str = ""
@@ -20,12 +24,28 @@ class CareRecipient(BaseModel):
     ssn: str = ""  # stored only in-memory; never logged
     conditions: list[str] = Field(default_factory=list)
     veteran: bool = False
+    living_setting: Literal[
+        "", "Own home", "Family member's home",
+        "Assisted living or a licensed residential care setting",
+        "Nursing home or skilled nursing facility", "Hospital",
+        "Rehabilitation facility", "Group home", "Other",
+    ] = ""
+    health_coverage: list[str] = Field(default_factory=list)
+    medicaid_status: Literal["", "Enrolled now", "Application pending", "Previously denied", "Has not applied"] = ""
     insurance: Literal["medi-cal", "medicare", "private", "none", "unknown"] = "unknown"
     current_benefits: list[str] = Field(default_factory=list)
     care_needs: list[str] = Field(default_factory=list)
+    income_sources: list[str] = Field(default_factory=list)
+    gross_monthly_income: Optional[float] = None
+    employment_status: str = ""
 
 
 class Caregiver(BaseModel):
+    income_sources: list[str] = Field(default_factory=list)
+    gross_monthly_income: Optional[float] = None
+    date_of_birth: str = ""
+    age: Optional[int] = None
+    us_citizen: Optional[bool] = None
     name: str = ""  # first and last together, for prose
     first_name: str = ""
     last_name: str = ""
@@ -43,8 +63,10 @@ class Caregiver(BaseModel):
 
 
 class Household(BaseModel):
+    reported_income_monthly: Optional[float] = None  # sum of reported resident income, not program-countable income
     size: Optional[int] = None
     income_monthly: Optional[float] = None
+    income_monthly_range: str = ""  # reported bucket, never an invented exact amount
 
 
 # Five-level eligibility match scale produced by each specialist.
@@ -78,6 +100,9 @@ class CaseProfile(BaseModel):
     # "recipient.adl_needs"). This is the canonical record of what the user
     # entered; the typed fields above are projected from it via intake.mapping.
     answers: dict[str, Any] = Field(default_factory=dict)
+    resolution: ResolutionState = Field(default_factory=ResolutionState)
+    fact_revision: int = 0
+    fact_metadata: dict[str, FactMetadata] = Field(default_factory=dict)
     followups: dict[str, str] = Field(default_factory=dict)
     eligibility: dict[str, "EligibilityResult"] = Field(default_factory=dict)
 

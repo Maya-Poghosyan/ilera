@@ -1,0 +1,204 @@
+{
+  "program": "VA Caregiver Support",
+  "doc_key": "va",
+  "generated_at": "2026-10-13T02:53:04.655984+00:00",
+  "execution": "Separate direct research invocation with Ilera Azure model and program-scoped RAG, not the hosted Durable endpoint",
+  "direct_question": "Audit the CURRENT refactored intake for completeness, not just documents. Can we make an accurate eligibility screening conclusion from these answers? List all missing facts, conditional visibility failures, precision gaps, program-specific eligibility-unit inputs, and mandatory unresolved criteria. Include concise simple followup wording and exactly when to ask it. Separate criteria facts from application paperwork.\nWhat external documents would possibly be needed, and what rules/triggers necessitate them? Give a concrete document-to-question matrix for your program. Show questions already in our intake, questions needing further detail, and questions belonging in the actual application session. Assess whether our intake supports accurate preliminary eligibility conclusions. Retrieve official sources before answering. ",
+  "result": {
+    "mappings": [
+      {
+        "document_name": "Caregiver Support Program (CSP) / PCAFC summary (referral to detailed rules)",
+        "program_or_pathway": "VA Caregiver Support Program — PCAFC (Program of Comprehensive Assistance for Family Caregivers)",
+        "question": "Is the veteran enrolled in or using VA health care / has VA contact?",
+        "subject_and_period": "Current VA enrollment or recent contact with VA (no specific period in source)",
+        "intake_field_ids": [
+          "recipient.va_contact",
+          "recipient.health_coverage",
+          "case.goals"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Have they been enrolled in VA health care (Yes/No)? If yes, what VA facility or PACT manages their care?",
+        "information_to_read": [
+          "VA-FEDERAL-BENEFITS-GUIDE:33:b75e51512c",
+          "VA-FEDERAL-BENEFITS-GUIDE:33:abe7dd19a9"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "The Federal Benefits Guide describes PCAFC as available through VA’s Caregiver Support Program and directs applicants to caregiver.va.gov for detailed eligibility and application process (no detailed criteria in this excerpt).",
+        "trigger_for_asking_fact": "User selects goal 'Finding VA caregiver benefits' OR indicates veteran/military status and VA health coverage/contact",
+        "trigger_for_document_lookup": "When user indicates 'Yes' to VA contact or VA health care and wants PCAFC — lookup required for facility or PACT record and for PCAFC eligibility rules on caregiver.va.gov",
+        "stage": "screening",
+        "documentary_requirement": "not_established",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report that they have VA contact or VA health coverage is sufficient to include PCAFC as a possible pathway for recommendations, but not to determine final eligibility.",
+        "alternatives": [
+          "If unsure, ask whether they have a VA patient identifier or the VA facility name"
+        ],
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:33:b75e51512c",
+          "VA-FEDERAL-BENEFITS-GUIDE:33:abe7dd19a9"
+        ],
+        "requirement_support": "Source points to caregiver.va.gov for detailed PCAFC eligibility and notes services available; does not enumerate eligibility criteria in the supplied pages.",
+        "retrieval_support": "Follow-up requires reading caregiver.va.gov or PCAFC program pages (referenced in source).",
+        "effective_date_or_jurisdiction_notes": "Federal VA program; source is the VA Federal Benefits Guide (2024/2025 edition) — see caregiver.va.gov for program-level updates.",
+        "review_notes": "Intake asks recipient.va_contact and health_coverage which flags potential PCAFC pathway, but the guide requires consulting caregiver.va.gov for eligibility details (not present in the intake)."
+      },
+      {
+        "document_name": "VA Pension — Application and Aid & Attendance evidence",
+        "program_or_pathway": "VA Pension (including Aid & Attendance / Housebound allowances)",
+        "question": "Does the veteran need aid and attendance / housebound care and is there medical evidence to support it?",
+        "subject_and_period": "Current functional needs and physician assessment (report preferred) covering the period needed to establish need for Aid & Attendance",
+        "intake_field_ids": [
+          "recipient.adl_needs",
+          "recipient.recognizes_danger",
+          "recipient.hazardous_behaviors",
+          "recipient.condition_documented",
+          "recipient.has_certifying_clinician",
+          "recipient.living_setting"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "Can you get a report from an attending physician or facility that describes the need for regular Aid & Attendance (VA Form 21-2680 is typically used)?",
+        "information_to_read": [
+          "VA-FEDERAL-BENEFITS-GUIDE:82:a1847a637a",
+          "VA-FEDERAL-BENEFITS-GUIDE:47:e3f77b29f7",
+          "VA-FEDERAL-BENEFITS-GUIDE:45:9ec6aec9ad"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "The guide instructs applicants to submit VA Form 21-2680 (Examination for Housebound Status or Permanent Need for Regular Aid and Attendance) and 'copies of any evidence, preferably a report from an attending physician or a nursing home, validating the need for aid and attendance.'",
+        "trigger_for_asking_fact": "User reports ADL needs or selects goals related to medical coverage or VA benefits, or indicates nursing-home residence",
+        "trigger_for_document_lookup": "If the user indicates ADL dependence or intent to apply for Aid & Attendance, request physician report and VA Form 21-2680; the intake should flag and move these facts to application stage.",
+        "stage": "split",
+        "documentary_requirement": "mandatory_application_document",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "Self-report of ADL needs and existence of a certifying clinician suffices for preliminary triage, but NOT for eligibility determination for pension or Aid & Attendance — physician documentation is required at application.",
+        "alternatives": [
+          "If user cannot obtain a physician report immediately, note 'Need to obtain VA Form 21-2680 completed by attending clinician' and continue screening."
+        ],
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:82:a1847a637a",
+          "VA-FEDERAL-BENEFITS-GUIDE:47:e3f77b29f7",
+          "VA-FEDERAL-BENEFITS-GUIDE:45:9ec6aec9ad"
+        ],
+        "requirement_support": "Source explicitly names VA Form 21-2680 and asks for attending physician reports to validate need for Aid & Attendance.",
+        "retrieval_support": "To verify, read the Pension / Aid & Attendance application instructions and VA Form 21-2680 guidance (pages cited).",
+        "effective_date_or_jurisdiction_notes": "Federal VA pension program; follow published VA forms and Pension Intake Center instructions in the guide.",
+        "review_notes": "Intake collects ADLs and presence of a certifying clinician — good for screening — but lacks the explicit application-document flags (VA Form 21-2680 and physician report) and precise income/net-worth figures needed for pension eligibility."
+      },
+      {
+        "document_name": "VA Pension — Income, net worth, and application forms",
+        "program_or_pathway": "VA Pension (means-tested benefit)",
+        "question": "What are the veteran’s annual income, unreimbursed medical expenses, and total countable net worth?",
+        "subject_and_period": "Current (annual) family income and net worth for the year used in pension eligibility determination",
+        "intake_field_ids": [
+          "recipient.monthly_income_range",
+          "recipient.assets",
+          "recipient.recent_transfers",
+          "recipient.medicaid_status"
+        ],
+        "intake_coverage": "partial",
+        "proposed_followup_question": "What is the veteran’s total gross annual household income (all sources) and an estimate of total countable assets/net worth (exclude primary residence if asked)?",
+        "information_to_read": [
+          "VA-FEDERAL-BENEFITS-GUIDE:46:d8c7218979",
+          "VA-FEDERAL-BENEFITS-GUIDE:4:5d73ea8968",
+          "VA-FEDERAL-BENEFITS-GUIDE:4:2deb359a49"
+        ],
+        "eligibility_rule_or_paperwork_requirement": "The guide explains that Veterans Pension is means-tested: yearly family income and net worth are compared to statutory limits and unreimbursed medical expenses may reduce countable income. It names VA Form 21P-527EZ to apply for pension.",
+        "trigger_for_asking_fact": "User expresses interest in pension or Aid & Attendance, or reports low income/assistance needs",
+        "trigger_for_document_lookup": "If user may be low-income based on monthly income range, ask for precise annual income figures and approximate asset totals (agency will require documentation later).",
+        "stage": "screening",
+        "documentary_requirement": "conditional_agency_verification",
+        "is_self_report_sufficient_for_ilera_preliminary_screening": "A monthly income range can triage toward or away from pension pathway but is insufficient for a defensible eligibility conclusion — exact annual income and asset/net-worth figures are needed for preliminary determinative screening.",
+        "alternatives": [
+          "If user cannot provide exact figures, capture recent pay statements, benefit award letters, or bank/account summaries as documents to obtain numbers during application stage."
+        ],
+        "source_ids": [
+          "VA-FEDERAL-BENEFITS-GUIDE:46:d8c7218979",
+          "VA-FEDERAL-BENEFITS-GUIDE:4:5d73ea8968",
+          "VA-FEDERAL-BENEFITS-GUIDE:4:2deb359a49"
+        ],
+        "requirement_support": "Source states pension eligibility is based on income/net worth and names VA Form 21P-527EZ for application; it emphasizes need for financial detail to determine eligibility.",
+        "retrieval_support": "Agency will require financial documentation and form 21P-527EZ at application; intake does not need uploads but must collect exact numbers for screening.",
+        "effective_date_or_jurisdiction_notes": "Federal VA pension rules apply; guide is the 2024/2025 Federal Benefits Guide excerpt.",
+        "review_notes": "Intake asks monthly_income_range and asset types but lacks precise annual income and countable-net-worth questions that are necessary to determine pension eligibility with reasonable confidence."
+      }
+    ],
+    "missing_eligibility_questions": [
+      "Exact veteran service dates (entry and separation) and whether at least minimum active-duty/wartime service requirement is met (ask: 'What were the veteran’s active-duty start and end dates?'),",
+      "Character of discharge (was discharge 'other than dishonorable'?) (ask: 'Was the veteran discharged under conditions other than dishonorable?'),",
+      "Whether the veteran is enrolled in VA health care (explicit enrollment status and VA facility/PACT name) (ask: 'Are they enrolled in VA health care? If yes, what VA facility or PACT?'),",
+      "Primary family caregiver designation and whether caregiver is the primary family caregiver under PCAFC (ask: 'Are you the primary family caregiver who provides most of the veteran’s personal care? For how many hours per day or week?'),",
+      "Precise hours/frequency of personal care provided by caregiver (ask: 'About how many hours per day or week do you provide hands-on personal care?'),",
+      "Exact annual household income and an approximate total of countable assets/net worth (ask: 'Please provide total gross annual household income and an approximate total of countable assets (exclude primary home if unknown).'),",
+      "If applying for VA pension/Aid & Attendance: availability of an attending physician willing to complete VA Form 21-2680 and to provide a written medical report (ask: 'Can your attending physician complete VA Form 21-2680 or provide a detailed report supporting need for Aid & Attendance?'),",
+      "If relevant: any recent (agency-relevant) transfers of assets (VA guidance references financial limits; intake has a 30-month transfers question only for nursing-home cases) (ask: 'Has the veteran transferred assets or given away money/property in the last 3 years?'),",
+      "Service-connection status and VA disability rating decision details if related to PCAFC pathway (ask: 'Has VA assigned a service-connected disability rating? If so, what combined percentage and do you have the decision letter?')."
+    ],
+    "intake_sufficiency_assessment": "Partial. The current intake flags VA pathways correctly (military status, VA contact, VA rating ranges, ADLs, physician contact, caregiver age, co-residence, and income ranges). However, it lacks critical precision and several program-specific eligibility-unit facts needed for defensible preliminary eligibility conclusions: exact service dates and discharge status, precise annual income and countable net worth, primary-caregiver designation and care-hours, and explicit application-document prompts (VA Form 21-2680; VA Form 21P-527EZ). For PCAFC the intake can identify likely candidates but cannot confirm required VA-specific enrollment/service conditions because the Federal Guide directs readers to caregiver.va.gov (detailed criteria not in retrieved text).",
+    "coverage_gaps": [
+      "Service qualification facts: no explicit question capturing active-duty service periods, wartime service days, or character of discharge (all required to assess pension eligibility).",
+      "Primary caregiver eligibility facts: no direct question asking whether the caregiver is the veteran’s officially designated primary family caregiver or number of care hours (PCAFC requires proof of substantial care responsibility).",
+      "Financial precision: monthly income ranges and asset-type checkboxes are insufficient for VA Pension means-test which requires annual income and countable net worth (intake must ask exact figures or approximate totals).",
+      "Application-only documents missing from intake mapping: VA Form 21-2680 and VA Form 21P-527EZ are required by VA at application stage; intake only asks about clinician and ADLs and does not flag these forms.",
+      "Evidence triggers: intake lacks explicit triggers that move a case from screening to application/document collection (for example, 'If interested in Aid & Attendance, prompt user to obtain VA Form 21-2680 from clinician').",
+      "VA eligibility detail is referenced but not retrieved: guide points to caregiver.va.gov for PCAFC rules — those rules are not present in the retrieved pages so eligibility specifics for PCAFC remain not_established in this audit."
+    ]
+  },
+  "retrieval_queries": [
+    "VA caregiver programs eligibility documentation PCAFC Program of Comprehensive Assistance for Family Caregivers eligibility requirements documents needed proof veteran status discharge proof medical certification proof of need for personal care 6 months continuous care VA Aid and Attendance pension eligibility documentation required application forms evidentiary requirements 'continuous in-person personal care for at least 6 months' 'VA disability rating' 'service connection' 'VA pension Aid & Attendance application documents required'"
+  ],
+  "retrieved_sources": {
+    "VA-FEDERAL-BENEFITS-GUIDE:33:b75e51512c": {
+      "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+      "url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+      "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+      "page": "33",
+      "text": "at any Veterans Health \nAdministration facility.\nPGCSS offers peer support mentoring, training, education, respite \ncare, self-care courses, referrals, and the Caregiver Support Line \n855-260-3274. In addition to services offered under the PGCSS, VA \noffers enhanced clinical support for Family Caregivers of eligible \nVeterans through PCAFC. Eligible Primary Family Caregivers \nenrolled in PCAFC may also receive a monthly stipend, beneficiary \ntravel, mental health counseling, enhanced respite services and \nhealth insurance, if applicable. To learn more about eligibility and \nthe application process for PCAFC, visit www.caregiver.va.gov/\nsupport/support_benefits.asp.\nFor detailed information about VA’s Caregiver Support Program \n(CSP) and the full range of services available to caregivers, visit \nwww.caregiver.va.gov.\nDependents and Survivors Health Care - Civilian Health \nand Medical Program of the Department of Veterans Affairs \n(CHAMPVA): Under CHAMPVA, certain dependents and survivors \ncan receive reimbursement for most medical expenses – such \nas inpatient, outpatient, mental health, prescription medication, \nskilled nursing care and durable medical equipment.\nTo be eligible for CHAMPVA a Veteran’s spouse or surviving spouse \nand eligible family members must not be eligible for TRICARE, \nwhich is the medical program provided for civilian dependents \nthrough the Department of"
+    },
+    "VA-FEDERAL-BENEFITS-GUIDE:33:abe7dd19a9": {
+      "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+      "url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+      "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+      "page": "33",
+      "text": "following:\n\ty Travel destination(s) and temporary address\n\ty Valid telephone number\n\ty Arrival and departure dates\n\ty Specific care concerns\nTheir PACT will contact the Traveling Veteran Coordinator, who \nwill assist in coordinating care at the alternate facility. For more \ninformation, contact PACT or a Traveling Veteran Coordinator at \nthe local VA facility.\nVeteran Health Identification Card: To get a Veteran ID Card \ngo to www.va.gov/records/get-veteran-id-cards/vic. When \nyou’re enrolled in VA health care, you’ll use your Veteran Health\n\n\nHealth Care | 25\nIdentification Card (VHIC) to check in to your appointments at \nVA medical centers. This secure ID card keeps your personal \ninformation safe while giving us the information we need to easily \naccess your VA health record.\nCaregiver Support Program and Services: Caregivers are \neligible for a host of VA services offered through VA’s Program \nof General Caregiver Support Services (PGCSS) and Program \nof Comprehensive Assistance for Family Caregivers (PCAFC) \ncollectively known as the Caregiver Support Program (CSP). \nPGCSS provides services and supports to caregivers of Veterans \nenrolled in and receiving health care at any Veterans Health \nAdministration facility.\nPGCSS offers peer support mentoring, training, education, respite \ncare, self-care courses, referrals, and the Caregiver Support Line \n855-260-3274. In"
+    },
+    "VA-FEDERAL-BENEFITS-GUIDE:82:a1847a637a": {
+      "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+      "url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+      "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+      "page": "82",
+      "text": "can mail your \napplication to the address below:\nPension Intake Center\nP .O. Box 5365\nJanesville, WI 53547\nSurvivors Aid and Attendance and Housebound Benefits: \nSurvivors who are eligible for pension and require the aid and \nattendance of another person, or are housebound, may be \neligible for a higher maximum annual pension rate. These benefits \nare paid in addition to monthly pension, and they are not paid \nwithout eligibility to survivor’s pension. Since aid and attendance \nand housebound allowances increase the pension amount, \npeople who are not eligible for a basic pension due to excessive \nincome may be eligible for pension at these increased rates. A \nsurviving spouse may not receive aid and attendance benefits \nand housebound benefits at the same time. For additional \ninformation on aid and attendance and housebound benefits \nincluding how to apply please visit www.va.gov/pension/aid-\nattendance-housebound.\nTo apply for aid and attendance or housebound benefits, submit a \nVA Form 21-2680, Examination for Housebound Status or Permanent \nNeed for Regular Aid and Attendance to the address shown below:\nU.S. Department of Veterans Affairs \nPension Intake Center\nP .O. Box 5365\nJanesville, WI 53547\n\n\n74 | Family Members/Survivors\nPlease include copies of any evidence, preferably a report from an \nattending physician or a nursing home, validating the need for aid \nan"
+    },
+    "VA-FEDERAL-BENEFITS-GUIDE:47:e3f77b29f7": {
+      "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+      "url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+      "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+      "page": "47",
+      "text": "and Housebound Benefits (Special \nMonthly Pension): Veterans who are eligible for VA pension \nand require the aid and attendance of another person, or are \nhousebound, may be eligible for a higher maximum annual \npension rate. These benefits are paid in addition to monthly \npension, and they are not paid without eligibility for pension. Since \naid and attendance and housebound allowances increase the \npension amount, people who are not eligible for a basic pension \ndue to excessive income may be eligible for pension at these \nincreased rates. A Veteran may not receive aid and attendance \nbenefits and housebound benefits at the same time. For additional \ninformation on aid and attendance and housebound benefits \nincluding how to apply please visit www.va.gov/pension/aid-\nattendance-housebound.\nTo apply for aid and attendance or housebound benefits, submit a \nVA Form 21-2680, Examination for Housebound Status or Permanent \nNeed for Regular Aid and Attendance, to the following address:\n\n\nPension | 39\nU.S. Department of Veterans Affairs \nPension Intake Center\nP .O. Box 5365\nJanesville, WI 53547\nPlease include copies of any evidence, preferably a report from an \nattending physician or a nursing home, validating the need for aid \nand attendance or housebound status. The report should contain \nenough detail to determine whether there is disease or injury \nproducing physical"
+    },
+    "VA-FEDERAL-BENEFITS-GUIDE:45:9ec6aec9ad": {
+      "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+      "url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+      "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+      "page": "45",
+      "text": "y the amount of countable \nincome of the Veteran, spouse, and dependent children. When \na Veteran without a dependent is furnished nursing home or \ndomiciliary care by VA, the pension is reduced to an amount not \nto exceed $90 per month after three calendar months of care. \nThe reduction may be delayed if nursing home care continues to \nprovide the Veteran with rehabilitation services. For additional \ninformation on pension benefits please visit www.va.gov/pension.\nEligibility for Veterans Pension: Veterans who entered active \nduty after September 7, 1980, generally must have served at least \n24 months or for the full period for which they called or ordered to \nactive duty (with some exceptions), with at least one day during a \nwartime period. For those separated prior to September 7, 1980, a \nVeteran must have at least 90 days of active military service, with \nat least one day during a recognized wartime period to qualify \nfor a VA pension. The 90-day active military service requirement \ndoes not apply to Veterans discharged from the military due \nto a service-connected disability. The Veteran’s discharge must \nhave been under conditions other than dishonorable, and the \ndisability must be for reasons other than the Veteran’s own \nwillful misconduct. In addition to meeting the minimum service \nrequirement, low-income wartime Veterans may qualify for \npension if they meet certa"
+    },
+    "VA-FEDERAL-BENEFITS-GUIDE:4:5d73ea8968": {
+      "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+      "url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+      "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+      "page": "4",
+      "text": ".....................................www.va.gov/vadodhealth/frcp.asp\nGeriatrics and Extended Care ........................................................................................www.va.gov/geriatrics\nHealth Care Eligibility ................................................................................................www.va.gov/health-care\nHomeless Veterans .......................................................................................................www.va.gov/homeless\nHome Loan Guaranty ..................................................................................www.benefits.va.gov/homeloans\nLife Insurance .................................................................................................www.benefits.va.gov/insurance\nMemorial Certificate Program ...............................................................................www.cem.va.gov/pmc.asp\nMental Health ........................................................................................................www.mentalhealth.va.gov\nMy HealtheVet ..............................................................................................................www.myhealth.va.gov\nNational Resource Directory ........................................................................................................www.nrd.gov\nPACT Act ................................................................."
+    },
+    "VA-FEDERAL-BENEFITS-GUIDE:46:d8c7218979": {
+      "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+      "url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+      "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+      "page": "46",
+      "text": "y must be for reasons other than the Veteran’s own \nwillful misconduct. In addition to meeting the minimum service \nrequirement, low-income wartime Veterans may qualify for \npension if they meet certain service, income, and net worth limits \nset by law and are:\n\ty Age 65 or older; or\n\ty Permanently and totally disabled; or\n\ty A patient in a nursing home receiving skilled nursing care; or\n\n\n38 | Pension\n\ty VA-approved medical foster home; or\n\ty Receiving Social Security Disability Insurance; or\n\ty Receiving Supplemental Security Income.\nYearly family income and net worth must be less than the amount \nset by Congress to qualify for the Veterans pension benefit. \nPayments are made to bring the Veteran’s total income, including \nother retirement or Social Security income, to a level set by \nCongress. Unreimbursed medical expenses may reduce countable \nincome for VA purposes.\nHow to Apply for Veterans Pension: To apply for Veterans \nPension, download and complete VA Form 21P 527EZ, \n“Application for Veterans Pension. ” You can mail your application \nto the address below:\nDepartment of Veterans Affairs \nPension Intake Center\nP .O. Box 5365\nJanesville, WI 53547\nAid and Attendance and Housebound Benefits (Special \nMonthly Pension): Veterans who are eligible for VA pension \nand require the aid and attendance of another person, or are \nhousebound, may be eligible for a higher ma"
+    },
+    "VA-FEDERAL-BENEFITS-GUIDE:4:2deb359a49": {
+      "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+      "url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+      "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+      "page": "4",
+      "text": ".............................................................www.cem.va.gov\nCaregiver Support ..........................................................................................................www.caregiver.va.gov\nCenter for Minority Veterans .............................................................www.va.gov/centerforminorityveterans\nCHAMPVA ...................................................www.va.gov/communitycare/programs/dependents/champva\nCommunity Care ................................................................................................www.va.gov/communitycare\nDental Care ........................................................................................................................www.va.gov/dental\nDisability Claims and Appeals .............................................................. www.va.gov/claim-or-appeal-status\nEducation Benefits .......................................................................................................www.va.gov/education\nEnvironmental Exposures ......................................................................www.publichealth.va.gov/exposures\nFederal Recovery Consultant Office ..........................................................www.va.gov/vadodhealth/frcp.asp\nGeriatrics and Extended Care ........................................................................................www.va.gov/ger"
+    }
+  },
+  "validation_issues": [],
+  "retrieval_events": []
+}

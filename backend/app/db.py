@@ -24,6 +24,51 @@ from .config import get_settings
 logger = logging.getLogger("ilera.db")
 
 _SCHEMA = """
+-- ---------------------------------------------------------------------------
+-- Namespacing: `public` holds per-case RUNTIME data (cases, applications, …).
+-- `reference` holds AUTHORED data that is the same for every caregiver and
+-- changes only when policy/forms/corpus change (eligibility policy models, form
+-- field maps, the RAG source corpus, the intake schema). Separating them keeps
+-- "the library of reference material" distinct from "this caregiver's state".
+-- ---------------------------------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS reference;
+
+-- Eligibility policy models, one row per program, authored and versioned.
+-- `doc` is the serialized ProgramPolicy (pathways → criteria), standard JsonStore
+-- shape. The ruleset version lives in the doc (doc->>'ruleset_version') and is
+-- exposed as an index so a program can be queried/pinned by version without a scan.
+CREATE TABLE IF NOT EXISTS reference.program_policies (
+    program_id text PRIMARY KEY,
+    doc        jsonb NOT NULL,
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS program_policies_version_idx
+    ON reference.program_policies ((doc->>'ruleset_version'));
+
+-- Form field-map schemas, one row per form. `doc` is the full schema JSON (the same
+-- shape as data/form_schemas/<form_id>.json: {_meta, fields}). form_id is stored
+-- lower-cased to match the case-insensitive load_schema() lookup.
+CREATE TABLE IF NOT EXISTS reference.form_schemas (
+    form_id    text PRIMARY KEY,
+    doc        jsonb NOT NULL,
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- RAG source corpus: the authored program documentation the ingest embeds. One row per
+-- source document, carrying its manifest metadata + the full source text. This is the
+-- SOURCE of truth the ingest reads; the embedded vectors live separately in the
+-- public.rag_chunks table (written by the ingest, not here).
+CREATE TABLE IF NOT EXISTS reference.rag_sources (
+    document_id text PRIMARY KEY,
+    program     text NOT NULL DEFAULT '',
+    title       text NOT NULL DEFAULT '',
+    source_url  text NOT NULL DEFAULT '',
+    meta        jsonb NOT NULL DEFAULT '{}'::jsonb,  -- the full manifest entry
+    text        text NOT NULL,
+    updated_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS rag_sources_program_idx ON reference.rag_sources (program);
+
 CREATE TABLE IF NOT EXISTS users (
     id              text PRIMARY KEY,
     name            text NOT NULL,
@@ -197,7 +242,10 @@ def _get_pool():
             from psycopg_pool import ConnectionPool
 
             pool = ConnectionPool(
-                get_settings().database_url, min_size=1, max_size=4, open=True, timeout=15
+                get_settings().database_url, min_size=1, max_size=4, open=True, timeout=15,
+                # Azure can terminate idle connections or restart the server. Check
+                # on checkout so the pool replaces stale connections before use.
+                check=ConnectionPool.check_connection,
             )
             with pool.connection() as conn:
                 conn.execute(_SCHEMA)
@@ -243,9 +291,16 @@ class JsonStore:
     """
 
     def __init__(
-        self, table: str, keys: Sequence[str] = ("id",), scoped_by_case: bool = False
+        self,
+        table: str,
+        keys: Sequence[str] = ("id",),
+        scoped_by_case: bool = False,
+        schema: str = "",
     ) -> None:
-        self.table = table
+        # A schema qualifies the table (e.g. reference.program_policies). Empty = the
+        # default search_path (public), which is where per-case runtime tables live.
+        self.schema = schema
+        self.table = f"{schema}.{table}" if schema else table
         self.keys = tuple(keys)
         # A store keyed by case_id is already scoped by it.
         self.scoped_by_case = scoped_by_case and "case_id" not in self.keys

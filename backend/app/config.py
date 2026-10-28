@@ -92,6 +92,24 @@ class Settings(BaseSettings):
     email_openai_deployment: str = ""
     email_scan_max_deliveries: int = 5
 
+    # Government PDF form templates (authored reference binaries). Stored in Azure Blob
+    # Storage so the library can grow with state coverage without bloating the DB or the
+    # container image. Empty account URL = fall back to the bundled files in data/forms/
+    # (local dev / keyless boot). Auth mirrors the email path: managed identity in Azure,
+    # DefaultAzureCredential otherwise.
+    forms_blob_account_url: str = ""        # e.g. https://ileraforms.blob.core.windows.net
+    forms_blob_container: str = "forms"
+    forms_use_managed_identity: bool = True
+    forms_managed_identity_client_id: str = ""
+
+    # Public guide binaries live separately from application form templates.
+    reference_guides_blob_account_url: str = ""  # falls back to forms account URL
+    reference_guides_blob_container: str = "reference-guides"
+
+    @property
+    def has_forms_blob(self) -> bool:
+        return bool(self.forms_blob_account_url)
+
     @property
     def has_postgres(self) -> bool:
         return bool(self.database_url)

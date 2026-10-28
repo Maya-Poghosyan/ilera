@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import {
-  ArrowRight,
   ClipboardCheck,
   Compass,
   HeartHandshake,
@@ -11,8 +10,9 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Logo } from "@/components/logo";
-import { useAuth } from "@/lib/auth-context";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { UncurlingArrow } from "@/components/uncurling-arrow";
 
 const features = [
   {
@@ -38,62 +38,22 @@ const features = [
 ];
 
 export default function Home() {
-  const { user, loading } = useAuth();
-
   return (
     <main className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
-          <Logo />
-          <div className="flex items-center gap-2">
-            <nav className="mr-2 flex items-center gap-1">
-              <Button variant="ghost" className="px-5 py-2.5" render={<Link href="/" />}>
-                Home
-              </Button>
-              <Button variant="ghost" className="px-5 py-2.5" render={<Link href="/about" />}>
-                About
-              </Button>
-            </nav>
-            {!loading && user ? (
-              <Button className="px-6 py-2.5" render={<Link href="/dashboard" />}>Dashboard</Button>
-            ) : (
-              <>
-                <Button variant="outline" className="px-6 py-2.5" render={<Link href="/login" />}>
-                  Sign in
-                </Button>
-                <Button className="px-6 py-2.5" render={<Link href="/intake" />}>Get started</Button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center gap-6 px-6 py-24 text-center">
-        <h1 className="text-balance text-4xl font-bold tracking-tight text-primary sm:text-5xl">
+        <h1 className="text-balance text-4xl sm:text-5xl">
           Benefits navigation that works for caregivers
         </h1>
         <p className="max-w-xl text-pretty text-lg text-muted-foreground">
           Unpaid caregivers spend hours navigating fragmented benefits programs. Ilera finds
           what you qualify for, optimizes your strategy, and completes the applications for you.
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          {!loading && user ? (
-            <Button size="lg" render={<Link href="/dashboard" />}>
-              Go to dashboard
-              <ArrowRight />
-            </Button>
-          ) : (
-            <>
-              <Button size="lg" render={<Link href="/intake" />}>
-                Get started
-                <ArrowRight />
-              </Button>
-              <Button size="lg" variant="outline" render={<Link href="/login" />}>
-                Sign in
-              </Button>
-            </>
-          )}
-        </div>
+        <Button size="lg" className="hover:pr-7" render={<Link href="/intake" />}>
+          Discover programs
+          <UncurlingArrow />
+        </Button>
       </section>
 
       <section className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-4 px-6 pb-24 sm:grid-cols-2">
@@ -110,12 +70,7 @@ export default function Home() {
         ))}
       </section>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-3 px-6 py-8 text-sm text-muted-foreground sm:flex-row">
-          <Logo size="sm" />
-          <p>Built for caregivers. Grounded in official program documentation.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

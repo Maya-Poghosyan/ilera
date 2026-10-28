@@ -60,12 +60,14 @@ export async function proxyToApi(
   path: string,
 ): Promise<Response> {
   const search = request.nextUrl.search;
+  const isReferenceGuide = path.startsWith("/api/reference-guides/");
   const hasBody = request.method !== "GET" && request.method !== "HEAD";
   const contentType = request.headers.get("content-type");
   let upstream: Response;
   try {
     upstream = await callApi(`${path}${search}`, {
       method: request.method,
+      ...(isReferenceGuide ? { redirect: "manual" as const, token: null } : {}),
       headers: contentType ? { "content-type": contentType } : undefined,
       body: hasBody ? await request.text() : undefined,
     });
@@ -77,7 +79,7 @@ export async function proxyToApi(
     );
   }
   const headers = new Headers();
-  for (const name of PASS_THROUGH) {
+  for (const name of isReferenceGuide ? [...PASS_THROUGH, "location", "x-content-type-options", "content-security-policy"] : PASS_THROUGH) {
     const value = upstream.headers.get(name);
     if (value) headers.set(name, value);
   }

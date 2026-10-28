@@ -204,6 +204,7 @@ azure-core==1.41.0 \
     #   azure-identity
     #   azure-keyvault-secrets
     #   azure-servicebus
+    #   azure-storage-blob
 azure-functions==1.25.0 \
     --hash=sha256:0d01e52c0871a01a65911bc163a0dfd7f09725ba43cea17a09909cc5d298c1d2 \
     --hash=sha256:3c737657110b6cfd14e6871515ab66c377b9ceecaca8dcbf5b391d2433424756
@@ -225,6 +226,10 @@ azure-keyvault-secrets==4.11.3 \
 azure-servicebus==7.15.0 \
     --hash=sha256:62c73f3d9efbaf0089a375adc5ef992ffe6d7d0b1218b8462265aa30ad352c3e \
     --hash=sha256:7d60ad0956d7d9a7b75a0dad0b9eea0d182564e48911c11af9cd47f65a1d6584
+    # via -r requirements.txt
+azure-storage-blob==12.31.0 \
+    --hash=sha256:0c0cb601d3462491d09ea96023cd791bb9dd4b173bf950daf3cff34ff47ba5b5 \
+    --hash=sha256:997b393cfcbdc4b186d5911790d91f80387f7edc12c4d73eab963a2d26e5b2a9
     # via -r requirements.txt
 bcrypt==4.3.0 \
     --hash=sha256:0042b2e342e9ae3d2ed22727c1262f76cc4f345683b5c1715f0250cf4277294f \
@@ -631,6 +636,7 @@ cryptography==50.0.2 \
     # via
     #   -r requirements.txt
     #   azure-identity
+    #   azure-storage-blob
     #   msal
     #   pyjwt
     #   python-jose
@@ -1004,6 +1010,7 @@ isodate==0.7.2 \
     #   azure-communication-email
     #   azure-keyvault-secrets
     #   azure-servicebus
+    #   azure-storage-blob
 jiter==0.17.0 \
     --hash=sha256:00b5a98df3e3a3e8cf7b619f4ac2f8bf975bbf3d95d02c5d17b8dbfe5c8b8245 \
     --hash=sha256:00d783a779c5664e16dbad5e3a3c3a75e128b07dd5f4765159658d9210a50ca5 \
@@ -2906,6 +2913,7 @@ typing-extensions==4.16.0 \
     #   azure-identity
     #   azure-keyvault-secrets
     #   azure-servicebus
+    #   azure-storage-blob
     #   fastapi
     #   httpx2
     #   huggingface-hub

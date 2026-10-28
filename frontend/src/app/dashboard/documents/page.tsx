@@ -15,11 +15,13 @@ export default function DocumentsPage() {
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? localStorage.getItem("ilera_case_id") : null;
-    if (stored) setCaseId(stored);
     listForms()
       .then((data) => setForms(data.forms))
       .catch(() => setForms([]))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setCaseId(stored);
+        setLoading(false);
+      });
   }, []);
 
   function handleDownload(formId: string) {
@@ -46,7 +48,7 @@ export default function DocumentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Documents</h1>
+          <h1 className="text-2xl">Documents</h1>
           <p className="text-sm text-muted-foreground">
             Auto-filled government benefit forms. Select a form and download the
             pre-populated PDF.
@@ -71,7 +73,7 @@ export default function DocumentsPage() {
 
       {Object.entries(programGroups).map(([group, groupForms]) => (
         <div key={group} className="space-y-3">
-          <h2 className="text-lg font-semibold">{group}</h2>
+          <h2 className="text-lg">{group}</h2>
           {groupForms.map((f) => {
             const hasMappings = f.mapped_fields > 0;
             return (

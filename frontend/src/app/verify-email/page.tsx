@@ -5,20 +5,18 @@ import { useSearchParams } from "next/navigation";
 import { CheckCircle, XCircle } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Logo } from "@/components/logo";
+import { SiteHeader } from "@/components/site-header";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying");
+  const token = searchParams.get("token");
+  const [requestStatus, setStatus] = useState<"verifying" | "success" | "error">("verifying");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const status = token ? requestStatus : "error";
+
   useEffect(() => {
-    const token = searchParams.get("token");
-    if (!token) {
-      setStatus("error");
-      setErrorMessage("This verification link is invalid. Please sign up again.");
-      return;
-    }
+    if (!token) return;
 
     fetch("/api/auth/verify-email", {
       method: "POST",
@@ -44,15 +42,11 @@ function VerifyEmailContent() {
             : "Verification failed. Please try signing up again.",
         );
       });
-  }, [searchParams]);
+  }, [token]);
 
   return (
     <main className="flex flex-1 flex-col">
-      <header className="sticky top-0 z-10 border-b border-border bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
-          <Logo />
-        </div>
-      </header>
+      <SiteHeader actions={null} />
 
       <section className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
         <Card className="w-full text-center">
@@ -90,7 +84,7 @@ function VerifyEmailContent() {
                 <CardTitle className="text-xl">Verification failed</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground">{errorMessage}</p>
+                <p className="text-sm text-muted-foreground">{token ? errorMessage : "This verification link is invalid. Please sign up again."}</p>
                 <p className="text-sm">
                   <a href="/signup" className="text-primary hover:underline">
                     Back to sign up

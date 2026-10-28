@@ -297,7 +297,7 @@ export default function ApplicationsPage() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
-        <h2 className="text-lg font-semibold">
+        <h2 className="text-lg">
           Auto-filling forms for {activeProgram}&hellip;
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -320,7 +320,7 @@ export default function ApplicationsPage() {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-2xl">
             {activeProgram}
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -407,7 +407,7 @@ export default function ApplicationsPage() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
-        <h2 className="text-lg font-semibold">
+        <h2 className="text-lg">
           Generating combined PDF for {activeProgram}&hellip;
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -428,7 +428,7 @@ export default function ApplicationsPage() {
         </Button>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-2xl">
             {activeProgram} &mdash; Preview
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -459,7 +459,7 @@ export default function ApplicationsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">
+        <h1 className="text-2xl">
           Your applications
         </h1>
         <p className="text-sm text-muted-foreground">
