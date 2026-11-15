@@ -1,0 +1,250 @@
+{
+  "as_of": "2026-11-15",
+  "elapsed_seconds": 15.72,
+  "results": [
+    {
+      "program": "ihss",
+      "evidence_count": 4,
+      "words": 73,
+      "answer": {
+        "conclusion": "Recommend a caregiver-kept timesheet showing dates and hours.",
+        "findings": [
+          {
+            "finding": "County must receive a timesheet before payment transactions.",
+            "citations": [
+              {
+                "document_id": "IHSS-MPP-30-765-785",
+                "page": "85"
+              }
+            ]
+          },
+          {
+            "finding": "Counties must inform providers of requirements they must meet to be paid.",
+            "citations": [
+              {
+                "document_id": "IHSS-MPP-30-765-785",
+                "page": "29"
+              }
+            ]
+          },
+          {
+            "finding": "Intake uses specific IHSS forms during assessment (SOC forms listed).",
+            "citations": [
+              {
+                "document_id": "IHSS-CASE-ASSESSMENT-CHECKLIST",
+                "page": "1"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Ask county intake if caregiver copy suffices.",
+          "If denied, request official county timesheet copy from agency."
+        ],
+        "limitations": [
+          "No passage says caregiver-held copy is acceptable for intake verification.",
+          "Search county IHSS intake guidance (smallest useful next lookup)."
+        ]
+      }
+    },
+    {
+      "program": "medical",
+      "evidence_count": 4,
+      "words": 72,
+      "answer": {
+        "conclusion": "Recommend a recent pay stub as optional caregiver-held record.",
+        "findings": [
+          {
+            "finding": "Pay stubs are requested to show gross monthly pay and dates worked.",
+            "citations": [
+              {
+                "document_id": "MEPM-ARTICLE-22",
+                "page": "119"
+              }
+            ]
+          },
+          {
+            "finding": "Self-reported work info may be used initially; employer verification possible.",
+            "citations": [
+              {
+                "document_id": "MEPM-ARTICLE-22",
+                "page": "119"
+              }
+            ]
+          },
+          {
+            "finding": "Railroad Retirement Board award requires a written RRB statement.",
+            "citations": [
+              {
+                "document_id": "MEPM-ARTICLE-22",
+                "page": "148"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Ask caregiver for a recent pay stub (gross pay and pay period dates).",
+          "Use self-report first; only verify with employer if needed."
+        ],
+        "limitations": [
+          "Source date_status unverified; confirm with current DHCS intake guidance (MEPM)."
+        ]
+      }
+    },
+    {
+      "program": "pfl",
+      "evidence_count": 4,
+      "words": 94,
+      "answer": {
+        "conclusion": "Recommend one optional caregiver-held record: a recent paystub showing CASDI and pay dates.",
+        "findings": [
+          {
+            "finding": "Paystubs show CASDI (SDI tax withholding) is the SDI funding source.",
+            "citations": [
+              {
+                "document_id": "EDD-DE2511",
+                "page": "1"
+              }
+            ]
+          },
+          {
+            "finding": "EDD advises using SDI Online or paper documentation when filing PFL claims.",
+            "citations": [
+              {
+                "document_id": "EDD-DE2475",
+                "page": "1"
+              }
+            ]
+          },
+          {
+            "finding": "Bonding leave payable within one year of birth/placement (limits timing relevance).",
+            "citations": [
+              {
+                "document_id": "EDD-DE2475",
+                "page": "2"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Have caregiver self-report recent paystub CASDI amount and pay period dates.",
+          "If unclear, check Claim for PFL (DE 2501F) filing instructions next."
+        ],
+        "limitations": [
+          "Passages don’t show how to convert CASDI withholding into exact benefit amount (EDD-DE2511, p.1).",
+          "No explicit rule proving a paystub satisfies intake verification (EDD-DE2475, p.1)."
+        ]
+      }
+    },
+    {
+      "program": "va",
+      "evidence_count": 4,
+      "words": 68,
+      "answer": {
+        "conclusion": "Recommend an optional VA payment notice showing amount and date.",
+        "findings": [
+          {
+            "finding": "VA automobile/ conveyance payment amount $25,603.02 effective Oct 1, 2023.",
+            "citations": [
+              {
+                "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+                "page": "37"
+              }
+            ]
+          },
+          {
+            "finding": "Clothing allowance applications must be received by August 1 of benefit year.",
+            "citations": [
+              {
+                "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+                "page": "37"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Ask caregiver to self-report any VA payment notice amount and date.",
+          "Product researcher: verify rates/dates on VA compensation rates webpage."
+        ],
+        "limitations": [
+          "No CA-specific implementation details in provided passages.",
+          "No retrieved passage proves caregivers routinely possess payment notices."
+        ]
+      }
+    },
+    {
+      "program": "medicare",
+      "evidence_count": 4,
+      "words": 65,
+      "answer": {
+        "conclusion": "Recommend optional caregiver-held Medicare card showing effective dates.",
+        "findings": [
+          {
+            "finding": "Medicare card referenced in relation to Part B effective date.",
+            "citations": [
+              {
+                "document_id": "CMS-MSP-CHAPTER-1",
+                "page": "14"
+              }
+            ]
+          },
+          {
+            "finding": "Part A/B effective dates tied to enrollment timing and retroactivity rules.",
+            "citations": [
+              {
+                "document_id": "MEDICARE-AND-YOU",
+                "page": "17"
+              },
+              {
+                "document_id": "CMS-MSP-CHAPTER-1",
+                "page": "45"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Ask caregiver to self-report card’s Medicare effective date(s).",
+          "If unclear, request researcher to check SSA award-letter guidance."
+        ],
+        "limitations": [
+          "Passages do not show the card lists premium amounts.",
+          "Retrieval not exhaustive; SSA documents may be needed for confirmation."
+        ]
+      }
+    },
+    {
+      "program": "tax",
+      "evidence_count": 4,
+      "words": 48,
+      "answer": {
+        "conclusion": "Optional record: caregiver copy of Form W-2 (box 10).",
+        "findings": [
+          {
+            "finding": "Form W-2 shows total dependent care benefits in box 10.",
+            "citations": [
+              {
+                "document_id": "IRS-PUB-503",
+                "page": "11"
+              }
+            ]
+          },
+          {
+            "finding": "Employer must report dependent care benefits to employee on W-2.",
+            "citations": [
+              {
+                "document_id": "IRS-PUB-503",
+                "page": "11"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Ask caregiver to self-report W-2 box 10 amount."
+        ],
+        "limitations": [
+          "W-2 may not show contribution dates or detailed expense dates (unsupported)."
+        ]
+      }
+    }
+  ]
+}

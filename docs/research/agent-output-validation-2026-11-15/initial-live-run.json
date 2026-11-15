@@ -1,0 +1,276 @@
+{
+  "as_of": "2026-11-15",
+  "elapsed_seconds": 10.51,
+  "results": [
+    {
+      "program": "ihss",
+      "evidence_count": 4,
+      "words": 74,
+      "answer": {
+        "conclusion": "Use the IHSS Social Worker Case Assessment Checklist.",
+        "findings": [
+          {
+            "finding": "Supports checking uncertain identity facts (view photo ID).",
+            "citations": [
+              {
+                "document_id": "IHSS-CASE-ASSESSMENT-CHECKLIST",
+                "page": "1"
+              }
+            ]
+          },
+          {
+            "finding": "Does not permit inferring caregiver suitability from a single ID check.",
+            "citations": [
+              {
+                "document_id": "IHSS-CASE-ASSESSMENT-CHECKLIST",
+                "page": "1"
+              }
+            ]
+          },
+          {
+            "finding": "AAC supplies sample questions to clarify uncertain care-related facts.",
+            "citations": [
+              {
+                "document_id": "IHSS-ANNOTATED-ASSESSMENT",
+                "page": "1"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Verify identity with photo ID during screening.",
+          "Use AAC questions to probe unclear care facts.",
+          "If suitability uncertain, request references and training documents."
+        ],
+        "limitations": [
+          "Sources date_status unverified.",
+          "No statewide rule shown for resolving disputed facts; search MPP sections 30-765–30-785."
+        ]
+      }
+    },
+    {
+      "program": "medical",
+      "evidence_count": 4,
+      "words": 58,
+      "answer": {
+        "conclusion": "Use MEPM‑Article 8’s evidence list for uncertain caregiver parentage.",
+        "findings": [
+          {
+            "finding": "Document: MEPM‑Article 8 is most useful for verifying caregiver/parentage.",
+            "citations": [
+              {
+                "document_id": "MEPM-ARTICLE-8",
+                "page": "17"
+              }
+            ]
+          },
+          {
+            "finding": "Supports: which documents prove parentage or legal responsibility.",
+            "citations": [
+              {
+                "document_id": "MEPM-ARTICLE-8",
+                "page": "17"
+              }
+            ]
+          },
+          {
+            "finding": "Unsupported inference: a sworn statement alone conclusively proves parentage if conflicting evidence exists.",
+            "citations": [
+              {
+                "document_id": "MEPM-ARTICLE-8",
+                "page": "17"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Request listed documentary evidence first.",
+          "If none, accept sworn caretaker statement and document attempts."
+        ],
+        "limitations": [
+          "Source date_status unverified (MEPM-ARTICLE-8, p.17)."
+        ]
+      }
+    },
+    {
+      "program": "pfl",
+      "evidence_count": 4,
+      "words": 73,
+      "answer": {
+        "conclusion": "Use the DE 2475 guide to resolve uncertain caregiver facts.",
+        "findings": [
+          {
+            "finding": "DE 2475 shows Parts A, C, and D are required; call if care recipient incapacitated.",
+            "citations": [
+              {
+                "document_id": "EDD-DE2475",
+                "page": "2"
+              }
+            ]
+          },
+          {
+            "finding": "DE 2475 supports what proof is needed for bonding (birth/placement details).",
+            "citations": [
+              {
+                "document_id": "EDD-DE2475",
+                "page": "1"
+              }
+            ]
+          },
+          {
+            "finding": "Unsupported inference: verbal confirmation can replace required written signature.",
+            "citations": [
+              {
+                "document_id": "EDD-DE2475",
+                "page": "2"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Call PFL at 1-877-238-4373 for instructions",
+          "Obtain required signed Parts A/C/D or authorized forms"
+        ],
+        "limitations": [
+          "All cited documents have date_status: unverified",
+          "Retrieval not exhaustive; check DE 2501F form directly"
+        ]
+      }
+    },
+    {
+      "program": "va",
+      "evidence_count": 4,
+      "words": 76,
+      "answer": {
+        "conclusion": "Use the Federal Benefits Guide (2025) to verify Veteran service documents.",
+        "findings": [
+          {
+            "finding": "Guide says Veterans can submit DD-214 to document service dates.",
+            "citations": [
+              {
+                "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+                "page": "10"
+              }
+            ]
+          },
+          {
+            "finding": "Guide describes Caregiver Support Program existence but not screening steps.",
+            "citations": [
+              {
+                "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+                "page": "33"
+              }
+            ]
+          },
+          {
+            "finding": "No passage here establishes that the Guide defines preliminary caregiver screening.",
+            "citations": [
+              {
+                "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+                "page": "84"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Request or obtain the Veteran’s DD-214 copy.",
+          "Contact local VA Caregiver Support or PACT for screening procedure."
+        ],
+        "limitations": [
+          "Guide date_status=unverified; evidence dates may be outdated (VA-FEDERAL-BENEFITS-GUIDE, page 6).",
+          "Retrieval not exhaustive for California-specific screening rules."
+        ]
+      }
+    },
+    {
+      "program": "medicare",
+      "evidence_count": 4,
+      "words": 61,
+      "answer": {
+        "conclusion": "Use CMS-MSP-CHAPTER-1 for screening uncertainty.",
+        "findings": [
+          {
+            "finding": "Document accepts self-attestation for dividends, interest, non‑liquid resources.",
+            "citations": [
+              {
+                "document_id": "CMS-MSP-CHAPTER-1",
+                "page": "26"
+              }
+            ]
+          },
+          {
+            "finding": "LIS leads are treated as MSP applications but lack income/resources details.",
+            "citations": [
+              {
+                "document_id": "CMS-MSP-CHAPTER-1",
+                "page": "29"
+              }
+            ]
+          },
+          {
+            "finding": "States must attempt AVS verification before requiring proof for verifiable resources.",
+            "citations": [
+              {
+                "document_id": "CMS-MSP-CHAPTER-1",
+                "page": "26"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Check California DHCS MSP implementation guidance.",
+          "Request SSA LIS leads record layout if needed."
+        ],
+        "limitations": [
+          "Source date status marked unverified.",
+          "State‑specific (California) implementation not in these passages."
+        ]
+      }
+    },
+    {
+      "program": "tax",
+      "evidence_count": 4,
+      "words": 64,
+      "answer": {
+        "conclusion": "Use IRS Publication 503 (Form W-10 guidance) for uncertain provider facts.",
+        "findings": [
+          {
+            "finding": "Supports using Form W-10 or alternate documents to verify provider identity.",
+            "citations": [
+              {
+                "document_id": "IRS-PUB-503",
+                "page": "9"
+              }
+            ]
+          },
+          {
+            "finding": "Supports reporting partial info and attaching statement if provider refuses.",
+            "citations": [
+              {
+                "document_id": "IRS-PUB-503",
+                "page": "10"
+              }
+            ]
+          },
+          {
+            "finding": "Does not support California-specific caregiver screening rules.",
+            "citations": [
+              {
+                "document_id": "IRS-PUB-503",
+                "page": "9"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Request provider complete Form W-10",
+          "If refused, file Form 2441 with attached statement"
+        ],
+        "limitations": [
+          "Sources date unverified (Publication 503, 2025)",
+          "Retrieval may omit state-level CA rules"
+        ]
+      }
+    }
+  ]
+}

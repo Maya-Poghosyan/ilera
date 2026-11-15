@@ -1,4 +1,7 @@
 from functools import lru_cache
+from typing import Literal
+
+from pydantic import Field
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -31,6 +34,11 @@ class Settings(BaseSettings):
     # Optional OpenAI-compatible base URL (e.g. an Azure OpenAI v1 endpoint:
     # https://<resource>.openai.azure.com/openai/v1). Empty = api.openai.com.
     openai_base_url: str = ""
+    # Completion budgets include reasoning tokens. Keep room for validated JSON.
+    eligibility_max_output_tokens: int = Field(default=4096, ge=1024, le=16384)
+    research_max_output_tokens: int = Field(default=3072, ge=1024, le=16384)
+    # Empty omits this setting for deployments without reasoning-effort support.
+    agent_reasoning_effort: Literal["", "low", "medium", "high"] = "low"
     embedding_model: str = "text-embedding-3-small"
     # Which embedding backend to use: "auto" (OpenAI if a key is set, else fastembed),
     # "openai", or "fastembed". Force "fastembed" when the OpenAI/Azure endpoint has no

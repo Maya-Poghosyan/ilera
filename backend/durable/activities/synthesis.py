@@ -19,6 +19,7 @@ import logging
 from datetime import datetime, timezone
 
 from app.agents.interactions import analyze_program_interactions
+from app.agents.output_contracts import StrategyOutput
 from app.config import get_settings
 from app.models import CaseProfile, EligibilityResult, SpecialistFinding
 from app.store import finding_to_result, get_profile, save_profile
@@ -46,7 +47,9 @@ Structure the bullets as follows:
 Use simple, everyday language. No jargon, no policy citations, no technical terms.
 Write as if explaining to someone with no benefits experience.
 No next steps. No action items. No headers, no markdown, no attribution, no disclaimers.
-The total number of bullets must not exceed 7.\
+Return the StrategyOutput contract only: a bullets array with at most 7 entries,
+each at most 240 characters and at most 180 words total. Empty is valid when no
+programs match. No background report or repeated points.\
 """
 
 
@@ -144,8 +147,8 @@ async def synthesis_activity(payload: dict) -> dict:
     # ── Phase 3: LLM strategy synthesis ──────────────────────────────────────
     try:
         from openai import AsyncOpenAI
-        from pydantic_ai import Agent
-        from pydantic_ai.models.openai import OpenAIModel
+        from pydantic_ai import Agent, ToolOutput
+        from pydantic_ai.models.openai import OpenAIChatModel
         from pydantic_ai.providers.openai import OpenAIProvider
 
         s = get_settings()
@@ -155,14 +158,19 @@ async def synthesis_activity(payload: dict) -> dict:
             max_retries=6,
             timeout=90.0,
         )
-        model = OpenAIModel(s.openai_model, provider=OpenAIProvider(openai_client=openai_client))
-        agent: Agent[None, str] = Agent(
+        model = OpenAIChatModel(s.openai_model, provider=OpenAIProvider(openai_client=openai_client))
+        agent: Agent[None, StrategyOutput] = Agent(
             model=model,
-            output_type=str,
+            output_type=ToolOutput(StrategyOutput, strict=True),
+            model_settings={
+                "max_tokens": s.eligibility_max_output_tokens,
+                **({"openai_reasoning_effort": s.agent_reasoning_effort} if s.agent_reasoning_effort else {}),
+            },
+            retries=1,
             system_prompt=_SYNTHESIS_SYSTEM,
         )
         result = await agent.run(_build_synthesis_user_prompt(specialist_results))
-        strategy_raw = result.output or ""
+        strategy_raw = "\n".join(result.output.bullets)
     except Exception as exc:
         logger.error("synthesis_activity: LLM synthesis failed: %s", exc, exc_info=True)
         raise FindingsPersistenceError(

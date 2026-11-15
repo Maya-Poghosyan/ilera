@@ -15,6 +15,7 @@ from ..config import get_settings
 from ..models import CaseProfile, Citation, EligibilityResult, InteractionNote
 from ..rag.index import get_index
 from ..rag.scope import profile_scope
+from .output_contracts import InteractionsOutput
 
 # Program scopes whose docs describe how programs interact (coordination / routing / tax).
 INTERACTION_SCOPES = ["federal_routing", "medicare", "tax", "medical"]
@@ -26,6 +27,9 @@ _SYSTEM = (
     "ordering (e.g. Medicare secondary to Medi-Cal), income/tax interactions (e.g. IRS "
     "Notice 2014-7 waiver-payment exclusion), and the best sequence to apply. Be specific "
     "and never invent rules not supported by the documentation."
+    " Return at most 3 decision-changing interactions and 150 words of note/action "
+    "text total. Each note and action is at most 180 characters. No background, "
+    "repeated caveats or exhaustive checklist. Use an empty list when none is supported."
 )
 
 _SCHEMA_HINT = (
@@ -137,23 +141,29 @@ def _analyze(
         f"INTER-ELIGIBILITY ADVISING DOCUMENTATION:\n{context}\n\n{_SCHEMA_HINT}"
     )
     try:
-        import json
         from openai import OpenAI
+        from pydantic_ai.profiles.openai import OpenAIJsonSchemaTransformer
         client = OpenAI(
             api_key=s.openai_api_key,
             base_url=s.openai_base_url or None,
         )
         resp = client.chat.completions.create(
             model=s.openai_model,
-            max_completion_tokens=1200,
-            response_format={"type": "json_object"},
+            max_completion_tokens=s.research_max_output_tokens,
+            **({"reasoning_effort": s.agent_reasoning_effort} if s.agent_reasoning_effort else {}),
+            response_format={"type": "json_schema", "json_schema": {
+                "name": "program_interactions", "strict": True,
+                "schema": OpenAIJsonSchemaTransformer(InteractionsOutput.model_json_schema(), strict=True).walk(),
+            }},
             messages=[
                 {"role": "system", "content": _SYSTEM},
                 {"role": "user", "content": user},
             ],
         )
-        text = (resp.choices[0].message.content or "{}").strip()
-        data = json.loads(text)
+        choice = resp.choices[0]
+        if choice.finish_reason != "stop" or choice.message.refusal or not choice.message.content:
+            raise ValueError("Incomplete interaction output")
+        data = InteractionsOutput.model_validate_json(choice.message.content).model_dump()
     except Exception:
         return _heuristic(active_set)
     notes: list[InteractionNote] = []

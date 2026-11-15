@@ -15,11 +15,9 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime, timezone
-from typing import Literal
-
-from pydantic import BaseModel, Field
 
 from app.agents.specialists import ALL_SPECIALISTS
+from app.agents.output_contracts import SpecialistOutput as _SpecialistOutput
 from app.config import get_settings
 from app.rag.scope import profile_scope
 from app.models import CaseProfile, EligibilityResult, FollowupQuestion
@@ -30,54 +28,6 @@ logger = logging.getLogger(__name__)
 
 # Map doc_key → program name for building SpecialistResult without instantiating.
 _DOC_KEY_TO_PROGRAM: dict[str, str] = {cls.doc_key: cls.program for cls in ALL_SPECIALISTS}
-
-# ── Pydantic-ai output schema ──────────────────────────────────────────────────
-
-
-class _FollowupOutput(BaseModel):
-    id: str
-    prompt: str
-    type: Literal["short_text", "long_text", "select", "multiselect", "boolean"] = "short_text"
-    options: list[str] = Field(default_factory=list)
-    why: str = ""
-
-
-class _SpecialistOutput(BaseModel):
-    """Structured output schema the LLM must conform to."""
-
-    match_level: Literal["none", "low", "medium", "likely", "very_likely"]
-    # User-facing one-liner. Must NOT contain citations, policy quotes, or program
-    # descriptions. Plain English for a family caregiver — the LLM's reasoning stays
-    # internal (tool calls / RAG); only the clean verdict reaches the user.
-    summary: str = Field(
-        default="",
-        description=(
-            "One sentence for the caregiver explaining why this program does or doesn't "
-            "look like a fit — using only facts from THIS person's profile. "
-            "No program descriptions. No citations. No jargon."
-        ),
-    )
-    roadblocks: list[str] = Field(
-        default_factory=list,
-        description="Specific barriers for this person that would block or complicate the application.",
-    )
-    next_steps: list[str] = Field(
-        default_factory=list,
-        description="Concrete action items for the caregiver to pursue this program.",
-    )
-    required_documents: list[str] = Field(
-        default_factory=list,
-        description="Documents the applicant will need to submit.",
-    )
-    missing_info: list[str] = Field(
-        default_factory=list,
-        description="Information not in the profile that would change this assessment.",
-    )
-    followups: list[_FollowupOutput] = Field(
-        default_factory=list,
-        description="Questions to ask the caregiver to fill gaps in the profile.",
-    )
-
 
 # ── System prompt template ─────────────────────────────────────────────────────
 
@@ -151,6 +101,13 @@ recipient. In either case, do not call any other tools.
 Step 2 — If the gate returns ELIGIBLE, call lookup_program_docs to retrieve official \
 program documentation. Use it to reason privately — do not quote or cite it in summary.
 Step 3 — Return structured output:
+Use at most 220 words across all returned prose and follow-up options. Summary is
+one sentence (at most 240 characters). Prioritize only decision-changing facts.
+At most 3 roadblocks, 3 next steps, 4 required documents, 3 missing facts and
+3 followups; each bullet/question is at most 180 characters. Empty lists are valid.
+Do not repeat the same point in multiple lists or return a report, policy overview,
+reasoning transcript or exhaustive checklist. If many gaps remain, group related
+gaps within these limits and keep the result tentative; do not silently assume them.
 - match_level: your eligibility confidence (none/low/medium/likely/very_likely)
 - summary: ONE sentence for the caregiver. Use only facts from their profile. \
   No program descriptions, no citations, no jargon — just the reason this person \
@@ -197,7 +154,7 @@ def _build_user_prompt(
 
     parts.append(
         "\nAssess eligibility for YOUR program only. "
-        "Use lookup_program_docs before finalising your assessment."
+        "Follow the gate-first tool sequence and return only the compact output contract."
     )
     return "\n".join(parts)
 
@@ -283,8 +240,8 @@ async def specialist_activity(payload: dict) -> dict:
     # ── LLM assessment ────────────────────────────────────────────────────────
     try:
         from openai import AsyncOpenAI
-        from pydantic_ai import Agent
-        from pydantic_ai.models.openai import OpenAIModel
+        from pydantic_ai import Agent, ToolOutput
+        from pydantic_ai.models.openai import OpenAIChatModel
         from pydantic_ai.providers.openai import OpenAIProvider
         from durable.tools.rag_tool import make_rag_tool
 
@@ -295,11 +252,15 @@ async def specialist_activity(payload: dict) -> dict:
             max_retries=6,
             timeout=90.0,
         )
-        model = OpenAIModel(s.openai_model, provider=OpenAIProvider(openai_client=openai_client))
+        model = OpenAIChatModel(s.openai_model, provider=OpenAIProvider(openai_client=openai_client))
         scope = profile_scope(profile, doc_key)
         agent: Agent[CaseProfile, _SpecialistOutput] = Agent(
             model=model,
-            output_type=_SpecialistOutput,
+            output_type=ToolOutput(_SpecialistOutput, strict=True),
+            model_settings={
+                "max_tokens": s.eligibility_max_output_tokens,
+                **({"openai_reasoning_effort": s.agent_reasoning_effort} if s.agent_reasoning_effort else {}),
+            },
             system_prompt=_SYSTEM_TEMPLATE.format(program=program),
             tools=[make_gate_tool(doc_key), make_rag_tool(doc_key, scope)],
             deps_type=CaseProfile,
