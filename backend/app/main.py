@@ -14,7 +14,8 @@ settings = get_settings()
 
 # Scheduled work (e.g. the unclaimed-case purge) runs as Container Apps Jobs from app/jobs,
 # not in this process, so scaling out replicas never multiplies it.
-app = FastAPI(title=settings.app_name)
+# No /docs, /redoc or /openapi.json: the API is public and scanners probe it constantly.
+app = FastAPI(title=settings.app_name, docs_url=None, redoc_url=None, openapi_url=None)
 configure_email_access_logging()
 
 app.add_middleware(
