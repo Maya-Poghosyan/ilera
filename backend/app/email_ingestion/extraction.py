@@ -6,11 +6,11 @@ import json
 from contextlib import ExitStack
 from datetime import date, datetime, time
 from typing import Literal
-from urllib.parse import urlparse
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from ..azure_openai import is_dedicated_endpoint, open_client, structured_completion
 from ..config import get_settings
 from .models import EmailMessage
 from .privacy import private_transport_logs
@@ -73,11 +73,7 @@ SYSTEM_PROMPT = """Extract only actionable care appointments, benefit deadlines,
 
 def require_extraction_configuration():
     settings = get_settings()
-    url = urlparse(settings.email_openai_endpoint)
-    if not (url.scheme == "https" and url.hostname and url.hostname.endswith(".openai.azure.com")
-            and not url.username and not url.password and url.port in (None, 443)
-            and url.path in ("", "/") and not url.query and not url.fragment
-            and settings.email_openai_deployment):
+    if not (is_dedicated_endpoint(settings.email_openai_endpoint) and settings.email_openai_deployment):
         raise ExtractionError("email_extraction_unconfigured")
     return settings
 
@@ -86,21 +82,15 @@ class AzureExtractor:
     """One managed-identity client per worker, with no general OpenAI fallback."""
     def __enter__(self):
         settings = require_extraction_configuration()
-        from azure.identity import DefaultAzureCredential, ManagedIdentityCredential, get_bearer_token_provider
-        from openai import OpenAI
         import httpcore  # noqa: F401
 
         self._stack = ExitStack()
         try:
             self._stack.enter_context(private_transport_logs())
-            credential = self._stack.enter_context(
-                ManagedIdentityCredential(client_id=settings.email_managed_identity_client_id or None)
-                if settings.email_use_managed_identity else DefaultAzureCredential())
-            self.client = self._stack.enter_context(OpenAI(
-                base_url=settings.email_openai_endpoint.rstrip("/") + "/openai/v1/",
-                api_key=get_bearer_token_provider(credential, "https://cognitiveservices.azure.com/.default"),
-                timeout=45, max_retries=0,
-            ))
+            self.client = open_client(
+                self._stack, endpoint=settings.email_openai_endpoint,
+                use_managed_identity=settings.email_use_managed_identity,
+                managed_identity_client_id=settings.email_managed_identity_client_id)
             self.deployment = settings.email_openai_deployment
             return self
         except Exception:
@@ -119,20 +109,8 @@ class AzureExtractor:
             "body": message.body_text.get_secret_value()[:MAX_BODY_CHARS],
         })
         try:
-            with private_transport_logs():
-                completion = self.client.chat.completions.create(
-                    model=self.deployment, store=False, max_completion_tokens=4000,
-                    messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": payload}],
-                    response_format={"type": "json_schema", "json_schema": {
-                        "name": "care_events", "strict": True, "schema": Extraction.model_json_schema(),
-                    }},
-                )
-            choice = completion.choices[0]
-            if choice.finish_reason != "stop" or choice.message.refusal or not choice.message.content:
-                raise ValueError("Incomplete extraction")
-            if len(choice.message.content) > 20000:
-                raise ValueError("Oversized extraction")
-            return Extraction.model_validate_json(choice.message.content)
+            return structured_completion(self.client, deployment=self.deployment, system=SYSTEM_PROMPT,
+                                         content=payload, output=Extraction, name="care_events")
         except Exception:
             raise ExtractionError("email_extraction_failed") from None
         finally:

@@ -39,6 +39,7 @@ export interface Question {
   type: FieldType;
   required: boolean;
   options?: string[];
+  show_all_states?: boolean;
   option_labels?: Record<string, string>;
   answer_aliases?: Record<string, string | null>;
   display_as?: "dropdown";
@@ -49,10 +50,13 @@ export interface Question {
   page_helper_link?: { text: string; href: string };
   placeholder?: string;
   helper_text?: string;
+  helper_text_by_answer?: { field: string; text: Record<string, string> };
   helper_link?: { text: string; href: string };
   helper_links?: { text: string; href: string }[];
   why_this_matters?: string;
   show_when?: Condition;
+  /** Offer the section's document upload on this question's page when true. */
+  upload_when?: Condition;
   validation?: Validation;
   allow_not_sure?: boolean;
   allow_prefer_not_to_answer?: boolean;
@@ -66,9 +70,13 @@ export interface Screen {
   id: string;
   title: string;
   intro_text?: string;
+  intro_documents?: { document: string; location: string }[];
   intro_emphasis?: string;
+  upload_documents?: UploadDocument[];
   questions: Question[];
 }
+
+export interface UploadDocument { document: string; note?: string }
 
 export interface IntakeSchema {
   version: string;
@@ -78,6 +86,7 @@ export interface IntakeSchema {
   name_fallback: string;
   form_wide_rules: string[];
   delayed_questions: string[];
+  document_upload: { max_bytes: number; max_pdf_pages: number; accept: string[] };
   screens: Screen[];
 }
 
@@ -169,6 +178,12 @@ export function recipientName(answers: Answers, schema: IntakeSchema): string {
 // Effective option list for a select question, injecting the form-wide
 // "I'm not sure" / "Prefer not to answer" options where the schema marks them
 // and they are not already present.
+export function questionHelperText(question: Question, answers: Answers): string | undefined {
+  const variant = question.helper_text_by_answer;
+  const answer = variant && answers[variant.field];
+  return (variant && typeof answer === 'string' ? variant.text[answer] : undefined) ?? question.helper_text;
+}
+
 export function effectiveOptions(q: Question): string[] {
   const opts = [...(q.options ?? [])];
   if (q.allow_not_sure && !opts.includes(NOT_SURE)) opts.push(NOT_SURE);
@@ -189,7 +204,7 @@ export function validateQuestions(questions: Question[], answers: Answers): Reco
   for (const q of questions) {
     const v = answers[q.field_id];
     if (!isAnswered(v)) {
-      if (q.required) errors[q.field_id] = "Please answer or choose an available unsure option.";
+      if (q.required) errors[q.field_id] = "Required";
       continue;
     }
     if (typeof v === "string" && ((v === NOT_SURE && q.allow_not_sure) || (v === PREFER_NOT && q.allow_prefer_not_to_answer))) continue;

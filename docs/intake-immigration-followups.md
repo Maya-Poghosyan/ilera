@@ -1,6 +1,6 @@
 # Immigration follow-ups in the person sections
 
-The user's five-section order is preserved. About You contains caregiver identity
+The user's five-section order is preserved. About You contains caregiver identity, an immediate status follow-up after citizenship No,
 and address; Who are you caring for? contains recipient identity and conditional
 address. Support goals begin Care Needs. Sensitive follow-ups stay with the topic
 whose eligibility they inform, after their prerequisite answers. Current Medi-Cal,
@@ -8,11 +8,17 @@ combined coverage/benefits and Medicare follow-ups are in Current Coverage and
 Benefits. IDs are preserved; the version changes so saved drafts retain applicable
 answers and restart navigation against the revised order.
 
+## About You
+
+Citizenship No immediately opens the existing broad citizenship/immigration category
+question before the address, without waiting for support goals. Unsure and prefer not
+to answer remain available. No document identifiers or uploads are requested. Changing
+the answer to Yes clears the hidden category.
+
 ## Work and Financials
 
 | Question | Show when |
 | --- | --- |
-| Caregiver citizenship/immigration category | Explicit citizenship No and goal Getting paid as a caregiver |
 | Current U.S. work authorization | The same paid-care goal, with a category answer that is not declined |
 | Tax residency for the requested tax year | Explicit citizenship No and a tax-benefits goal |
 
@@ -59,6 +65,7 @@ instructions to distinguish work, coverage, residence and tax rules.
 
 Server and browser use the same schema conditions. Clearing or changing citizenship,
 goals or status removes answers from hidden branches, including dependent dates.
+The caregiver category remains when goals change because it now follows citizenship alone.
 No new automatic immigration disqualifier is added.
 
 ## Policy references checked
@@ -74,3 +81,25 @@ These are question-routing rules, not a complete legal eligibility decision tree
 Historical policy changes, current coverage scope, renewals and complex statuses
 may still need specialist follow-ups. Existing program-specific questions remain
 in the later sections.
+
+## October 28, 2026 review
+
+Attempted to query all six hosted policy research specialists through
+`app.agents.research`; the hosted Postgres index was unreachable (PoolTimeout),
+so no new agent answers were obtained. Checked current official EDD, CDSS and IRS
+sources directly instead. EDD states that citizenship/immigration status does not
+affect PFL eligibility. CDSS distinguishes provider enrollment and work-eligibility
+verification from initial screening. IRS distinguishes tax residency/dependent tests
+from identification numbers required on a filed return.
+
+Product decision: collect a broad self-reported category immediately as requested;
+ask work authorization only for paid-caregiver interest and tax residency only for
+relevant tax pathways. Broad immigration category alone does not establish either
+fact. Defer document numbers, SSNs/ITINs, identity documents and uploads to agency
+application/enrollment verification. This is a screening design decision, not a claim
+that agencies never require those identifiers. Recipient-specific coverage/residence
+questions retain their existing separate gates.
+
+Additional official references checked:
+- https://www.cdss.ca.gov/inforesources/letters-regulations/legislation-and-regulations/confidentiality-regulations/div30-ch30-700-thru-sec30-785
+- https://www.irs.gov/individuals/international-taxpayers/nonresident-aliens-dependents

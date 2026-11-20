@@ -33,11 +33,11 @@ def test_sections_and_prerequisites_are_encountered_before_followups():
     screens = build_schema()['screens']
     positions = {q['field_id']: (s, n) for s, screen in enumerate(screens) for n, q in enumerate(screen['questions'])}
     assert positions['case.goals'][0] == 2
-    assert positions['caregiver.citizenship_residency'][0] == 3
+    assert positions['caregiver.citizenship_residency'][0] == 0
     assert positions['caregiver.work_authorized'][0] == 3
-    assert positions['caregiver.tax_residency'][0] == 3
+    assert positions['caregiver.tax_residency'][0] == 5
     assert positions['recipient.citizenship_residency'][0] == 1
-    assert positions['recipient.five_year_us_residence'][0] == 4
+    assert positions['recipient.five_year_us_residence'][0] == 6
     immigration = ['caregiver.citizenship_residency', 'caregiver.work_authorized', 'caregiver.tax_residency',
                    'recipient.citizenship_residency', 'recipient.immigration_status_detail', 'recipient.lpr_since',
                    'recipient.five_year_us_residence', 'recipient.pregnancy_postpartum', 'recipient.foster_care_at_18',
@@ -68,11 +68,12 @@ def test_caregiver_work_and_tax_branches_are_independent():
     assert shown('caregiver.work_authorized', {**base, 'case.goals': [PAID]})
     assert not shown('caregiver.tax_residency', {**base, 'case.goals': [PAID]})
     assert shown('caregiver.tax_residency', {**base, 'case.goals': [TAX]})
-    assert not shown('caregiver.citizenship_residency', {**base, 'case.goals': [TAX]})
+    assert shown('caregiver.citizenship_residency', {**base, 'case.goals': [TAX]})
     assert not shown('caregiver.work_authorized', {**base, 'case.goals': [TAX]})
     assert not shown('caregiver.work_authorized', {**base, 'case.goals': [PAID], 'caregiver.citizenship_residency': 'Prefer not to answer'})
-    # Taking leave/checking PFL alone never activates immigration questions.
-    assert not shown('caregiver.citizenship_residency', {**base, 'caregiver.check_pfl': 'Yes'})
+    # The immediate category follows No before goals; PFL never triggers work authorization.
+    assert shown('caregiver.citizenship_residency', {'caregiver.us_citizen': False})
+    assert not shown('caregiver.work_authorized', {**base, 'caregiver.check_pfl': 'Yes'})
     assert not shown('caregiver.work_authorized', {**base, 'case.goals': ['Take a break from caregiving']})
 
 
@@ -124,7 +125,8 @@ def test_branch_changes_clear_sensitive_answers_and_preserve_explicit_uncertaint
     assert 'recipient.lpr_since' not in citizenship_change
     assert 'recipient.five_year_us_residence' not in citizenship_change
     goal_change = clean_answers({**answers, 'case.goals': ['Take a break from caregiving']})
-    assert 'caregiver.citizenship_residency' not in goal_change
+    assert goal_change['caregiver.citizenship_residency'] == 'Another immigration status'
+    assert 'caregiver.work_authorized' not in goal_change
     assert goal_change['recipient.citizenship_residency'] == 'Lawful permanent resident'
     profile = map_answers_to_profile(cleaned, CaseProfile(id='immigration'))
     assert profile.answers['caregiver.work_authorized'] == 'No'

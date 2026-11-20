@@ -22,16 +22,16 @@ const schema = JSON.parse(execFileSync(path.join(root, 'backend/.venv/bin/python
 const question = (id) => schema.screens.flatMap((s) => s.questions).find((q) => q.field_id === id);
 const visibleIds = (answers) => flow.buildPages(schema, answers).flatMap((p) => p.questions.map((q) => q.field_id));
 
-test('five section introductions and only the last optional question', () => {
+test('seven section introductions and only the last optional question', () => {
  const pages = flow.buildPages(schema, {});
- assert.equal(pages.filter(p => p.kind === 'intro').length, 5);
+ assert.equal(pages.filter(p => p.kind === 'intro').length, 7);
  assert.deepEqual(schema.screens.flatMap(s => s.questions).filter(q => !q.required).map(q => q.field_id), ['case.application_barriers']);
  const names = pages.find(p => p.questions.some(q => q.field_id === 'caregiver.first_name'));
  assert.ok(names.questions.some(q => q.field_id === 'caregiver.date_of_birth'));
  assert.ok(!names.questions.some(q => q.field_id === 'recipient.first_name'));
- assert.deepEqual(schema.screens[0].questions.map(q => q.field_id), ['caregiver.first_name', 'caregiver.last_name', 'caregiver.date_of_birth', 'caregiver.us_citizen', 'caregiver.address.street', 'caregiver.address.city', 'caregiver.address.state', 'caregiver.address.county', 'caregiver.address.zip', 'caregiver.coresidence']);
+ assert.deepEqual(schema.screens[0].questions.map(q => q.field_id), ['caregiver.first_name', 'caregiver.last_name', 'caregiver.date_of_birth', 'caregiver.us_citizen', 'caregiver.citizenship_residency', 'caregiver.address.street', 'caregiver.address.city', 'caregiver.address.state', 'caregiver.address.county', 'caregiver.address.zip', 'caregiver.coresidence']);
  assert.equal(schema.screens[2].questions[0].field_id, 'case.goals');
- assert.equal(schema.screens[4].questions[0].field_id, 'recipient.medicaid_covered');
+ assert.equal(schema.screens[6].questions[0].field_id, 'recipient.medicaid_covered');
  const hazardous = flow.buildPages(schema, {'recipient.recognizes_danger': 'Yes'}).find(p => p.questions.some(q => q.field_id === 'recipient.hazardous_behaviors'));
  assert.equal(hazardous.questions.length, 1);
 });
@@ -62,11 +62,13 @@ test('invalid dates are rejected', () => {
 test('eligibility followups stay with their topics and follow their prerequisites', () => {
  const positions = new Map(schema.screens.flatMap((s, section) => s.questions.map((q, order) => [q.field_id, { section, order }])));
  assert.equal(positions.get('case.goals').section, 2);
- for (const id of ['caregiver.citizenship_residency', 'caregiver.work_authorized', 'caregiver.tax_residency', 'recipient.tax_residency']) assert.equal(positions.get(id).section, 3);
+ assert.equal(positions.get('caregiver.citizenship_residency').section, 0);
+ assert.equal(positions.get('caregiver.work_authorized').section, 3);
+ for (const id of ['caregiver.tax_residency', 'recipient.tax_residency']) assert.equal(positions.get(id).section, 5);
  for (const id of ['recipient.citizenship_residency', 'recipient.immigration_status_detail']) assert.equal(positions.get(id).section, 1);
- for (const id of ['recipient.lpr_since', 'recipient.five_year_us_residence']) assert.equal(positions.get(id).section, 4);
- assert.equal(positions.get('recipient.medicaid_covered').section, 4);
- assert.equal(positions.get('recipient.coverage_and_benefits').section, 4);
+ for (const id of ['recipient.lpr_since', 'recipient.five_year_us_residence']) assert.equal(positions.get(id).section, 6);
+ assert.equal(positions.get('recipient.medicaid_covered').section, 6);
+ assert.equal(positions.get('recipient.coverage_and_benefits').section, 6);
  assert.ok(positions.get('recipient.us_citizen').order < positions.get('recipient.citizenship_residency').order);
  const base = { 'caregiver.us_citizen': false, 'caregiver.citizenship_residency': 'Another immigration status', 'case.goals': ['Get paid for caregiving'] };
  assert.ok(visibleIds(base).includes('caregiver.work_authorized'));
@@ -121,4 +123,81 @@ test('resume uses last completed page and ignores partial later pages', () => {
  ];
  assert.equal(flow.lastCompletedPage(pages, {'caregiver.first_name':'Test','caregiver.address.street':'1 Test St'}), 'caregiver.first_name');
  assert.equal(flow.lastCompletedPage(pages, {'caregiver.first_name':'Test','caregiver.address.street':'1 Test St','caregiver.address.city':'Oakland'}), 'caregiver.address.street');
+});
+
+test('citizenship No immediately adds a status page before the address, without goals', () => {
+ const pages = flow.buildPages(schema, { 'caregiver.us_citizen': false });
+ const index = pages.findIndex(p => p.questions.some(q => q.field_id === 'caregiver.us_citizen'));
+ assert.equal(pages[index + 1].questions[0].field_id, 'caregiver.citizenship_residency');
+ assert.equal(pages[index + 2].questions[0].field_id, 'caregiver.address.street');
+ for (const answer of [true, undefined]) assert.ok(!visibleIds({ 'caregiver.us_citizen': answer }).includes('caregiver.citizenship_residency'));
+ const cleaned = logic.cleanAnswers(schema, { 'caregiver.us_citizen': true, 'caregiver.citizenship_residency': 'Lawful permanent resident' });
+ assert.equal(cleaned['caregiver.citizenship_residency'], undefined);
+});
+
+test('resume preserves a skipped or partial card and falls back for a removed branch', () => {
+ const answers = { 'caregiver.first_name': 'Test' };
+ const pages = flow.buildPages(schema, answers);
+ assert.equal(flow.resumePage(pages, 'caregiver.address.street', answers), 'caregiver.address.street');
+ assert.equal(flow.resumePage(pages, 'caregiver.address.city', answers), 'caregiver.address.street');
+ assert.equal(flow.resumePage(pages, 'removed-question', answers), flow.lastCompletedPage(pages, answers));
+});
+
+test('review lists visible missing and invalid answers with section and card destinations', () => {
+ const answers = { 'caregiver.first_name': 'Test', 'caregiver.us_citizen': true, 'caregiver.address.zip': '123' };
+ const pages = flow.buildPages(schema, answers);
+ const issues = flow.intakeIssues(pages, answers);
+ assert.ok(!issues.some(issue => issue.question.field_id === 'caregiver.first_name'));
+ assert.ok(!issues.some(issue => issue.question.field_id === 'caregiver.us_citizen'));
+ assert.ok(!issues.some(issue => issue.question.field_id === 'caregiver.citizenship_residency'));
+ const missing = issues.find(issue => issue.question.field_id === 'caregiver.last_name');
+ assert.equal(missing.message, 'Required');
+ assert.equal(missing.section, 'About You');
+ assert.equal(missing.pageKey, 'caregiver.first_name');
+ assert.equal(issues.find(issue => issue.question.field_id === 'caregiver.address.zip').message, 'Enter a five-digit ZIP code.');
+ assert.ok(issues.every(issue => pages.some(page => page.key === issue.pageKey && page.questions.includes(issue.question))));
+ const fixed = { ...answers, 'caregiver.last_name': 'Caregiver', 'caregiver.address.zip': '94612' };
+ const updated = flow.intakeIssues(flow.buildPages(schema, fixed), fixed);
+ assert.ok(!updated.some(issue => ['caregiver.last_name', 'caregiver.address.zip'].includes(issue.question.field_id)));
+});
+
+test('review updates with branches and accepts a complete valid card', () => {
+ const answers = { 'caregiver.us_citizen': false };
+ assert.ok(flow.intakeIssues(flow.buildPages(schema, answers), answers).some(issue => issue.question.field_id === 'caregiver.citizenship_residency'));
+ const declined = { ...answers, 'caregiver.citizenship_residency': 'Prefer not to answer' };
+ assert.ok(!flow.intakeIssues(flow.buildPages(schema, declined), declined).some(issue => issue.question.field_id === 'caregiver.citizenship_residency'));
+ assert.deepEqual(flow.intakeIssues([{ key: 'citizen', kind: 'questions', questions: [question('caregiver.us_citizen')] }], answers), []);
+});
+
+test('work authorization guidance follows the caregiver status without assuming an answer', () => {
+ const q = question('caregiver.work_authorized');
+ for (const status of question('caregiver.citizenship_residency').options.filter(status => status !== 'Prefer not to answer')) {
+   const answers = { 'caregiver.citizenship_residency': status };
+   assert.equal(logic.questionHelperText(q, answers), q.helper_text_by_answer.text[status]);
+   assert.equal(answers['caregiver.work_authorized'], undefined);
+ }
+ assert.match(logic.questionHelperText(q, { 'caregiver.citizenship_residency': 'Lawful permanent resident' }), /without a separate work permit/);
+ assert.match(logic.questionHelperText(q, { 'caregiver.citizenship_residency': 'Another immigration status' }), /pending application alone/);
+ assert.equal(logic.questionHelperText(q, {}), undefined);
+ assert.equal(logic.questionHelperText(question('caregiver.work_state'), {}), question('caregiver.work_state').helper_text);
+});
+
+test('work, household and tax sections separate shared facts and put work authorization first', () => {
+ const work = schema.screens.find(s => s.id === 'work_caregiving');
+ const household = schema.screens.find(s => s.id === 'household_assets');
+ const tax = schema.screens.find(s => s.id === 'tax_information');
+ assert.deepEqual([work.title, household.title, tax.title], ['Work and Caregiving', 'Household and Assets', 'Tax Information']);
+ assert.equal(work.questions[0].field_id, 'caregiver.work_authorized');
+ assert.ok(work.questions.some(q => q.field_id === 'tax.dependent_care_fsa_available'));
+ for (const id of ['household.members', 'caregiver.claims_recipient', 'recipient.tax_filing_status', 'recipient.assets', 'recipient.work_history_social_security']) assert.ok(household.questions.some(q => q.field_id === id));
+ assert.equal(tax.questions[0].field_id, 'tax.entry_method');
+ assert.equal(tax.questions[1].field_id, 'tax.year');
+ assert.equal(tax.questions[2].field_id, 'tax.filing_status');
+ assert.ok(tax.questions.every(q => q.field_id.startsWith('tax.') || q.field_id.endsWith('.tax_residency')));
+ const answers = {'caregiver.us_citizen': false, 'caregiver.citizenship_residency': 'Lawful permanent resident', 'case.goals': ['Get paid for caregiving'], 'caregiver.employment_status': 'Employed full time'};
+ const pages = flow.buildPages(schema, answers);
+ const intro = pages.findIndex(p => p.key === 'section:work_caregiving');
+ assert.equal(pages[intro + 1].questions[0].field_id, 'caregiver.work_authorized');
+ assert.ok(pages.some(p => p.key === 'section:household_assets'));
+ assert.ok(pages.some(p => p.key === 'section:tax_information'));
 });

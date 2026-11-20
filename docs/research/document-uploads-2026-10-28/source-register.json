@@ -1,0 +1,607 @@
+[
+  {
+    "url": "https://www.cdss.ca.gov/in-home-supportive-services",
+    "labels": [
+      "CDSS IHSS"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.cdss.ca.gov/cdssweb/entres/forms/english/soc873.pdf",
+    "labels": [
+      "SOC 873, pp. 1\u20132",
+      "SOC 873"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.dhcs.ca.gov/medi-cal/help/asset-limit-frequently-asked-questions/",
+    "labels": [
+      "DHCS asset FAQ, \u201cWhat is an asset limit?\u201d and transfer sections"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://edd.ca.gov/en/disability/Am_I_Eligible_for_PFL_Benefits",
+    "labels": [
+      "EDD eligibility",
+      "EDD CASDI guidance"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://edd.ca.gov/pflreviewdocuments",
+    "labels": [
+      "EDD review documents"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://edd.ca.gov/en/disability/Calculating_PFL_Benefit_Payment_Amounts/",
+    "labels": [
+      "EDD base-period guidance"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2501f.pdf",
+    "labels": [
+      "DE 2501F, instruction pp. 1\u20132"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.dol.gov/agencies/whd/fmla/forms",
+    "labels": [
+      "DOL forms"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://calcivilrights.ca.gov/Employment/",
+    "labels": [
+      "CRD employment"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://calcivilrights.ca.gov/family-medical-pregnancy-leave/",
+    "labels": [
+      "CRD leave resources",
+      "CRD resources"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.medicare.gov/basics/get-started-with-medicare/using-medicare/your-medicare-card",
+    "labels": [
+      "Medicare card guidance",
+      "Medicare card"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.ssa.gov/manage-benefits/get-benefit-letter",
+    "labels": [
+      "SSA benefit letter",
+      "SSA verification letter"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.medicare.gov/basics/get-started-with-medicare/other-paths",
+    "labels": [
+      "Medicare other paths"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.va.gov/family-and-caregiver-benefits/health-and-disability/comprehensive-assistance-for-family-caregivers/",
+    "labels": [
+      "VA PCAFC"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.va.gov/pension/eligibility/",
+    "labels": [
+      "VA pension eligibility"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/instructions/iw2w3",
+    "labels": [
+      "W-2 instructions, Box 10",
+      "IRS W-2 instructions"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/publications/p15b",
+    "labels": [
+      "2026 Pub. 15-B, dependent-care assistance"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/instructions/i2441",
+    "labels": [
+      "2025 Form 2441 instructions"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/pub/irs-prior/f1040--2025.pdf",
+    "labels": [
+      "2025 Form 1040, pp. 1\u20132",
+      "2025 1040"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/publications/p501",
+    "labels": [
+      "IRS dependency tests"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/pub/irs-prior/f2441--2025.pdf",
+    "labels": [
+      "2025 Form 2441, Parts I\u2013III",
+      "2441"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/publications/p503",
+    "labels": [
+      "IRS Pub. 503"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/pub/irs-prior/f1040sa--2025.pdf",
+    "labels": [
+      "Schedule A, lines 1\u20134",
+      "Schedule A"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/publications/p502",
+    "labels": [
+      "IRS Pub. 502"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.ftb.ca.gov/forms/2025/2025-3506-instructions.html",
+    "labels": [
+      "2025 FTB 3506 instructions",
+      "3506 instructions"
+    ],
+    "used_in": [
+      "report.md",
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/individuals/certain-medicaid-waiver-payments-may-be-excludable-from-income",
+    "labels": [
+      "IRS waiver-payment Q&A"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/model-overview?view=doc-intel-4.0.0",
+    "labels": [
+      "Microsoft model overview"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://developers.openai.com/api/docs/guides/file-inputs",
+    "labels": [
+      "OpenAI file inputs"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/responses",
+    "labels": [
+      "Azure Responses PDF input"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/azure/developer/ai/how-to/extract-entities-using-structured-outputs",
+    "labels": [
+      "Microsoft extraction example"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/azure/foundry/responsible-ai/openai/data-privacy",
+    "labels": [
+      "Microsoft model data handling"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://learn.microsoft.com/en-us/azure/foundry/responsible-ai/document-intelligence/data-privacy-security",
+    "labels": [
+      "Document Intelligence data handling"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://ttlc.intuit.com/turbotax-support/en-us/help-article/import-or-export-files/import-documents-turbotax",
+    "labels": [
+      "TurboTax document import"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "primary product documentation"
+  },
+  {
+    "url": "https://www.getyourrefund.org/en/faq/about_getyourrefund/what_is_getyourrefund",
+    "labels": [
+      "GetYourRefund Assist"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "primary product documentation"
+  },
+  {
+    "url": "https://www.calsaws.org/wp-content/uploads/2021/09/BenefitsCal_QG_UploadDocumentsWithinApplication_v1.0.pdf",
+    "labels": [
+      "BenefitsCal/CalSAWS upload guide, pp. 1\u20134"
+    ],
+    "used_in": [
+      "report.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/instructions/i1040sc",
+    "labels": [
+      "Schedule C instructions"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/forms-pubs/about-schedule-e-form-1040",
+    "labels": [
+      "Schedule E"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/forms-pubs/about-schedule-f-form-1040",
+    "labels": [
+      "Schedule F"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/forms-pubs/about-form-1099-nec",
+    "labels": [
+      "IRS 1099-NEC"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/businesses/what-to-do-with-form-1099-k",
+    "labels": [
+      "IRS 1099-K"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/forms-pubs/about-form-1099-int",
+    "labels": [
+      "IRS interest"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/forms-pubs/about-form-1099-div",
+    "labels": [
+      "dividends"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/forms-pubs/about-form-1099-b",
+    "labels": [
+      "broker proceeds"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.irs.gov/instructions/i1099r",
+    "labels": [
+      "IRS 1099-R instructions"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.ssa.gov/manage-benefits/get-tax-form-10991042s",
+    "labels": [
+      "SSA tax-form retrieval"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.calpers.ca.gov/retirees/taxes/understanding-your-1099r-tax-form",
+    "labels": [
+      "CalPERS tax-form distinctions"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.va.gov/records/download-va-letters/",
+    "labels": [
+      "VA letter retrieval"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.va.gov/records/get-military-service-records/",
+    "labels": [
+      "VA military records"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.dhcs.ca.gov/medi-cal/use/",
+    "labels": [
+      "DHCS coverage notice"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.vba.va.gov/pubs/forms/VBA-21P-8416-ARE.pdf",
+    "labels": [
+      "VA 21P-8416 instructions, pp. 1\u20132"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.va.gov/forms/21-2680/",
+    "labels": [
+      "VA 21-2680"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.uscis.gov/sites/default/files/document/forms/i-9instr.pdf",
+    "labels": [
+      "USCIS I-9 instructions"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  },
+  {
+    "url": "https://www.cdss.ca.gov/cdssweb/entres/forms/english/soc426.pdf",
+    "labels": [
+      "CDSS SOC 426, instructions and enrollment certification"
+    ],
+    "used_in": [
+      "document-to-field-matrix.md"
+    ],
+    "checked_on": "2026-10-28",
+    "evidence_type": "official agency/vendor primary documentation"
+  }
+]

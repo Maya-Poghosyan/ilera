@@ -100,6 +100,16 @@ class Settings(BaseSettings):
     email_openai_deployment: str = ""
     email_scan_max_deliveries: int = 5
 
+    # Intake document assistance: a dedicated Azure OpenAI resource, separate from eligibility
+    # research and email scanning. Empty = uploads are offered but not read (503).
+    document_openai_endpoint: str = ""      # e.g. https://<resource>.openai.azure.com
+    document_openai_deployment: str = ""
+    document_use_managed_identity: bool = True
+    document_managed_identity_client_id: str = ""
+    # Only for a local OpenAI-compatible stand-in (http://127.0.0.1 or localhost) in e2e tests.
+    # Refused with a real Azure endpoint, which must use managed identity.
+    document_openai_api_key: str = ""
+
     # Government PDF form templates (authored reference binaries). Stored in Azure Blob
     # Storage so the library can grow with state coverage without bloating the DB or the
     # container image. Empty account URL = fall back to the bundled files in data/forms/

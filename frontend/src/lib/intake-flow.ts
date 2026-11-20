@@ -1,5 +1,5 @@
-import { type Answers, type IntakeSchema, type Question, evalCondition, validateQuestions } from './intake-schema';
-export interface IntakePage { key: string; title: string; introText?: string; introEmphasis?: string; helperText?: string; helperLink?: {text:string;href:string}; showIntro: boolean; kind: 'intro'|'questions'; questions: Question[]; }
+import { type Answers, type IntakeSchema, type Question, type UploadDocument, evalCondition, validateQuestions } from './intake-schema';
+export interface IntakePage { key: string; title: string; introText?: string; introDocuments?: { document: string; location: string }[]; introEmphasis?: string; helperText?: string; helperLink?: {text:string;href:string}; uploadDocuments?: UploadDocument[]; showIntro: boolean; kind: 'intro'|'questions'; questions: Question[]; }
 export function paginate(questions: Question[]): Question[][] {
   const pages: Question[][]=[];
   for (const question of questions) {
@@ -13,12 +13,31 @@ export function buildPages(schema: IntakeSchema,answers: Answers): IntakePage[] 
   return schema.screens.flatMap(section=>{
     const groups=paginate(section.questions.filter(q=>evalCondition(q.show_when,answers)));
     if(!groups.length)return [];
-    return [{key:`section:${section.id}`,title:section.title,introText:section.intro_text,introEmphasis:section.intro_emphasis,showIntro:true,kind:'intro' as const,questions:[]},...groups.map(questions=>({key:questions[0].field_id,title:questions[0].page_title??section.title,helperText:questions[0].page_helper_text,helperLink:questions[0].page_helper_link,showIntro:false,kind:'questions' as const,questions}))];
+    return [{key:`section:${section.id}`,title:section.title,introText:section.intro_text,introDocuments:section.intro_documents,introEmphasis:section.intro_emphasis,uploadDocuments:section.upload_documents,showIntro:true,kind:'intro' as const,questions:[]},...groups.map(questions=>({key:questions[0].field_id,title:questions[0].page_title??section.title,helperText:questions[0].page_helper_text,helperLink:questions[0].page_helper_link,uploadDocuments:questions.some(q=>q.upload_when&&evalCondition(q.upload_when,answers))?section.upload_documents:undefined,showIntro:false,kind:'questions' as const,questions}))];
   });
 }
 export function pageIndex(pages: IntakePage[],questionId: string|null): number {
   const found=pages.findIndex(p=>p.key===questionId || p.questions.some(q=>q.field_id===questionId));
   return found<0?0:found;
+}
+
+export function intakeIssues(pages: IntakePage[], answers: Answers) {
+  let section = '';
+  return pages.flatMap(page => {
+    if (page.kind === 'intro') {
+      section = page.title;
+      return [];
+    }
+    const errors = validateQuestions(page.questions, answers);
+    return page.questions.filter(q => errors[q.field_id]).map(question => ({
+      section, question, pageKey: page.key, message: errors[question.field_id],
+    }));
+  });
+}
+
+export function resumePage(pages: IntakePage[], questionId: string | null, answers: Answers): string | null {
+  const saved = pages.find(page => page.key === questionId || page.questions.some(q => q.field_id === questionId));
+  return saved?.key ?? lastCompletedPage(pages, answers);
 }
 
 // Resume the completed prefix, rather than an arbitrary later page visited before saving.

@@ -69,7 +69,8 @@ export async function proxyToApi(
       method: request.method,
       ...(isReferenceGuide ? { redirect: "manual" as const, token: null } : {}),
       headers: contentType ? { "content-type": contentType } : undefined,
-      body: hasBody ? await request.text() : undefined,
+      // Bytes, not text: uploaded documents and other binary bodies must survive unchanged.
+      body: hasBody ? await request.arrayBuffer() : undefined,
     });
   } catch (err) {
     console.error(`api proxy: ${request.method} ${path} -> ${apiUrl()} failed`, err);

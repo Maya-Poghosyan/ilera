@@ -16,6 +16,7 @@ import {
   US_STATES,
   effectiveOptions,
   interpolateName,
+  questionHelperText,
 } from "@/lib/intake-schema";
 
 interface Props {
@@ -31,16 +32,17 @@ export function QuestionField({ question, value, name, error, answers = {}, onCh
   const text = interpolateName(question.text, name);
   const taxYear = answers["tax.year"];
   const selectedTaxYear = typeof taxYear === "number" && Number.isInteger(taxYear) && taxYear >= 2000 && taxYear <= 2100 ? taxYear : undefined;
+  const helperText = questionHelperText(question, answers);
   const helper = question.field_id === "tax.lived_together_over_half_year" && selectedTaxYear
     ? `For the ${selectedTaxYear} tax year, count the time from January 1 through December 31, ${selectedTaxYear}. This is the year the income or care expenses are from, even if you file the return in ${selectedTaxYear + 1}.`
-    : question.helper_text ? interpolateName(question.helper_text, name) : undefined;
+    : helperText ? interpolateName(helperText, name) : undefined;
   const helperLinks = [...(question.helper_link ? [question.helper_link] : []), ...(question.helper_links ?? [])];
   const why = question.why_this_matters ? interpolateName(question.why_this_matters, name) : undefined;
 
   return (
     // Full height with the control pushed to the bottom, so side-by-side fields keep
     // their inputs on one line even when only one of them has helper text.
-    <div className="flex h-full flex-col gap-2" data-field-id={question.field_id} role="group" aria-label={text}>
+    <div id={`intake-${question.field_id}`} tabIndex={-1} className="flex h-full flex-col gap-2" data-field-id={question.field_id} role="group" aria-label={text}>
       {text && !question.hide_title && (
         <Label className="block text-base font-medium">
           {text}
@@ -122,13 +124,14 @@ function FieldControl({
     case "state_dropdown":
       return (
         <select
+          aria-label={interpolateName(question.text, name)}
           className="h-10 w-full rounded-lg border border-input bg-transparent px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
         >
           <option value="">Select a state…</option>
-          {(question.options ?? US_STATES).map((s) => (
-            <option key={s} value={s}>
+          {(question.show_all_states ? US_STATES : question.options ?? US_STATES).map((s) => (
+            <option key={s} value={s} disabled={!!question.options && !question.options.includes(s)}>
               {question.option_labels?.[s] ?? s}
             </option>
           ))}

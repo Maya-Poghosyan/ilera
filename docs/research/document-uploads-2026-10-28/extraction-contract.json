@@ -1,0 +1,93 @@
+{
+  "contract_version": "proposal-2026-10-28",
+  "status": "illustrative contract, not implemented; all values synthetic",
+  "required_envelope": {
+    "case_ref": "server-bound opaque case reference; never accepted from model as authorization",
+    "document_ref": "opaque document ID scoped to this case",
+    "document_sha256": "computed by service, not by model",
+    "document_class": "pay_statement",
+    "issuer_label": "Synthetic Payroll",
+    "form_edition": null,
+    "page_count": 1,
+    "statement_date": "2026-10-23",
+    "tax_year": null,
+    "period_start": "2026-10-05",
+    "period_end": "2026-10-18",
+    "effective_start": null,
+    "effective_end": null,
+    "extraction_method": "deterministic_text_with_optional_model_normalization",
+    "extractor_version": "versioned configuration and model/deployment ID",
+    "subject_match": {
+      "suggested_role": "caregiver",
+      "person_ref": "opaque local roster reference",
+      "matched_by": "user confirmation; never SSN/account-number matching",
+      "confirmed": false
+    }
+  },
+  "observations": [
+    {
+      "observation_id": "obs-synthetic-sdi-1",
+      "semantic_key": "payroll.state_disability_deduction",
+      "raw_value": "CASDI 12.00",
+      "normalized_value": 12.0,
+      "value_type": "money",
+      "currency": "USD",
+      "unit": "per_pay_period",
+      "amount_basis": "deduction; neither gross wages nor net pay",
+      "payment_date": "2026-10-23",
+      "service_date": null,
+      "evidence_kind": "direct",
+      "derivation": null,
+      "sources": [
+        {
+          "document_ref": "same opaque document ID",
+          "page_1_based": 1,
+          "quote": "CASDI 12.00",
+          "bounding_box_normalized_xyxy": [0.1, 0.4, 0.6, 0.45],
+          "text_span": {"offset": 100, "length": 11},
+          "source_validation": "pending: verify quote and region against sanitized original page"
+        }
+      ],
+      "quality": {
+        "state": "needs_review",
+        "confidence_score": null,
+        "missing_reason": null,
+        "conflict_refs": [],
+        "warnings": ["one pay period does not establish qualifying base-period earnings"]
+      }
+    }
+  ],
+  "answer_candidates": [
+    {
+      "field_id": "caregiver.sdi_deductions",
+      "candidate_value": "Yes",
+      "supporting_observation_ids": ["obs-synthetic-sdi-1"],
+      "assertion_kind": "direct evidence with user-confirmed applicability",
+      "visibility": "must evaluate actual show_when against reviewed answers before applying",
+      "review": {
+        "state": "pending",
+        "allowed_states": ["pending", "accepted", "edited", "rejected", "unresolved"],
+        "confirmed_by_user": false,
+        "confirmed_at": null,
+        "confirmed_value": null
+      },
+      "raw_intake_target": "answers[caregiver.sdi_deductions]",
+      "typed_fact_projection": null,
+      "projection_note": "No dedicated typed binding exists today for this field; preserve reviewed raw answer and external evidence reference."
+    }
+  ],
+  "required_rules": [
+    "Only allow catalog field IDs and valid current types/enums; reject unknown keys.",
+    "Null requires an explicit reason: missing, unreadable, redacted, not_applicable, stale, conflicting, or unsupported. Never default to zero or false.",
+    "Source page must be an integer from 1 to page_count; quote/span/region must resolve to observed content. Bounding box or text span is required, both preferred.",
+    "A derived observation must identify formula, input observation IDs, rounding, units, period and owner. Model arithmetic alone is insufficient.",
+    "Amounts require gross/net/taxable/received/elected/balance distinction and currency; dates require role such as entitlement/effective/issue/payment/service.",
+    "Whole-question answers assembled from components require completeness and allocation review; one income source cannot complete a household roster.",
+    "Keep conflicting observations with their effective periods; do not choose newest upload automatically.",
+    "Apply only user-confirmed values through existing validation/cleanup; preserve pending observations outside raw intake answers.",
+    "Retain evidence provenance separately from user_report metadata; preserve externally resolved facts and never silently overwrite them.",
+    "Exclude SSNs, ITINs, account/routing/claim/member/immigration numbers, signatures and machine-readable identifiers; no such fields in model output.",
+    "No eligibility conclusions, unseen-person matching, tool instructions or policy retrieval from personal documents.",
+    "Capture document lifecycle/deletion status outside model output; evidence link must disclose if original was deleted."
+  ]
+}

@@ -7,6 +7,7 @@ from .eligibility.routes import router as eligibility_resolution_router
 from .email_ingestion.notifications import router as email_notifications_router
 from .email_ingestion.privacy import configure_email_access_logging
 from .email_ingestion.routes import router as email_router
+from .intake.documents import router as intake_documents_router
 from .routes import ROUTERS
 
 settings = get_settings()
@@ -29,5 +30,6 @@ app.include_router(auth_router)
 app.include_router(eligibility_resolution_router)
 app.include_router(email_router)
 app.include_router(email_notifications_router)
+app.include_router(intake_documents_router)
 for router in ROUTERS:
     app.include_router(router)

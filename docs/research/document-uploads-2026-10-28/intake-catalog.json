@@ -1,0 +1,5001 @@
+[
+  {
+    "id": "about_you",
+    "title": "About You",
+    "intro_text": "Your details help us screen support options and prepare applications.",
+    "questions": [
+      {
+        "field_id": "caregiver.first_name",
+        "text": "Your first name",
+        "type": "short_text",
+        "required": true,
+        "layout": "inline",
+        "page_group": "About you",
+        "page_title": "About you",
+        "group": "About you"
+      },
+      {
+        "field_id": "caregiver.last_name",
+        "text": "Your last name",
+        "type": "short_text",
+        "required": true,
+        "layout": "inline",
+        "page_group": "About you",
+        "page_title": "About you",
+        "group": "About you"
+      },
+      {
+        "field_id": "caregiver.date_of_birth",
+        "text": "Your date of birth",
+        "type": "date",
+        "required": true,
+        "page_group": "About you",
+        "page_title": "About you",
+        "group": "About you"
+      },
+      {
+        "field_id": "caregiver.us_citizen",
+        "text": "Are you a U.S. citizen?",
+        "type": "boolean",
+        "required": true,
+        "page_group": "About you",
+        "page_title": "About you",
+        "group": "About you",
+        "allow_not_sure": false,
+        "allow_prefer_not_to_answer": false
+      },
+      {
+        "field_id": "caregiver.citizenship_residency",
+        "text": "Which best describes your citizenship or immigration status?",
+        "type": "single_select",
+        "required": true,
+        "show_when": {
+          "field": "caregiver.us_citizen",
+          "op": "equals",
+          "value": false
+        },
+        "page_group": "Your citizenship or immigration status",
+        "page_title": "Your citizenship or immigration status",
+        "group": "Your citizenship or immigration status",
+        "option_labels": {
+          "U.S. national": "U.S. national (not a U.S. citizen)",
+          "Lawful permanent resident": "Lawful permanent resident (Green Card holder)",
+          "Another immigration status": "Another status or pending application (such as a visa, asylum, TPS or DACA)"
+        },
+        "options": [
+          "U.S. national",
+          "Lawful permanent resident",
+          "Another immigration status",
+          "No current immigration status",
+          "I'm not sure",
+          "Prefer not to answer"
+        ],
+        "display_as": "dropdown"
+      },
+      {
+        "field_id": "caregiver.address.street",
+        "text": "Street address",
+        "type": "short_text",
+        "required": true,
+        "page_group": "Your address",
+        "page_title": "Your address",
+        "group": "Your address"
+      },
+      {
+        "field_id": "caregiver.address.city",
+        "text": "City",
+        "type": "short_text",
+        "required": true,
+        "layout": "inline",
+        "page_group": "Your address",
+        "page_title": "Your address",
+        "group": "Your address"
+      },
+      {
+        "field_id": "caregiver.address.state",
+        "text": "State",
+        "type": "state_dropdown",
+        "required": true,
+        "layout": "inline",
+        "options": [
+          "CA"
+        ],
+        "option_labels": {
+          "CA": "California"
+        },
+        "page_group": "Your address",
+        "page_title": "Your address",
+        "group": "Your address"
+      },
+      {
+        "field_id": "caregiver.address.county",
+        "text": "County",
+        "type": "short_text",
+        "required": true,
+        "layout": "inline",
+        "page_group": "Your address",
+        "page_title": "Your address",
+        "group": "Your address"
+      },
+      {
+        "field_id": "caregiver.address.zip",
+        "text": "ZIP code",
+        "type": "zip",
+        "required": true,
+        "layout": "inline",
+        "page_group": "Your address",
+        "page_title": "Your address",
+        "group": "Your address"
+      },
+      {
+        "field_id": "caregiver.coresidence",
+        "text": "Does the person you're caring for live with you?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "page_group": "Your address",
+        "page_title": "Your address",
+        "group": "Your address"
+      }
+    ]
+  },
+  {
+    "id": "recipient",
+    "title": "Who are you caring for?",
+    "intro_text": "Tell us about the person receiving care.",
+    "questions": [
+      {
+        "field_id": "recipient.first_name",
+        "text": "First name of the person you care for",
+        "type": "short_text",
+        "required": true,
+        "layout": "inline",
+        "page_group": "Who are you caring for?",
+        "page_title": "Who are you caring for?",
+        "group": "Who are you caring for?"
+      },
+      {
+        "field_id": "recipient.last_name",
+        "text": "Their last name",
+        "type": "short_text",
+        "required": true,
+        "layout": "inline",
+        "page_group": "Who are you caring for?",
+        "page_title": "Who are you caring for?",
+        "group": "Who are you caring for?"
+      },
+      {
+        "field_id": "recipient.date_of_birth",
+        "text": "Date of birth",
+        "type": "date",
+        "required": true,
+        "page_group": "Who are you caring for?",
+        "page_title": "Who are you caring for?",
+        "group": "Who are you caring for?"
+      },
+      {
+        "field_id": "recipient.us_citizen",
+        "text": "Are they a U.S. citizen?",
+        "type": "boolean",
+        "required": true,
+        "page_group": "Who are you caring for?",
+        "page_title": "Who are you caring for?",
+        "group": "Who are you caring for?",
+        "allow_not_sure": false,
+        "allow_prefer_not_to_answer": false
+      },
+      {
+        "field_id": "caregiver.relationship",
+        "text": "They are your\u2026",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Spouse or domestic partner",
+          "Parent",
+          "Parent-in-law",
+          "Child",
+          "Sibling",
+          "Grandparent",
+          "Grandchild",
+          "Other relative",
+          "Friend",
+          "Neighbor",
+          "Other"
+        ],
+        "display_as": "dropdown",
+        "helper_text": "Include biological, adoptive, step or foster relationships.",
+        "answer_aliases": {
+          "Adult child": "Child",
+          "Child under 18": "Child",
+          "Friend, neighbor, or other unpaid caregiver": null,
+          "Paid caregiver": null,
+          "Legal guardian or authorized representative": null,
+          "I'm not sure": null
+        },
+        "page_group": "Who are you caring for?",
+        "page_title": "Who are you caring for?",
+        "group": "Who are you caring for?"
+      },
+      {
+        "field_id": "recipient.citizenship_residency",
+        "text": "Which best describes [recipient name]\u2019s citizenship or immigration status?",
+        "type": "single_select",
+        "required": true,
+        "option_labels": {
+          "U.S. national": "U.S. national (not a U.S. citizen)",
+          "Lawful permanent resident": "Lawful permanent resident (Green Card holder)",
+          "Another immigration status": "Another status or pending application (such as a visa, asylum, TPS or DACA)"
+        },
+        "options": [
+          "U.S. national",
+          "Lawful permanent resident",
+          "Another immigration status",
+          "No current immigration status",
+          "I'm not sure",
+          "Prefer not to answer"
+        ],
+        "show_when": {
+          "field": "recipient.us_citizen",
+          "op": "equals",
+          "value": false
+        },
+        "page_group": "Their coverage eligibility",
+        "page_title": "Their coverage eligibility",
+        "group": "Their coverage eligibility",
+        "display_as": "dropdown"
+      },
+      {
+        "field_id": "recipient.immigration_status_detail",
+        "text": "Which immigration status or situation applies to [recipient name]?",
+        "type": "single_select",
+        "required": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.us_citizen",
+              "op": "equals",
+              "value": false
+            },
+            {
+              "field": "recipient.citizenship_residency",
+              "op": "equals",
+              "value": "Another immigration status"
+            }
+          ]
+        },
+        "helper_text": "These situations can follow different coverage rules. This is a preliminary self-report, not an agency determination; no documents or case numbers are needed.",
+        "page_group": "Their coverage eligibility",
+        "page_title": "Their coverage eligibility",
+        "group": "Their coverage eligibility",
+        "options": [
+          "Refugee",
+          "Granted asylum",
+          "Citizen of Micronesia, the Marshall Islands, or Palau",
+          "Temporary Protected Status (TPS)",
+          "Deferred Action for Childhood Arrivals (DACA)",
+          "Paroled into the U.S.",
+          "Visa or another temporary status",
+          "An immigration application is pending",
+          "Another status",
+          "I'm not sure",
+          "Prefer not to answer"
+        ],
+        "option_labels": {
+          "Granted asylum": "Granted asylum (asylum application approved)",
+          "An immigration application is pending": "An immigration application is pending (still waiting for a decision)"
+        },
+        "display_as": "dropdown"
+      },
+      {
+        "field_id": "recipient.address.street",
+        "text": "[recipient name]'s street address",
+        "type": "short_text",
+        "required": true,
+        "show_when": {
+          "field": "caregiver.coresidence",
+          "op": "equals",
+          "value": "No"
+        },
+        "page_group": "[recipient name]'s address",
+        "page_title": "[recipient name]'s address",
+        "group": "[recipient name]'s address"
+      },
+      {
+        "field_id": "recipient.address.city",
+        "text": "[recipient name]'s city",
+        "type": "short_text",
+        "required": true,
+        "show_when": {
+          "field": "caregiver.coresidence",
+          "op": "equals",
+          "value": "No"
+        },
+        "layout": "inline",
+        "page_group": "[recipient name]'s address",
+        "page_title": "[recipient name]'s address",
+        "group": "[recipient name]'s address"
+      },
+      {
+        "field_id": "recipient.address.state",
+        "text": "[recipient name]'s state",
+        "type": "state_dropdown",
+        "required": true,
+        "show_when": {
+          "field": "caregiver.coresidence",
+          "op": "equals",
+          "value": "No"
+        },
+        "layout": "inline",
+        "options": [
+          "CA"
+        ],
+        "option_labels": {
+          "CA": "California"
+        },
+        "page_group": "[recipient name]'s address",
+        "page_title": "[recipient name]'s address",
+        "group": "[recipient name]'s address"
+      },
+      {
+        "field_id": "recipient.address.county",
+        "text": "[recipient name]'s county",
+        "type": "short_text",
+        "required": true,
+        "show_when": {
+          "field": "caregiver.coresidence",
+          "op": "equals",
+          "value": "No"
+        },
+        "layout": "inline",
+        "page_group": "[recipient name]'s address",
+        "page_title": "[recipient name]'s address",
+        "group": "[recipient name]'s address"
+      },
+      {
+        "field_id": "recipient.address.zip",
+        "text": "[recipient name]'s ZIP code",
+        "type": "zip",
+        "required": true,
+        "show_when": {
+          "field": "caregiver.coresidence",
+          "op": "equals",
+          "value": "No"
+        },
+        "layout": "inline",
+        "page_group": "[recipient name]'s address",
+        "page_title": "[recipient name]'s address",
+        "group": "[recipient name]'s address"
+      },
+      {
+        "field_id": "recipient.living_setting",
+        "text": "Where is [recipient name] currently living?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Own home",
+          "Family member's home",
+          "Assisted living or a licensed residential care setting",
+          "Nursing home or skilled nursing facility",
+          "Hospital",
+          "Rehabilitation facility",
+          "Group home",
+          "Other"
+        ],
+        "show_when": {
+          "field": "caregiver.coresidence",
+          "op": "equals",
+          "value": "No"
+        },
+        "display_as": "dropdown",
+        "page_group": "[recipient name]'s address",
+        "page_title": "[recipient name]'s address",
+        "group": "[recipient name]'s address"
+      },
+      {
+        "field_id": "recipient.move_timeline",
+        "text": "Is [recipient name] expected to move or leave a hospital or care facility soon?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes, within 7 days",
+          "Within 30 days",
+          "Later",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "caregiver.coresidence",
+              "op": "equals",
+              "value": "No"
+            },
+            {
+              "field": "recipient.living_setting",
+              "op": "in",
+              "value": [
+                "Assisted living or a licensed residential care setting",
+                "Nursing home or skilled nursing facility",
+                "Hospital",
+                "Rehabilitation facility",
+                "Group home"
+              ]
+            }
+          ]
+        },
+        "page_group": "Their living situation",
+        "page_title": "Their living situation",
+        "group": "Their living situation"
+      },
+      {
+        "field_id": "recipient.facility_length_of_stay",
+        "text": "About how long has [recipient name] been there?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Less than 30 days",
+          "30\u201389 days",
+          "90 days\u20135 months",
+          "6 months or longer",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "caregiver.coresidence",
+              "op": "equals",
+              "value": "No"
+            },
+            {
+              "field": "recipient.living_setting",
+              "op": "in",
+              "value": [
+                "Hospital",
+                "Rehabilitation facility",
+                "Nursing home or skilled nursing facility",
+                "Group home",
+                "Assisted living or a licensed residential care setting"
+              ]
+            }
+          ]
+        },
+        "page_group": "Their living situation",
+        "page_title": "Their living situation",
+        "group": "Their living situation"
+      }
+    ]
+  },
+  {
+    "id": "care",
+    "title": "Care Needs",
+    "intro_text": "Tell us about the support and day-to-day care they need.",
+    "questions": [
+      {
+        "field_id": "case.goals",
+        "text": "What kind of support would help you most right now?",
+        "type": "multi_select",
+        "required": true,
+        "options": [
+          "Get paid for caregiving",
+          "Get help providing or paying for care",
+          "Take a break from caregiving",
+          "Find health coverage",
+          "Get financial support or tax savings",
+          "Understand benefits we already have",
+          "Other"
+        ],
+        "helper_text": "Choose any that apply.",
+        "page_group": "What support would help?",
+        "page_title": "What support would help?",
+        "group": "What support would help?",
+        "answer_aliases": {
+          "Getting paid as a caregiver": "Get paid for caregiving",
+          "Help paying for care": "Get help providing or paying for care",
+          "In-home assistance": "Get help providing or paying for care",
+          "Medical coverage": "Find health coverage",
+          "Respite (a break from caregiving)": "Take a break from caregiving",
+          "Understanding existing benefits": "Understand benefits we already have",
+          "Finding VA caregiver benefits": "Get help providing or paying for care",
+          "Tax credits, deductions, or dependent-care benefits": "Get financial support or tax savings",
+          "Getting SSI, SSDI, or other income support for the person receiving care": "Get financial support or tax savings",
+          "Saving money without affecting benefits": "Get financial support or tax savings"
+        }
+      },
+      {
+        "field_id": "case.goals_other",
+        "text": "What other support would help?",
+        "type": "short_text",
+        "required": true,
+        "show_when": {
+          "field": "case.goals",
+          "op": "includes_any",
+          "value": [
+            "Other"
+          ]
+        },
+        "page_group": "What support would help?",
+        "page_title": "What support would help?",
+        "group": "What support would help?"
+      },
+      {
+        "field_id": "recipient.condition_categories",
+        "text": "What conditions or care needs does [recipient name] have?",
+        "type": "tag_input",
+        "required": true,
+        "options": [
+          "Physical disability or mobility limitation",
+          "Blindness or significant vision loss",
+          "Intellectual or developmental disability",
+          "Autism",
+          "Memory loss, Alzheimer's disease, or another form of dementia",
+          "Serious or chronic medical condition",
+          "Mental health condition",
+          "Terminal illness",
+          "Injury",
+          "Work-related injury or occupational illness",
+          "Recovery after surgery or hospitalization",
+          "Age-related frailty",
+          "Regular injections",
+          "Wound care",
+          "Catheter care"
+        ],
+        "placeholder": "Type to search or add a condition or care need\u2026",
+        "page_group": "Their conditions and care needs",
+        "page_title": "Their conditions and care needs",
+        "group": "Their conditions and care needs"
+      },
+      {
+        "field_id": "recipient.condition_documented",
+        "text": "Have these been documented by a medical professional?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "helper_text": "For example, a doctor or other health professional has noted the condition or care needs in a visit summary, medical record or diagnosis letter. Choose \u201cI\u2019m not sure\u201d if you need to check.",
+        "page_group": "Medical documentation",
+        "page_title": "Medical documentation",
+        "group": "Medical documentation"
+      },
+      {
+        "field_id": "recipient.adl_needs",
+        "text": "What help does [recipient name] need?",
+        "type": "multi_select",
+        "required": true,
+        "options": [
+          "Bathing or showering",
+          "Dressing",
+          "Grooming or personal hygiene",
+          "Using the toilet",
+          "Eating or drinking",
+          "Moving around or transfers",
+          "Medication management",
+          "Supervision for safety",
+          "None of these",
+          "I'm not sure"
+        ],
+        "validation": {
+          "exclusive_options": [
+            "None of these",
+            "I'm not sure"
+          ]
+        },
+        "page_group": "Daily care",
+        "page_title": "Daily care",
+        "group": "Daily care"
+      },
+      {
+        "field_id": "recipient.care_frequency",
+        "text": "How often do they need someone\u2019s help?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Every day",
+          "Several days a week",
+          "Occasionally",
+          "No help currently",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.adl_needs",
+              "op": "answered"
+            },
+            {
+              "not": {
+                "field": "recipient.adl_needs",
+                "op": "includes",
+                "value": "None of these"
+              }
+            }
+          ]
+        },
+        "page_group": "Care frequency",
+        "page_title": "Care frequency",
+        "group": "Care frequency"
+      },
+      {
+        "field_id": "recipient.planned_nursing_home",
+        "text": "Is a move to a nursing home being considered?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "page_group": "Care plans",
+        "page_title": "Care plans",
+        "group": "Care plans"
+      },
+      {
+        "field_id": "recipient.recognizes_danger",
+        "text": "Does [recipient name] have difficulty recognizing dangerous situations or understanding how to stay safe?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "page_group": "Safety",
+        "page_title": "Safety",
+        "group": "Safety"
+      },
+      {
+        "field_id": "recipient.hazardous_behaviors",
+        "text": "Have they behaved in any of these ways that could put them in danger?",
+        "type": "multi_select",
+        "required": true,
+        "options": [
+          "Wandering",
+          "Leaving appliances on",
+          "Unsafe use of objects",
+          "Other hazardous behavior",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "recipient.recognizes_danger",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "validation": {
+          "exclusive_options": [
+            "I'm not sure"
+          ]
+        },
+        "page_group": "Hazardous behavior",
+        "page_title": "Hazardous behavior",
+        "group": "Hazardous behavior"
+      },
+      {
+        "field_id": "recipient.dd_onset_before_18",
+        "text": "Did the developmental disability begin before age 18?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "recipient.condition_categories",
+          "op": "includes_any",
+          "value": [
+            "Autism",
+            "Intellectual or developmental disability"
+          ]
+        },
+        "page_group": "Developmental disability",
+        "page_title": "Developmental disability",
+        "group": "Developmental disability"
+      }
+    ]
+  },
+  {
+    "id": "work_caregiving",
+    "title": "Work and Caregiving",
+    "intro_text": "Tell us about your work and caregiving. Have these handy if available:",
+    "intro_documents": [
+      {
+        "document": "Recent pay statements",
+        "location": "Your payroll portal"
+      },
+      {
+        "document": "Employer benefit information",
+        "location": "Your benefits or HR portal"
+      }
+    ],
+    "questions": [
+      {
+        "field_id": "caregiver.work_authorized",
+        "text": "Are you currently authorized to work in the U.S.?",
+        "type": "single_select",
+        "required": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "caregiver.us_citizen",
+              "op": "equals",
+              "value": false
+            },
+            {
+              "field": "case.goals",
+              "op": "includes_any",
+              "value": [
+                "Get paid for caregiving"
+              ]
+            },
+            {
+              "field": "caregiver.citizenship_residency",
+              "op": "answered"
+            },
+            {
+              "not": {
+                "field": "caregiver.citizenship_residency",
+                "op": "equals",
+                "value": "Prefer not to answer"
+              }
+            }
+          ]
+        },
+        "helper_text_by_answer": {
+          "field": "caregiver.citizenship_residency",
+          "text": {
+            "U.S. national": "You\u2019re a U.S. national, so you\u2019re authorized to work in the U.S. without a separate work permit.",
+            "Lawful permanent resident": "You\u2019re a Green Card holder, so you\u2019re authorized to work in the U.S. without a separate work permit.",
+            "Another immigration status": "You selected another status or pending application. Check your work permit (EAD) or immigration approval notice for work permission, dates and employer restrictions. Some statuses authorize work without a separate permit. A pending application alone does not establish work authorization.",
+            "No current immigration status": "You indicated that you have no current immigration status. If you have a separate work permit (EAD), check its validity and any restrictions. If you do not know whether you have current permission to work, choose \u201cI\u2019m not sure.\u201d",
+            "I'm not sure": "You\u2019re unsure of your immigration status. Check any work permit (EAD) or immigration approval notice you have for work permission, dates and employer restrictions. If you still do not know, choose \u201cI\u2019m not sure.\u201d"
+          }
+        },
+        "page_group": "Your paid-caregiver eligibility",
+        "page_title": "Your paid-caregiver eligibility",
+        "group": "Your paid-caregiver eligibility",
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure",
+          "Prefer not to answer"
+        ],
+        "display_as": "dropdown"
+      },
+      {
+        "field_id": "caregiver.employment_status",
+        "text": "What is your current employment status?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Employed full time",
+          "Employed part time",
+          "Self-employed",
+          "Not currently employed",
+          "Retired"
+        ],
+        "allow_not_sure": false,
+        "page_group": "Employment",
+        "page_title": "Employment",
+        "group": "Employment"
+      },
+      {
+        "field_id": "caregiver.work_state",
+        "text": "In what state do you work?",
+        "type": "state_dropdown",
+        "required": true,
+        "options": [
+          "CA"
+        ],
+        "option_labels": {
+          "CA": "California"
+        },
+        "show_all_states": true,
+        "show_when": {
+          "field": "caregiver.employment_status",
+          "op": "in",
+          "value": [
+            "Employed full time",
+            "Employed part time",
+            "Self-employed"
+          ]
+        },
+        "helper_text": "If you work remotely, use the state where you physically do the work, rather than automatically choosing your employer\u2019s headquarters. If you work in multiple states, payroll or HR can help confirm coverage.",
+        "helper_link": {
+          "text": "How California treats work across states",
+          "href": "/api/reference-guides/edd-multistate-employment"
+        },
+        "page_group": "Work location",
+        "page_title": "Work location",
+        "group": "Work location"
+      },
+      {
+        "field_id": "tax.dependent_care_fsa_available",
+        "text": "Does your employer offer a Dependent Care FSA or another caregiving benefit?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes, and I use it",
+          "Yes, but I do not use it",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "caregiver.employment_status",
+          "op": "in",
+          "value": [
+            "Employed full time",
+            "Employed part time",
+            "Self-employed"
+          ]
+        },
+        "helper_text": "Check your benefits portal or ask HR whether a Dependent Care Flexible Spending Account (FSA) is offered. On your W-2, look for Box 10, \u201cDependent care benefits,\u201d to see benefits you received that year.\n\nIf Box 10 is blank, your employer may still offer this benefit\u2014you may just not have signed up for or used it that year. Before choosing \u201cNo,\u201d check your benefits portal or ask HR: \u201cDo we offer a Dependent Care FSA or help paying for care?\u201d If you cannot find the answer, choose \u201cI\u2019m not sure.\u201d",
+        "helper_link": {
+          "text": "How to read Box 10 on your W-2",
+          "href": "https://turbotax.intuit.com/tax-tips/irs-tax-forms/what-is-a-w-2-form/L6VJbqWl5"
+        },
+        "page_group": "Employer care benefits",
+        "page_title": "Employer care benefits",
+        "group": "Employer care benefits"
+      },
+      {
+        "field_id": "caregiver.employer_type",
+        "text": "What kind of employer do you work for?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Private company or nonprofit",
+          "Federal government",
+          "State or local government",
+          "School",
+          "Household or individual employer",
+          "Self-employed",
+          "Gig or contract platform",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "caregiver.employment_status",
+          "op": "in",
+          "value": [
+            "Employed full time",
+            "Employed part time",
+            "Self-employed"
+          ]
+        },
+        "display_as": "dropdown",
+        "page_group": "Your employer",
+        "page_title": "Your employer",
+        "group": "Your employer"
+      },
+      {
+        "field_id": "caregiver.employer_tenure",
+        "text": "How long have you worked for this employer?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Less than 6 months",
+          "6\u201311 months",
+          "At least 12 months",
+          "Work has been seasonal or has included breaks",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "caregiver.employment_status",
+              "op": "in",
+              "value": [
+                "Employed full time",
+                "Employed part time"
+              ]
+            },
+            {
+              "field": "caregiver.employer_type",
+              "op": "in",
+              "value": [
+                "Private company or nonprofit",
+                "Federal government",
+                "State or local government",
+                "School",
+                "Household or individual employer",
+                "I'm not sure"
+              ]
+            }
+          ]
+        },
+        "display_as": "dropdown",
+        "page_group": "Your employer",
+        "page_title": "Your employer",
+        "group": "Your employer"
+      },
+      {
+        "field_id": "caregiver.hours_worked_last_12_months",
+        "text": "About how many hours have you worked for this employer during the last 12 months?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Less than 1,250 hours",
+          "At least 1,250 hours",
+          "I have not worked there for 12 months",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "caregiver.employment_status",
+              "op": "in",
+              "value": [
+                "Employed full time",
+                "Employed part time"
+              ]
+            },
+            {
+              "field": "caregiver.employer_type",
+              "op": "in",
+              "value": [
+                "Private company or nonprofit",
+                "Federal government",
+                "State or local government",
+                "School",
+                "Household or individual employer",
+                "I'm not sure"
+              ]
+            }
+          ]
+        },
+        "display_as": "dropdown",
+        "page_group": "Your employer",
+        "page_title": "Your employer",
+        "group": "Your employer"
+      },
+      {
+        "field_id": "caregiver.employer_size_75_miles",
+        "text": "About how many employees work for your employer within 75 miles of your worksite?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Fewer than 50",
+          "50 or more",
+          "I work remotely and do not know which worksite applies",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "caregiver.employment_status",
+              "op": "in",
+              "value": [
+                "Employed full time",
+                "Employed part time"
+              ]
+            },
+            {
+              "field": "caregiver.employer_type",
+              "op": "in",
+              "value": [
+                "Private company or nonprofit",
+                "Federal government",
+                "State or local government",
+                "School",
+                "Household or individual employer",
+                "I'm not sure"
+              ]
+            }
+          ]
+        },
+        "display_as": "dropdown",
+        "page_group": "Your employer",
+        "page_title": "Your employer",
+        "group": "Your employer"
+      },
+      {
+        "field_id": "caregiver.payment_status",
+        "text": "Are you currently paid to care for [recipient name]?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes, through Medicaid, a waiver, IHSS, or another public program",
+          "Yes, privately or out of pocket",
+          "No",
+          "I'm not sure"
+        ],
+        "page_group": "Payment for caregiving",
+        "page_title": "Payment for caregiving",
+        "group": "Payment for caregiving"
+      },
+      {
+        "field_id": "caregiver.caregiving_employment_impact",
+        "text": "Have your caregiving responsibilities affected your employment or income?",
+        "type": "multi_select",
+        "required": true,
+        "options": [
+          "Stopped working",
+          "Reduced hours",
+          "Have taken leave",
+          "Taking leave",
+          "Expect to take leave",
+          "Prevented me from finding work",
+          "No change",
+          "Not employed",
+          "Other"
+        ],
+        "validation": {
+          "exclusive_options": [
+            "No change",
+            "Not employed"
+          ]
+        },
+        "page_group": "How caregiving affects work",
+        "page_title": "How caregiving affects work",
+        "group": "How caregiving affects work",
+        "helper_text": "Select reduced hours if caregiving has changed your regular schedule, even over several years. Select a leave option only if you have taken, are taking, or plan a specific period away from work or a leave arrangement with reduced hours."
+      },
+      {
+        "field_id": "caregiver.leave_start",
+        "text": "When did this leave period start, or when will it start?",
+        "type": "date",
+        "required": true,
+        "show_when": {
+          "field": "caregiver.caregiving_employment_impact",
+          "op": "includes_any",
+          "value": [
+            "Taking leave",
+            "Expect to take leave",
+            "Have taken leave"
+          ]
+        },
+        "allow_not_sure": true,
+        "helper_text": "Use the first day of the specific leave period you want us to check\u2014not when you first started caregiving. For a leave arrangement with reduced hours, use the first day of that arrangement. If your regular hours changed years ago but you have not taken or planned leave, select only \u201cReduced hours\u201d on the previous page; no leave date is needed.",
+        "page_group": "Leave start date",
+        "page_title": "Leave start date",
+        "group": "Leave start date"
+      },
+      {
+        "field_id": "caregiver.work_at_leave_start",
+        "text": "At the start of this leave period, what describes your work situation?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Working",
+          "Looking for work",
+          "Receiving unemployment or disability benefits",
+          "None of these",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "caregiver.caregiving_employment_impact",
+          "op": "includes_any",
+          "value": [
+            "Taking leave",
+            "Expect to take leave",
+            "Have taken leave"
+          ]
+        },
+        "page_group": "Paid Family Leave timing",
+        "page_title": "Paid Family Leave timing",
+        "group": "Paid Family Leave timing"
+      },
+      {
+        "field_id": "caregiver.leave_wage_loss",
+        "text": "Will you lose any wages during this leave?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "caregiver.caregiving_employment_impact",
+          "op": "includes_any",
+          "value": [
+            "Taking leave",
+            "Expect to take leave",
+            "Have taken leave"
+          ]
+        },
+        "page_group": "Paid Family Leave timing",
+        "page_title": "Paid Family Leave timing",
+        "group": "Paid Family Leave timing"
+      },
+      {
+        "field_id": "caregiver.working_during_leave",
+        "text": "Will you work some hours during the leave?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "caregiver.caregiving_employment_impact",
+          "op": "includes_any",
+          "value": [
+            "Taking leave",
+            "Expect to take leave",
+            "Have taken leave"
+          ]
+        },
+        "page_group": "Paid Family Leave timing",
+        "page_title": "Paid Family Leave timing",
+        "group": "Paid Family Leave timing"
+      },
+      {
+        "field_id": "caregiver.sdi_deductions",
+        "text": "Have you had CASDI or SDI deductions on your paychecks?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "caregiver.caregiving_employment_impact",
+          "op": "includes_any",
+          "value": [
+            "Taking leave",
+            "Expect to take leave",
+            "Have taken leave"
+          ]
+        },
+        "helper_text": "Look under deductions on your pay statements for CASDI or SDI. We\u2019re asking about the last 18 months. Choose \u2018I\u2019m not sure\u2019 if you need to check.",
+        "page_group": "Leave coverage",
+        "page_title": "Leave coverage",
+        "group": "Leave coverage"
+      },
+      {
+        "field_id": "caregiver.pfl_base_period_earnings",
+        "text": "Did you earn at least $300 from work covered by California SDI in the relevant period?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "caregiver.caregiving_employment_impact",
+          "op": "includes_any",
+          "value": [
+            "Taking leave",
+            "Expect to take leave",
+            "Have taken leave"
+          ]
+        },
+        "helper_text": "This is earnings, not $300 in deductions. The base period is generally wages earned 5\u201318 months before the claim starts. Pay statements or your earnings history can help; if the timing is unclear, choose \u201cI\u2019m not sure\u201d.",
+        "page_group": "Leave earnings and plan",
+        "page_title": "Leave earnings and plan",
+        "group": "Leave earnings and plan"
+      },
+      {
+        "field_id": "caregiver.voluntary_plan",
+        "text": "Does your employer use its own disability and family-leave plan instead of California SDI?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "caregiver.caregiving_employment_impact",
+              "op": "includes_any",
+              "value": [
+                "Taking leave",
+                "Expect to take leave",
+                "Have taken leave"
+              ]
+            },
+            {
+              "field": "caregiver.sdi_deductions",
+              "op": "in",
+              "value": [
+                "No",
+                "I'm not sure"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Your benefits handbook or HR team may call this a \u201cVoluntary Plan\u201d.",
+        "page_group": "Leave earnings and plan",
+        "page_title": "Leave earnings and plan",
+        "group": "Leave earnings and plan"
+      },
+      {
+        "field_id": "caregiver.pfl_used_last_12_months",
+        "text": "Have you received California Paid Family Leave in the past 12 months?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "caregiver.caregiving_employment_impact",
+          "op": "includes_any",
+          "value": [
+            "Taking leave",
+            "Expect to take leave",
+            "Have taken leave"
+          ]
+        },
+        "page_group": "Previous Paid Family Leave",
+        "page_title": "Previous Paid Family Leave",
+        "group": "Previous Paid Family Leave"
+      },
+      {
+        "field_id": "caregiver.pfl_weeks_used",
+        "text": "About how many weeks have you already used?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "caregiver.caregiving_employment_impact",
+              "op": "includes_any",
+              "value": [
+                "Taking leave",
+                "Expect to take leave",
+                "Have taken leave"
+              ]
+            },
+            {
+              "field": "caregiver.pfl_used_last_12_months",
+              "op": "equals",
+              "value": "Yes"
+            }
+          ]
+        },
+        "helper_text": "Check your EDD payment history if you need to. This includes leave for any qualifying reason.",
+        "validation": {
+          "min": 0,
+          "max": 8
+        },
+        "page_group": "Previous Paid Family Leave",
+        "page_title": "Previous Paid Family Leave",
+        "group": "Previous Paid Family Leave"
+      },
+      {
+        "field_id": "caregiver.leave_other_payments",
+        "text": "During the days you would claim Paid Family Leave, will you receive any of these payments?",
+        "type": "multi_select",
+        "required": true,
+        "options": [
+          "Full wages or salary",
+          "Unemployment benefits",
+          "State disability benefits",
+          "Workers\u2019 compensation",
+          "Other payments",
+          "None of these",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "caregiver.caregiving_employment_impact",
+          "op": "includes_any",
+          "value": [
+            "Taking leave",
+            "Expect to take leave",
+            "Have taken leave"
+          ]
+        },
+        "validation": {
+          "exclusive_options": [
+            "None of these",
+            "I'm not sure"
+          ]
+        },
+        "helper_text": "This helps check overlapping wage-replacement payments or full wages for the same claim days.",
+        "page_group": "Payments during Paid Family Leave",
+        "page_title": "Payments during Paid Family Leave",
+        "group": "Payments during Paid Family Leave"
+      },
+      {
+        "field_id": "caregiver.parent_role",
+        "text": "Do you have day-to-day responsibility for raising and supporting this child?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "caregiver.caregiving_employment_impact",
+              "op": "includes_any",
+              "value": [
+                "Taking leave",
+                "Expect to take leave",
+                "Have taken leave"
+              ]
+            },
+            {
+              "all": [
+                {
+                  "field": "recipient.age",
+                  "op": "lt",
+                  "value": 18
+                },
+                {
+                  "field": "caregiver.relationship",
+                  "op": "in",
+                  "value": [
+                    "Friend",
+                    "Neighbor",
+                    "Other"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "helper_text": "This can matter even if you are not their biological or legal parent.",
+        "page_group": "Caring for a child",
+        "page_title": "Caring for a child",
+        "group": "Caring for a child"
+      }
+    ]
+  },
+  {
+    "id": "household_assets",
+    "title": "Household and Assets",
+    "intro_text": "Tell us about your household, income and assets. Have these handy if available:",
+    "intro_documents": [
+      {
+        "document": "Social Security benefit letters",
+        "location": "Your my Social Security account"
+      },
+      {
+        "document": "VA benefit letters",
+        "location": "Your VA.gov account"
+      },
+      {
+        "document": "Pension benefit statements",
+        "location": "Your pension provider\u2019s online account"
+      },
+      {
+        "document": "Account statements and bank balances",
+        "location": "Your bank\u2019s website or app"
+      }
+    ],
+    "intro_emphasis": "Answer what you know. Amounts can be looked up later.",
+    "questions": [
+      {
+        "field_id": "recipient.marital_status",
+        "text": "Is [recipient name] married or in a registered domestic partnership?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "Widowed",
+          "Separated or divorced"
+        ],
+        "page_group": "Their family",
+        "page_title": "Their family",
+        "group": "Their family"
+      },
+      {
+        "field_id": "recipient.spouse_living_situation",
+        "text": "Where does their spouse or partner live?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "With the recipient",
+          "With me, but not with the recipient",
+          "In a separate private home",
+          "In a nursing home or other care facility",
+          "Other"
+        ],
+        "show_when": {
+          "field": "recipient.marital_status",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "helper_text": "\u201cWith the recipient\u201d means the same home as [recipient name], whether or not you also live there.",
+        "page_group": "Their spouse\u2019s living situation",
+        "page_title": "Their spouse\u2019s living situation",
+        "group": "Their spouse\u2019s living situation"
+      },
+      {
+        "field_id": "recipient.tax_filing_status",
+        "text": "Does [recipient name] file a federal tax return?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes, their own return",
+          "Yes, jointly with a spouse",
+          "No",
+          "I'm not sure"
+        ],
+        "page_group": "Their tax return",
+        "page_title": "Their tax return",
+        "group": "Their tax return"
+      },
+      {
+        "field_id": "caregiver.claims_recipient",
+        "text": "Do you plan to claim [recipient name] as a dependent on your tax return?",
+        "type": "boolean",
+        "required": true,
+        "page_group": "Who claims them",
+        "page_title": "Who claims them",
+        "group": "Who claims them"
+      },
+      {
+        "field_id": "recipient.claimed_as_dependent",
+        "text": "Does someone else plan to claim [recipient name] as a dependent on their tax return?",
+        "show_when": {
+          "field": "caregiver.claims_recipient",
+          "op": "equals",
+          "value": false
+        },
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "page_group": "Who claims them",
+        "page_title": "Who claims them",
+        "group": "Who claims them"
+      },
+      {
+        "field_id": "recipient.dependent_claimant_relationship",
+        "text": "Who would claim them?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Spouse",
+          "Parent",
+          "Adult child",
+          "Other relative",
+          "Someone else",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "caregiver.claims_recipient",
+              "op": "equals",
+              "value": false
+            },
+            {
+              "field": "recipient.claimed_as_dependent",
+              "op": "equals",
+              "value": "Yes"
+            }
+          ]
+        },
+        "page_group": "Who claims them",
+        "page_title": "Who claims them",
+        "group": "Who claims them"
+      },
+      {
+        "field_id": "recipient.claims_dependents",
+        "text": "Will [recipient name] claim anyone as a dependent?",
+        "show_when": {
+          "field": "recipient.tax_filing_status",
+          "op": "in",
+          "value": [
+            "Yes, their own return",
+            "Yes, jointly with a spouse"
+          ]
+        },
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "page_group": "Their dependents",
+        "page_title": "Their dependents",
+        "group": "Their dependents"
+      },
+      {
+        "field_id": "household.members",
+        "text": "Household members and income",
+        "type": "household_members",
+        "required": true,
+        "helper_text": "Add anyone else who lives in their household or is connected to them through a tax return.",
+        "helper_link": {
+          "text": "Where to find income before deductions",
+          "href": "/api/reference-guides/ssa-benefit-letter"
+        },
+        "helper_links": [
+          {
+            "text": "How to find a Social Security benefit letter",
+            "href": "/api/reference-guides/ssa-benefit-letter"
+          }
+        ],
+        "page_group": "Household members and income",
+        "page_title": "Household members and income",
+        "group": "Household members and income",
+        "hide_title": false
+      },
+      {
+        "field_id": "recipient.condition_limits_work",
+        "text": "Does the condition prevent or substantially limit [recipient name]'s ability to work?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "[recipient name] is a child or has not yet worked",
+          "[recipient name] is past retirement age",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "recipient.condition_categories",
+          "op": "answered"
+        },
+        "page_group": "Work and disability",
+        "page_title": "",
+        "group": "Work and disability"
+      },
+      {
+        "field_id": "recipient.work_history_social_security",
+        "text": "Has [recipient name] worked and paid Social Security taxes in the past?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes, for several years",
+          "Yes, but only briefly or a long time ago",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "recipient.age",
+          "op": "gte",
+          "value": 18
+        },
+        "page_group": "Work and disability",
+        "page_title": "",
+        "group": "Work and disability"
+      },
+      {
+        "field_id": "recipient.assets",
+        "text": "Does [recipient name] own any of these?",
+        "type": "multi_select",
+        "required": true,
+        "options": [
+          "Primary home",
+          "Other property",
+          "Savings or investments",
+          "Cash",
+          "Additional vehicles",
+          "Retirement accounts",
+          "Life insurance with cash value",
+          "Trust or annuity",
+          "None",
+          "I'm not sure"
+        ],
+        "helper_text": "Include things owned jointly.",
+        "validation": {
+          "exclusive_options": [
+            "None",
+            "I'm not sure"
+          ]
+        },
+        "page_group": "Things they own",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.assets_savings_investments",
+        "text": "About how much are [recipient name]\u2019s savings and investments worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.assets",
+              "op": "includes_any",
+              "value": [
+                "Savings or investments"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Use the latest balances. Keep retirement accounts separate.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.assets_savings_investments",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.assets_cash",
+        "text": "About how much are [recipient name]\u2019s cash worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.assets",
+              "op": "includes_any",
+              "value": [
+                "Cash"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Include cash not already in the accounts above.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.assets_cash",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.assets_other_property",
+        "text": "About how much are [recipient name]\u2019s other property worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.assets",
+              "op": "includes_any",
+              "value": [
+                "Other property"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Start with an estimate of what the property could sell for today. Then subtract the amount still owed on its mortgage or other loans secured by the property. For example, if it could sell for $300,000 and $200,000 is still owed, enter $100,000. A rough estimate is fine; choose \u201cI\u2019m not sure\u201d if you need to check.",
+        "helper_link": {
+          "text": "Understanding property value after mortgage debt",
+          "href": "https://www.consumerfinance.gov/ask-cfpb/what-is-a-home-equity-loan-en-106/"
+        },
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.assets_other_property",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.assets_additional_vehicles",
+        "text": "About how much are [recipient name]\u2019s additional vehicles worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.assets",
+              "op": "includes_any",
+              "value": [
+                "Additional vehicles"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Keep the main vehicle separate. Estimate value after loans owed.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.assets_additional_vehicles",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.assets_retirement_accounts",
+        "text": "About how much are [recipient name]\u2019s retirement accounts worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.assets",
+              "op": "includes_any",
+              "value": [
+                "Retirement accounts"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Use current balances. We ask separately about regular payments.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.assets_retirement_accounts",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.assets_life_insurance_cash_value",
+        "text": "About how much are [recipient name]\u2019s life insurance cash value worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.assets",
+              "op": "includes_any",
+              "value": [
+                "Life insurance with cash value"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Look for \u201ccash surrender value\u201d, not the amount paid after death. Your insurer can help.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.assets_life_insurance_cash_value",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.assets_joint",
+        "text": "Are any of those assets owned jointly with someone else?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.assets",
+              "op": "answered"
+            },
+            {
+              "not": {
+                "field": "recipient.assets",
+                "op": "includes_any",
+                "value": [
+                  "None"
+                ]
+              }
+            }
+          ]
+        },
+        "page_group": "recipient.assets_joint",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.assets_joint_details",
+        "text": "Which assets are shared, and with whom?",
+        "type": "long_text",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.assets_joint",
+              "op": "equals",
+              "value": "Yes"
+            }
+          ]
+        },
+        "helper_text": "Use relationships, such as \u201csavings with spouse\u201d, and their share if known.",
+        "page_group": "recipient.assets_joint_details",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.retirement_regular_payments",
+        "text": "Are they receiving regular payments from those retirement accounts?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.assets",
+              "op": "includes_any",
+              "value": [
+                "Retirement accounts"
+              ]
+            }
+          ]
+        },
+        "page_group": "recipient.retirement_regular_payments",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.trust_annuity_details",
+        "text": "What do you know about the trust or annuity?",
+        "type": "long_text",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.assets",
+              "op": "includes_any",
+              "value": [
+                "Trust or annuity"
+              ]
+            }
+          ]
+        },
+        "helper_text": "If known, share its approximate value, who owns it, and whether it pays income. Choose \u201cI\u2019m not sure\u201d if specialist review is needed.",
+        "page_group": "recipient.trust_annuity_details",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.spouse.assets",
+        "text": "Does their spouse or partner own any of these?",
+        "type": "multi_select",
+        "required": true,
+        "options": [
+          "Primary home",
+          "Other property",
+          "Savings or investments",
+          "Cash",
+          "Additional vehicles",
+          "Retirement accounts",
+          "Life insurance with cash value",
+          "Trust or annuity",
+          "None",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "recipient.marital_status",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "helper_text": "Include things owned jointly.",
+        "validation": {
+          "exclusive_options": [
+            "None",
+            "I'm not sure"
+          ]
+        },
+        "page_group": "Things their spouse or partner owns",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.assets_savings_investments",
+        "text": "About how much are their spouse or partner\u2019s savings and investments worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets",
+              "op": "includes_any",
+              "value": [
+                "Savings or investments"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Use the latest balances. Keep retirement accounts separate.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.spouse.assets_savings_investments",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.assets_cash",
+        "text": "About how much are their spouse or partner\u2019s cash worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets",
+              "op": "includes_any",
+              "value": [
+                "Cash"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Include cash not already in the accounts above.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.spouse.assets_cash",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.assets_other_property",
+        "text": "About how much are their spouse or partner\u2019s other property worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets",
+              "op": "includes_any",
+              "value": [
+                "Other property"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Start with an estimate of what the property could sell for today. Then subtract the amount still owed on its mortgage or other loans secured by the property. For example, if it could sell for $300,000 and $200,000 is still owed, enter $100,000. A rough estimate is fine; choose \u201cI\u2019m not sure\u201d if you need to check.",
+        "helper_link": {
+          "text": "Understanding property value after mortgage debt",
+          "href": "https://www.consumerfinance.gov/ask-cfpb/what-is-a-home-equity-loan-en-106/"
+        },
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.spouse.assets_other_property",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.assets_additional_vehicles",
+        "text": "About how much are their spouse or partner\u2019s additional vehicles worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets",
+              "op": "includes_any",
+              "value": [
+                "Additional vehicles"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Keep the main vehicle separate. Estimate value after loans owed.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.spouse.assets_additional_vehicles",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.assets_retirement_accounts",
+        "text": "About how much are their spouse or partner\u2019s retirement accounts worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets",
+              "op": "includes_any",
+              "value": [
+                "Retirement accounts"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Use current balances. We ask separately about regular payments.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.spouse.assets_retirement_accounts",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.assets_life_insurance_cash_value",
+        "text": "About how much are their spouse or partner\u2019s life insurance cash value worth?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets",
+              "op": "includes_any",
+              "value": [
+                "Life insurance with cash value"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Look for \u201ccash surrender value\u201d, not the amount paid after death. Your insurer can help.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "recipient.spouse.assets_life_insurance_cash_value",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.assets_joint",
+        "text": "Are any of those assets owned jointly with someone else?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets",
+              "op": "answered"
+            },
+            {
+              "not": {
+                "field": "recipient.spouse.assets",
+                "op": "includes_any",
+                "value": [
+                  "None"
+                ]
+              }
+            }
+          ]
+        },
+        "page_group": "recipient.spouse.assets_joint",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.assets_joint_details",
+        "text": "Which assets are shared, and with whom?",
+        "type": "long_text",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets_joint",
+              "op": "equals",
+              "value": "Yes"
+            }
+          ]
+        },
+        "helper_text": "Use relationships, such as \u201csavings with spouse\u201d, and their share if known.",
+        "page_group": "recipient.spouse.assets_joint_details",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.retirement_regular_payments",
+        "text": "Are they receiving regular payments from those retirement accounts?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets",
+              "op": "includes_any",
+              "value": [
+                "Retirement accounts"
+              ]
+            }
+          ]
+        },
+        "page_group": "recipient.spouse.retirement_regular_payments",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.trust_annuity_details",
+        "text": "What do you know about the trust or annuity?",
+        "type": "long_text",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets",
+              "op": "includes_any",
+              "value": [
+                "Trust or annuity"
+              ]
+            }
+          ]
+        },
+        "helper_text": "If known, share its approximate value, who owns it, and whether it pays income. Choose \u201cI\u2019m not sure\u201d if specialist review is needed.",
+        "page_group": "recipient.spouse.trust_annuity_details",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.recent_transfers",
+        "text": "Has [recipient name] given away or transferred money or property within the last 30 months?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "any": [
+            {
+              "field": "recipient.living_setting",
+              "op": "equals",
+              "value": "Nursing home or skilled nursing facility"
+            },
+            {
+              "field": "recipient.planned_nursing_home",
+              "op": "in",
+              "value": [
+                "Yes",
+                "I'm not sure"
+              ]
+            }
+          ]
+        },
+        "allow_prefer_not_to_answer": true,
+        "page_group": "recipient.recent_transfers",
+        "page_title": "",
+        "group": "Things they own"
+      },
+      {
+        "field_id": "recipient.transfer_details",
+        "text": "What was given away or transferred, and when?",
+        "type": "long_text",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "field": "recipient.recent_transfers",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "helper_text": "Include approximate dates, values, who received it (relationship only), and whether it was a gift or sale. Records can help if you need to check. The relevant dates and exceptions vary by program.",
+        "page_group": "recipient.transfer_details",
+        "page_title": "",
+        "group": "Things they own"
+      }
+    ]
+  },
+  {
+    "id": "tax_information",
+    "title": "Tax Information",
+    "intro_text": "These questions help check caregiving-related tax savings. Have these handy if available:",
+    "intro_documents": [
+      {
+        "document": "A recent tax return and W-2s",
+        "location": "Your tax software, tax preparer or saved records"
+      },
+      {
+        "document": "Care and medical expense records",
+        "location": "Your receipts, invoices or payment records"
+      }
+    ],
+    "intro_emphasis": "Answer what you know. Amounts can be looked up later.",
+    "questions": [
+      {
+        "field_id": "tax.year",
+        "text": "Which year\u2019s taxes should we use to check for caregiving-related savings?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "helper_text": "The next questions help us check possible tax savings from claiming a dependent or paying for care. Enter the year the income or care expenses are from. For example, if you paid for care in 2025 and file your return in 2026, enter 2025.",
+        "validation": {
+          "min": 2000,
+          "max": 2100,
+          "integer": true
+        },
+        "page_group": "Tax year",
+        "page_title": "",
+        "group": "Tax year"
+      },
+      {
+        "field_id": "tax.filing_status",
+        "text": "How do you expect to file for that year?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Single",
+          "Married filing jointly",
+          "Married filing separately",
+          "Head of household",
+          "Qualifying surviving spouse",
+          "I'm not sure"
+        ],
+        "page_group": "Tax year",
+        "page_title": "",
+        "group": "Tax year"
+      },
+      {
+        "field_id": "caregiver.tax_residency",
+        "text": "For the tax year you want to check, how are you treated for U.S. tax purposes?",
+        "type": "single_select",
+        "required": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "caregiver.us_citizen",
+              "op": "equals",
+              "value": false
+            },
+            {
+              "field": "case.goals",
+              "op": "includes_any",
+              "value": [
+                "Get financial support or tax savings"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Tax residency is different from immigration status. Choose unsure if you need to check; do not enter a Social Security number or tax ID.",
+        "page_group": "Your tax residency",
+        "page_title": "Your tax residency",
+        "group": "Your tax residency",
+        "options": [
+          "U.S. resident for tax purposes",
+          "Nonresident for tax purposes",
+          "I'm not sure",
+          "Prefer not to answer"
+        ],
+        "display_as": "dropdown",
+        "helper_link": {
+          "text": "IRS guidance on tax residency",
+          "href": "https://www.irs.gov/publications/p519"
+        }
+      },
+      {
+        "field_id": "recipient.tax_residency",
+        "text": "For the tax year you want to check, which citizen or resident category describes [recipient name]?",
+        "type": "single_select",
+        "required": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.us_citizen",
+              "op": "equals",
+              "value": false
+            },
+            {
+              "field": "case.goals",
+              "op": "includes_any",
+              "value": [
+                "Get financial support or tax savings"
+              ]
+            }
+          ]
+        },
+        "helper_text": "This helps check the dependent citizen-or-resident test. Tax residency differs from immigration status, and other dependent requirements still apply.",
+        "page_group": "Their tax residency",
+        "page_title": "Their tax residency",
+        "group": "Their tax residency",
+        "option_labels": {
+          "U.S. national": "U.S. national (not a U.S. citizen)"
+        },
+        "options": [
+          "U.S. national",
+          "U.S. resident for tax purposes",
+          "Resident of Canada",
+          "Resident of Mexico",
+          "None of these",
+          "I'm not sure",
+          "Prefer not to answer"
+        ],
+        "display_as": "dropdown",
+        "helper_link": {
+          "text": "IRS dependent eligibility rules",
+          "href": "https://www.irs.gov/publications/p501"
+        }
+      },
+      {
+        "field_id": "tax.adjusted_gross_income",
+        "text": "About what is your adjusted gross income for that year?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "helper_text": "A previous return can help you estimate: look for \u201cadjusted gross income\u201d on Form 1040. Choose \u201cI\u2019m not sure\u201d if you need to check.",
+        "helper_link": {
+          "text": "Where to find your adjusted gross income (AGI)",
+          "href": "https://www.irs.gov/filing/adjusted-gross-income"
+        },
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "show_when": {
+          "field": "caregiver.has_income",
+          "op": "equals",
+          "value": true
+        },
+        "page_group": "Income for that tax year",
+        "page_title": "Income for that tax year",
+        "group": "Income for that tax year"
+      },
+      {
+        "field_id": "tax.recipient_gross_annual_income",
+        "text": "About how much income will [recipient name] have for that tax year?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "helper_text": "We need their own income, not the household total. Different tax benefits treat income differently; income sources entered earlier help us review it.",
+        "helper_link": {
+          "text": "How to look up income for the dependent tax check",
+          "href": "https://www.irs.gov/publications/p501"
+        },
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "show_when": {
+          "field": "recipient.has_income",
+          "op": "equals",
+          "value": true
+        },
+        "page_group": "Income for that tax year",
+        "page_title": "Income for that tax year",
+        "group": "Income for that tax year"
+      },
+      {
+        "field_id": "tax.provides_over_half_support",
+        "text": "Do you provide more than half of [recipient name]'s total financial support?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "About half",
+          "I'm not sure"
+        ],
+        "page_group": "Financial support",
+        "page_title": "Financial support",
+        "group": "Financial support"
+      },
+      {
+        "field_id": "tax.lived_together_over_half_year",
+        "text": "Did [recipient name] live with you for more than half of the tax year?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "The year is not over yet",
+          "I'm not sure"
+        ],
+        "helper_text": "For most people, the tax year runs from January 1 through December 31. Use the year the income or care expenses are from, even if you file the return the following year.",
+        "page_group": "Financial support",
+        "page_title": "Financial support",
+        "group": "Financial support"
+      },
+      {
+        "field_id": "tax.paid_care_to_work",
+        "text": "Did you pay someone to care for them so you or your spouse could work or look for work?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "page_group": "Care expenses",
+        "page_title": "Care expenses",
+        "group": "Care expenses"
+      },
+      {
+        "field_id": "tax.caregiver_earned_income",
+        "text": "Did you earn income from work during that year?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "tax.paid_care_to_work",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "page_group": "Paid care details",
+        "page_title": "Paid care details",
+        "group": "Paid care details"
+      },
+      {
+        "field_id": "tax.spouse_work_situation",
+        "text": "What describes your spouse during that year?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Worked",
+          "Looked for work",
+          "Full-time student",
+          "Unable to care for themselves",
+          "None of these",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "tax.paid_care_to_work",
+              "op": "equals",
+              "value": "Yes"
+            },
+            {
+              "field": "tax.filing_status",
+              "op": "in",
+              "value": [
+                "Married filing jointly",
+                "Married filing separately"
+              ]
+            }
+          ]
+        },
+        "page_group": "Paid care details",
+        "page_title": "Paid care details",
+        "group": "Paid care details"
+      },
+      {
+        "field_id": "tax.paid_provider_relationship",
+        "text": "Who did you pay to provide the care?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "An unrelated person or care organization",
+          "Your spouse",
+          "Your child under 19",
+          "Another person you claim as a dependent",
+          "The parent of your child receiving care",
+          "Another relative",
+          "Other",
+          "I'm not sure"
+        ],
+        "helper_text": "We only need their relationship to you. Names and tax ID numbers come later if needed.",
+        "show_when": {
+          "field": "tax.paid_care_to_work",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "page_group": "Paid care details",
+        "page_title": "Paid care details",
+        "group": "Paid care details"
+      },
+      {
+        "field_id": "tax.paid_care_amount",
+        "text": "About how much did you pay for that care during the tax year?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "helper_text": "Use invoices or payment records. Include only care that let you or your spouse work or look for work.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "show_when": {
+          "field": "tax.paid_care_to_work",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "page_group": "Paid care details",
+        "page_title": "Paid care details",
+        "group": "Paid care details"
+      },
+      {
+        "field_id": "tax.care_reimbursements",
+        "text": "How much of those care costs was reimbursed or paid through employer benefits?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "helper_text": "Enter 0 if none. Include Dependent Care FSA payments; do not count the same expense twice.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "show_when": {
+          "field": "tax.paid_care_to_work",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "page_group": "Paid care details",
+        "page_title": "Paid care details",
+        "group": "Paid care details"
+      },
+      {
+        "field_id": "tax.unreimbursed_medical_expenses",
+        "text": "Did you pay unreimbursed medical, dental, long-term-care, transportation, equipment, or home-modification expenses for [recipient name]?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "page_group": "Medical expenses",
+        "page_title": "Medical expenses",
+        "group": "Medical expenses"
+      },
+      {
+        "field_id": "tax.medical_expense_amount",
+        "text": "About how much did you pay for their medical or care expenses that year?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "helper_text": "Include only the portion you paid and were not reimbursed for. Receipts and insurance statements can help.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "show_when": {
+          "field": "tax.unreimbursed_medical_expenses",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "page_group": "Unreimbursed medical costs",
+        "page_title": "Unreimbursed medical costs",
+        "group": "Unreimbursed medical costs"
+      },
+      {
+        "field_id": "tax.public_payment_program",
+        "text": "Which public program pays you to provide care?",
+        "type": "short_text",
+        "required": true,
+        "allow_not_sure": true,
+        "helper_text": "Use the program name on a payment notice or award letter, for example IHSS. Do not enter a provider ID.",
+        "show_when": {
+          "field": "caregiver.payment_status",
+          "op": "equals",
+          "value": "Yes, through Medicaid, a waiver, IHSS, or another public program"
+        },
+        "page_group": "Caregiving payments and taxes",
+        "page_title": "Caregiving payments and taxes",
+        "group": "Caregiving payments and taxes"
+      },
+      {
+        "field_id": "tax.waiver_payment_cophysical_residence",
+        "text": "If you are paid through a Medicaid waiver or similar program, do you live in the same home as [recipient name]?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "caregiver.payment_status",
+          "op": "equals",
+          "value": "Yes, through Medicaid, a waiver, IHSS, or another public program"
+        },
+        "page_group": "Caregiving payments and taxes",
+        "page_title": "Caregiving payments and taxes",
+        "group": "Caregiving payments and taxes"
+      }
+    ]
+  },
+  {
+    "id": "coverage_benefits",
+    "title": "Current Coverage and Benefits",
+    "intro_text": "A Medicare card, Medi-Cal coverage information, benefit letters and application confirmations can help. ",
+    "questions": [
+      {
+        "field_id": "recipient.medicaid_covered",
+        "text": "Are they currently covered by Medi-Cal, California\u2019s Medicaid program?",
+        "helper_text": "Check the Medi-Cal status in their BenefitsCal account. Their case must be linked to the account before its status will appear. If you cannot find the status or it is unclear, their county Medi-Cal office can confirm whether coverage is active. Choose \u201cI\u2019m not sure\u201d if you still need to check.",
+        "helper_link": {
+          "text": "How to check whether Medi-Cal is active",
+          "href": "https://ehsd.org/2026/01/30/medi-cal-frequently-asked-questions/"
+        },
+        "helper_links": [
+          {
+            "text": "Find their county Medi-Cal office",
+            "href": "https://www.dhcs.ca.gov/services/medi-cal-resources/county-offices/"
+          }
+        ],
+        "type": "boolean",
+        "required": true,
+        "page_group": "Medi-Cal",
+        "page_title": "Medi-Cal",
+        "group": "Medi-Cal",
+        "allow_not_sure": true
+      },
+      {
+        "field_id": "recipient.coverage_and_benefits",
+        "text": "What health coverage and benefits do they currently have?",
+        "type": "multi_select",
+        "required": true,
+        "options": [
+          "Medicaid",
+          "Medicare",
+          "VA health care",
+          "Employer or private insurance",
+          "No health coverage",
+          "SSI",
+          "SSDI or Social Security Disability",
+          "Social Security retirement or survivor benefits",
+          "Medicaid home- and community-based services",
+          "VA disability compensation",
+          "VA pension or Aid and Attendance",
+          "SNAP or food assistance",
+          "Housing assistance",
+          "Workers' compensation",
+          "Other",
+          "I'm not sure"
+        ],
+        "option_labels": {
+          "Medicaid": "Medi-Cal (California Medicaid)",
+          "SSI": "Supplemental Security Income (SSI)",
+          "SSDI or Social Security Disability": "Social Security Disability Insurance (SSDI)",
+          "VA health care": "Veterans Affairs (VA) health care",
+          "VA disability compensation": "Veterans Affairs (VA) disability compensation",
+          "VA pension or Aid and Attendance": "Veterans Affairs (VA) pension or Aid and Attendance",
+          "SNAP or food assistance": "Supplemental Nutrition Assistance Program (SNAP / CalFresh)",
+          "Medicaid home- and community-based services": "Medicaid home- and community-based services (HCBS)"
+        },
+        "validation": {
+          "exclusive_options": [
+            "I'm not sure"
+          ],
+          "incompatible_options": [
+            [
+              "No health coverage",
+              "Medicaid"
+            ],
+            [
+              "No health coverage",
+              "Medicare"
+            ],
+            [
+              "No health coverage",
+              "VA health care"
+            ],
+            [
+              "No health coverage",
+              "Employer or private insurance"
+            ]
+          ]
+        },
+        "helper_text": "Select coverage and income benefits separately. \u201cNo health coverage\u201d can be selected alongside an income benefit such as SSI.",
+        "page_group": "Current coverage and benefits",
+        "page_title": "Current coverage and benefits",
+        "group": "Current coverage and benefits"
+      },
+      {
+        "field_id": "recipient.medicare_parts",
+        "text": "Which parts of Medicare are active?",
+        "type": "multi_select",
+        "required": true,
+        "options": [
+          "Part A (hospital)",
+          "Part B (medical)",
+          "Neither",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "recipient.health_coverage",
+          "op": "includes_any",
+          "value": [
+            "Medicare"
+          ]
+        },
+        "helper_text": "Your Medicare card lists Part A and Part B and their start dates. Do not enter the Medicare number.",
+        "validation": {
+          "exclusive_options": [
+            "Neither",
+            "I'm not sure"
+          ]
+        },
+        "helper_link": {
+          "text": "How to read your Medicare card",
+          "href": "https://www.medicare.gov/basics/get-started-with-medicare/using-medicare/your-medicare-card"
+        },
+        "page_group": "Medicare parts",
+        "page_title": "Medicare parts",
+        "group": "Medicare parts"
+      },
+      {
+        "field_id": "recipient.medicare_part_a_start",
+        "text": "When did Part A coverage start?",
+        "type": "date",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "field": "recipient.medicare_parts",
+          "op": "includes_any",
+          "value": [
+            "Part A (hospital)"
+          ]
+        },
+        "page_helper_text": "Use the coverage start date on the card or online Medicare record.",
+        "layout": "inline",
+        "page_helper_link": {
+          "text": "How to read your Medicare card",
+          "href": "https://www.medicare.gov/basics/get-started-with-medicare/using-medicare/your-medicare-card"
+        },
+        "page_group": "Medicare coverage dates",
+        "page_title": "Medicare coverage dates",
+        "group": "Medicare coverage dates"
+      },
+      {
+        "field_id": "recipient.medicare_part_b_start",
+        "text": "When did Part B coverage start?",
+        "type": "date",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "field": "recipient.medicare_parts",
+          "op": "includes_any",
+          "value": [
+            "Part B (medical)"
+          ]
+        },
+        "page_helper_text": "Use the coverage start date on the card or online Medicare record.",
+        "layout": "inline",
+        "page_helper_link": {
+          "text": "How to read your Medicare card",
+          "href": "https://www.medicare.gov/basics/get-started-with-medicare/using-medicare/your-medicare-card"
+        },
+        "page_group": "Medicare coverage dates",
+        "page_title": "Medicare coverage dates",
+        "group": "Medicare coverage dates"
+      },
+      {
+        "field_id": "recipient.ssdi_start",
+        "text": "When did Social Security disability benefits start?",
+        "type": "date",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "field": "recipient.current_benefits",
+          "op": "includes_any",
+          "value": [
+            "SSDI or Social Security Disability"
+          ]
+        },
+        "helper_text": "Use the benefit entitlement/start date from the Social Security award letter, if known.",
+        "page_group": "Social Security and early Medicare",
+        "page_title": "Social Security and early Medicare",
+        "group": "Social Security and early Medicare"
+      },
+      {
+        "field_id": "recipient.medicare_early_conditions",
+        "text": "Have they been diagnosed with either of these?",
+        "type": "multi_select",
+        "required": true,
+        "options": [
+          "ALS (Lou Gehrig\u2019s disease)",
+          "Permanent kidney failure requiring dialysis or a kidney transplant",
+          "Neither",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "field": "recipient.age",
+          "op": "lt",
+          "value": 65
+        },
+        "helper_text": "These conditions can affect Medicare eligibility before age 65. An existing diagnosis is enough to answer; no new medical certificate is needed.",
+        "validation": {
+          "exclusive_options": [
+            "Neither",
+            "I'm not sure"
+          ]
+        },
+        "helper_link": {
+          "text": "How to read your Medicare card",
+          "href": "https://www.medicare.gov/basics/get-started-with-medicare/using-medicare/your-medicare-card"
+        },
+        "page_group": "Social Security and early Medicare",
+        "page_title": "Social Security and early Medicare",
+        "group": "Social Security and early Medicare"
+      },
+      {
+        "field_id": "recipient.medicare_insured_work",
+        "text": "Have they or their spouse worked and paid Medicare taxes?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "any": [
+                {
+                  "field": "case.goals",
+                  "op": "includes_any",
+                  "value": [
+                    "Find health coverage",
+                    "Get help providing or paying for care",
+                    "Get paid for caregiving",
+                    "Understand benefits we already have",
+                    "Get financial support or tax savings"
+                  ]
+                },
+                {
+                  "field": "recipient.health_coverage",
+                  "op": "includes_any",
+                  "value": [
+                    "Medicare"
+                  ]
+                }
+              ]
+            },
+            {
+              "field": "recipient.age",
+              "op": "gte",
+              "value": 65
+            },
+            {
+              "not": {
+                "field": "recipient.health_coverage",
+                "op": "includes_any",
+                "value": [
+                  "Medicare"
+                ]
+              }
+            }
+          ]
+        },
+        "helper_text": "An earnings record may help if you are unsure. This helps distinguish premium-free coverage from other enrollment options; it is not a decision by itself.",
+        "helper_link": {
+          "text": "How to read your Medicare card",
+          "href": "https://www.medicare.gov/basics/get-started-with-medicare/using-medicare/your-medicare-card"
+        },
+        "page_group": "Checking Medicare options",
+        "page_title": "Checking Medicare options",
+        "group": "Checking Medicare options"
+      },
+      {
+        "field_id": "recipient.lpr_since",
+        "text": "When did [recipient name] become a lawful permanent resident?",
+        "type": "date",
+        "required": true,
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "field": "recipient.us_citizen",
+                  "op": "equals",
+                  "value": false
+                },
+                {
+                  "field": "case.goals",
+                  "op": "includes_any",
+                  "value": [
+                    "Find health coverage",
+                    "Get help providing or paying for care",
+                    "Get paid for caregiving",
+                    "Understand benefits we already have",
+                    "Get financial support or tax savings"
+                  ]
+                },
+                {
+                  "field": "recipient.age",
+                  "op": "gte",
+                  "value": 19
+                },
+                {
+                  "field": "recipient.medicaid_covered",
+                  "op": "in",
+                  "value": [
+                    false,
+                    "I'm not sure"
+                  ]
+                }
+              ]
+            },
+            {
+              "field": "recipient.citizenship_residency",
+              "op": "equals",
+              "value": "Lawful permanent resident"
+            }
+          ]
+        },
+        "helper_text": "Use the date permanent-resident status began, not simply the date they first arrived in the U.S. Unknown dates can be checked later. A recent date does not automatically rule out California Medi-Cal.",
+        "page_group": "Their residence history",
+        "page_title": "Their residence history",
+        "group": "Their residence history",
+        "allow_not_sure": true,
+        "allow_prefer_not_to_answer": true
+      },
+      {
+        "field_id": "recipient.five_year_us_residence",
+        "text": "Have they lived continuously in the U.S. for at least five years?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure",
+          "Prefer not to answer"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "field": "recipient.us_citizen",
+                  "op": "equals",
+                  "value": false
+                },
+                {
+                  "any": [
+                    {
+                      "field": "case.goals",
+                      "op": "includes_any",
+                      "value": [
+                        "Find health coverage",
+                        "Get help providing or paying for care",
+                        "Get paid for caregiving",
+                        "Understand benefits we already have",
+                        "Get financial support or tax savings"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "Medicare"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.age",
+                      "op": "gte",
+                      "value": 19
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "Medicare"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "field": "recipient.citizenship_residency",
+              "op": "equals",
+              "value": "Lawful permanent resident"
+            },
+            {
+              "field": "recipient.age",
+              "op": "gte",
+              "value": 65
+            },
+            {
+              "not": {
+                "field": "recipient.health_coverage",
+                "op": "includes_any",
+                "value": [
+                  "Medicare"
+                ]
+              }
+            },
+            {
+              "field": "recipient.medicare_insured_work",
+              "op": "in",
+              "value": [
+                "No",
+                "I'm not sure"
+              ]
+            }
+          ]
+        },
+        "page_group": "Their residence history",
+        "page_title": "Their residence history",
+        "group": "Their residence history",
+        "helper_text": "This helps check Medicare enrollment options when premium-free eligibility is unresolved. Five years of continuous residence is not a blanket requirement for every Medicare or Medi-Cal pathway."
+      },
+      {
+        "field_id": "recipient.pregnancy_postpartum",
+        "text": "Is [recipient name] pregnant or within one year after a pregnancy ended?",
+        "type": "single_select",
+        "required": true,
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "field": "recipient.us_citizen",
+                  "op": "equals",
+                  "value": false
+                },
+                {
+                  "field": "case.goals",
+                  "op": "includes_any",
+                  "value": [
+                    "Find health coverage",
+                    "Get help providing or paying for care",
+                    "Get paid for caregiving",
+                    "Understand benefits we already have",
+                    "Get financial support or tax savings"
+                  ]
+                },
+                {
+                  "field": "recipient.age",
+                  "op": "gte",
+                  "value": 19
+                },
+                {
+                  "field": "recipient.medicaid_covered",
+                  "op": "in",
+                  "value": [
+                    false,
+                    "I'm not sure"
+                  ]
+                }
+              ]
+            },
+            {
+              "field": "recipient.citizenship_residency",
+              "op": "in",
+              "value": [
+                "Lawful permanent resident",
+                "Another immigration status",
+                "No current immigration status",
+                "I'm not sure"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Pregnancy and the year after a pregnancy ends can change which Medi-Cal coverage options are available. You do not need to share medical records.",
+        "page_group": "Coverage exceptions",
+        "page_title": "Coverage exceptions",
+        "group": "Coverage exceptions",
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure",
+          "Prefer not to answer"
+        ],
+        "display_as": "dropdown"
+      },
+      {
+        "field_id": "recipient.foster_care_at_18",
+        "text": "Was [recipient name] in foster care on their 18th birthday?",
+        "type": "single_select",
+        "required": true,
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "field": "recipient.us_citizen",
+                  "op": "equals",
+                  "value": false
+                },
+                {
+                  "field": "case.goals",
+                  "op": "includes_any",
+                  "value": [
+                    "Find health coverage",
+                    "Get help providing or paying for care",
+                    "Get paid for caregiving",
+                    "Understand benefits we already have",
+                    "Get financial support or tax savings"
+                  ]
+                },
+                {
+                  "field": "recipient.age",
+                  "op": "gte",
+                  "value": 19
+                },
+                {
+                  "field": "recipient.medicaid_covered",
+                  "op": "in",
+                  "value": [
+                    false,
+                    "I'm not sure"
+                  ]
+                }
+              ]
+            },
+            {
+              "field": "recipient.age",
+              "op": "lt",
+              "value": 26
+            },
+            {
+              "field": "recipient.citizenship_residency",
+              "op": "in",
+              "value": [
+                "Lawful permanent resident",
+                "Another immigration status",
+                "No current immigration status",
+                "I'm not sure"
+              ]
+            }
+          ]
+        },
+        "helper_text": "Former foster youth under 26 may have a different Medi-Cal pathway. This answer alone does not establish eligibility.",
+        "page_group": "Coverage exceptions",
+        "page_title": "Coverage exceptions",
+        "group": "Coverage exceptions",
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure",
+          "Prefer not to answer"
+        ],
+        "display_as": "dropdown"
+      },
+      {
+        "field_id": "recipient.military_status",
+        "text": "Does [recipient name] have a military connection?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Veteran",
+          "Current active-duty service member",
+          "National Guard or Reserve member",
+          "Surviving spouse of a veteran",
+          "Dependent of a veteran",
+          "None of these",
+          "I'm not sure"
+        ],
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_contact",
+        "text": "Has [recipient name] used VA services or applied for VA benefits?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "any": [
+            {
+              "field": "recipient.military_status",
+              "op": "in",
+              "value": [
+                "Veteran",
+                "Current active-duty service member",
+                "National Guard or Reserve member",
+                "Surviving spouse of a veteran",
+                "Dependent of a veteran",
+                "I'm not sure"
+              ]
+            },
+            {
+              "field": "recipient.health_coverage",
+              "op": "includes_any",
+              "value": [
+                "VA health care"
+              ]
+            },
+            {
+              "field": "recipient.current_benefits",
+              "op": "includes_any",
+              "value": [
+                "VA disability compensation",
+                "VA pension or Aid and Attendance"
+              ]
+            }
+          ]
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_health_enrolled",
+        "text": "Are they currently enrolled in VA health care?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "any": [
+            {
+              "field": "recipient.military_status",
+              "op": "in",
+              "value": [
+                "Veteran",
+                "Current active-duty service member",
+                "National Guard or Reserve member",
+                "Surviving spouse of a veteran",
+                "Dependent of a veteran",
+                "I'm not sure"
+              ]
+            },
+            {
+              "field": "recipient.health_coverage",
+              "op": "includes_any",
+              "value": [
+                "VA health care"
+              ]
+            },
+            {
+              "field": "recipient.current_benefits",
+              "op": "includes_any",
+              "value": [
+                "VA disability compensation",
+                "VA pension or Aid and Attendance"
+              ]
+            }
+          ]
+        },
+        "helper_text": "VA benefits or past contact do not always mean health-care enrollment. An enrollment letter or online VA health record can help.",
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_rating_assigned",
+        "text": "Has VA given them a disability rating?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "Decision pending",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "any": [
+                {
+                  "field": "recipient.military_status",
+                  "op": "in",
+                  "value": [
+                    "Veteran",
+                    "Current active-duty service member",
+                    "National Guard or Reserve member",
+                    "Surviving spouse of a veteran",
+                    "Dependent of a veteran",
+                    "I'm not sure"
+                  ]
+                },
+                {
+                  "field": "recipient.health_coverage",
+                  "op": "includes_any",
+                  "value": [
+                    "VA health care"
+                  ]
+                },
+                {
+                  "field": "recipient.current_benefits",
+                  "op": "includes_any",
+                  "value": [
+                    "VA disability compensation",
+                    "VA pension or Aid and Attendance"
+                  ]
+                }
+              ]
+            },
+            {
+              "any": [
+                {
+                  "field": "recipient.va_contact",
+                  "op": "in",
+                  "value": [
+                    "Yes",
+                    "I'm not sure"
+                  ]
+                },
+                {
+                  "field": "recipient.current_benefits",
+                  "op": "includes_any",
+                  "value": [
+                    "VA disability compensation"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_rating",
+        "text": "Do you know their VA disability rating?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "No rating",
+          "Less than 70%",
+          "70% or higher",
+          "Rating decision is pending",
+          "I'm not sure"
+        ],
+        "helper_text": "If VA has already given them a rating, look for the combined percentage in their decision letter or VA record. Choose the matching range, or \u2018I\u2019m not sure\u2019. You do not need their VA file number.",
+        "show_when": {
+          "all": [
+            {
+              "any": [
+                {
+                  "field": "recipient.military_status",
+                  "op": "in",
+                  "value": [
+                    "Veteran",
+                    "Current active-duty service member",
+                    "National Guard or Reserve member",
+                    "Surviving spouse of a veteran",
+                    "Dependent of a veteran",
+                    "I'm not sure"
+                  ]
+                },
+                {
+                  "field": "recipient.health_coverage",
+                  "op": "includes_any",
+                  "value": [
+                    "VA health care"
+                  ]
+                },
+                {
+                  "field": "recipient.current_benefits",
+                  "op": "includes_any",
+                  "value": [
+                    "VA disability compensation",
+                    "VA pension or Aid and Attendance"
+                  ]
+                }
+              ]
+            },
+            {
+              "field": "recipient.va_rating_assigned",
+              "op": "in",
+              "value": [
+                "Yes",
+                "I'm not sure"
+              ]
+            }
+          ]
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.military_discharge_status",
+        "text": "Was [recipient name] discharged from the military, or do they have a date of medical discharge?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "Medical discharge is scheduled",
+          "No",
+          "Not applicable",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "any": [
+            {
+              "field": "recipient.military_status",
+              "op": "in",
+              "value": [
+                "Veteran",
+                "Current active-duty service member",
+                "National Guard or Reserve member",
+                "Surviving spouse of a veteran",
+                "Dependent of a veteran",
+                "I'm not sure"
+              ]
+            },
+            {
+              "field": "recipient.health_coverage",
+              "op": "includes_any",
+              "value": [
+                "VA health care"
+              ]
+            },
+            {
+              "field": "recipient.current_benefits",
+              "op": "includes_any",
+              "value": [
+                "VA disability compensation",
+                "VA pension or Aid and Attendance"
+              ]
+            }
+          ]
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_six_month_care_need",
+        "text": "Is [recipient name] expected to need continuous, in-person personal care for at least 6 months?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "any": [
+            {
+              "field": "recipient.military_status",
+              "op": "in",
+              "value": [
+                "Veteran",
+                "Current active-duty service member",
+                "National Guard or Reserve member",
+                "Surviving spouse of a veteran",
+                "Dependent of a veteran",
+                "I'm not sure"
+              ]
+            },
+            {
+              "field": "recipient.health_coverage",
+              "op": "includes_any",
+              "value": [
+                "VA health care"
+              ]
+            },
+            {
+              "field": "recipient.current_benefits",
+              "op": "includes_any",
+              "value": [
+                "VA disability compensation",
+                "VA pension or Aid and Attendance"
+              ]
+            }
+          ]
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "caregiver.willing_va_coresidence",
+        "text": "Would you be willing to live with them full time to provide care?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.military_status",
+              "op": "in",
+              "value": [
+                "Veteran",
+                "Current active-duty service member",
+                "I'm not sure"
+              ]
+            },
+            {
+              "field": "caregiver.coresidence",
+              "op": "equals",
+              "value": "No"
+            },
+            {
+              "field": "caregiver.relationship",
+              "op": "in",
+              "value": [
+                "Friend",
+                "Neighbor",
+                "Other"
+              ]
+            }
+          ]
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_pension_status",
+        "text": "Does [recipient name] currently receive a VA pension, Aid and Attendance, or Housebound benefits?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "VA pension only",
+          "Aid and Attendance",
+          "Housebound",
+          "Application pending",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "any": [
+            {
+              "field": "recipient.military_status",
+              "op": "in",
+              "value": [
+                "Veteran",
+                "Current active-duty service member",
+                "National Guard or Reserve member",
+                "Surviving spouse of a veteran",
+                "Dependent of a veteran",
+                "I'm not sure"
+              ]
+            },
+            {
+              "field": "recipient.health_coverage",
+              "op": "includes_any",
+              "value": [
+                "VA health care"
+              ]
+            },
+            {
+              "field": "recipient.current_benefits",
+              "op": "includes_any",
+              "value": [
+                "VA disability compensation",
+                "VA pension or Aid and Attendance"
+              ]
+            }
+          ]
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_pension_interest",
+        "text": "Would you like us to check VA pension or Aid and Attendance options?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "any": [
+                {
+                  "field": "recipient.military_status",
+                  "op": "in",
+                  "value": [
+                    "Veteran",
+                    "Current active-duty service member",
+                    "National Guard or Reserve member",
+                    "Surviving spouse of a veteran",
+                    "Dependent of a veteran",
+                    "I'm not sure"
+                  ]
+                },
+                {
+                  "field": "recipient.health_coverage",
+                  "op": "includes_any",
+                  "value": [
+                    "VA health care"
+                  ]
+                },
+                {
+                  "field": "recipient.current_benefits",
+                  "op": "includes_any",
+                  "value": [
+                    "VA disability compensation",
+                    "VA pension or Aid and Attendance"
+                  ]
+                }
+              ]
+            },
+            {
+              "any": [
+                {
+                  "field": "recipient.military_status",
+                  "op": "in",
+                  "value": [
+                    "Veteran",
+                    "Surviving spouse of a veteran",
+                    "I'm not sure"
+                  ]
+                },
+                {
+                  "field": "recipient.current_benefits",
+                  "op": "includes_any",
+                  "value": [
+                    "VA pension or Aid and Attendance"
+                  ]
+                },
+                {
+                  "field": "recipient.va_pension_status",
+                  "op": "in",
+                  "value": [
+                    "VA pension only",
+                    "Aid and Attendance",
+                    "Housebound",
+                    "Application pending"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "helper_text": "These have different service and financial rules from VA caregiver support.",
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_service_start",
+        "text": "When did the Veteran\u2019s active-duty service begin?",
+        "type": "date",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Surviving spouse of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.va_pension_interest",
+                      "op": "in",
+                      "value": [
+                        "Yes",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "helper_text": "A DD214 or service record lists the dates. Choose \u201cI\u2019m not sure\u201d if you need to check.",
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_service_end",
+        "text": "When did the Veteran\u2019s active-duty service end?",
+        "type": "date",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Surviving spouse of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.va_pension_interest",
+                      "op": "in",
+                      "value": [
+                        "Yes",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_discharge_character",
+        "text": "What does the Veteran\u2019s discharge record say?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Honorable",
+          "General (under honorable conditions)",
+          "Other than honorable",
+          "Bad conduct",
+          "Dishonorable",
+          "Other",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Surviving spouse of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.va_pension_interest",
+                      "op": "in",
+                      "value": [
+                        "Yes",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "helper_text": "Use the character of service on the DD214. Some cases need VA review; do not guess.",
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_expected_annual_income",
+        "text": "About how much income will they receive over the next 12 months?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Surviving spouse of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.va_pension_interest",
+                      "op": "in",
+                      "value": [
+                        "Yes",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "helper_text": "Include wages and benefits before deductions. Use an annual estimate if income varies; do not include a spouse\u2019s income here.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.spouse.va_expected_annual_income",
+        "text": "About how much income will their spouse receive over the next 12 months?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Surviving spouse of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "all": [
+                    {
+                      "any": [
+                        {
+                          "field": "recipient.military_status",
+                          "op": "in",
+                          "value": [
+                            "Veteran",
+                            "Current active-duty service member",
+                            "National Guard or Reserve member",
+                            "Surviving spouse of a veteran",
+                            "Dependent of a veteran",
+                            "I'm not sure"
+                          ]
+                        },
+                        {
+                          "field": "recipient.health_coverage",
+                          "op": "includes_any",
+                          "value": [
+                            "VA health care"
+                          ]
+                        },
+                        {
+                          "field": "recipient.current_benefits",
+                          "op": "includes_any",
+                          "value": [
+                            "VA disability compensation",
+                            "VA pension or Aid and Attendance"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "any": [
+                        {
+                          "field": "recipient.va_pension_interest",
+                          "op": "in",
+                          "value": [
+                            "Yes",
+                            "I'm not sure"
+                          ]
+                        },
+                        {
+                          "field": "recipient.va_pension_status",
+                          "op": "in",
+                          "value": [
+                            "VA pension only",
+                            "Aid and Attendance",
+                            "Housebound",
+                            "Application pending",
+                            "I'm not sure"
+                          ]
+                        },
+                        {
+                          "field": "recipient.current_benefits",
+                          "op": "includes_any",
+                          "value": [
+                            "VA pension or Aid and Attendance"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "field": "recipient.marital_status",
+                  "op": "equals",
+                  "value": "Yes"
+                }
+              ]
+            }
+          ]
+        },
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_unreimbursed_medical_expenses",
+        "text": "About how much will they and their spouse pay for unreimbursed medical or care costs over those 12 months?",
+        "type": "number",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Surviving spouse of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.va_pension_interest",
+                      "op": "in",
+                      "value": [
+                        "Yes",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "helper_text": "Include costs you expect to pay yourselves, such as care fees, insurance premiums or medical bills. Leave out costs paid back by insurance or someone else.",
+        "validation": {
+          "min": 0,
+          "max": 1000000000
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_transfers_last_3_years",
+        "text": "Have they or their spouse given away or transferred assets in the past three years?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Surviving spouse of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.va_pension_interest",
+                      "op": "in",
+                      "value": [
+                        "Yes",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "recipient.va_transfer_details",
+        "text": "What was transferred, and when?",
+        "type": "long_text",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "all": [
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Current active-duty service member",
+                        "National Guard or Reserve member",
+                        "Surviving spouse of a veteran",
+                        "Dependent of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.health_coverage",
+                      "op": "includes_any",
+                      "value": [
+                        "VA health care"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA disability compensation",
+                        "VA pension or Aid and Attendance"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "any": [
+                    {
+                      "field": "recipient.military_status",
+                      "op": "in",
+                      "value": [
+                        "Veteran",
+                        "Surviving spouse of a veteran",
+                        "I'm not sure"
+                      ]
+                    },
+                    {
+                      "field": "recipient.current_benefits",
+                      "op": "includes_any",
+                      "value": [
+                        "VA pension or Aid and Attendance"
+                      ]
+                    },
+                    {
+                      "field": "recipient.va_pension_status",
+                      "op": "in",
+                      "value": [
+                        "VA pension only",
+                        "Aid and Attendance",
+                        "Housebound",
+                        "Application pending"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "all": [
+                {
+                  "all": [
+                    {
+                      "any": [
+                        {
+                          "field": "recipient.military_status",
+                          "op": "in",
+                          "value": [
+                            "Veteran",
+                            "Current active-duty service member",
+                            "National Guard or Reserve member",
+                            "Surviving spouse of a veteran",
+                            "Dependent of a veteran",
+                            "I'm not sure"
+                          ]
+                        },
+                        {
+                          "field": "recipient.health_coverage",
+                          "op": "includes_any",
+                          "value": [
+                            "VA health care"
+                          ]
+                        },
+                        {
+                          "field": "recipient.current_benefits",
+                          "op": "includes_any",
+                          "value": [
+                            "VA disability compensation",
+                            "VA pension or Aid and Attendance"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "any": [
+                        {
+                          "field": "recipient.va_pension_interest",
+                          "op": "in",
+                          "value": [
+                            "Yes",
+                            "I'm not sure"
+                          ]
+                        },
+                        {
+                          "field": "recipient.va_pension_status",
+                          "op": "in",
+                          "value": [
+                            "VA pension only",
+                            "Aid and Attendance",
+                            "Housebound",
+                            "Application pending",
+                            "I'm not sure"
+                          ]
+                        },
+                        {
+                          "field": "recipient.current_benefits",
+                          "op": "includes_any",
+                          "value": [
+                            "VA pension or Aid and Attendance"
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "field": "recipient.va_transfers_last_3_years",
+                  "op": "equals",
+                  "value": "Yes"
+                }
+              ]
+            }
+          ]
+        },
+        "helper_text": "Include approximate dates, values, the recipient\u2019s relationship, and whether it was a gift or sale. Do not enter account numbers.",
+        "page_group": "VA coverage and caregiver support",
+        "page_title": "VA coverage and caregiver support",
+        "group": "VA coverage and caregiver support"
+      },
+      {
+        "field_id": "case.has_applied_or_received",
+        "text": "Have you applied for or received any caregiver benefits or care services?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No"
+        ],
+        "page_group": "Caregiver benefits and care services",
+        "page_title": "Caregiver benefits and care services",
+        "group": "Caregiver benefits and care services"
+      },
+      {
+        "field_id": "recipient.programs_touched",
+        "text": "Which caregiver benefits or care services?",
+        "type": "multi_select",
+        "required": true,
+        "options": [
+          "IHSS",
+          "VA caregiver support",
+          "Paid Family Leave",
+          "Medi-Cal care services or waiver",
+          "Regional Center services",
+          "Other"
+        ],
+        "show_when": {
+          "field": "case.has_applied_or_received",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "validation": {
+          "exclusive_options": []
+        },
+        "page_group": "Caregiver benefits and care services",
+        "page_title": "Caregiver benefits and care services",
+        "group": "Caregiver benefits and care services",
+        "option_labels": {
+          "IHSS": "In-Home Supportive Services (IHSS)",
+          "VA caregiver support": "Veterans Affairs (VA) caregiver support",
+          "Paid Family Leave": "Paid Family Leave (PFL)",
+          "Medi-Cal care services or waiver": "Medi-Cal care services or waiver",
+          "Regional Center services": "Regional Center services",
+          "Other": "Other"
+        }
+      },
+      {
+        "field_id": "recipient.other_program",
+        "text": "Which other caregiver program or service?",
+        "type": "short_text",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "field": "recipient.programs_touched",
+          "op": "includes_any",
+          "value": [
+            "Other"
+          ]
+        },
+        "page_group": "Caregiver benefits and care services",
+        "page_title": "Caregiver benefits and care services",
+        "group": "Caregiver benefits and care services"
+      },
+      {
+        "field_id": "recipient.program_statuses",
+        "text": "Where does each application or service stand?",
+        "type": "program_statuses",
+        "options": [
+          "Currently receiving benefits",
+          "Application submitted",
+          "Approved, awaiting services",
+          "Denied",
+          "Benefits stopped",
+          "Renewal due"
+        ],
+        "required": true,
+        "show_when": {
+          "field": "case.has_applied_or_received",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "page_group": "Status of each program",
+        "page_title": "Status of each program",
+        "group": "Status of each program",
+        "option_labels": {
+          "IHSS": "In-Home Supportive Services (IHSS)",
+          "VA caregiver support": "Veterans Affairs (VA) caregiver support",
+          "Paid Family Leave": "Paid Family Leave (PFL)",
+          "Medi-Cal care services or waiver": "Medi-Cal care services or waiver",
+          "Regional Center services": "Regional Center services",
+          "Other": "Other"
+        }
+      },
+      {
+        "field_id": "case.program_dates",
+        "text": "When did you apply or receive the most recent decision for each program?",
+        "type": "program_dates",
+        "required": true,
+        "show_when": {
+          "field": "case.has_applied_or_received",
+          "op": "equals",
+          "value": "Yes"
+        },
+        "helper_text": "Use the most recent application or decision date. You can check a confirmation or agency notice.",
+        "page_group": "Dates for each program",
+        "page_title": "Dates for each program",
+        "group": "Dates for each program",
+        "option_labels": {
+          "IHSS": "In-Home Supportive Services (IHSS)",
+          "VA caregiver support": "Veterans Affairs (VA) caregiver support",
+          "Paid Family Leave": "Paid Family Leave (PFL)",
+          "Medi-Cal care services or waiver": "Medi-Cal care services or waiver",
+          "Regional Center services": "Regional Center services",
+          "Other": "Other"
+        }
+      },
+      {
+        "field_id": "case.application_barriers",
+        "text": "Is anything making it difficult to apply for support?",
+        "type": "multi_select",
+        "required": false,
+        "options": [
+          "Missing documents",
+          "Medical certification",
+          "Financial eligibility",
+          "Cannot reach the agency",
+          "Waiting for an appointment",
+          "Unclear instructions",
+          "Other",
+          "Nothing",
+          "I'm not sure"
+        ],
+        "validation": {
+          "exclusive_options": [
+            "Nothing",
+            "I'm not sure"
+          ]
+        },
+        "helper_text": "You can answer even if you have not started an application. Select anything you would like help with.",
+        "page_group": "Anything making it difficult?",
+        "page_title": "Anything making it difficult?",
+        "group": "Anything making it difficult?"
+      }
+    ]
+  }
+]

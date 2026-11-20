@@ -1,0 +1,918 @@
+{
+  "as_of": "2026-11-15",
+  "deployed_commit": "ad61b499248a10f3ae5f51a8310039c2b87c24e5",
+  "elapsed_seconds": 16.01,
+  "results": [
+    {
+      "program": "ihss",
+      "fields": [
+        "recipient.condition_documented",
+        "recipient.medicaid_covered",
+        "household.members"
+      ],
+      "queries": [
+        "IHSS income verification pay stubs Social Security award letter",
+        "IHSS SOC 873 preliminary screening health care certification"
+      ],
+      "answer": {
+        "conclusion": "Upload SOC 873 and household facts; defer IDs.",
+        "findings": [
+          {
+            "finding": "Health-care certification documents condition and required signature.",
+            "citations": [
+              {
+                "document_id": "IHSS-MPP-30-700-764",
+                "page": ""
+              }
+            ]
+          },
+          {
+            "finding": "Medi‑Cal is referenced but Medicaid coverage verification procedure is unresolved.",
+            "citations": [
+              {
+                "document_id": "IHSS-MPP-30-700-764",
+                "page": ""
+              }
+            ]
+          },
+          {
+            "finding": "Case record must document household income/property and include signed statement.",
+            "citations": [
+              {
+                "document_id": "IHSS-MPP-30-700-764",
+                "page": ""
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Include SOC 873 health-care certification.",
+          "Include signed statement of household facts.",
+          "Defer government‑ID uploads unless requested later."
+        ],
+        "limitations": [
+          "No explicit Medi‑Cal verification steps in supplied passages.",
+          "County-specific procedures and forms are not provided."
+        ]
+      },
+      "words": 67,
+      "retrieved_passages": 7,
+      "cited_evidence": [
+        {
+          "text": "s in that month, and has received IHSS services continuously since that date.\n.25\tThe case record for persons specified in .111 above shall indicate the information used to determine receipt of SSI/SSP benefits.\n.26\tThe case record for persons specified in Sections 30-755.112, .113, and .114 above shall include:\n.261\tThe information used by the county to determine age, blindness or disability.\n.262\tThe information regarding the recipient's property, income, and living situation used by the county in determining eligibility.  Such information shall be recorded on a statement of facts form which shall be signed by the recipient or his/her authorized representative under penalty of perjury, and shall be dated.  The county shall verify income.  The county may verify other information if necessary to insure a correct eligibility determination.\n\tCALIFORNIA-DSS-MANUAL-SS\nMANUAL LETTER NO. SS-06-02\tEffective   \n\tPage 61.4\n\tSOCIAL SERVICES STANDARDS\nRegulations\tSERVICE PROGRAM NO. 7:  IHSS\t30-755\n30-755\tPERSONS SERVED BY THE NON-PCSP IHSS PROGRAM (Continued)\t30-755\n.263\tFor persons eligible under .114 above, the information used to decide that the recipient was once determined to be eligible for SSI/SSP, was once determined to be disabled as provided in .114(a)  above, and was discontinued from SSI/SSP because of engaging in substantial gainful activity.\n.264\tThe computation of the amou",
+          "program": "ihss",
+          "source": "IHSS-MPP-30-700-764",
+          "score": 0.5213132494712306,
+          "title": "IHSS MPP Handbook Division 30, Sections 30-700 through 30-764",
+          "source_url": "https://www.cdss.ca.gov/Portals/9/Regs/Man/SS/ssman2.docx",
+          "document_id": "IHSS-MPP-30-700-764",
+          "page": "",
+          "policy": {
+            "applicable_programs": [
+              "ihss"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "state_program_manual",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "zed screening and assessment tool used to evaluate the physical, clinical, psychological and psycho-social functioning and document the life care wishes of residents of long-term care facilities certified to participate in Medicare or Medicaid (Medi-Cal); or \n\tHANDBOOK CONTINUES\t\n\tCALIFORNIA-DSS-MANUAL-SS\nMANUAL LETTER NO. SS 16-02\tEffective   10/1/16\n\tPage 61.1b\nSOCIAL SERVICES STANDARDS\nRegulations\tSERVICE PROGRAM NO. 7:  IHSS\t30-754 (Cont.)\n30-754\tHEALTH CARE CERTIFICATION\t30-754\n\t\t(Continued)\n\tHANDBOOK CONTINUES\n\t\t\t(c)\tAn Individual Program Plan, which is an agreement developed by the planning team for a developmentally disabled individual who receives Regional Center services, that outlines the individual’s goals and objectives, and specifies the services and supports he/she will need to achieve them.  \n\tHANDBOOK ENDS HERE\t\n\t.23\tIn the absence of such alternative documentation, the SOC 873 (10/16) shall be utilized.  \n.3\tThe county shall request the health care certification from the applicant at or before the time of the in-home assessment.  \n\t.31\tIf the health care certification is requested before the in-home assessment, the county shall screen applications received and, for those in which clear evidence of a need for services exists, the county shall not delay conducting the in-home assessment until the completed and signed health care certification is received by the",
+          "program": "ihss",
+          "source": "IHSS-MPP-30-700-764",
+          "score": 0.6864043661576451,
+          "title": "IHSS MPP Handbook Division 30, Sections 30-700 through 30-764",
+          "source_url": "https://www.cdss.ca.gov/Portals/9/Regs/Man/SS/ssman2.docx",
+          "document_id": "IHSS-MPP-30-700-764",
+          "page": "",
+          "policy": {
+            "applicable_programs": [
+              "ihss"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "state_program_manual",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "(1)\tA Physician;  \n\t\t\t\t(2)\tA Physician Assistant;  \n\t\t\t\t(3)\tA Regional Center Clinician or Clinician Supervisor;  \n\t\t\t\t(4)\tAn Occupational therapist;  \n\t\t\t\t(5)\tA Physical Therapist;  \n\t\t\t\t(6)\tA Psychiatrist;  \n\t\t\t\t(7)\tA Psychologist;  \n\t\t\t\t(8)\tAn Optometrist;  \n\t\t\t\t(9)\tAn Ophthalmologist;  \n\t\t\t\t(10)\tA Public Health Nurse;  \n\t\t\t\t(11)\tA Licensed Clinical Social Worker; or  \n\t\t\t\t(12)\tA Marriage and Family Therapist.  \n\tHANDBOOK ENDS HERE\t\n\tCALIFORNIA-DSS-MANUAL-SS\nMANUAL LETTER NO. SS-16-02\tEffective   10/1/16\n\tPage 61.1a\n\tSOCIAL SERVICES STANDARDS\n30-754 (Cont.)\tSERVICE PROGRAM NO. 7:  IHSS\tRegulations\n30-754\tHEALTH CARE CERTIFICATION\t30-754\n\t\t(Continued)\n\t.12\tThe completed and signed health care certification shall not be dated more than 60 days prior to the date it is submitted to the county.  \n\t.13\tThe health care certification shall not be required on subsequent reassessments.  \n.2\tThe health care certification shall be provided on a department-approved form, incorporated in its entirety herein by reference, the California Department of Social Services In-Home Supportive Services Program Health Care Certification (SOC 873 (10/16)).  \n\t.21\tThe county shall accept alternative documentation in place of the SOC 873 (10/16) provided that the alternative documentation meets the following criteria:  \n\t\t.211\tAlternative documentation shall include all of the following elements:",
+          "program": "ihss",
+          "source": "IHSS-MPP-30-700-764",
+          "score": 0.6531968524942792,
+          "title": "IHSS MPP Handbook Division 30, Sections 30-700 through 30-764",
+          "source_url": "https://www.cdss.ca.gov/Portals/9/Regs/Man/SS/ssman2.docx",
+          "document_id": "IHSS-MPP-30-700-764",
+          "page": "",
+          "policy": {
+            "applicable_programs": [
+              "ihss"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "state_program_manual",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "to improve the quality of the IHSS program at the local level.\nNOTE: Authority Cited:  Sections 10553 and 10554, Welfare and Institutions Code. Reference: Section 12305.71, Welfare and Institutions Code.\n\tCALIFORNIA-DSS-MANUAL-SS\nMANUAL LETTER NO. SS-06-02\tEffective   \n\tPage 61.1\nThis page is intentionally left blank.SOCIAL SERVICES STANDARDS\nRegulations\tSERVICE PROGRAM NO. 7:  IHSS\t30-754 (Cont.)\n30-754\tHEALTH CARE CERTIFICATION\t30-754\n.1\tAs a condition of receiving services, each applicant shall provide a health care certification.  \n\t.11\tThe health care certification shall:  \n\t\t.111\tIndicate that the applicant is unable to independently perform one or more activities of daily living;  \n\t\t.112\tIndicate that without services to assist the applicant with activities of daily living, the applicant is at risk of placement in out-of-home care;  \n\t\t.113\tProvide a description of any condition or functional limitation that has resulted in, or contributed to, the applicant’s need for services; and  \n\t\t.114\tBe signed by a LHCP-HCC, as defined in Section 30-701(l)(2).\n\tHANDBOOK BEGINS HERE\n\t\t\t(a)\tIndividuals who are considered to be LHCP-HCCs include, but are not limited to, the following:\n\t\t\t\t(1)\tA Physician;  \n\t\t\t\t(2)\tA Physician Assistant;  \n\t\t\t\t(3)\tA Regional Center Clinician or Clinician Supervisor;  \n\t\t\t\t(4)\tAn Occupational therapist;  \n\t\t\t\t(5)\tA Physical Therapist;  \n\t\t\t\t(6)\tA Psy",
+          "program": "ihss",
+          "source": "IHSS-MPP-30-700-764",
+          "score": 0.645870796423772,
+          "title": "IHSS MPP Handbook Division 30, Sections 30-700 through 30-764",
+          "source_url": "https://www.cdss.ca.gov/Portals/9/Regs/Man/SS/ssman2.docx",
+          "document_id": "IHSS-MPP-30-700-764",
+          "page": "",
+          "policy": {
+            "applicable_programs": [
+              "ihss"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "state_program_manual",
+            "version": "",
+            "date_status": "unverified"
+          }
+        }
+      ]
+    },
+    {
+      "program": "medical",
+      "fields": [
+        "household.members",
+        "recipient.assets_savings_investments",
+        "recipient.retirement_regular_payments"
+      ],
+      "queries": [
+        "Medi-Cal gross income verification pay stubs benefit letters",
+        "asset verification bank accounts retirement payments ownership"
+      ],
+      "answer": {
+        "conclusion": "Provide self-report first; upload one high-value payer/asset document next.",
+        "findings": [
+          {
+            "finding": "Household members: self-report sufficient for preliminary screening.",
+            "citations": [
+              {
+                "document_id": "MEPM-ARTICLE-8",
+                "page": "42"
+              }
+            ]
+          },
+          {
+            "finding": "Savings/investments: bank passbook or account statement best to rebut ownership presumption.",
+            "citations": [
+              {
+                "document_id": "MEPM-ARTICLE-8",
+                "page": "42"
+              }
+            ]
+          },
+          {
+            "finding": "Retirement/regular payments: award letter or annuity paperwork is highest-value evidence.",
+            "citations": [
+              {
+                "document_id": "MEPM-ARTICLE-8",
+                "page": "42"
+              },
+              {
+                "document_id": "MEPM-ARTICLE-9",
+                "page": "141"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Include self-reported household.members in first release",
+          "Request one bank statement or passbook page for assets",
+          "Request Social Security/award letter or annuity schedule"
+        ],
+        "limitations": [
+          "Unresolved whether insurance payment summaries alone fully verify property exemption",
+          "County-specific acceptable-verification list not in provided passages"
+        ]
+      },
+      "words": 76,
+      "retrieved_passages": 8,
+      "cited_evidence": [
+        {
+          "text": "ocument \nto govern use and access to the funds. Since all three members of the MFBU have access \nto the bank account, the county will presume equal ownership of the funds and divide if \nequally among the three. The presumption of equal ownership may be rebutted. \nExample 6: An unmamed couple is listed as joint owners on a savings account with the \nunmamed man's aged mother. - The couple and their mutual children are applying for \nMedi-Cal. The county has determined that the unmamed couple has unrestricted access to \nthe account; the entire account is presumed available to them. This presumption may be \nrebutted. The unmarried man and woman are each presumed to own a half of the funds in \nthe account. The mutual child wilf receive an allocation of the funds. \n9. INCOME DETERMINATION \nA General rules: \nThe county will usually follow the 'name on the checkn rule in determining ownership \nof income. However, certain types of income may be issued in the name of a payee \non behalf of another family member. Therefore, the county will need to verify \nownership of income as well as the gross amount Many agencies (e.g., Social \nSecunty Administration) will issue benefits for more than one person under one \nname. A wife, widow, or ex-spouse may receive a benefit check for herself andior \non behalf of her children. Mout the award letter (or other equivalent verification), \nthe county will",
+          "program": "medical",
+          "source": "MEPM-ARTICLE-8",
+          "score": 0.46093109246313846,
+          "title": "MEPM Article 8 — Responsible Relatives and Unit Determination",
+          "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article8-RR-UnitDeterminations.pdf",
+          "document_id": "MEPM-ARTICLE-8",
+          "page": "42",
+          "policy": {
+            "applicable_programs": [
+              "medical"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "agency_eligibility_manual",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "Security Adminin, for that individual or spouse. \nWhen the individual or spouse takes steps to restructure \nthe annuity the batance of the annuity shall be considered \nunavaiiable until payment@) are received. \nd If steps are not taken there is a transfer of ~rooerhl for iess \nthan fair market vatue that may be a disqualifying transfer. \n(See \"Note\" below.) \nAfter payments to the annuitant begin, if the payments are later \ndesignated to any other individual (other than for the sole benefit of \nthe spouse), they shaIl be considered a transfer of income that may \nresult in a disqualifying transfer in the future. (See \"Note\" below.) \nSECTION NO.: 50489 et seq. MANUAL LRTER NO.: 179 DATE: PAGE: 95-18 \n5-15-97\n\n\nMEDICAL ELIGIBILITY PROCEDURES MANUAL \nSee Transfer of Asset guidelines to determine whether or not a period of ineligibility for \nnursing facility level of care should be calculated. Do not treat transfers of income until \nguidelines have been issued to do so. \nNote: Whenever an annuity has not been properly annubed, counties &&I advise the I \nindividual that they attempt to have the annuty annuitized in accordance with these \nprocedures. When it is necessary to advii an applicant beneficiary that they must annuitke \ntheir annuity in accordance with these procedum, provide the applicantlbeneficiary with the \nannuitant's Me expectancy by entering the Secretary's ta",
+          "program": "medical",
+          "source": "MEPM-ARTICLE-9",
+          "score": 0.4429390227824408,
+          "title": "MEPM Article 9 — Property",
+          "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article9-Property.pdf",
+          "document_id": "MEPM-ARTICLE-9",
+          "page": "141",
+          "policy": {
+            "applicable_programs": [
+              "medical"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "agency_eligibility_manual",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "he sole owner of a second car. However, the car registration lists only the father's \nname. When asked about the discrepancy, the father states that his son paid for the car with \nhis own money, but for insurance purposes, the car is registered in the father's name only. \nThey present a bill of sale whicf, shows that the son purchased the car and the bank \npassbook shows the withdrawal from the son's savings account. The verification clearfy \nestablishes that the son is the actual owner. It is not necessary to transfer legal title to the \nactual owner when the individuals are in the same MFBU. \nEvample 5: The MFBU indudes a father and his teenage son who state on the 'MC 210 that \nthey co-own a second car which the regisbation dip confirms. The county will presum? equal \nownership of the car fie., they each own 50 percent). The family may rebut the presumption \nof equal ownership to establish the actual ownership interest \n?1.2 \nw -- \nSECTION NO.: 50373 MANUAL LETTER NO.: DATE: ilAr191993 8F-9\n\n\nMEDICAL ELIGIBILIlY PROCEDURES MANUAL \nH. Joint Bank Accounts \nSection 50453(a)(2) states that accounts held with persons who are not family members are \nconsidered available in their entirety if the applicant or beneficiary has unrestricted access \n. to the funds unless evidence is submitted which clearly establishes ownership of the funds. \nTherefore, when there is a joint ac",
+          "program": "medical",
+          "source": "MEPM-ARTICLE-8",
+          "score": 0.43930563638436126,
+          "title": "MEPM Article 8 — Responsible Relatives and Unit Determination",
+          "source_url": "https://www.dhcs.ca.gov/wp-content/uploads/2025/10/Article8-RR-UnitDeterminations.pdf",
+          "document_id": "MEPM-ARTICLE-8",
+          "page": "42",
+          "policy": {
+            "applicable_programs": [
+              "medical"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "agency_eligibility_manual",
+            "version": "",
+            "date_status": "unverified"
+          }
+        }
+      ]
+    },
+    {
+      "program": "pfl",
+      "fields": [
+        "caregiver.sdi_deductions",
+        "caregiver.pfl_base_period_earnings",
+        "caregiver.pfl_used_last_12_months",
+        "caregiver.pfl_weeks_used"
+      ],
+      "queries": [
+        "CASDI paystub base period wages paid family leave",
+        "PFL notice computation benefit payments claim history"
+      ],
+      "answer": {
+        "conclusion": "Collect paystubs and caregiver self-report first; defer legal/1099 verification.",
+        "findings": [
+          {
+            "finding": "CASDI/SDI withholding appears on paystubs and funds PFL.",
+            "citations": [
+              {
+                "document_id": "EDD-DE2511",
+                "page": "1"
+              }
+            ]
+          },
+          {
+            "finding": "PFL provides up to eight weeks and replaces ~70–90% weekly pay.",
+            "citations": [
+              {
+                "document_id": "EDD-DE2511",
+                "page": "1"
+              }
+            ]
+          },
+          {
+            "finding": "Claim rules and employer “INTEGRATE” guidance affect reported wage/payment status.",
+            "citations": [
+              {
+                "document_id": "EDD-DE2475",
+                "page": "2"
+              },
+              {
+                "document_id": "EDD-DE2475",
+                "page": "1"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Include paystub showing CASDI withholding (caregiver-held).",
+          "Collect paystubs/wage records covering base-period earnings (caregiver-held).",
+          "Use caregiver self-report for prior PFL use/weeks for initial screening."
+        ],
+        "limitations": [
+          "Documentation standard for proving prior PFL weeks is unresolved (no explicit guidance).",
+          "Employer benefit-offer versus actual PFL use distinction not specified in sources."
+        ]
+      },
+      "words": 84,
+      "retrieved_passages": 6,
+      "cited_evidence": [
+        {
+          "text": "For more information, visit  \nPaid Family Leave  \n(edd.ca.gov/PaidFamilyLeave).\nThe EDD is an equal opportunity employer/program. Auxiliary aids and services \nare available upon request to individuals with disabilities. Requests for services, \naids, and/or alternate formats need to be made by calling 1-866-490-8879 \n(voice). TTY users, please call the California Relay Service at 711.\nPaid Family Leave \nHelping \nCalifornians  \nbe present for \nthe moments  \nthat matter.\nAbout Paid Family Leave\nPaid Family Leave program was created for the \nmoments that matter. Benefits are available to care \nfor a seriously ill family member, to bond with a new \nchild, or participate in a qualifying military event.\nFacts About  \nPaid Family Leave\n• Provides up to eight weeks of partial-wage-\nreplacement benefits. Leave doesn’t have to be\ntaken all at once.\n• Provides approximately 70 to 90 percent of your\nweekly salary.\n• Funded through your State Disabilit y Insurance\ntax withholding, noted as “CASDI” on paystubs,\nor a qualifying voluntary plan paid into in the past\n5 to 18 months.\n• To bond with a new child, leave can be taken\nanytime within the first 12 months of a child\nentering your family.\n• Citizenship and immigration status do not\naffect eligibility.\nWhat if My Claim Is Denied?\nIf your claim is denied, you have the right to:\n• Know the reason for denial.\n• Appeal decisions about",
+          "program": "pfl",
+          "source": "EDD-DE2511",
+          "score": 0.5735027639622685,
+          "title": "Facts About Paid Family Leave",
+          "source_url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2511.pdf",
+          "document_id": "EDD-DE2511",
+          "page": "1",
+          "policy": {
+            "applicable_programs": [
+              "pfl"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "state_consumer_guidance",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "Paid Family Leave (PFL) Benefits – New Mother,\n(DE 2501FP), question 6 if you continue to work during your family care leave.\n• Attach a separate letter if you will be working part-time or taking leave on an\nintermittent basis. Be sure to include your Social Security number, name, address,\nphone number, regular working hours, rate of pay, and the amount of time you\nplan to be off work each week.\nWages from your \nEmployer\nIf your employer continues to pay you wages during your claim.\nIf your employer pays you the difference between PFL benefits and full pay, write \n“INTEGRATE” on the Claim for Paid Family Leave (PFL) Benefits (DE 2501F), question \nA22 or on the Claim for Paid Family Leave (PFL) Benefits – New Mother  \n(DE 2501FP), question 6.\nYour Responsibilities Submit your claim and any other required forms completely, accurately, and in a \ntimely manner.\n• Use black ink only.\n• Do not separate the pages of the form, and submit all parts of the claim form at\none time.\n• Submit the claim form when you begin your family leave claim. The EDD is\nunable to process claims with future beginning dates.\n• If submitting a claim form late, you must include a written explanation of the\nreason(s) for the lateness to avoid a disqualification.\n• Mail your claim form in the pre-addressed envelope. If you do not have\nthe pre addressed envelope provided with the claim, send your claim and\ncorr",
+          "program": "pfl",
+          "source": "EDD-DE2475",
+          "score": 0.5445696571786383,
+          "title": "Guide for Completing a Paid Family Leave Claim",
+          "source_url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2475.pdf",
+          "document_id": "EDD-DE2475",
+          "page": "2",
+          "policy": {
+            "applicable_programs": [
+              "pfl"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "state_claim_guidance",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "CU\nDE 2475 Rev. 10 (12-20) Page 1 of 2\nGUIDE FOR COMPLETING A CLAIM FORM FOR \nPAID FAMILY LEAVE (PFL) BENEFITS\nState Disability Insurance (SDI) offers secure and convenient online options for filing Paid Family Leave (PFL) claims. \nFor faster processing, submit a claim form and documentation on SDI Online (edd.ca.gov/SDI_Online).\nTo avoid delays when filing a claim using the paper application, please follow the general guidelines below. Allow \nsufficient time for claim processing (generally two weeks). For more information, read the yellow instruction and \ninformation sheet provided with the Claim for Paid Family Leave (PFL) Benefits (DE 2501F) contact the PFL office at \n1-877-238-4373, or visit State Disability Insurance (edd.ca.gov/disability).\nClaim Type PFL provides benefits to eligible workers who need to take time off work to care for a \nseriously ill family member, to bond with a new child, or to participate in a qualifying \nevent as a result of a family member’s military deployment to a foreign country. Do not  \nfile for more than one claim type on the same claim form or for the same period of time.\nBonding with a New \nBaby after a Disability \nInsurance (DI) \nPregnancy-Related \nClaim\nFor new mothers who received pregnancy-related DI benefits prior to filing for PFL \nbenefits.\n• The Claim for Paid Family Leave (PFL) Benefits – New Mother (DE 2501FP) will\nautomat",
+          "program": "pfl",
+          "source": "EDD-DE2475",
+          "score": 0.5662417536116555,
+          "title": "Guide for Completing a Paid Family Leave Claim",
+          "source_url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2475.pdf",
+          "document_id": "EDD-DE2475",
+          "page": "1",
+          "policy": {
+            "applicable_programs": [
+              "pfl"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "state_claim_guidance",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "n(s) for the lateness to avoid a disqualification.\n• Mail your claim form in the pre-addressed envelope. If you do not have\nthe pre addressed envelope provided with the claim, send your claim and\ncorrespondence to: EDD-Paid Family Leave, PO Box 989315, West Sacramento,\nCA 95798-9315.\nPFL Toll-Free Numbers English 1-877-238-4373\nSpanish 1-877-379-3819\nCantonese 1-866-692-5595\nVietnamese 1-866-692-5596\nArmenian 1-866-627-1567\nPunjabi 1-866-627-1568\nTagalog 1-866-627-1569",
+          "program": "pfl",
+          "source": "EDD-DE2475",
+          "score": 0.5528401699788086,
+          "title": "Guide for Completing a Paid Family Leave Claim",
+          "source_url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2475.pdf",
+          "document_id": "EDD-DE2475",
+          "page": "2",
+          "policy": {
+            "applicable_programs": [
+              "pfl"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "state_claim_guidance",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "ancy-Related \nClaim\nFor new mothers who received pregnancy-related DI benefits prior to filing for PFL \nbenefits.\n• The Claim for Paid Family Leave (PFL) Benefits – New Mother (DE 2501FP) will\nautomatically be mailed to you in a separate envelope at the end of your DI claim\nafter your final payment is issued.\n• When you have recovered from delivering your baby, submit your Claim for Paid\nFamily Leave (PFL) Benefits – New Mother (DE 2501FP).\n• Complete all sections of the Claim for Paid Family Leave (PFL) Benefits – New\nMother (DE 2501FP), and mail no later than 41 days from the date you wish to begin\nyour bonding claim or you may submit it using SDI Online.\n• If you do not receive this form, call DI at 1-800-480-3287 or PFL at 1-877-238-4373.\nBonding with a \nNew Child\nFor new mothers without a prior pregnancy-related disability claim, new fathers, \nregistered domestic partners, or foster care or adoptive parents.\n• Complete and sign Part A on page 1 and Part B on page 3 of the Claim for Paid\nFamily Leave (PFL) Benefits (DE 2501F), and mail no later than 41 days from the date\nyou wish to begin your bonding claim.\n• Include Proof of Relationship documentation with your bonding claim.\n º Birth verification must clearly show the child’s name, date of birth, gender, and\nthe name of the parent claiming benefits.\n º New placement of foster care or adoption documentation must verify th",
+          "program": "pfl",
+          "source": "EDD-DE2475",
+          "score": 0.5388553539325053,
+          "title": "Guide for Completing a Paid Family Leave Claim",
+          "source_url": "https://edd.ca.gov/siteassets/files/pdf_pub_ctr/de2475.pdf",
+          "document_id": "EDD-DE2475",
+          "page": "1",
+          "policy": {
+            "applicable_programs": [
+              "pfl"
+            ],
+            "jurisdictions": [
+              "CA"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "state_claim_guidance",
+            "version": "",
+            "date_status": "unverified"
+          }
+        }
+      ]
+    },
+    {
+      "program": "va",
+      "fields": [
+        "recipient.va_rating",
+        "recipient.va_pension_status",
+        "recipient.va_health_enrolled",
+        "recipient.va_service_start"
+      ],
+      "queries": [
+        "VA benefits summary service verification disability rating letter",
+        "DD214 service dates pension caregiver health enrollment"
+      ],
+      "answer": {
+        "conclusion": "Collect VA award/entitlement documents first; defer service dates and enrollment until verified.",
+        "findings": [
+          {
+            "finding": "Disability rating is a 10%–100% graduated scale.",
+            "citations": [
+              {
+                "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+                "page": "35"
+              }
+            ]
+          },
+          {
+            "finding": "Pension eligibility requires service/time and discharge criteria; aid/attendance needs medical report.",
+            "citations": [
+              {
+                "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+                "page": "81"
+              },
+              {
+                "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+                "page": "82"
+              }
+            ]
+          },
+          {
+            "finding": "VA health enrollment specifics not supplied here (link only).",
+            "citations": [
+              {
+                "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+                "page": "4"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Request recipient VA award/entitlement letters first",
+          "Request physician report only when aid/attendance claimed",
+          "Lookup VA health-enrollment rules and service-date proof"
+        ],
+        "limitations": [
+          "No passage here defines 'service start' or prescribes specific enrollment records",
+          "Guidance is federal; California-specific implementation unresolved"
+        ]
+      },
+      "words": 76,
+      "retrieved_passages": 8,
+      "cited_evidence": [
+        {
+          "text": "e \nmonetary benefit, paid to Veterans with disabilities that are the \nresult of a disease or injury incurred or aggravated during active \nmilitary service, to include physical and mental health conditions \nresulting from MST. The benefits amount is graduated according \nto the degree of the Veteran’s disability on a scale from 10% to \n100% (in increments of 10%). Compensation may also be paid for \ndisabilities that are considered related or secondary to disabilities \nincurred in service, even though they may arise after service.\nTo be eligible for compensation, a Veteran must have been \nseparated or discharged under conditions other than \ndishonorable. For more information on eligibility for VA disability \nbenefits, visit www.va.gov/disability/eligibility.\nMonthly disability compensation rates vary based on the degree \nof disability and the number of eligible dependents. Veterans \nwith disability ratings of at least 30% are eligible for additional \nallowances for dependents, including spouses, minor children, \nchildren between the ages of 18 and 23 who are attending school, \nchildren who are permanently incapable of self-support because \nof a disability arising before age 18, and dependent parents.\nThe additional amount depends on the disability rating and \nthe number of dependents. For detailed compensation rate \ninformation visit www.va.gov/disability/compensation-rates/\nveter",
+          "program": "va",
+          "source": "VA-FEDERAL-BENEFITS-GUIDE",
+          "score": 0.532546365061203,
+          "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+          "source_url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+          "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+          "page": "35",
+          "policy": {
+            "applicable_programs": [
+              "va"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "annual_federal_benefits_guide",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "g or Skilled Nursing Facility). For \nadditional information on pension benefits please visit www.\nva.gov/pension/survivors-pension. \nEligibility for Survivors Pension: To be eligible for Survivor’s \nPension, the deceased Veteran must have met the following \nrequirements:\n\ty If the Veteran served on or before September 7, 1980, the \nVeteran must have served at least 90 days of active military \nservice, with at least one day during a wartime period\n\ty If the Veteran entered active duty after September 7, 1980, the\n\n\nFamily Members/Survivors | 73\nVeteran generally must have served at least 24 months or the \nfull tour of duty with at least one day during a wartime period\n\ty Discharged from military service under other than \ndishonorable conditions\nTo qualify as a surviving child of a deceased Veteran, the child must \nmeet the following requirements: under age 18 (or under age 23 if \nattending a VA-approved school) or permanently incapable of self-\nsupport due to a disability diagnosed before age 18. \nHow to Apply for Survivors Pension: To apply for Survivors \nPension, download and complete VA Form 21P 534EZ, “Application \nfor DIC, Death Pension, and/or Accrued Benefits. ” You can mail your \napplication to the address below:\nPension Intake Center\nP .O. Box 5365\nJanesville, WI 53547\nSurvivors Aid and Attendance and Housebound Benefits: \nSurvivors who are eligible for pension",
+          "program": "va",
+          "source": "VA-FEDERAL-BENEFITS-GUIDE",
+          "score": 0.5209536761318021,
+          "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+          "source_url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+          "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+          "page": "81",
+          "policy": {
+            "applicable_programs": [
+              "va"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "annual_federal_benefits_guide",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "can mail your \napplication to the address below:\nPension Intake Center\nP .O. Box 5365\nJanesville, WI 53547\nSurvivors Aid and Attendance and Housebound Benefits: \nSurvivors who are eligible for pension and require the aid and \nattendance of another person, or are housebound, may be \neligible for a higher maximum annual pension rate. These benefits \nare paid in addition to monthly pension, and they are not paid \nwithout eligibility to survivor’s pension. Since aid and attendance \nand housebound allowances increase the pension amount, \npeople who are not eligible for a basic pension due to excessive \nincome may be eligible for pension at these increased rates. A \nsurviving spouse may not receive aid and attendance benefits \nand housebound benefits at the same time. For additional \ninformation on aid and attendance and housebound benefits \nincluding how to apply please visit www.va.gov/pension/aid-\nattendance-housebound.\nTo apply for aid and attendance or housebound benefits, submit a \nVA Form 21-2680, Examination for Housebound Status or Permanent \nNeed for Regular Aid and Attendance to the address shown below:\nU.S. Department of Veterans Affairs \nPension Intake Center\nP .O. Box 5365\nJanesville, WI 53547\n\n\n74 | Family Members/Survivors\nPlease include copies of any evidence, preferably a report from an \nattending physician or a nursing home, validating the need for aid \nan",
+          "program": "va",
+          "source": "VA-FEDERAL-BENEFITS-GUIDE",
+          "score": 0.507875737899798,
+          "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+          "source_url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+          "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+          "page": "82",
+          "policy": {
+            "applicable_programs": [
+              "va"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "annual_federal_benefits_guide",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": ".....................................www.va.gov/vadodhealth/frcp.asp\nGeriatrics and Extended Care ........................................................................................www.va.gov/geriatrics\nHealth Care Eligibility ................................................................................................www.va.gov/health-care\nHomeless Veterans .......................................................................................................www.va.gov/homeless\nHome Loan Guaranty ..................................................................................www.benefits.va.gov/homeloans\nLife Insurance .................................................................................................www.benefits.va.gov/insurance\nMemorial Certificate Program ...............................................................................www.cem.va.gov/pmc.asp\nMental Health ........................................................................................................www.mentalhealth.va.gov\nMy HealtheVet ..............................................................................................................www.myhealth.va.gov\nNational Resource Directory ........................................................................................................www.nrd.gov\nPACT Act .................................................................",
+          "program": "va",
+          "source": "VA-FEDERAL-BENEFITS-GUIDE",
+          "score": 0.5058697901797705,
+          "title": "Federal Benefits Guide for Veterans, Dependents, Survivors, and Caregivers",
+          "source_url": "https://department.va.gov/wp-content/uploads/2024/12/2025-Federal-Benefits-for-Veterans-Dependents-and-Survivors.pdf",
+          "document_id": "VA-FEDERAL-BENEFITS-GUIDE",
+          "page": "4",
+          "policy": {
+            "applicable_programs": [
+              "va"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "annual_federal_benefits_guide",
+            "version": "",
+            "date_status": "unverified"
+          }
+        }
+      ]
+    },
+    {
+      "program": "medicare",
+      "fields": [
+        "recipient.medicare_parts",
+        "recipient.medicare_part_a_start",
+        "recipient.medicare_part_b_start",
+        "recipient.ssdi_start"
+      ],
+      "queries": [
+        "Medicare card Part A Part B effective dates",
+        "Social Security disability award letter entitlement start"
+      ],
+      "answer": {
+        "conclusion": "Collect Medicare card and SSA award letter for intake; defer other documents.",
+        "findings": [
+          {
+            "finding": "Medicare card shows Part A/Part B effective dates — highest-value record.",
+            "citations": [
+              {
+                "document_id": "CMS-MSP-CHAPTER-1",
+                "page": "14"
+              }
+            ]
+          },
+          {
+            "finding": "SSA SSDI award can show retroactive SSDI and Part A entitlement date.",
+            "citations": [
+              {
+                "document_id": "CMS-MSP-CHAPTER-1",
+                "page": "45"
+              }
+            ]
+          },
+          {
+            "finding": "Part B enrollments limited to enrollment periods; self-report OK for screening.",
+            "citations": [
+              {
+                "document_id": "MEDICARE-AND-YOU",
+                "page": "17"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Include photo of Medicare card (front) in first release",
+          "Request SSA award letter copy only if SSDI reported",
+          "Defer requests for buy-in or retroactive notices"
+        ],
+        "limitations": [
+          "No supplied passage gives precise CA-specific implementation.",
+          "Unresolved: whether a self-attested effective date suffices for state buy-in verification."
+        ]
+      },
+      "words": 89,
+      "retrieved_passages": 8,
+      "cited_evidence": [
+        {
+          "text": "card and \nreturning the card before the Part B effective date. \nPremium-free Part A: Individuals can file for \nMedicare premium-free Part A at SSA if they are: \n• Age 65 and over and have not yet filed for \nSocial Security or RRB benefits;  \n• An individual who qualifies for Medicare on \nthe basis of ESRD; or \n• A government employee age 65 and over who \nhas paid the Medicare payroll tax for the \nrequired number of quarters. \nIndividuals who file for Part A are enrolled in Part B \nunless they decline it.  \nPremium Part A: Individuals who qualify for \npremium Part A (i.e. those who do not qualify for  \npremium-free Part A) must apply for Medicare at \nSSA. They can enroll in Part B only or premium Part \nA and Part B.  \nNOTE: An individual can enroll in Medicare Part B \nwithout enrolling in premium Part A. Conversely, an \nindividual cannot enroll in premium Part A unless the \nindividual is receiving Part B benefits or files an \napplication to enroll.  \nDelayed Premium Part A and Part B: Individuals \nwho did not enroll in premium Part A or Part B during \ntheir IEP can enroll during the GEP or during an \napplicable SEP.  \nPart B-ID: Individuals apply for Part B-ID through \nSSA. Medicare enrollment periods do not apply to \nPart B-ID. \n \n \n \n15 An individual can sign up for Medicare Part A and Part B through SSA’s toll-free number 1-800-772-1213, TTY \n1-800-325-0778, by making an app",
+          "program": "medicare",
+          "source": "CMS-MSP-CHAPTER-1",
+          "score": 0.6475579177229476,
+          "title": "Medicare Savings Program Eligibility and Enrollment — Chapter 1",
+          "source_url": "https://www.cms.gov/files/document/chapter-1-program-overview-and-policy.pdf",
+          "document_id": "CMS-MSP-CHAPTER-1",
+          "page": "14",
+          "policy": {
+            "applicable_programs": [
+              "medicare"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "federal_program_manual",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "d in section \n1902(a)(10)(A)(ii)(X) of the Act (relating to individuals who have incomes up to the FPL and are \neither 65 years old or older or with disabilities, which is considered an ‘‘other Medicaid \neligibility group’’) retroactive to October 1 of the previous calendar year;  \n• Is determined in January to meet all eligibility requirements for the QMB eligibility group; and \n • The individual’s state has elected to include all Medicaid beneficiaries eligible for Medicare in \nits Part B buy-in agreement, then, in this example, Part B buy-in starts on November 1 of the \nprevious calendar year (i.e., the buy-in start date for ‘‘other Medicaid eligibility groups,’’ which \nis the second month the individual is eligible for the Medicaid eligibility group and Medicare). \nPart A buy-in will begin February 1 of the current year.44  \nNOTE: In some instances, SSA determines Medicaid beneficiaries eligible for premium-free \nPart A for a retroactive period.45 The individual is also retroactively eligible to enroll in Part B \nover this period. If a state learns that SSA established retroactive Medicare Part A entitlement for \na member of a buy-in coverage group, the state must review the individual’s eligibility for Part B \nbuy-in over the retroactive period.  \n \nBeginning January 1, 2024, state liability for retroactive Medicare Part B premiums for full-\nbenefit Medicaid beneficiaries",
+          "program": "medicare",
+          "source": "CMS-MSP-CHAPTER-1",
+          "score": 0.6338024812597703,
+          "title": "Medicare Savings Program Eligibility and Enrollment — Chapter 1",
+          "source_url": "https://www.cms.gov/files/document/chapter-1-program-overview-and-policy.pdf",
+          "document_id": "CMS-MSP-CHAPTER-1",
+          "page": "45",
+          "policy": {
+            "applicable_programs": [
+              "medicare"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "federal_program_manual",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": ") but you qualify for \nit, you can sign up for it any time after you’re first eligible for Medicare (page 22 ). \nIn this example, your Part A coverage will go back (retroactively) 6 months from \nwhen you signed up for Part A or applied for Social Security or RRB benefits, but \nno earlier than the first month you’re eligible for Medicare. Depending on how you \nbecome eligible for Part A, the retroactive period may be different.\nYou can only sign up for Part B during the enrollment periods on pages 17–18 .\n\n\nSection 1: Signing up for Medicare\n17\nImportant!  Remember, in most cases, if you don’t sign up for Part A (if \nyou have to buy it) and Part B when you’re first eligible, your enrollment \nmay be delayed and you may have to pay a late enrollment penalty that’s \nadded to your monthly premium (pages 22–23).\nWhat are the Part A and Part B enrollment periods?\nYou can only sign up for Part B (and/or Part A if you have to buy it) during \nthese enrollment periods.\nInitial Enrollment Period \nGenerally, you can first sign up for Part A and/or Part B during the 7-month \nperiod that begins 3 months before the month you turn 65 and ends 3 months \nafter the month you turn 65. If your birthday is on the first of the month, \nyour 7-month period starts 4 months before the month you turn 65 and ends \n2 months after the month you turn 65. \nExample: If you turn 65 on June 2, your 7-mont",
+          "program": "medicare",
+          "source": "MEDICARE-AND-YOU",
+          "score": 0.6225950154221731,
+          "title": "Medicare & You",
+          "source_url": "https://www.medicare.gov/publications/10050-medicare-and-you.pdf",
+          "document_id": "MEDICARE-AND-YOU",
+          "page": "17",
+          "policy": {
+            "applicable_programs": [
+              "medicare"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "current_year_consumer_handbook",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "dividual’s eligibility for Part B \nbuy-in over the retroactive period.  \n \nBeginning January 1, 2024, state liability for retroactive Medicare Part B premiums for full-\nbenefit Medicaid beneficiaries under a buy-in agreement is limited to a period no greater than 36 \n \n44 While the individual’s QMB eligibility under the state plan will not become effective until February of the \nparticular calendar year, Part B buy-in starts on November 1 of the previous calendar year, because the individual \nwas eligible in a Medicaid eligibility group that was included in the state’s buy -in coverage group effective in \nOctober of the previous calendar year (that is, the buy-in start date for ‘‘other Medicaid eligibility groups,’’ which is \nthe second month the individual is eligible for a buy-in coverage group and Medicare). \n45 This generally occurs when an individual under age 65 who files a claim for disability benefits at SSA receives a \nfavorable Social Security Disability Insurance (SSDI) award multiple years after the initial application, and SSA \ndetermines the individual eligible for SSDI benefits at or up to 12 months prior to the point of application. \nIndividuals entitled to SSDI become entitled to premium-free Medicare Part A after 24 months of entitlement to \nSSDI, but in certain cases, an individual’s start date for SSDI benefits is retroactive more than 24 months. In that \nca",
+          "program": "medicare",
+          "source": "CMS-MSP-CHAPTER-1",
+          "score": 0.621265863697643,
+          "title": "Medicare Savings Program Eligibility and Enrollment — Chapter 1",
+          "source_url": "https://www.cms.gov/files/document/chapter-1-program-overview-and-policy.pdf",
+          "document_id": "CMS-MSP-CHAPTER-1",
+          "page": "45",
+          "policy": {
+            "applicable_programs": [
+              "medicare"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "federal_program_manual",
+            "version": "",
+            "date_status": "unverified"
+          }
+        }
+      ]
+    },
+    {
+      "program": "tax",
+      "fields": [
+        "tax.year",
+        "tax.filing_status",
+        "tax.adjusted_gross_income",
+        "tax.care_reimbursements",
+        "tax.dependent_care_fsa_available"
+      ],
+      "queries": [
+        "W-2 Box 10 dependent care benefits employer provided",
+        "Form 1040 adjusted gross income Form 2441 medical expenses"
+      ],
+      "answer": {
+        "conclusion": "Recommend collecting three high-value caregiver/recipient records.",
+        "findings": [
+          {
+            "finding": "Employer-dependent care benefits appear on Form W‑2 box 10.",
+            "citations": [
+              {
+                "document_id": "IRS-PUB-503",
+                "page": "10"
+              }
+            ]
+          },
+          {
+            "finding": "Claiming credit requires completing Form 2441 and attaching to Form 1040.",
+            "citations": [
+              {
+                "document_id": "IRS-PUB-503",
+                "page": "13"
+              }
+            ]
+          },
+          {
+            "finding": "Plan qualification and exclusion limits (e.g., $5,000; $2,500 MFS) are employer‑/year‑dependent.",
+            "citations": [
+              {
+                "document_id": "IRS-PUB-503",
+                "page": "11"
+              }
+            ]
+          }
+        ],
+        "next_steps": [
+          "Include caregiver-held W‑2 box 10 amount (high value).",
+          "Include self-reported year and whether Form 2441 was filed.",
+          "Defer collecting AGI verification for now."
+        ],
+        "limitations": [
+          "AGI rule/verification not present in supplied passages (unresolved).",
+          "Employer offer vs actual use partly unresolved; employer plan qualification is reported by employer."
+        ]
+      },
+      "words": 82,
+      "retrieved_passages": 7,
+      "cited_evidence": [
+        {
+          "text": "pen-\nses.\nCaution:  Amounts excluded from your income under \nyour employer's dependent care benefits plan can't be \nused to claim a medical expense deduction.\nDependent Care Benefits\nIf you receive dependent care benefits, your dollar limit for \npurposes of the credit may be reduced. See Reduced Dol-\nlar Limit , later. But, even if you can't take the credit, you \nmay be able to take an exclusion or deduction for the de-\npendent care benefits.\nDependent care benefits.  Dependent care benefits in-\nclude:\n1. Amounts your employer paid directly to either you or \nyour care provider for the care of your qualifying per-\nson while you work,\n2. The fair market value of care in a daycare facility pro-\nvided or sponsored by your employer, and\n3. Pre-tax contributions you made under a dependent \ncare flexible spending arrangement.\nY our salary may have been reduced to pay for these bene-\nfits. If you received dependent care benefits as an em-\nployee, they should be shown in box 10 of your Form W-2, \nWage and T ax Statement. See Statement for employee , \nlater. Benefits you received as a partner should be shown \nin box 13 of your Schedule K-1 (Form 1065) with code O.\nEnter the amount of these benefits on Form 2441, Part \nIII, line 12.\nExclusion or deduction.  If your employer provides de-\npendent care benefits under a qualified plan, you may be \nable to exclude these benefits from your inco",
+          "program": "tax",
+          "source": "IRS-PUB-503",
+          "score": 0.6438556403112564,
+          "title": "Publication 503 — Child and Dependent Care Expenses",
+          "source_url": "https://www.irs.gov/pub/irs-pdf/p503.pdf",
+          "document_id": "IRS-PUB-503",
+          "page": "10",
+          "policy": {
+            "applicable_programs": [
+              "tax"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "annual_tax_publication",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "enefits on Form 2441, Part \nIII, line 12.\nExclusion or deduction.  If your employer provides de-\npendent care benefits under a qualified plan, you may be \nable to exclude these benefits from your income. Y our em-\nployer can tell you whether your benefit plan qualifies. T o \nclaim the exclusion, you must complete Part III of Form \n2441.\nIf you are self -employed and receive benefits from a \nqualified dependent care benefit plan, you are treated as \nboth employer and employee. Therefore, you wouldn't get \nan exclusion from wages. Instead, you would get a deduc-\ntion on Schedule C (Form 1040), line 14; Schedule E \n(Form 1040), line 19 or 28; or Schedule F (Form 1040), \nline 15. T o claim the deduction, you must use Form 2441.\nThe amount you can exclude or deduct is limited to the \nsmallest of:\n1. The total amount of dependent care benefits you re-\nceived during the year,\n2. The total amount of qualified expenses you incurred \nduring the year,\n3. Y our earned income,\n4. Y our spouse's earned income, or\n5. The maximum amount allowed under your dependent \ncare plan. For 2025, the maximum amount that can be \nexcluded from an employee's income through a de-\npendent care assistance program is $5,000 ($2,500 if \nmarried filing separately).\n10 Publication 503 (2025)\n\n\nPage 11 of 20  Fileid: … cation-503/2025/a/xml/cycle04/source 13:10 - 18-Nov-2025\nThe type and rule above prints",
+          "program": "tax",
+          "source": "IRS-PUB-503",
+          "score": 0.6290292791244197,
+          "title": "Publication 503 — Child and Dependent Care Expenses",
+          "source_url": "https://www.irs.gov/pub/irs-pdf/p503.pdf",
+          "document_id": "IRS-PUB-503",
+          "page": "11",
+          "policy": {
+            "applicable_programs": [
+              "tax"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "annual_tax_publication",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "..... $3,000\n2) Minus: Dependent care benefits George\nexcludes from income ................... −1,000\n3) Reduced dollar limit on expenses George\ncan use for the credit ................... $2,000\nExample 2.  Randall is married and both he and his \nwife are employed. Each has earned income in excess of \n$6,000. They have two children, Anne and Andy, ages 2 \nand 4, who attend a daycare facility licensed and regula-\nted by the state. Randall's work -related expenses are \n$6,000 for the year.\nRandall's employer has a dependent care assistance \nprogram as part of its cafeteria plan, which allows employ-\nees to make pre -tax contributions to a dependent care \nflexible spending arrangement. Randall has elected to \n12 Publication 503 (2025)\n\n\nPage 13 of 20  Fileid: … cation-503/2025/a/xml/cycle04/source 13:10 - 18-Nov-2025\nThe type and rule above prints on all proofs including departmental reproduction proofs. MUST be removed before printing.\ntake the maximum $5,000 exclusion from his salary to \ncover dependent care expenses through this program.\nAlthough the dollar limit for his work -related expenses \nis $6,000 (two or more qualifying persons), Randall figures \nhis credit on only $1,000 of the $6,000 work -related ex-\npense paid. This is because his dollar limit is reduced as \nshown next.\nRandall's Reduced Dollar Limit\n 1) Maximum allowable expenses for two\nqualifying persons",
+          "program": "tax",
+          "source": "IRS-PUB-503",
+          "score": 0.5769386155780587,
+          "title": "Publication 503 — Child and Dependent Care Expenses",
+          "source_url": "https://www.irs.gov/pub/irs-pdf/p503.pdf",
+          "document_id": "IRS-PUB-503",
+          "page": "13",
+          "policy": {
+            "applicable_programs": [
+              "tax"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "annual_tax_publication",
+            "version": "",
+            "date_status": "unverified"
+          }
+        },
+        {
+          "text": "ete line 2 without including \nany dependent care benefits. They complete line 2 of \nForm 2441, listing both Susan and James, as shown in the \nLine 2 Example. They check the box in column (c) to indi-\ncate that James is disabled. \nAll of Susan's expenses were covered by the $1,000 of \nemployer-provided dependent care benefits. However, \ntheir son James has special needs and they paid $18,500 \nfor his care. Line 3 imposes a $5,000 limit for two or more \nchildren ($6,000 limit minus $1,000 already excluded from \nincome = $5,000) and Roger and Megan continue to com-\nplete the form.\nEven though line 2 indicates one of the Paris children \ndidn't have any dependent care expenses, it doesn't \nchange the fact that they had two qualifying children for \nthe purposes of Form 2441.\nPayments for prior-year expenses. If you had work -re-\nlated expenses in 2024 that you paid in 2025 and you \ndidn't claim a credit on the maximum amount of qualified \nexpenses for 2024, you may be able to increase the \namount of the credit you can take in 2025. T o figure the \ncredit, complete Worksheet A in the Instructions for Form \n2441. Enter the amount of the credit on Form 2441, \nline 9b.\nHow To Claim the Credit\nT o claim the credit, you can file Form 1040, 1040 -SR, or \n1040-NR. Y ou must complete Form 2441 and attach it to \nyour Form 1040, 1040 -SR, or 1040 -NR. Enter the credit \non your Schedule 3 (Form",
+          "program": "tax",
+          "source": "IRS-PUB-503",
+          "score": 0.6381129553554574,
+          "title": "Publication 503 — Child and Dependent Care Expenses",
+          "source_url": "https://www.irs.gov/pub/irs-pdf/p503.pdf",
+          "document_id": "IRS-PUB-503",
+          "page": "13",
+          "policy": {
+            "applicable_programs": [
+              "tax"
+            ],
+            "jurisdictions": [
+              "US"
+            ],
+            "effective_from": null,
+            "effective_to": null,
+            "authority_level": "annual_tax_publication",
+            "version": "",
+            "date_status": "unverified"
+          }
+        }
+      ]
+    }
+  ]
+}
