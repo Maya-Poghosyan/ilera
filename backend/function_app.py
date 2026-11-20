@@ -24,6 +24,7 @@ import azure.durable_functions as df
 import azure.functions as func
 
 # Import the raw generator / async functions — decorators are applied below.
+from app.core.config import require_for
 from durable.activities.eligibility_gate import eligibility_gate
 from durable.activities.specialist import specialist_activity
 from durable.activities.synthesis import synthesis_activity
@@ -31,6 +32,8 @@ from durable.orchestrators.eligibility import eligibility_orchestrator
 from durable.orchestrators.peer_query import peer_query_orchestrator
 
 # DFApp is the v2 programming model app object for Durable Functions.
+require_for("functions")
+
 app = df.DFApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 # ── Register orchestrators ─────────────────────────────────────────────────────

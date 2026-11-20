@@ -7,7 +7,6 @@ from pydantic import BaseModel, Field, SecretStr
 
 from app.accounts.sessions import get_current_user
 from app.accounts.users import User
-from app.core.config import get_settings
 from app.cases.store import get_case_owner
 from app.email_ingestion.providers.microsoft import ProviderError
 from app.email_ingestion import connections, credentials
@@ -16,14 +15,6 @@ from app.email_ingestion.store import list_connections
 from app.email_ingestion.privacy import PrivateEmailRoute
 
 router = APIRouter(prefix="/api/email", tags=["email"], route_class=PrivateEmailRoute)
-
-
-def _require_connections() -> None:
-    s = get_settings()
-    if not (s.email_key_vault_url and s.email_microsoft_tenant_id and s.email_microsoft_client_id
-            and s.email_microsoft_redirect_uri and s.email_microsoft_client_secret_name
-            and s.email_token_encryption_key_name):
-        raise RuntimeError("Microsoft mailbox connection settings are missing")
 
 
 def _owner(case_id: str, user: User) -> None:
@@ -69,7 +60,6 @@ class ConnectRequest(BaseModel):
 @router.post("/microsoft/connect")
 def connect(body: ConnectRequest, response: Response, user: User = Depends(get_current_user)) -> dict:
     response.headers["Cache-Control"] = "no-store"
-    _require_connections()
     _owner(body.case_id, user)
     try:
         return {"authorization_url": connections.begin_connection(user_id=user.id, case_id=body.case_id)}
@@ -88,7 +78,6 @@ class CallbackRequest(BaseModel):
 @router.post("/microsoft/callback", response_model=PublicConnection)
 def callback(body: CallbackRequest, response: Response, user: User = Depends(get_current_user)):
     response.headers["Cache-Control"] = "no-store"
-    _require_connections()
     if not 20 <= len(body.state.get_secret_value()) <= 512:
         raise HTTPException(400, "Connection request is invalid")
     try:

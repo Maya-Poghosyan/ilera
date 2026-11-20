@@ -63,4 +63,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    from app.core.config import require_for
+    require_for("rag-ingest")
     main()

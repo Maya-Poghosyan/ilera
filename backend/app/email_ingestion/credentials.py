@@ -9,7 +9,6 @@ from __future__ import annotations
 import json
 from contextlib import contextmanager
 from typing import Iterator
-from urllib.parse import urlparse
 
 from pydantic import SecretStr
 
@@ -28,9 +27,6 @@ def _vault() -> Iterator:
     from azure.keyvault.secrets import SecretClient
 
     settings = get_settings()
-    url = urlparse(settings.email_key_vault_url)
-    if url.scheme != "https" or not url.hostname or not url.hostname.endswith(".vault.azure.net"):
-        raise CredentialError("Key Vault is not configured")
     credential = managed_identity(settings.email_managed_identity_client_id)
     with private_transport_logs(), credential:
         with SecretClient(vault_url=settings.email_key_vault_url, credential=credential,

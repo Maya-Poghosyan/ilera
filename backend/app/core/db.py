@@ -190,8 +190,6 @@ def _get_pool():
             from psycopg_pool import ConnectionPool
 
             dsn = get_settings().database_url
-            if not dsn:
-                raise RuntimeError("DATABASE_URL is required")
             pool = ConnectionPool(
                 dsn, min_size=1, max_size=4, open=True, timeout=15,
                 # Azure can terminate idle connections or restart the server. Check

@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.core.azure_openai import is_dedicated_endpoint, open_client, structured_completion
+from app.core.azure_openai import open_client, structured_completion
 from app.core.config import get_settings
 from app.email_ingestion.models import EmailMessage
 from app.email_ingestion.privacy import private_transport_logs
@@ -71,17 +71,10 @@ SYSTEM_PROMPT = """Extract only actionable care appointments, benefit deadlines,
  All outputs are suggestions requiring human review, never confirmed calendar events."""
 
 
-def require_extraction_configuration():
-    settings = get_settings()
-    if not (is_dedicated_endpoint(settings.email_openai_endpoint) and settings.email_openai_deployment):
-        raise ExtractionError("email_extraction_unconfigured")
-    return settings
-
-
 class AzureExtractor:
     """One managed-identity client per worker, with no general OpenAI fallback."""
     def __enter__(self):
-        settings = require_extraction_configuration()
+        settings = get_settings()
         import httpcore  # noqa: F401
 
         self._stack = ExitStack()

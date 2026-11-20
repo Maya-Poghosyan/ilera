@@ -444,8 +444,6 @@ _index_lock = threading.Lock()
 def _make_index(*, force: bool) -> PgVectorIndex:
     """Attach to the store the ingest wrote to. `force` (ingest only) rebuilds it in place."""
     dsn = get_settings().database_url
-    if not dsn:
-        raise RuntimeError("DATABASE_URL is required")
     idx = PgVectorIndex(dsn)
     try:
         idx.build() if force else idx.ensure()
@@ -477,8 +475,6 @@ def sync_index() -> tuple[PgVectorIndex, SyncResult]:
     """Bring the index in line with the corpus, re-embedding only what changed."""
     global _index
     dsn = get_settings().database_url
-    if not dsn:
-        raise RuntimeError("DATABASE_URL is required")
     with _index_lock:
         idx = PgVectorIndex(dsn)
         result = idx.sync()

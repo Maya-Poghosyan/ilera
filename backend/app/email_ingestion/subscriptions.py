@@ -9,26 +9,15 @@ import asyncio
 import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse
 
 from app.core import db
-from app.core.config import get_settings
+from app.core.config import get_settings, require_for
 from app.email_ingestion import connections
 from app.email_ingestion.models import MailboxConnection
 from app.email_ingestion.reconciliation import prune_orphan_subscriptions, reconcile
 
 
-def require_configuration() -> None:
-    s = get_settings()
-    url = urlparse(s.email_microsoft_notification_url)
-    if not (s.email_service_bus_namespace and url.scheme == "https" and url.hostname
-            and not url.username and not url.password and not url.query and not url.fragment
-            and url.path == "/api/email/microsoft/notifications"):
-        raise RuntimeError("Email subscription maintenance is not configured")
-
-
 def ensure_subscription(connection_id: str, user_id: str) -> None:
-    require_configuration()
     # Most hourly visits need no credential decryption, vault reads, or Graph calls.
     with db.connection() as conn:
         mailbox = connections._owned_connection(conn, connection_id, user_id)
@@ -71,7 +60,6 @@ def ensure_subscription(connection_id: str, user_id: str) -> None:
 
 
 def maintain_subscriptions() -> dict[str, int]:
-    require_configuration()
     with db.connection() as conn:
         rows = conn.execute(
             "SELECT e.doc FROM email_connections e JOIN cases c ON c.id = e.case_id "
@@ -107,6 +95,7 @@ def maintain_subscriptions() -> dict[str, int]:
 
 
 if __name__ == "__main__":
+    require_for("email-maintenance")
     try:
         result = maintain_subscriptions()
     except Exception:

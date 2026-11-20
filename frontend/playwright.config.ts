@@ -24,7 +24,7 @@ export default defineConfig({
       cwd: "../backend",
       url: `http://127.0.0.1:${API}/healthz`,
       reuseExistingServer: false,
-      env: { DATABASE_URL, OPENAI_API_KEY: "", EMAIL_OPENAI_ENDPOINT: "" },
+      env: { DATABASE_URL },
     },
     {
       command: `npx next dev --port ${WEB} --hostname 127.0.0.1`,

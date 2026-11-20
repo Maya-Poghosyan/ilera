@@ -13,11 +13,11 @@ import uuid
 
 from app.core import db
 from app.core.azure_identity import managed_identity
-from app.core.config import get_settings
+from app.core.config import get_settings, require_for
 from app.calendar.suggestions import SuggestedEvent
 from app.email_ingestion.providers.microsoft import ReauthorizationRequired
 from app.email_ingestion import connections
-from app.email_ingestion.extraction import AzureExtractor, EXTRACTION_VERSION, Extraction, require_extraction_configuration
+from app.email_ingestion.extraction import AzureExtractor, EXTRACTION_VERSION, Extraction
 from app.email_ingestion.models import EmailScanJob, MailboxConnection, ScanResult
 from app.email_ingestion.privacy import private_transport_logs
 
@@ -149,11 +149,6 @@ def settle_message(receiver, message, extractor) -> str:
 
 def run_worker() -> None:
     settings = get_settings()
-    require_extraction_configuration()
-    if not (settings.email_service_bus_namespace and settings.email_key_vault_url
-            and settings.email_microsoft_client_id and settings.email_microsoft_tenant_id
-            and settings.email_microsoft_redirect_uri and 1 <= settings.email_scan_max_deliveries <= 5):
-        raise RuntimeError("email_worker_unconfigured")
     from azure.servicebus import AutoLockRenewer, ServiceBusClient, ServiceBusReceiveMode
 
     stop = threading.Event()
@@ -176,6 +171,7 @@ def run_worker() -> None:
 
 
 if __name__ == "__main__":
+    require_for("email-worker")  # names missing settings; safe to print, unlike scan errors
     try:
         run_worker()
     except Exception:

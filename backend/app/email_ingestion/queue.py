@@ -32,8 +32,6 @@ class ScanPublisher:
 
         if self._sender is None:
             settings = get_settings()
-            if not settings.email_service_bus_namespace:
-                raise RuntimeError("Email queue is unavailable")
             from azure.servicebus import ServiceBusClient
 
             self._stack.enter_context(private_transport_logs())

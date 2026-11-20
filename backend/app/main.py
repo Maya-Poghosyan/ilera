@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,7 +8,7 @@ from app.accounts import routes as accounts
 from app.applications import routes as applications
 from app.calendar import routes as calendar
 from app.cases import routes as cases
-from app.core.config import get_settings
+from app.core.config import get_settings, require_for
 from app.eligibility import routes as eligibility
 from app.email_ingestion import notifications as email_notifications
 from app.email_ingestion import routes as email
@@ -20,10 +22,16 @@ from app.reminders import routes as reminders
 
 settings = get_settings()
 
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    require_for("api")  # refuse to serve with missing settings rather than fail on a request
+    yield
+
 # Scheduled work (e.g. the unclaimed-case purge) runs as Container Apps Jobs,
 # not in this process, so scaling out replicas never multiplies it.
 # No /docs, /redoc or /openapi.json: the API is public and scanners probe it constantly.
-app = FastAPI(title=settings.app_name, docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(title=settings.app_name, docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 configure_email_access_logging()
 
 app.add_middleware(

@@ -19,8 +19,20 @@ from openai import OpenAI
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 api_port, model_port = int(sys.argv[1]), int(sys.argv[2])
-os.environ.update(DOCUMENT_OPENAI_ENDPOINT="https://e2e.openai.azure.com", DOCUMENT_OPENAI_DEPLOYMENT="e2e-documents",
-                  JWT_SECRET=os.environ.get("JWT_SECRET") or "e2e-secret")
+# Every setting the API requires at startup; external services are replaced below, so these
+# only need to be well-formed.
+os.environ.update(
+    JWT_SECRET="e2e-secret", CORS_ORIGINS="http://127.0.0.1", OPENAI_API_KEY="e2e",
+    OPENAI_BASE_URL="https://e2e.openai.azure.com/openai/v1", AZURE_FUNCTIONS_URL="https://e2e.azurewebsites.net",
+    AZURE_FUNCTIONS_KEY="e2e", ACS_EMAIL_CONNECTION_STRING="endpoint=https://e2e/;accesskey=e2e",
+    EMAIL_MICROSOFT_TENANT_ID="00000000-0000-0000-0000-000000000001",
+    EMAIL_MICROSOFT_CLIENT_ID="00000000-0000-0000-0000-000000000002",
+    EMAIL_MICROSOFT_REDIRECT_URI="https://e2e.test/api/email/microsoft/callback",
+    EMAIL_MICROSOFT_NOTIFICATION_URL="https://e2e.test/api/email/microsoft/notifications",
+    EMAIL_KEY_VAULT_URL="https://e2e.vault.azure.net", EMAIL_SERVICE_BUS_NAMESPACE="e2e.servicebus.windows.net",
+    DOCUMENT_OPENAI_ENDPOINT="https://e2e.openai.azure.com", DOCUMENT_OPENAI_DEPLOYMENT="e2e-documents",
+    REFERENCE_GUIDES_BLOB_ACCOUNT_URL="https://e2e.blob.core.windows.net",
+)
 
 from app.accounts import mail as account_mail  # noqa: E402
 from app.cases import pipeline  # noqa: E402

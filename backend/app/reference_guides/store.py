@@ -11,8 +11,6 @@ def get_guide_bytes(key: str) -> bytes:
 
     if _client is None:
         s = get_settings()
-        if not s.reference_guides_blob_account_url:
-            raise RuntimeError("REFERENCE_GUIDES_BLOB_ACCOUNT_URL is required")
         service = BlobServiceClient(account_url=s.reference_guides_blob_account_url,
                                     credential=managed_identity())
         _client = service.get_container_client(s.reference_guides_blob_container)

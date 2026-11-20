@@ -1,23 +1,27 @@
 from functools import lru_cache
 from typing import Literal
+from urllib.parse import urlparse
+from uuid import UUID
 
-from pydantic import Field
-
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+CONSUMER_TENANT = "9188040d-6c67-4c5b-b112-36a304b66dad"  # personal Microsoft accounts
 
 
 class Settings(BaseSettings):
-    """Runtime configuration.
+    """Runtime configuration, validated at the boundary.
 
-    The API, the Functions app and the email worker share this class and each sets only the
-    settings it uses, so nothing is required here; code that needs a setting fails loudly
-    when it is missing. There are no switches or fallbacks: unset means misconfigured."""
+    Formats are checked here whenever a value is set. Which settings must be set depends on the
+    process (the API, the Functions app, the email worker and jobs share this class), so each
+    entry point calls `require_for(process)` at startup; past that, code can trust its settings.
+    There are no switches or fallbacks: unset means misconfigured."""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # Core
     app_name: str = "Ilera API"
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = ""
     # IANA zone reminder schedules are interpreted in ("18:00" means 6pm here).
     default_timezone: str = "America/Los_Angeles"
     # Auth
@@ -76,7 +80,7 @@ class Settings(BaseSettings):
     email_managed_identity_client_id: str = ""
     email_openai_endpoint: str = ""
     email_openai_deployment: str = ""
-    email_scan_max_deliveries: int = 5
+    email_scan_max_deliveries: int = Field(default=5, ge=1, le=5)
 
     # Intake document assistance: a dedicated Azure OpenAI resource, separate from eligibility
     # research and email scanning, reached with managed identity.
@@ -90,6 +94,77 @@ class Settings(BaseSettings):
     reference_guides_blob_container: str = "reference-guides"
 
 
+    @field_validator("openai_base_url", "azure_functions_url", "app_url", "reference_guides_blob_account_url")
+    @classmethod
+    def _https(cls, value: str) -> str:
+        if value and urlparse(value).scheme != "https":
+            raise ValueError("must be an https URL")
+        return value
+
+    @field_validator("email_openai_endpoint", "document_openai_endpoint")
+    @classmethod
+    def _dedicated_azure_openai(cls, value: str) -> str:
+        """A bare https://<resource>.openai.azure.com origin, nothing else."""
+        u = urlparse(value)
+        if value and not (u.scheme == "https" and u.hostname and u.hostname.endswith(".openai.azure.com")
+                          and not u.username and not u.password and u.port in (None, 443)
+                          and u.path in ("", "/") and not u.query and not u.fragment):
+            raise ValueError("must be a bare https://<resource>.openai.azure.com origin")
+        return value
+
+    @field_validator("email_key_vault_url")
+    @classmethod
+    def _key_vault(cls, value: str) -> str:
+        u = urlparse(value)
+        if value and not (u.scheme == "https" and u.hostname and u.hostname.endswith(".vault.azure.net")):
+            raise ValueError("must be https://<vault>.vault.azure.net")
+        return value
+
+    @field_validator("email_microsoft_tenant_id", "email_microsoft_client_id")
+    @classmethod
+    def _entra_id(cls, value: str) -> str:
+        if value:
+            value = str(UUID(value))
+            if value == CONSUMER_TENANT:
+                raise ValueError("personal Microsoft accounts are not supported")
+        return value
+
+    @field_validator("email_microsoft_redirect_uri", "email_microsoft_notification_url")
+    @classmethod
+    def _email_endpoint(cls, value: str, info) -> str:
+        path = {"email_microsoft_redirect_uri": "/api/email/microsoft/callback",
+                "email_microsoft_notification_url": "/api/email/microsoft/notifications"}[info.field_name]
+        u = urlparse(value)
+        if value and not (u.scheme == "https" and u.hostname and not u.username and not u.password
+                          and not u.query and not u.fragment and u.path == path):
+            raise ValueError(f"must be an https URL ending in {path}")
+        return value
+
+
+_EMAIL = ("database_url", "email_microsoft_tenant_id", "email_microsoft_client_id",
+          "email_microsoft_redirect_uri", "email_key_vault_url", "email_service_bus_namespace")
+REQUIRED: dict[str, tuple[str, ...]] = {
+    "api": (*_EMAIL, "jwt_secret", "cors_origins", "openai_api_key", "openai_base_url",
+            "azure_functions_url", "azure_functions_key", "acs_email_connection_string",
+            "email_microsoft_notification_url", "document_openai_endpoint", "document_openai_deployment",
+            "reference_guides_blob_account_url"),
+    "email-worker": (*_EMAIL, "email_openai_endpoint", "email_openai_deployment"),
+    "email-maintenance": (*_EMAIL, "email_microsoft_notification_url"),
+    "functions": ("database_url", "openai_api_key", "openai_base_url"),
+    "rag-ingest": ("database_url", "openai_api_key", "openai_base_url"),
+    "purge": ("database_url",),
+}
+
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def require_for(process: str) -> Settings:
+    """Fail at startup, naming every missing setting, rather than on the first request."""
+    settings = get_settings()
+    missing = [name.upper() for name in REQUIRED[process] if not getattr(settings, name)]
+    if missing:
+        raise RuntimeError(f"{process} is missing required settings: {', '.join(missing)}")
+    return settings

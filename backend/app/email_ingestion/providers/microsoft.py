@@ -9,7 +9,7 @@ import secrets
 import json
 from datetime import datetime, timedelta, timezone
 from typing import Literal
-from urllib.parse import quote, urlencode, urlparse
+from urllib.parse import quote, urlencode
 from uuid import UUID
 
 import httpx
@@ -23,7 +23,6 @@ from app.email_ingestion.providers.base import AuthorizedMailbox, EmailSubscript
 
 GRAPH = "https://graph.microsoft.com/v1.0"
 SCOPES = "openid profile offline_access https://graph.microsoft.com/Mail.Read"
-CONSUMER_TENANT = "9188040d-6c67-4c5b-b112-36a304b66dad"
 
 
 class ProviderError(Exception):
@@ -38,18 +37,9 @@ class MicrosoftEmailProvider:
     name: Literal["microsoft"] = "microsoft"
 
     def __init__(self, client_secret: SecretStr):
-        settings = get_settings()
-        try:
-            self.tenant = str(UUID(settings.email_microsoft_tenant_id))
-            self.client_id = str(UUID(settings.email_microsoft_client_id))
-            if self.tenant == CONSUMER_TENANT:
-                raise ValueError("consumer account")
-            redirect = urlparse(settings.email_microsoft_redirect_uri)
-            if (redirect.scheme != "https" or not redirect.netloc or redirect.query or redirect.fragment
-                    or redirect.path != "/api/email/microsoft/callback"):
-                raise ValueError("invalid redirect")
-        except ValueError:
-            raise ProviderError("Microsoft mailbox connection is not configured") from None
+        settings = get_settings()  # tenant, client id and redirect are validated in Settings
+        self.tenant = settings.email_microsoft_tenant_id
+        self.client_id = settings.email_microsoft_client_id
         self.redirect_uri = settings.email_microsoft_redirect_uri
         self.secret = client_secret
         self.authority = f"https://login.microsoftonline.com/{self.tenant}"
@@ -200,8 +190,6 @@ class MicrosoftEmailProvider:
 
     async def subscribe(self, access_token: SecretStr, *, notification_url: str,
                         client_state: str) -> EmailSubscription:
-        if urlparse(notification_url).scheme != "https":
-            raise ProviderError("An HTTPS notification URL is required")
         data = await self._graph("POST", "/subscriptions", access_token, json={
             "changeType": "created", "notificationUrl": notification_url,
             "lifecycleNotificationUrl": notification_url,

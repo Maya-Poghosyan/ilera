@@ -24,8 +24,6 @@ def _get_openai_client():
         from openai import OpenAI
 
         s = get_settings()
-        if not (s.openai_api_key and s.openai_base_url):
-            raise RuntimeError("OPENAI_API_KEY and OPENAI_BASE_URL are required")
         _openai_client = OpenAI(
             api_key=s.openai_api_key,
             base_url=s.openai_base_url,

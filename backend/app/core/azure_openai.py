@@ -5,7 +5,6 @@ OPENAI_API_KEY used for eligibility research."""
 
 from contextlib import ExitStack
 from typing import TypeVar
-from urllib.parse import urlparse
 
 from pydantic import BaseModel
 
@@ -13,14 +12,6 @@ from app.core.azure_identity import managed_identity
 from app.core.private_logs import private_transport_logs
 
 M = TypeVar("M", bound=BaseModel)
-
-
-def is_dedicated_endpoint(url: str) -> bool:
-    """A bare https://<resource>.openai.azure.com origin, nothing else."""
-    u = urlparse(url)
-    return bool(u.scheme == "https" and u.hostname and u.hostname.endswith(".openai.azure.com")
-                and not u.username and not u.password and u.port in (None, 443)
-                and u.path in ("", "/") and not u.query and not u.fragment)
 
 
 def open_client(stack: ExitStack, *, endpoint: str, managed_identity_client_id: str = "", timeout: float = 45):

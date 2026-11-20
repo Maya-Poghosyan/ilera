@@ -13,7 +13,6 @@ from fastapi.responses import PlainTextResponse
 from starlette.concurrency import run_in_threadpool
 
 from app.core import db
-from app.core.config import get_settings
 from app.email_ingestion.connections import _lock, _write_connection
 from app.email_ingestion.models import EmailScanJob, MailboxConnection
 from app.email_ingestion.queue import ScanPublisher, enqueue_scan
@@ -105,9 +104,6 @@ async def notifications(request: Request):
         if not token or len(token) > 4096:
             raise HTTPException(400, "Invalid validation token")
         return PlainTextResponse(token, headers={"Cache-Control": "no-store"})
-    settings = get_settings()
-    if not settings.email_service_bus_namespace:
-        raise HTTPException(503, "Email notifications are unavailable")
     body = bytearray()
     async for chunk in request.stream():
         body.extend(chunk)

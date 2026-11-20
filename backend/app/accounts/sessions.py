@@ -14,10 +14,7 @@ _bearer = HTTPBearer(auto_error=False)
 
 
 def _secret() -> str:
-    secret = get_settings().jwt_secret
-    if not secret:
-        raise RuntimeError("JWT_SECRET is required")
-    return secret
+    return get_settings().jwt_secret
 
 
 def create_token(user_id: str) -> str:

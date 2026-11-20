@@ -2,7 +2,7 @@
 
 from contextlib import ExitStack
 
-from app.core.azure_openai import is_dedicated_endpoint, open_client, structured_completion
+from app.core.azure_openai import open_client, structured_completion
 from app.core.config import get_settings
 from app.core.private_logs import private_transport_logs
 from app.intake.documents.fields import RawExtraction, prompt_rules, to_suggestions
@@ -25,15 +25,8 @@ NEVER include names, addresses, SSNs, Medicare numbers, claim/account/policy num
 diagnoses or any identifier in any field."""
 
 
-def _settings():
-    s = get_settings()
-    if not (s.document_openai_deployment and is_dedicated_endpoint(s.document_openai_endpoint)):
-        raise RuntimeError("DOCUMENT_OPENAI_ENDPOINT and DOCUMENT_OPENAI_DEPLOYMENT are required")
-    return s
-
-
 def read_document(upload: Upload) -> DocumentReading:
-    settings = _settings()
+    settings = get_settings()
     request = model_input(upload)
     import httpcore  # noqa: F401  (register transport loggers before suppressing them)
 
