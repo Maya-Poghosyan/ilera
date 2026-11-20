@@ -18,10 +18,10 @@ import threading
 from collections.abc import Iterator
 from dataclasses import dataclass, field
 
-from ..config import get_settings
-from .embeddings import DIM, embed, embed_one
-from .embeddings import model_id as embedding_id
-from .scope import PolicyMetadata, RetrievalScope
+from app.core.config import get_settings
+from app.rag.embeddings import DIM, embed, embed_one
+from app.rag.embeddings import model_id as embedding_id
+from app.rag.scope import PolicyMetadata, RetrievalScope
 
 _DATA = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 KNOWLEDGE_DIR = os.path.join(_DATA, "knowledge")
@@ -121,7 +121,7 @@ def _chunk_text(text: str) -> list[tuple[str, str]]:
 
 def _iter_corpus_documents() -> Iterator[Document]:
     """The authored RAG corpus (data/knowledge), as the Documents the chunker consumes."""
-    from .source_store import iter_sources
+    from app.rag.source_store import iter_sources
 
     for src in iter_sources():
         yield Document(

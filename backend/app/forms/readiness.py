@@ -14,8 +14,8 @@ projection of ``profile.eligibility``.
 
 from __future__ import annotations
 
-from ..intake.schema import DELAYED_QUESTIONS
-from ..models import CaseProfile, FormReadiness
+from app.intake.schema import DELAYED_QUESTIONS
+from app.cases.models import CaseProfile, FormReadiness
 
 # Match levels worth preparing documents for. A "none" result is not actionable, so it
 # is omitted — the caregiver should not gather paperwork for a program they can't get.

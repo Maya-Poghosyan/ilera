@@ -11,11 +11,11 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 
-from .. import db
-from ..config import get_settings
-from . import connections
-from .models import MailboxConnection
-from .reconciliation import prune_orphan_subscriptions, reconcile
+from app.core import db
+from app.core.config import get_settings
+from app.email_ingestion import connections
+from app.email_ingestion.models import MailboxConnection
+from app.email_ingestion.reconciliation import prune_orphan_subscriptions, reconcile
 
 
 def require_configuration() -> None:

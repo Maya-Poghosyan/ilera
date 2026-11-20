@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from .. import db
-from .models import MailboxConnection, ScanResult
+from app.core import db
+from app.email_ingestion.models import MailboxConnection, ScanResult
 
 _connections = db.JsonStore("email_connections", scoped_by_case=True)
 _results = db.JsonStore("email_scan_results", scoped_by_case=True)

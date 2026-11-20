@@ -2,7 +2,7 @@
 stored case is run through the same deterministic gates the eligibility pipeline uses."""
 import pytest
 
-from app.store import get_profile
+from app.cases.store import get_profile
 from durable.tools.eligibility_checks import GATES
 from tests.intake_helpers import complete_current_intake
 

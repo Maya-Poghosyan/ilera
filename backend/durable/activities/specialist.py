@@ -16,11 +16,11 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
-from app.agents.specialists import ALL_SPECIALISTS
-from app.agents.output_contracts import SpecialistOutput as _SpecialistOutput
-from app.config import get_settings
+from app.eligibility.agents.specialists import ALL_SPECIALISTS
+from app.eligibility.agents.output_contracts import SpecialistOutput as _SpecialistOutput
+from app.core.config import get_settings
 from app.rag.scope import profile_scope
-from app.models import CaseProfile, EligibilityResult, FollowupQuestion
+from app.cases.models import CaseProfile, EligibilityResult, FollowupQuestion
 from durable.models import PeerQueryResult, SpecialistInput, SpecialistResult
 from durable.tools.eligibility_checks import make_gate_tool
 

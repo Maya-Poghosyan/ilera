@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import logging
 
-from app.models import CaseProfile
+from app.cases.models import CaseProfile
 from durable.errors import GateError
 from durable.models import EligibilityGateInput, EligibilityGateResult
 from durable.tools.eligibility_checks import GATES

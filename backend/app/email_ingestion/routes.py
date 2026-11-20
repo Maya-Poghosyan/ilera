@@ -5,14 +5,14 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, Field, SecretStr
 
-from ..auth import User, get_current_user
-from ..config import get_settings
-from ..store import get_case_owner
-from ..providers.microsoft import ProviderError
-from . import connections, credentials
-from .models import MailboxConnection
-from .store import list_connections
-from .privacy import PrivateEmailRoute
+from app.accounts.auth import User, get_current_user
+from app.core.config import get_settings
+from app.cases.store import get_case_owner
+from app.email_ingestion.providers.microsoft import ProviderError
+from app.email_ingestion import connections, credentials
+from app.email_ingestion.models import MailboxConnection
+from app.email_ingestion.store import list_connections
+from app.email_ingestion.privacy import PrivateEmailRoute
 
 router = APIRouter(prefix="/api/email", tags=["email"], route_class=PrivateEmailRoute)
 

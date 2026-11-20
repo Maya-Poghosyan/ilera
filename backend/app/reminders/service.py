@@ -1,0 +1,179 @@
+"""Reminder scheduling — model, persistence (Postgres), and templates.
+
+A Reminder stores a schedule (daily, weekly, once). Delivery is not configured.
+Persistence mirrors the CaseProfile pattern in store.py.
+"""
+
+import uuid
+from datetime import date, datetime, time, timedelta, timezone
+from enum import Enum
+from typing import Optional
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+from pydantic import BaseModel, Field
+
+from app.core import db
+from app.core.config import get_settings
+
+# ---------------------------------------------------------------------------
+# Model
+# ---------------------------------------------------------------------------
+
+
+class ReminderKind(str, Enum):
+    daily_care_log = "daily_care_log"
+    appointment = "appointment"
+    renewal_deadline = "renewal_deadline"
+    custom = "custom"
+
+
+class ScheduleFreq(str, Enum):
+    daily = "daily"
+    weekly = "weekly"
+    once = "once"
+
+
+class ReminderSchedule(BaseModel):
+    freq: ScheduleFreq = ScheduleFreq.daily
+    time: str = "09:00"  # HH:MM in 24-hour format, in `timezone`
+    weekday: Optional[int] = None  # 0=Mon … 6=Sun, used when freq=weekly
+    date: Optional[str] = None  # ISO date, used when freq=once
+    # IANA name; None falls back to settings.default_timezone. A caregiver's
+    # "6pm check-in" is 6pm where they live, not 6pm UTC.
+    timezone: Optional[str] = None
+
+
+class Reminder(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    case_id: Optional[str] = None
+    kind: ReminderKind = ReminderKind.custom
+    message: str = ""
+    schedule: ReminderSchedule = Field(default_factory=ReminderSchedule)
+    next_run: Optional[str] = None  # ISO datetime
+    active: bool = True
+    created_at: str = Field(
+        default_factory=lambda: datetime.now(timezone.utc).isoformat()
+    )
+    last_sent_at: Optional[str] = None
+
+
+# ---------------------------------------------------------------------------
+# next_run computation
+# ---------------------------------------------------------------------------
+
+
+def _zone(schedule: ReminderSchedule) -> ZoneInfo:
+    name = schedule.timezone or get_settings().default_timezone
+    try:
+        return ZoneInfo(name)
+    except (ZoneInfoNotFoundError, ValueError):
+        return ZoneInfo("UTC")
+
+
+def compute_next_run(schedule: ReminderSchedule) -> str:
+    """Return the next fire time as an ISO-8601 UTC datetime string.
+
+    The wall-clock time is resolved in the schedule's zone, so a daily 18:00
+    reminder stays at 6pm local across DST rather than drifting an hour.
+    """
+    zone = _zone(schedule)
+    now = datetime.now(zone)
+    hour, minute = (int(p) for p in schedule.time.split(":"))
+    fire_time = time(hour, minute)
+
+    def at(day: date) -> datetime:
+        return datetime.combine(day, fire_time, tzinfo=zone)
+
+    if schedule.freq == ScheduleFreq.once:
+        day = date.fromisoformat(schedule.date) if schedule.date else now.date()
+        candidate = at(day)  # a past date fires on the next scheduler tick
+    elif schedule.freq == ScheduleFreq.weekly:
+        weekday = schedule.weekday if schedule.weekday is not None else 0
+        candidate = at(now.date())
+        days_ahead = (weekday - candidate.weekday()) % 7
+        if days_ahead == 0 and candidate <= now:
+            days_ahead = 7
+        candidate = at(now.date() + timedelta(days=days_ahead))
+    elif schedule.freq == ScheduleFreq.daily:
+        candidate = at(now.date())
+        if candidate <= now:
+            candidate = at(now.date() + timedelta(days=1))
+    else:
+        candidate = now
+
+    return candidate.astimezone(timezone.utc).isoformat()
+
+
+def advance_next_run(reminder: Reminder) -> None:
+    """Move next_run forward after a send. Deactivates one-shot reminders."""
+    if reminder.schedule.freq == ScheduleFreq.once:
+        reminder.active = False
+        reminder.next_run = None
+    else:
+        reminder.next_run = compute_next_run(reminder.schedule)
+
+
+# ---------------------------------------------------------------------------
+# Persistence (Postgres)
+# ---------------------------------------------------------------------------
+
+_store = db.JsonStore("reminders")
+
+
+def save_reminder(reminder: Reminder) -> None:
+    _store.put(reminder.id, reminder.model_dump_json())
+
+
+def get_reminder(reminder_id: str) -> Optional[Reminder]:
+    doc = _store.get(reminder_id)
+    return Reminder.model_validate(doc) if doc else None
+
+
+def list_reminders() -> list[Reminder]:
+    return [Reminder.model_validate(doc) for doc in _store.list()]
+
+
+def delete_reminder(reminder_id: str) -> bool:
+    return _store.delete(reminder_id)
+
+
+# ---------------------------------------------------------------------------
+# Templates
+# ---------------------------------------------------------------------------
+
+TEMPLATES: dict[str, dict] = {
+    "daily_care_log": {
+        "kind": "daily_care_log",
+        "message": "",  # filled at send-time via daily_care_log_prompt()
+        "schedule": {"freq": "daily", "time": "18:00"},
+    },
+    "ihss_timesheet": {
+        "kind": "renewal_deadline",
+        "message": (
+            "IHSS timesheet reminder: Your timesheet is due soon. "
+            "Please submit it to avoid delays in payment."
+        ),
+        "schedule": {"freq": "weekly", "time": "09:00", "weekday": 4},
+    },
+    "medi_cal_renewal": {
+        "kind": "renewal_deadline",
+        "message": (
+            "Medi-Cal annual renewal reminder: Check your mail for the renewal packet "
+            "and submit it before the deadline to keep coverage."
+        ),
+        "schedule": {"freq": "once", "time": "09:00"},
+    },
+    "pfl_weekly_cert": {
+        "kind": "renewal_deadline",
+        "message": (
+            "Paid Family Leave weekly certification: File your weekly claim "
+            "at edd.ca.gov to keep receiving PFL benefits."
+        ),
+        "schedule": {"freq": "weekly", "time": "09:00", "weekday": 0},
+    },
+    "appointment": {
+        "kind": "appointment",
+        "message": "Upcoming appointment reminder — check your calendar for details.",
+        "schedule": {"freq": "once", "time": "09:00"},
+    },
+}

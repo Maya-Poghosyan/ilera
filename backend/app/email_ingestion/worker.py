@@ -11,15 +11,15 @@ import signal
 import threading
 import uuid
 
-from .. import db
-from ..azure_identity import managed_identity
-from ..config import get_settings
-from ..suggested_events import SuggestedEvent
-from ..providers.microsoft import ReauthorizationRequired
-from . import connections
-from .extraction import AzureExtractor, EXTRACTION_VERSION, Extraction, require_extraction_configuration
-from .models import EmailScanJob, MailboxConnection, ScanResult
-from .privacy import private_transport_logs
+from app.core import db
+from app.core.azure_identity import managed_identity
+from app.core.config import get_settings
+from app.calendar.suggestions import SuggestedEvent
+from app.email_ingestion.providers.microsoft import ReauthorizationRequired
+from app.email_ingestion import connections
+from app.email_ingestion.extraction import AzureExtractor, EXTRACTION_VERSION, Extraction, require_extraction_configuration
+from app.email_ingestion.models import EmailScanJob, MailboxConnection, ScanResult
+from app.email_ingestion.privacy import private_transport_logs
 
 
 class RetryScan(Exception):

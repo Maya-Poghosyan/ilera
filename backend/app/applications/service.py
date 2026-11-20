@@ -1,0 +1,550 @@
+"""Application completion engine.
+
+Manages the lifecycle of benefit applications: program->form-set mapping,
+application status persistence (Postgres), autofill + Q&A resolution,
+and stitching multiple filled PDFs into a single combined document.
+"""
+
+import io
+import re
+from enum import Enum
+from typing import Any, Optional
+
+from pydantic import BaseModel, Field
+from pypdf import PdfWriter
+
+from app.core import db
+from app.forms.discovery import discover_fields, field_index
+from app.forms.filler import load_schema, resolve_fields, write_values
+from app.forms.groups import (
+    GroupInput,
+    applies,
+    is_profile_path,
+    load_groups,
+    load_skips,
+    parse_condition,
+    pdf_values,
+)
+from app.cases.models import CaseProfile
+
+# ---------------------------------------------------------------------------
+# Program -> form-set mapping
+# ---------------------------------------------------------------------------
+
+PROGRAM_FORMS: dict[str, list[str]] = {
+    "IHSS": ["soc-295", "soc-426a"],
+    "VA Caregiver Support": ["va-10-10cg"],
+    "Medi-Cal": ["ccfrm604"],
+    "CHAMPVA": ["va-10-7959c"],
+    "CFRA / FMLA": ["cfra-cert"],
+    "IHSS Provider": ["soc-426", "soc-829"],
+}
+
+
+def get_program_forms(program: str) -> list[str]:
+    return PROGRAM_FORMS.get(program, [])
+
+
+def list_programs() -> list[dict[str, Any]]:
+    result = []
+    for program, form_ids in PROGRAM_FORMS.items():
+        result.append({
+            "program": program,
+            "form_ids": form_ids,
+            "form_count": len(form_ids),
+        })
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Application status model + persistence
+# ---------------------------------------------------------------------------
+
+
+class AppStatus(str, Enum):
+    open = "open"
+    in_progress = "in_progress"
+    needs_info = "needs_info"
+    completed = "completed"
+
+
+class AppQuestion(BaseModel):
+    """A single question shown one-by-one on the frontend.
+
+    The top-level fields (``field_id``, ``text``, ``type``, ``required``, ``options``,
+    ``why_this_matters``) are the intake ``QuestionField`` shape, so the frontend renders
+    these directly with no adapter. The remaining fields are backend-only metadata used to
+    translate the user's answer back into concrete PDF values at fill time (and, later, to
+    feed the specialist layer).
+    """
+
+    field_id: str
+    text: str
+    type: str = "short_text"
+    required: bool = True
+    options: list[str] = Field(default_factory=list)
+    why_this_matters: str = ""
+
+    # backend-only
+    form_id: str = ""
+    fields: list[str] = Field(default_factory=list)
+    option_values: dict[str, str] = Field(default_factory=dict)  # option label -> raw PDF value
+    interpret: bool = False
+
+    # Questions sharing a ``group_id`` are one screen: a group asks for one real-world
+    # fact and each of its inputs fills different boxes, so they are answered together.
+    group_id: str = ""
+    group_prompt: str = ""
+    input: str = ""
+    option_fields: dict[str, list[str]] = Field(default_factory=dict)
+    # A "if yes, ..." follow-up: only shown once an earlier answer satisfies this, e.g.
+    # `past_ihss.received_ihss_before == "Yes"`. Conditions the profile can settle are
+    # applied here instead, and the group never reaches the frontend at all.
+    ask_when: str = ""
+
+
+class ApplicationState(BaseModel):
+    case_id: str
+    program: str
+    status: AppStatus = AppStatus.open
+    answers: dict[str, Any] = Field(default_factory=dict)
+    questions: list[AppQuestion] = Field(default_factory=list)
+
+
+_store = db.JsonStore("applications", keys=("case_id", "program"))
+
+
+def _slug(program: str) -> str:
+    return program.lower().replace(" ", "_").replace("/", "_")
+
+
+def save_app_state(state: ApplicationState) -> None:
+    _store.put((state.case_id, _slug(state.program)), state.model_dump_json())
+
+
+def get_app_state(case_id: str, program: str) -> Optional[ApplicationState]:
+    doc = _store.get((case_id, _slug(program)))
+    return ApplicationState.model_validate(doc) if doc else None
+
+
+def list_app_states(case_id: str) -> list[ApplicationState]:
+    return [ApplicationState.model_validate(doc) for doc in _store.list(case_id)]
+
+
+# ---------------------------------------------------------------------------
+# Application flow logic
+# ---------------------------------------------------------------------------
+
+
+def _clean_label(text: str) -> str:
+    """Trim a form label/tooltip down to a readable question prompt."""
+    text = " ".join((text or "").split())
+    # Drop a leading "Section 1 – ..." style prefix, keeping the field's own label.
+    for sep in (". ", " - ", " \u2013 "):
+        if sep in text and text.lower().startswith("section"):
+            text = text.split(sep, 1)[1]
+            break
+    # The frontend marks optional fields itself, so a label saying so reads twice.
+    text = re.sub(r"[\s(]*\(?optional\)?[\s)]*$", "", text, flags=re.I)
+    return text.strip()
+
+
+def _build_question(
+    field_name: str, label: str, spec_type: str, form_id: str, info
+) -> AppQuestion:
+    """Compose a single AppQuestion, enriched with the real PDF field type/options."""
+    if info is not None:
+        qtype = info.intake_type
+        options = list(info.options)
+    else:
+        qtype = _SPEC_TYPE_TO_INTAKE.get(spec_type, "short_text")
+        options = []
+    return AppQuestion(
+        field_id=field_name,
+        text=_clean_label(label) or field_name,
+        type=qtype,
+        required=True,
+        options=options,
+        form_id=form_id,
+        fields=[field_name],
+        option_values={o: o for o in options},
+    )
+
+
+# Fallback map when a field isn't found in the real PDF (schema spec type -> intake type).
+_SPEC_TYPE_TO_INTAKE = {
+    "text": "short_text",
+    "checkbox": "boolean",
+    "radio": "single_select",
+    "choice": "single_select",
+    "date": "short_text",
+}
+
+
+def _group_questions(
+    form_id: str, profile: CaseProfile, askable: set[str]
+) -> tuple[list[AppQuestion], set[str]]:
+    """Questions from a form's committed groups, and the fields they account for.
+
+    A group that can't apply to this profile — a second household member's details for a
+    one-person household — is dropped whole, so none of its boxes are ever mentioned.
+    Fields the group pass marked office-use are accounted for without being asked.
+    """
+    schema = load_schema(form_id)
+    covered: set[str] = set(load_skips(schema))
+    questions: list[AppQuestion] = []
+
+    for group in load_groups(schema):
+        targets = {f for f in group.target_fields() if f in askable}
+        if not targets:
+            continue
+        covered |= targets
+        if not applies(group, profile):
+            continue
+        parsed = parse_condition(group.applies_when or "")
+        ask_when = (
+            group.applies_when
+            if parsed and not is_profile_path(parsed[0])
+            else ""
+        )
+        # An input whose every box the profile already fills is not a question.
+        asking = [i for i in group.inputs if set(i.target_fields()) & askable]
+        if not asking:
+            continue
+        if group.opt_in:
+            # A section that is the applicant's choice — naming a representative,
+            # picking a dental plan — costs one yes/no unless they want it.
+            opt_in_id = f"{group.id}_opt_in"
+            questions.append(
+                AppQuestion(
+                    field_id=f"{opt_in_id}.wanted",
+                    text=group.opt_in,
+                    type="single_select",
+                    options=["Yes", "No"],
+                    form_id=form_id,
+                    group_id=opt_in_id,
+                    input="wanted",
+                    ask_when=ask_when,
+                )
+            )
+            ask_when = f'{opt_in_id}.wanted == "Yes"'
+        for inp in asking:
+            questions.append(
+                AppQuestion(
+                    field_id=f"{group.id}.{inp.key}",
+                    text=_clean_label(inp.label),
+                    type=inp.type,
+                    required=inp.required,
+                    options=list(inp.options),
+                    why_this_matters=inp.help or group.help,
+                    form_id=form_id,
+                    fields=list(inp.fields),
+                    option_values=dict(inp.option_values),
+                    option_fields={k: list(v) for k, v in inp.option_fields.items()},
+                    group_id=group.id,
+                    group_prompt=group.prompt,
+                    input=inp.key,
+                    ask_when=ask_when,
+                )
+            )
+    return questions, covered
+
+
+def _merge_question(existing: AppQuestion, addition: AppQuestion) -> None:
+    """Fold a second form's copy of the same question into the one already asked."""
+    existing.fields = list(dict.fromkeys([*existing.fields, *addition.fields]))
+    for label, names in addition.option_fields.items():
+        merged = [*existing.option_fields.get(label, []), *names]
+        existing.option_fields[label] = list(dict.fromkeys(merged))
+    existing.option_values.update(addition.option_values)
+    for label in addition.options:
+        if label not in existing.options:
+            existing.options.append(label)
+    if existing.form_id != addition.form_id:
+        existing.form_id = ""  # it now fills more than one form
+
+
+# A record marker names *which* of several like things a question is about: "Person 2",
+# "Household Member 1", "Other insurance #2", "Income source 3", "Dependent 2". The
+# leading noun and its number together identify the record; two questions about the same
+# fact belong to the same person only when both resolve to the same record. "Primary
+# contact" is a form's name for the first person, so it is treated as person 1.
+_RECORD = re.compile(
+    r"(person|household\s*member|member|insurance|income|dependent|child|employer|"
+    r"applicant|parent|spouse)\s*#?\s*(\d+)|(primary\s+contact)",
+    re.I,
+)
+# Everything stripped from a label before comparing what it asks: parentheticals, any
+# record marker, and bare demonstratives that only make a sentence read naturally.
+_NOISE = re.compile(
+    r"\([^)]*\)|(?:person|household\s*member|member|insurance|income|dependent|child|"
+    r"employer|applicant|parent|spouse)\s*#?\s*\d+|primary\s+contact|"
+    r"\b(this|that|their|they|the)\b",
+    re.I,
+)
+# Role suffixes on a group id that don't change which record it is about, stripped so a
+# section and its opt-in ("..._contact" and "..._contact_opt_in") share one scope.
+_GROUP_SUFFIX = re.compile(r"_(opt_in|profile|details|contact|info)$")
+
+
+def _record_key(text: str) -> Optional[str]:
+    """A `<noun>:<number>` scope from a record marker in `text`, or None.
+
+    "Primary contact" collapses onto person 1 so a form's prose name for the applicant
+    and its numbered table row are the same record.
+    """
+    marker = _RECORD.search(text)
+    if not marker:
+        return None
+    if marker.group(3):  # "primary contact"
+        return "person:1"
+    noun = marker.group(1).lower().replace(" ", "")
+    return f"{noun}:{marker.group(2) or '1'}"
+
+
+def _scope(question: AppQuestion) -> str:
+    """Which record a question is about — the person/policy/source it belongs to.
+
+    Both a group id (`household_member_2`, `insurance_1`, `person_3_profile`) and a
+    record marker in the text ("Household member 2", "Other insurance #1") name a
+    record, and they must resolve to the *same* key so a loose reprint of a boxed field
+    folds into the group that owns it. So both are reduced to `<noun>:<number>`. A
+    named block with no numbered record (an address, a representative) is scoped by its
+    group id, minus role suffixes so a section and its opt-in agree. A question with
+    neither is scoped to the primary record ("").
+    """
+    if question.group_id:
+        keyed = _record_key(question.group_id.replace("_", " "))
+        if keyed:
+            return keyed
+        base = question.group_id
+        while True:
+            stripped = _GROUP_SUFFIX.sub("", base)
+            if stripped == base:
+                break
+            base = stripped
+        return f"g:{base}"
+    return _record_key(f"{question.group_prompt} {question.text}") or ""
+
+
+def _fact(question: AppQuestion) -> tuple[str, str]:
+    """What a question asks, and which record it asks it about.
+
+    A form names the same person two ways — "Person 1" in its table, "the Primary
+    Contact" in its opening — and labels the same box "Middle name" in one place and
+    "Person 1 (Primary Contact) middle name" in another: same record, same fact. But
+    "Household member 1" and "Household member 2" are different records, so their
+    identically-worded boxes are different facts and must not be merged.
+    """
+    scope = _scope(question)
+    asked = _NOISE.sub(" ", question.text)
+    return scope, "".join(c for c in asked.lower() if c.isalnum())
+
+
+def _same_fact(
+    question: AppQuestion, asked: list[AppQuestion]
+) -> Optional[AppQuestion]:
+    """The question already on screen that this one repeats, if there is one."""
+    fact = _fact(question)
+    if not fact[1]:
+        return None
+    for other in asked:
+        if other.type == question.type and _fact(other) == fact:
+            return other
+    return None
+
+
+def start_application(
+    case_id: str, program: str, profile: CaseProfile
+) -> dict[str, Any]:
+    """Start or resume an application: autofill all forms and compose missing questions."""
+    form_ids = get_program_forms(program)
+    if not form_ids:
+        return {
+            "program": program,
+            "form_ids": [],
+            "autofilled": 0,
+            "total_fields": 0,
+            "questions": [],
+            "error": f"No forms mapped for program '{program}'",
+        }
+
+    questions: list[AppQuestion] = []
+    by_question_id: dict[str, AppQuestion] = {}
+    total_autofilled = 0
+    total_fields = 0
+    seen_fields: set[str] = set()
+
+    state = get_app_state(case_id, program)
+    existing_answers = state.answers if state else {}
+
+    for form_id in form_ids:
+        result = resolve_fields(form_id, profile)
+        resolved = result.get("resolved", {})
+        needs = result.get("needs_user_input", [])
+        missing = result.get("missing", [])
+
+        total_autofilled += len(resolved)
+        # Prefer the real AcroForm field count as the honest denominator; fall back to
+        # the curated schema counts when the PDF has no template on disk.
+        discovered = discover_fields(form_id)
+        total_fields += len(discovered) if discovered else (
+            len(resolved) + len(needs) + len(missing)
+        )
+
+        askable = {q.get("field", "") for q in needs} - {""}
+        grouped, covered = _group_questions(form_id, profile, askable)
+        for question in grouped:
+            seen_fields |= set(question.fields)
+            if question.field_id in existing_answers:
+                continue
+            # Group ids are shared across forms, so one fact asked by two forms in the
+            # same program becomes a single question that fills both.
+            already = by_question_id.get(question.field_id)
+            if already is not None:
+                _merge_question(already, question)
+                continue
+            by_question_id[question.field_id] = question
+            questions.append(question)
+
+        info_by_field = field_index(form_id)
+        for q in needs:
+            field = q.get("field", "")
+            if not field or field in covered or field in seen_fields:
+                continue
+            if field in existing_answers:
+                continue
+            seen_fields.add(field)
+            loose = _build_question(
+                field_name=field,
+                label=q.get("label", field),
+                spec_type=q.get("type", "text"),
+                form_id=form_id,
+                info=info_by_field.get(field),
+            )
+            # A box no group claimed still asks something, and the something is often
+            # a question already on screen: the form reprints the applicant's middle
+            # name beside a section it belongs to.
+            asked = _same_fact(loose, questions)
+            if asked is not None:
+                _merge_question(asked, loose)
+                continue
+            questions.append(loose)
+
+    if state is None:
+        state = ApplicationState(
+            case_id=case_id,
+            program=program,
+            status=AppStatus.in_progress,
+        )
+    else:
+        state.status = AppStatus.in_progress
+    state.questions = questions
+    save_app_state(state)
+
+    return {
+        "program": program,
+        "form_ids": form_ids,
+        "autofilled": total_autofilled,
+        "total_fields": total_fields,
+        "questions": [q.model_dump() for q in questions],
+    }
+
+
+def _to_pdf_value(question: AppQuestion, raw: Any) -> Optional[str]:
+    """Translate a user's answer into the concrete AcroForm value pypdf expects."""
+    if raw is None or raw == "" or raw == []:
+        return None
+    if question.type == "boolean":
+        truthy = raw is True or str(raw).strip().lower() in ("true", "yes", "1")
+        return "/Yes" if truthy else "/Off"
+    if question.type in ("single_select", "multi_select"):
+        if isinstance(raw, list):
+            return ", ".join(question.option_values.get(str(v), str(v)) for v in raw)
+        return question.option_values.get(str(raw), str(raw))
+    return str(raw)
+
+
+def _grouped_values(question: AppQuestion, raw: Any) -> dict[str, str]:
+    """Where a grouped answer lands, using the split declared when the group was drafted."""
+    return pdf_values(
+        GroupInput(
+            key=question.input or question.field_id,
+            label=question.text,
+            type=question.type,
+            fields=question.fields,
+            options=question.options,
+            option_fields=question.option_fields,
+            option_values=question.option_values,
+        ),
+        raw,
+    )
+
+
+def submit_answers(
+    case_id: str, program: str, answers: dict[str, Any], profile: CaseProfile
+) -> bytes:
+    """Accept answers for missing fields, fill all forms, stitch into one PDF."""
+    state = get_app_state(case_id, program)
+    if state is None:
+        state = ApplicationState(case_id=case_id, program=program)
+    state.answers.update(answers)
+    save_app_state(state)
+
+    questions_by_id = {q.field_id: q for q in state.questions}
+    form_ids = get_program_forms(program)
+    filled_pdfs: list[bytes] = []
+
+    for form_id in form_ids:
+        result = resolve_fields(form_id, profile)
+        merged_values = dict(result.get("resolved", {}))
+
+        form_fields = set(load_schema(form_id).get("fields") or {})
+        for field_id, raw in state.answers.items():
+            question = questions_by_id.get(field_id)
+            if question is not None:
+                if question.group_id:
+                    # One answer, several boxes with different values: the group decides
+                    # which. Names are form-specific, so only this form's are written.
+                    for target, value in _grouped_values(question, raw).items():
+                        if target in form_fields:
+                            merged_values[target] = value
+                    continue
+                if question.form_id and question.form_id != form_id:
+                    continue
+                pdf_value = _to_pdf_value(question, raw)
+                if pdf_value is None:
+                    continue
+                for target in question.fields or [field_id]:
+                    merged_values[target] = pdf_value
+            elif isinstance(raw, str) and raw:
+                # Legacy: answer keyed directly by PDF field name.
+                merged_values[field_id] = raw
+
+        try:
+            pdf_bytes = write_values(form_id, merged_values)
+            filled_pdfs.append(pdf_bytes)
+        except FileNotFoundError:
+            continue
+
+    return stitch_pdfs(filled_pdfs)
+
+
+def stitch_pdfs(pdf_bytes_list: list[bytes]) -> bytes:
+    """Merge multiple PDF byte arrays into a single combined PDF."""
+    writer = PdfWriter()
+    for pdf_data in pdf_bytes_list:
+        reader_stream = io.BytesIO(pdf_data)
+        writer.append(reader_stream)
+    buf = io.BytesIO()
+    writer.write(buf)
+    return buf.getvalue()
+
+
+def complete_application(case_id: str, program: str) -> None:
+    """Mark an application as completed."""
+    state = get_app_state(case_id, program)
+    if state is None:
+        state = ApplicationState(case_id=case_id, program=program)
+    state.status = AppStatus.completed
+    save_app_state(state)

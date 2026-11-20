@@ -12,9 +12,9 @@ from __future__ import annotations
 
 import azure.durable_functions as df
 
-from app.agents.specialists import ALL_SPECIALISTS
+from app.eligibility.agents.specialists import ALL_SPECIALISTS
+from app.cases.pipeline import CaseInput
 from durable.models import (
-    CaseInput,
     EligibilityGateInput,
     EligibilityGateResult,
     SpecialistInput,

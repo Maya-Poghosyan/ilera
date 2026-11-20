@@ -1,9 +1,8 @@
-# Scheduled jobs for the API's own housekeeping, run from the API image (app/jobs) so they
+# Scheduled jobs for the API's own housekeeping, run from the API image so they
 # fire once per schedule no matter how many API replicas are serving.
 #
 # They reuse the worker identity (already has AcrPull) and the same database-url input as
-# the maintenance job. Like that job, the image is var.api_image: bump it to an image that
-# contains app/jobs/<module> before applying.
+# the maintenance job. Like that job, the image is var.api_image.
 
 resource "azurerm_container_app_job" "purge_unclaimed" {
   name                         = "ilera-purge-unclaimed"
@@ -41,7 +40,7 @@ resource "azurerm_container_app_job" "purge_unclaimed" {
       name    = "purge"
       image   = var.api_image
       command = ["python"]
-      args    = ["-m", "app.jobs.purge_unclaimed_cases"]
+      args    = ["-m", "app.cases.purge"]
       cpu     = 0.25
       memory  = "0.5Gi"
 

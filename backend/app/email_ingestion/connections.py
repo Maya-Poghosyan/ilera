@@ -15,10 +15,10 @@ from datetime import datetime, timedelta, timezone
 
 from pydantic import SecretStr
 
-from .. import db
-from ..providers.microsoft import MicrosoftEmailProvider, ProviderError, ReauthorizationRequired
-from . import credentials
-from .models import MailboxConnection
+from app.core import db
+from app.email_ingestion.providers.microsoft import MicrosoftEmailProvider, ProviderError, ReauthorizationRequired
+from app.email_ingestion import credentials
+from app.email_ingestion.models import MailboxConnection
 
 
 class ConnectionError(Exception):

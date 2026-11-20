@@ -15,7 +15,7 @@ if not os.environ.get("TEST_DATABASE_URL"):
 os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
 os.environ.setdefault("JWT_SECRET", "test-secret")
 
-from app.config import Settings, get_settings  # noqa: E402
+from app.core.config import Settings, get_settings  # noqa: E402
 
 Settings.model_config["env_file"] = None
 get_settings.cache_clear()
@@ -28,7 +28,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 @pytest.fixture(autouse=True)
 def orchestrator(monkeypatch):
     """The Azure Functions pipeline is the one external call intake makes; record it instead."""
-    import durable.client
+    from app.cases import pipeline
 
     started = []
 
@@ -36,7 +36,7 @@ def orchestrator(monkeypatch):
         started.append(profile.id)
         return f"eligibility-{profile.id}"
 
-    monkeypatch.setattr(durable.client, "start_eligibility_orchestration", start)
+    monkeypatch.setattr(pipeline, "start_eligibility_orchestration", start)
     return started
 
 

@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from app.models import CaseProfile
+from app.cases.models import CaseProfile
 from app.eligibility.facts import known_fact
 
 from pydantic_ai import RunContext

@@ -15,8 +15,8 @@ import argparse
 import logging
 from collections import Counter
 
-from .embeddings import batch_size, model_id
-from .index import iter_documents, rebuild_index, sync_index
+from app.rag.embeddings import batch_size, model_id
+from app.rag.index import iter_documents, rebuild_index, sync_index
 
 
 def main() -> None:
@@ -31,8 +31,8 @@ def main() -> None:
     if args.rebuild and args.metadata_only:
         parser.error("--rebuild and --metadata-only cannot be combined")
     if args.metadata_only:
-        from app.config import get_settings
-        from .index import PgVectorIndex
+        from app.core.config import get_settings
+        from app.rag.index import PgVectorIndex
         index = PgVectorIndex(get_settings().database_url)
         try:
             print(f"Updated scope metadata for {index.sync_metadata()} documents; vectors unchanged.")

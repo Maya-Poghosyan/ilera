@@ -6,9 +6,9 @@ from collections import deque
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 
-from .extractor import read_document
-from .models import HTTP_STATUS, DocumentError, DocumentReading, ErrorCode
-from .upload import MAX_BYTES, Upload
+from app.intake.documents.extractor import read_document
+from app.intake.documents.models import HTTP_STATUS, DocumentError, DocumentReading, ErrorCode
+from app.intake.documents.upload import MAX_BYTES, Upload
 
 router = APIRouter()
 

@@ -1,6 +1,6 @@
 """Read public guide binaries from blob storage."""
-from ..azure_identity import managed_identity
-from ..config import get_settings
+from app.core.azure_identity import managed_identity
+from app.core.config import get_settings
 
 _client = None
 

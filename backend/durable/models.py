@@ -17,12 +17,6 @@ MatchLevel = Literal["none", "low", "medium", "likely", "very_likely", "assessme
 # ── Inputs ─────────────────────────────────────────────────────────────────────
 
 
-class CaseInput(BaseModel):
-    """What the orchestrator receives when triggered via HTTP starter."""
-    case_id: str
-    profile_json: str  # serialized CaseProfile; deserialized once, passed to activities
-
-
 class EligibilityGateInput(BaseModel):
     doc_key: str
     profile_json: str

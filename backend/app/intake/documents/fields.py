@@ -11,8 +11,8 @@ from typing import Any, Callable, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ..schema import SCREENS
-from .models import AnswerSuggestion, IncomeSuggestion, Source
+from app.intake.schema import SCREENS
+from app.intake.documents.models import AnswerSuggestion, IncomeSuggestion, Source
 
 QUESTIONS = {q["field_id"]: q for s in SCREENS for q in s["questions"]}
 

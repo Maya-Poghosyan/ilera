@@ -11,11 +11,11 @@ from uuid import NAMESPACE_URL, uuid5
 
 from pydantic import TypeAdapter
 
-from ..models import CaseProfile
-from .engine import ProgramEvaluation, evaluate_program
-from .facts import fact_registry, known_fact, write_fact
-from .policy import ProgramPolicy
-from .resolution_models import (CompletionReceipt, CompletionRequest, ResolutionMethod,
+from app.cases.models import CaseProfile
+from app.eligibility.engine import ProgramEvaluation, evaluate_program
+from app.eligibility.facts import fact_registry, known_fact, write_fact
+from app.eligibility.policy import ProgramPolicy
+from app.eligibility.resolution_models import (CompletionReceipt, CompletionRequest, ResolutionMethod,
                                 ResolutionTask, ResolutionTemplate)
 
 _TEMPLATE_DIR = Path(__file__).resolve().parents[2] / "data" / "resolution_templates"

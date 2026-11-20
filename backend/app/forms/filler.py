@@ -14,8 +14,8 @@ from typing import Any
 from pypdf import PdfReader, PdfWriter
 from pypdf.generic import BooleanObject, NameObject
 
-from ..models import CaseProfile
-from .schema_store import all_schemas, load_schema
+from app.cases.models import CaseProfile
+from app.forms.schema_store import all_schemas, load_schema
 
 FORMS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "forms")
 

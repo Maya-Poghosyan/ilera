@@ -6,10 +6,10 @@ values. Facts resolved outside intake retain their provenance and values.
 """
 from typing import Any
 
-from ..eligibility.facts import write_fact
-from ..geo import normalize_county, zip_to_county
-from ..models import CaseProfile
-from .logic import UNKNOWN, answer_context, clean_answers
+from app.eligibility.facts import write_fact
+from app.intake.geo import normalize_county, zip_to_county
+from app.cases.models import CaseProfile
+from app.intake.logic import UNKNOWN, answer_context, clean_answers
 
 _BINDINGS = {
     **{f"care_recipient.{name}": f"recipient.{name}" for name in

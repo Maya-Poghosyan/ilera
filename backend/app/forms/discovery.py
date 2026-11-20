@@ -9,8 +9,8 @@ from the real field inventory instead of a static guess.
 
 from dataclasses import dataclass, field
 
-from .extract import extract_fields
-from .filler import pdf_path
+from app.forms.extract import extract_fields
+from app.forms.filler import pdf_path
 
 # Accessibility artifacts that carry a fillable field but are not real data inputs.
 # Government PDFs annotate screen-reader helpers with these phrases in the tooltip (/TU).

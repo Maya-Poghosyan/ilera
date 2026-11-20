@@ -9,8 +9,8 @@ from typing import Any
 
 from pydantic import TypeAdapter
 
-from ..models import CaseProfile, Caregiver, CareRecipient, Household
-from .fact_models import FactMetadata
+from app.cases.models import CaseProfile, Caregiver, CareRecipient, Household
+from app.eligibility.fact_models import FactMetadata
 
 _ROOTS = {"care_recipient": CareRecipient, "caregiver": Caregiver, "household": Household}
 # In-memory-only values must never become persisted case facts or event payloads.

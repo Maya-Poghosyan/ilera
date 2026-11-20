@@ -5,8 +5,8 @@ import io
 from dataclasses import dataclass
 from typing import Literal
 
-from ..schema import DOCUMENT_UPLOAD
-from .models import DocumentError, ErrorCode
+from app.intake.schema import DOCUMENT_UPLOAD
+from app.intake.documents.models import DocumentError, ErrorCode
 
 MAX_BYTES: int = DOCUMENT_UPLOAD["max_bytes"]
 MAX_PDF_PAGES: int = DOCUMENT_UPLOAD["max_pdf_pages"]

@@ -12,12 +12,12 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from fastapi.responses import PlainTextResponse
 from starlette.concurrency import run_in_threadpool
 
-from .. import db
-from ..config import get_settings
-from .connections import _lock, _write_connection
-from .models import EmailScanJob, MailboxConnection
-from .queue import ScanPublisher, enqueue_scan
-from .privacy import PrivateEmailRoute
+from app.core import db
+from app.core.config import get_settings
+from app.email_ingestion.connections import _lock, _write_connection
+from app.email_ingestion.models import EmailScanJob, MailboxConnection
+from app.email_ingestion.queue import ScanPublisher, enqueue_scan
+from app.email_ingestion.privacy import PrivateEmailRoute
 
 router = APIRouter(prefix="/api/email/microsoft", tags=["email"], route_class=PrivateEmailRoute)
 MAX_BODY_BYTES = 1024 * 1024

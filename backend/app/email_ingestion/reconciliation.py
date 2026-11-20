@@ -30,11 +30,11 @@ from __future__ import annotations
 import asyncio
 from datetime import datetime, timedelta, timezone
 
-from .. import db
-from ..config import get_settings
-from . import connections
-from .models import EmailScanJob, MailboxConnection
-from .queue import ScanPublisher
+from app.core import db
+from app.core.config import get_settings
+from app.email_ingestion import connections
+from app.email_ingestion.models import EmailScanJob, MailboxConnection
+from app.email_ingestion.queue import ScanPublisher
 
 # Overlap the previous cursor slightly so a message received in the same second as the last
 # covered instant is never skipped. Idempotent enqueue makes the small re-scan harmless.

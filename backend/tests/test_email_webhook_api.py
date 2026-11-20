@@ -9,12 +9,14 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from app import auth, db, store
-from app.config import get_settings
+from app.accounts import auth
+from app.core import db
+from app.cases import store
+from app.core.config import get_settings
 from app.email_ingestion import notifications
 from app.email_ingestion.models import MailboxConnection
 from app.email_ingestion.store import get_connection, save_connection
-from app.models import CaseProfile
+from app.cases.models import CaseProfile
 
 URL = "/api/email/microsoft/notifications"
 STATE = "client-state-secret"

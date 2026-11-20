@@ -18,12 +18,12 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
-from app.agents.interactions import analyze_program_interactions
-from app.agents.output_contracts import StrategyOutput
-from app.config import get_settings
-from app.models import CaseProfile, EligibilityResult, SpecialistFinding
-from app.store import finding_to_result, get_profile, save_profile
-from app.strategy_text import format_strategy
+from app.eligibility.agents.interactions import analyze_program_interactions
+from app.eligibility.agents.output_contracts import StrategyOutput
+from app.core.config import get_settings
+from app.cases.models import CaseProfile, EligibilityResult, SpecialistFinding
+from app.cases.store import finding_to_result, get_profile, save_profile
+from app.eligibility.strategy_text import format_strategy
 from durable.errors import FindingsPersistenceError
 from durable.models import SpecialistResult, SynthesisInput, SynthesisResult
 

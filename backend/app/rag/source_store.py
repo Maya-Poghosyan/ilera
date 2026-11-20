@@ -11,7 +11,7 @@ import os
 from dataclasses import dataclass, field
 from typing import Iterator
 
-from .scope import PolicyMetadata
+from app.rag.scope import PolicyMetadata
 
 _DATA = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 KNOWLEDGE_DIR = os.path.join(_DATA, "knowledge")

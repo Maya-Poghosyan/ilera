@@ -8,7 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 
-from ..private_logs import private_transport_logs
+from app.core.private_logs import private_transport_logs
 
 def private_transport(function):
     @wraps(function)

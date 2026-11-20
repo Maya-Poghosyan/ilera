@@ -5,8 +5,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app import store, auth
-from app.models import CaseProfile
+from app.cases import store
+from app.accounts import auth
+from app.cases.models import CaseProfile
 
 client = TestClient(app)
 

@@ -22,8 +22,8 @@ api_port, model_port = int(sys.argv[1]), int(sys.argv[2])
 os.environ.update(DOCUMENT_OPENAI_ENDPOINT="https://e2e.openai.azure.com", DOCUMENT_OPENAI_DEPLOYMENT="e2e-documents",
                   JWT_SECRET=os.environ.get("JWT_SECRET") or "e2e-secret")
 
-import durable.client  # noqa: E402
-from app import auth  # noqa: E402
+from app.accounts import auth  # noqa: E402
+from app.cases import pipeline  # noqa: E402
 from app.intake.documents import extractor  # noqa: E402
 from app.main import app  # noqa: E402
 from tests.intake_helpers import complete_current_intake  # noqa: E402
@@ -39,7 +39,7 @@ async def no_pipeline(profile):
 
 mail: dict[str, list[dict]] = defaultdict(list)
 extractor.open_client = fake_client
-durable.client.start_eligibility_orchestration = no_pipeline
+pipeline.start_eligibility_orchestration = no_pipeline
 auth._send_verification_email = lambda email, token: mail[email.lower()].append({"kind": "verify", "token": token})
 auth._send_otp_email = lambda email, code: mail[email.lower()].append({"kind": "otp", "code": code})
 

@@ -9,7 +9,7 @@ import json
 import os
 from functools import cache
 
-from .policy import ProgramPolicy
+from app.eligibility.policy import ProgramPolicy
 
 _SEED_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "program_policies")
 

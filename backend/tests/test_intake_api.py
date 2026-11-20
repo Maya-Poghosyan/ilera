@@ -1,5 +1,5 @@
 """QA: the public intake endpoint, end to end through validation, mapping and Postgres."""
-from app.store import get_profile
+from app.cases.store import get_profile
 from tests.intake_helpers import complete_current_intake
 
 

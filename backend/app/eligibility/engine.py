@@ -8,10 +8,10 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from ..models import CaseProfile
-from .facts import known_fact
-from .policy import Criterion, ProgramPolicy
-from .rules import evaluate_rule
+from app.cases.models import CaseProfile
+from app.eligibility.facts import known_fact
+from app.eligibility.policy import Criterion, ProgramPolicy
+from app.eligibility.rules import evaluate_rule
 
 
 class CriterionResult(BaseModel):

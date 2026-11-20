@@ -6,10 +6,10 @@ Broker deduplication does not replace atomic worker idempotency.
 
 from contextlib import ExitStack
 
-from .models import EmailScanJob
-from .privacy import private_transport_logs
-from ..azure_identity import managed_identity
-from ..config import get_settings
+from app.email_ingestion.models import EmailScanJob
+from app.email_ingestion.privacy import private_transport_logs
+from app.core.azure_identity import managed_identity
+from app.core.config import get_settings
 
 
 class ScanPublisher:

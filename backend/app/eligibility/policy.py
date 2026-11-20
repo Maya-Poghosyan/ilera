@@ -56,8 +56,8 @@ class Criterion(BaseModel):
 
     @model_validator(mode="after")
     def validate_contract(self):
-        from .facts import fact_registry
-        from .rules import validate_rule
+        from app.eligibility.facts import fact_registry
+        from app.eligibility.rules import validate_rule
 
         if not self.criterion_id.strip():
             raise ValueError("criterion_id must be nonempty")

@@ -11,7 +11,7 @@ fills:
         GroupInput(key="city",   label="City",           fields=["SOC 295 8"]),
     ])
 
-Groups are drafted offline by `app.forms.generate_groups` and committed alongside the
+Groups are drafted offline by `app.forms.authoring.generate_groups` and committed alongside the
 field map, so the split from one answer to several boxes is fixed, reviewable and
 covered by tests — nothing interprets the applicant's words at submit time.
 
@@ -29,8 +29,8 @@ from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
-from ..models import CaseProfile
-from .filler import _dig
+from app.cases.models import CaseProfile
+from app.forms.filler import _dig
 
 # `applies_when`, e.g. "household.size >= 2" or "care_recipient.veteran == true".
 # A real expression language would be a liability here: these strings are written by a

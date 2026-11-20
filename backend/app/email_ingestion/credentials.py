@@ -13,10 +13,10 @@ from urllib.parse import urlparse
 
 from pydantic import SecretStr
 
-from ..azure_identity import managed_identity
-from ..config import get_settings
-from ..providers.base import OAuthTokens
-from .privacy import private_transport_logs
+from app.core.azure_identity import managed_identity
+from app.core.config import get_settings
+from app.email_ingestion.providers.base import OAuthTokens
+from app.email_ingestion.privacy import private_transport_logs
 
 
 class CredentialError(Exception):

@@ -3,11 +3,11 @@ from datetime import date
 from math import isfinite
 from typing import Any
 
-from .schema import SCREENS
+from app.intake.schema import SCREENS
 
 UNKNOWN = {"I'm not sure", "Prefer not to answer", "Not sure"}
 QUESTIONS = {q["field_id"]: q for section in SCREENS for q in section["questions"]}
-from .household import details as household_details, valid_members
+from app.intake.household import details as household_details, valid_members
 
 
 def answer_context(answers: dict[str, Any], today: date | None = None) -> dict[str, Any]:

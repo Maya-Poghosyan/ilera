@@ -48,7 +48,7 @@ class ResolutionTemplate(StrictModel):
 
     @model_validator(mode="after")
     def validate_binding(self):
-        from .facts import fact_registry
+        from app.eligibility.facts import fact_registry
         if self.profile_path not in fact_registry():
             raise ValueError("Template must bind to a persistent canonical fact")
         kinds = [m.kind for m in self.methods]

@@ -10,10 +10,10 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from ..azure_openai import is_dedicated_endpoint, open_client, structured_completion
-from ..config import get_settings
-from .models import EmailMessage
-from .privacy import private_transport_logs
+from app.core.azure_openai import is_dedicated_endpoint, open_client, structured_completion
+from app.core.config import get_settings
+from app.email_ingestion.models import EmailMessage
+from app.email_ingestion.privacy import private_transport_logs
 
 EXTRACTION_VERSION = "care-events-v1"
 MAX_BODY_CHARS = 24000

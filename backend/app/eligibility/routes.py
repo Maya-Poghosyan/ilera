@@ -2,13 +2,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import Field
 
-from ..access import require_case_access
-from ..store import get_profile, mutate_profile
-from .engine import ProgramEvaluation
-from .loader import list_policies
-from .resolution import (ResolutionConflict, complete_resolution, defer_resolution,
+from app.accounts.access import require_case_access
+from app.cases.store import get_profile, mutate_profile
+from app.eligibility.engine import ProgramEvaluation
+from app.eligibility.loader import list_policies
+from app.eligibility.resolution import (ResolutionConflict, complete_resolution, defer_resolution,
                          load_templates, refresh_resolution)
-from .resolution_models import CompletionRequest, ResolutionTask, StrictModel
+from app.eligibility.resolution_models import CompletionRequest, ResolutionTask, StrictModel
 
 router = APIRouter(prefix="/api/eligibility-resolution", tags=["eligibility resolution"])
 
