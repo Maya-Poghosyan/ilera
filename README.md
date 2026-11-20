@@ -211,10 +211,10 @@ rather than 403 to avoid confirming the case exists. Unclaimed cases are deleted
   `calendar_events`) and the same database serves the pgvector RAG index.
 - **LLM:** set `OPENAI_API_KEY` and `OPENAI_BASE_URL` (Azure OpenAI v1 endpoint).
 - **Email:** Microsoft 365 mailbox connections and scanning; configure Entra and Key Vault
-  using [the Azure setup handoff](docs/azure-email-setup.md). Gmail is not supported.
+  (see [infra/azure/README.md](infra/azure/README.md)). Gmail is not supported.
   Reminder records remain available, but automatic delivery and text check-ins are
   unavailable.
 - **Forms:** fillable government PDFs live in blob storage (`FORMS_BLOB_ACCOUNT_URL`) with
   authoring copies under `backend/data/forms/`; field maps are in `backend/data/form_schemas/`.
 
-Email scanning implementation milestones and current status: [Azure email roadmap](docs/email-scanning-milestones.md).
+Every Azure resource and what it is for: [infra/azure/README.md](infra/azure/README.md).

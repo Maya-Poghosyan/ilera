@@ -1,7 +1,7 @@
 Resolution guidance content
 ===========================
 
-The generated authoring schema is `docs/resolution-template.schema.json`.
+The authoring schema is `ResolutionTemplate` in `backend/app/eligibility/resolution_models.py`.
 Add one JSON file per canonical fact. `load_templates()` validates every file and
 publishes only `status: "reviewed"` templates. Draft resources never reach tasks.
 Only one reviewed template may target each fact. The current scope is the existing

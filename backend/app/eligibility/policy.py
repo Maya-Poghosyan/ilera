@@ -14,7 +14,7 @@ boundary enforceable rather than aspirational:
 
 Facts are addressed by their CaseProfile `profile_path` (the same key the form filler
 resolves against), so a fact resolved for a criterion is the same fact that
-autocompletes a form. See docs/ilera_eligibility_action_planning_architecture.txt.
+autocompletes a form.
 
 This is authored reference data: one ProgramPolicy per program, versioned by
 `ruleset_version`, authored as JSON under data/program_policies/.
