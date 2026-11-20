@@ -6,7 +6,7 @@ programs without duplicating its text or embeddings. Every search now requires a
 
 ## Authored metadata
 
-Each `data/knowledge/manifest.json` entry (or `reference.rag_sources.meta` row)
+Each `data/knowledge/manifest.json` entry (the only source; the database holds no copy)
 contains:
 
 | Field | Meaning |
@@ -83,12 +83,9 @@ Zero matching passages are identified as a coverage gap, not a negative verdict.
 1. Before deploying the new API and Functions code, run the metadata migration
    using the backend's existing configured credentials:
    `python -m app.rag.ingest --metadata-only`.
-2. Confirm catalog rows/jurisdictions match the authored source metadata. Existing
-   DB metadata is authoritative; newly added scope fields are backfilled from the
-   bundled manifest only when absent for a known document.
-   For subsequent curation, update `reference.rag_sources.meta` when using the
-   DB-backed corpus, then rerun metadata sync. Editing the bundled manifest alone
-   will not override existing explicit DB scope fields.
+2. Confirm catalog rows/jurisdictions match the authored source metadata.
+   To curate, edit `data/knowledge/manifest.json` and merge; the RAG ingest
+   workflow syncs the scope catalog (`--metadata-only` updates it without re-embedding).
 3. Deploy the API and eligibility Functions together. Old code ignores the
    additive catalog, so migrating first is compatible with the current deployment.
 4. Run scoped research for CA and another state. California-only documents must
