@@ -19,13 +19,14 @@ from app.core import db
 from app.email_ingestion.providers.microsoft import MicrosoftEmailProvider, ProviderError, ReauthorizationRequired
 from app.email_ingestion import credentials
 from app.email_ingestion.models import MailboxConnection
+from app.email_ingestion.store import write_connection
 
 
 class ConnectionError(Exception):
     pass
 
 
-def _lock(conn, user_id: str, case_id: str) -> None:
+def lock_mailbox(conn, user_id: str, case_id: str) -> None:
     # A transaction-scoped database lock, not a process-local lock.
     identity = f"email:{user_id}:{case_id}"
     conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", (identity,))
@@ -40,14 +41,6 @@ def _require_owner(conn, user_id: str, case_id: str) -> None:
 
 def _provider() -> MicrosoftEmailProvider:
     return MicrosoftEmailProvider(credentials.client_secret())
-
-
-def _write_connection(conn, mailbox: MailboxConnection) -> None:
-    conn.execute(
-        "INSERT INTO email_connections (id, case_id, doc) VALUES (%s, %s, %s::jsonb) "
-        "ON CONFLICT (id) DO UPDATE SET doc = EXCLUDED.doc, updated_at = now()",
-        (mailbox.id, mailbox.case_id, mailbox.model_dump_json()),
-    )
 
 
 def _write_tokens(conn, connection_id: str, envelope: str) -> None:
@@ -66,7 +59,7 @@ def begin_connection(*, user_id: str, case_id: str) -> str:
     provider = _provider()
     encrypted = credentials.encrypt({"verifier": verifier, "nonce": nonce})
     with db.connection() as conn:
-        _lock(conn, user_id, case_id)
+        lock_mailbox(conn, user_id, case_id)
         _require_owner(conn, user_id, case_id)
         conn.execute("DELETE FROM email_oauth_states WHERE expires_at <= now() OR (user_id = %s AND case_id = %s)",
                      (user_id, case_id))
@@ -89,7 +82,7 @@ def finish_connection(*, user_id: str, state: str, code: str | None, denied: boo
         if row is None:
             raise ConnectionError("Connection request expired or already used")
         case_id = row[0]
-        _lock(conn, user_id, case_id)
+        lock_mailbox(conn, user_id, case_id)
         _require_owner(conn, user_id, case_id)
         row = conn.execute(
             "DELETE FROM email_oauth_states WHERE state_hash = %s AND user_id = %s AND expires_at > now() "
@@ -118,7 +111,7 @@ def finish_connection(*, user_id: str, state: str, code: str | None, denied: boo
                 mailbox.consented_at = datetime.now(timezone.utc)
                 mailbox.granted_scopes = account.tokens.scopes
                 sealed = credentials.seal_tokens(account.tokens)
-                _write_connection(conn, mailbox)
+                write_connection(conn, mailbox)
                 _write_tokens(conn, mailbox.id, sealed)
         except (ConnectionError, ProviderError, credentials.CredentialError) as exc:
             failure = exc
@@ -145,7 +138,7 @@ def access_token(*, connection_id: str, user_id: str) -> SecretStr:
     result = None
     with db.connection() as conn:
         mailbox = _owned_connection(conn, connection_id, user_id)
-        _lock(conn, user_id, mailbox.case_id)
+        lock_mailbox(conn, user_id, mailbox.case_id)
         mailbox = _owned_connection(conn, connection_id, user_id)
         if mailbox.status != "connected":
             raise ConnectionError("Connection is inactive")
@@ -159,11 +152,11 @@ def access_token(*, connection_id: str, user_id: str) -> SecretStr:
                 tokens = asyncio.run(_provider().refresh_token(tokens.refresh_token))
                 _write_tokens(conn, connection_id, credentials.seal_tokens(tokens))
                 mailbox.granted_scopes = tokens.scopes
-                _write_connection(conn, mailbox)
+                write_connection(conn, mailbox)
             result = tokens.access_token
         except ReauthorizationRequired as exc:
             mailbox.status = "reauthorization_required"
-            _write_connection(conn, mailbox)
+            write_connection(conn, mailbox)
             failure = exc
     if failure:
         raise failure
@@ -180,7 +173,7 @@ def disconnect(*, connection_id: str, user_id: str) -> bool:
     """
     with db.connection() as conn:
         mailbox = _owned_connection(conn, connection_id, user_id)
-        _lock(conn, user_id, mailbox.case_id)
+        lock_mailbox(conn, user_id, mailbox.case_id)
         mailbox = _owned_connection(conn, connection_id, user_id)
         cleanup_pending = bool(mailbox.subscription_id)
         if mailbox.subscription_id:
@@ -193,13 +186,12 @@ def disconnect(*, connection_id: str, user_id: str) -> bool:
                     if tokens.expires_at <= datetime.now(timezone.utc):
                         tokens = asyncio.run(provider.refresh_token(tokens.refresh_token))
                     asyncio.run(provider.unsubscribe(tokens.access_token, mailbox.subscription_id))
-                    mailbox.subscription_id = None
-                    mailbox.subscription_expires_at = None
+                    mailbox.end_subscription()
                     cleanup_pending = False
             except (ProviderError, credentials.CredentialError):
                 pass  # Local deletion must succeed despite an expired grant or provider outage.
         mailbox.status = "disconnected"
-        _write_connection(conn, mailbox)
+        write_connection(conn, mailbox)
         conn.execute("DELETE FROM email_credentials WHERE connection_id = %s", (connection_id,))
         conn.execute("DELETE FROM email_oauth_states WHERE user_id = %s AND case_id = %s", (user_id, mailbox.case_id))
     return cleanup_pending

@@ -119,8 +119,8 @@ def _chunk_text(text: str) -> list[tuple[str, str]]:
     return out
 
 
-def _iter_corpus_documents() -> Iterator[Document]:
-    """The authored RAG corpus (data/knowledge), as the Documents the chunker consumes."""
+def iter_documents() -> Iterator[Document]:
+    """The authored RAG corpus (data/knowledge), one Document at a time, as the chunker consumes it."""
     from app.rag.source_store import iter_sources
 
     for src in iter_sources():
@@ -132,11 +132,6 @@ def _iter_corpus_documents() -> Iterator[Document]:
             source_url=src.source_url,
             policy=src.policy,
         )
-
-
-def iter_documents() -> Iterator[Document]:
-    """A generator, so indexing holds one document (and its chunks) at a time."""
-    return _iter_corpus_documents()
 
 
 def iter_chunks() -> Iterator[Chunk]:

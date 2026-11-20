@@ -13,7 +13,8 @@ from fastapi.responses import PlainTextResponse
 from starlette.concurrency import run_in_threadpool
 
 from app.core import db
-from app.email_ingestion.connections import _lock, _write_connection
+from app.email_ingestion.connections import lock_mailbox
+from app.email_ingestion.store import write_connection
 from app.email_ingestion.models import EmailScanJob, MailboxConnection
 from app.email_ingestion.queue import ScanPublisher, enqueue_scan
 from app.email_ingestion.privacy import PrivateEmailRoute
@@ -55,7 +56,7 @@ def process_notification(notice: dict, publish=None) -> None:
         if not _matches(mailbox, notice):
             return
         # Serialize publishing and lifecycle updates against disconnect/reconnect.
-        _lock(conn, mailbox.user_id, mailbox.case_id)
+        lock_mailbox(conn, mailbox.user_id, mailbox.case_id)
         row = conn.execute(
             "SELECT e.doc FROM email_connections e JOIN cases c ON c.id = e.case_id "
             "WHERE e.id = %s AND c.owner_user_id = e.doc->>'user_id'", (mailbox.id,),
@@ -70,15 +71,13 @@ def process_notification(notice: dict, publish=None) -> None:
             if lifecycle == "reauthorizationRequired":
                 mailbox.subscription_renewal_required = True
             elif lifecycle == "subscriptionRemoved":
-                mailbox.subscription_id = None
-                mailbox.subscription_expires_at = None
-                mailbox.subscription_client_state_hash = None
+                mailbox.end_subscription()
                 mailbox.reconciliation_required = True
             elif lifecycle == "missed":
                 mailbox.reconciliation_required = True
             else:
                 return
-            _write_connection(conn, mailbox)
+            write_connection(conn, mailbox)
             return
         data = notice.get("resourceData")
         if notice.get("changeType") != "created" or not isinstance(data, dict):

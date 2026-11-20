@@ -23,7 +23,7 @@ def create_token(user_id: str) -> str:
     return jwt.encode({"sub": user_id, "exp": expire}, _secret(), algorithm=settings.jwt_algorithm)
 
 
-def _user_from(credentials: Optional[HTTPAuthorizationCredentials]) -> Optional[User]:
+async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(_bearer)) -> Optional[User]:
     if credentials is None:
         return None
     try:
@@ -34,13 +34,8 @@ def _user_from(credentials: Optional[HTTPAuthorizationCredentials]) -> Optional[
     return get_user_by_id(user_id) if user_id else None
 
 
-async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(_bearer)) -> User:
-    user = _user_from(credentials)
+async def get_current_user(user: Optional[User] = Depends(get_optional_user)) -> User:
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated",
                             headers={"WWW-Authenticate": "Bearer"})
     return user
-
-
-async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(_bearer)) -> Optional[User]:
-    return _user_from(credentials)

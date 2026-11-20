@@ -13,6 +13,7 @@ from datetime import datetime, timedelta, timezone
 from app.core import db
 from app.core.config import get_settings, require_for
 from app.email_ingestion import connections
+from app.email_ingestion.store import write_connection
 from app.email_ingestion.models import MailboxConnection
 from app.email_ingestion.reconciliation import prune_orphan_subscriptions, reconcile
 
@@ -30,7 +31,7 @@ def ensure_subscription(connection_id: str, user_id: str) -> None:
     token = connections.access_token(connection_id=connection_id, user_id=user_id)
     with db.connection() as conn:
         mailbox = connections._owned_connection(conn, connection_id, user_id)
-        connections._lock(conn, user_id, mailbox.case_id)
+        connections.lock_mailbox(conn, user_id, mailbox.case_id)
         mailbox = connections._owned_connection(conn, connection_id, user_id)
         if mailbox.status != "connected" or mailbox.provider != "microsoft":
             raise connections.ConnectionError("Connection is inactive")
@@ -56,7 +57,7 @@ def ensure_subscription(connection_id: str, user_id: str) -> None:
         mailbox.subscription_id = subscription.id
         mailbox.subscription_expires_at = subscription.expires_at
         mailbox.subscription_renewal_required = False
-        connections._write_connection(conn, mailbox)
+        write_connection(conn, mailbox)
 
 
 def maintain_subscriptions() -> dict[str, int]:

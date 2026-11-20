@@ -33,6 +33,7 @@ from datetime import datetime, timedelta, timezone
 from app.core import db
 from app.core.config import get_settings
 from app.email_ingestion import connections
+from app.email_ingestion.store import write_connection
 from app.email_ingestion.models import EmailScanJob, MailboxConnection
 from app.email_ingestion.queue import ScanPublisher
 
@@ -69,7 +70,7 @@ def reconcile(connection_id: str, user_id: str, *, publish=None) -> int:
 
     enqueued = 0
     with db.connection() as conn:
-        connections._lock(conn, user_id, mailbox.case_id)
+        connections.lock_mailbox(conn, user_id, mailbox.case_id)
         current = connections._owned_connection(conn, connection_id, user_id)
         # Re-check under the lock: disconnect/reconnect during listing invalidates this pass.
         if (not current.reconciliation_required or current.status != "connected"
@@ -83,7 +84,7 @@ def reconcile(connection_id: str, user_id: str, *, publish=None) -> int:
         # Only reached if every enqueue above succeeded (a raise propagates out, flag intact).
         current.reconciled_through = now
         current.reconciliation_required = False
-        connections._write_connection(conn, current)
+        write_connection(conn, current)
     return enqueued
 
 
@@ -121,7 +122,7 @@ def prune_orphan_subscriptions(connection_id: str, user_id: str) -> int:
 
     deleted = 0
     with db.connection() as conn:
-        connections._lock(conn, user_id, mailbox.case_id)
+        connections.lock_mailbox(conn, user_id, mailbox.case_id)
         current = connections._owned_connection(conn, connection_id, user_id)
         # A concurrent create/renew may have changed the tracked id; honor the latest.
         if current.status != "connected" or current.provider != "microsoft":

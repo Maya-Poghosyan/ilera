@@ -17,6 +17,7 @@ from app.core.config import get_settings, require_for
 from app.calendar.suggestions import SuggestedEvent
 from app.email_ingestion.providers.microsoft import ReauthorizationRequired
 from app.email_ingestion import connections
+from app.email_ingestion.store import write_connection
 from app.email_ingestion.extraction import AzureExtractor, EXTRACTION_VERSION, Extraction
 from app.email_ingestion.models import EmailScanJob, MailboxConnection, ScanResult
 from app.email_ingestion.privacy import private_transport_logs
@@ -39,7 +40,7 @@ def _active_connection(conn, job: EmailScanJob) -> MailboxConnection | None:
 
 def _commit_result(conn, job: EmailScanJob, original: MailboxConnection, extraction: Extraction) -> str:
     # Same lock as disconnect/reconnect. If either won the race, discard transient output.
-    connections._lock(conn, original.user_id, original.case_id)
+    connections.lock_mailbox(conn, original.user_id, original.case_id)
     current = _active_connection(conn, job)
     if (current is None or current.user_id != original.user_id or current.case_id != original.case_id
             or current.consented_at != original.consented_at):
@@ -99,12 +100,12 @@ def process_job(job: EmailScanJob, extractor) -> str:
         try:
             message = asyncio.run(connections._provider().fetch_message(token, job.message_id))
         except ReauthorizationRequired:
-            connections._lock(conn, mailbox.user_id, mailbox.case_id)
+            connections.lock_mailbox(conn, mailbox.user_id, mailbox.case_id)
             current = _active_connection(conn, job)
             if current is not None and current.consented_at == mailbox.consented_at:
                 current.status = "reauthorization_required"
                 current.reconciliation_required = True
-                connections._write_connection(conn, current)
+                write_connection(conn, current)
             return "inactive"
         del token
         try:

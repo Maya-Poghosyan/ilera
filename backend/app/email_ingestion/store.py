@@ -9,8 +9,20 @@ _connections = db.JsonStore("email_connections", scoped_by_case=True)
 _results = db.JsonStore("email_scan_results", scoped_by_case=True)
 
 
-def save_connection(connection: MailboxConnection) -> None:
-    _connections.put(connection.id, connection.model_dump_json(), case_id=connection.case_id)
+def write_connection(conn, mailbox: MailboxConnection) -> None:
+    """Persist inside the caller's transaction, re-validating first: fields are assigned one
+    at a time, so this is where an inconsistent connection is refused."""
+    mailbox = MailboxConnection.model_validate(mailbox.model_dump())
+    conn.execute(
+        "INSERT INTO email_connections (id, case_id, doc) VALUES (%s, %s, %s::jsonb) "
+        "ON CONFLICT (id) DO UPDATE SET doc = EXCLUDED.doc, updated_at = now()",
+        (mailbox.id, mailbox.case_id, mailbox.model_dump_json()),
+    )
+
+
+def save_connection(mailbox: MailboxConnection) -> None:
+    with db.connection() as conn:
+        write_connection(conn, mailbox)
 
 
 def get_connection(connection_id: str) -> MailboxConnection | None:

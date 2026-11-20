@@ -10,7 +10,7 @@ from enum import Enum
 from typing import Optional
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from app.core import db
 from app.core.config import get_settings
@@ -41,6 +41,15 @@ class ReminderSchedule(BaseModel):
     # IANA name; None falls back to settings.default_timezone. A caregiver's
     # "6pm check-in" is 6pm where they live, not 6pm UTC.
     timezone: Optional[str] = None
+
+    @model_validator(mode="after")
+    def _fields_match_frequency(self) -> "ReminderSchedule":
+        weekly, once = self.freq == ScheduleFreq.weekly, self.freq == ScheduleFreq.once
+        if weekly != (self.weekday is not None) or once != (self.date is not None):
+            raise ValueError("weekly reminders need a weekday, one-off reminders a date, and nothing else")
+        if self.weekday is not None and not 0 <= self.weekday <= 6:
+            raise ValueError("weekday is 0 (Monday) to 6 (Sunday)")
+        return self
 
 
 class Reminder(BaseModel):

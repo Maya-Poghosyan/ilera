@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Literal
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, SecretStr
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, SecretStr, model_validator
 
 EmailProviderName = Literal["microsoft", "google"]
 
@@ -37,6 +37,16 @@ class MailboxConnection(BaseModel):
     # window starts here (falling back to consented_at). Advanced only on a fully covered pass.
     reconciled_through: AwareDatetime | None = None
     created_at: AwareDatetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @model_validator(mode="after")
+    def _subscription_is_whole(self) -> "MailboxConnection":
+        parts = (self.subscription_id, self.subscription_expires_at, self.subscription_client_state_hash)
+        if any(p is None for p in parts) and any(p is not None for p in parts):
+            raise ValueError("a subscription needs its id, expiry and client-state hash together")
+        return self
+
+    def end_subscription(self) -> None:
+        self.subscription_id = self.subscription_expires_at = self.subscription_client_state_hash = None
 
 
 class EmailScanJob(BaseModel):

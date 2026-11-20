@@ -1,6 +1,6 @@
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from app.eligibility.fact_models import FactMetadata
 from app.eligibility.resolution_models import ResolutionState
@@ -116,6 +116,12 @@ class CaseProfile(BaseModel):
     # The synthesized, human-facing application strategy.
     strategy: str = ""
     strategy_complete: bool = False
+
+    @model_validator(mode="after")
+    def _error_only_when_failed(self) -> "CaseProfile":
+        if bool(self.eligibility_error) != (self.eligibility_status == "error"):
+            raise ValueError("eligibility_error is set exactly when eligibility_status is 'error'")
+        return self
 
 
 class FollowupQuestion(BaseModel):

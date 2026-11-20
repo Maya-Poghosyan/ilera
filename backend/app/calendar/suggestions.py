@@ -43,6 +43,12 @@ class SuggestedEvent(BaseModel):
             data = {**data, "date": today.replace(day=int(data["day"])).isoformat()}
         return data
 
+    @model_validator(mode="after")
+    def _date_matches_status(self) -> "SuggestedEvent":
+        if (self.date_status == "known") != (self.date is not None):
+            raise ValueError("an event has a date exactly when its date is known")
+        return self
+
     @computed_field
     @property
     def day(self) -> int:
