@@ -5,18 +5,9 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 
 from app.accounts.access import require_case_access
-from app.applications.service import (
-    AppStatus,
-    ApplicationState,
-    complete_application,
-    get_app_state,
-    get_program_forms,
-    list_app_states,
-    list_programs,
-    save_app_state,
-    start_application,
-    submit_answers,
-)
+from app.applications.service import (complete_application, get_program_forms, list_programs, start_application,
+                                      submit_answers)
+from app.applications.state import AppStatus, ApplicationState, get_app_state, list_app_states, save_app_state
 from app.cases.store import get_profile
 
 router = APIRouter()
