@@ -11,7 +11,6 @@ embedding on demand, and `build()` is reachable only through `rebuild_index()`.
 from __future__ import annotations
 
 import hashlib
-import json
 import logging
 import os
 import re

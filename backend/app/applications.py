@@ -15,7 +15,7 @@ from pypdf import PdfWriter
 
 from . import db
 from .forms.discovery import discover_fields, field_index
-from .forms.filler import load_schema, resolve_fields
+from .forms.filler import load_schema, resolve_fields, write_values
 from .forms.groups import (
     GroupInput,
     applies,
@@ -522,45 +522,12 @@ def submit_answers(
                 merged_values[field_id] = raw
 
         try:
-            pdf_bytes = _fill_pdf_with_overrides(form_id, merged_values)
+            pdf_bytes = write_values(form_id, merged_values)
             filled_pdfs.append(pdf_bytes)
         except FileNotFoundError:
             continue
 
     return stitch_pdfs(filled_pdfs)
-
-
-def _fill_pdf_with_overrides(form_id: str, values: dict[str, str]) -> bytes:
-    """Fill a PDF with explicit field values (bypassing CaseProfile resolution)."""
-    from pypdf import PdfReader
-
-    from .forms.filler import _get_pdf_path
-
-    from pypdf.generic import BooleanObject, NameObject
-
-    pdf_path = _get_pdf_path(form_id)
-    if not pdf_path:
-        raise FileNotFoundError(f"No PDF template found for form {form_id}")
-
-    reader = PdfReader(pdf_path)
-    writer = PdfWriter()
-    writer.append(reader)
-
-    acroform_ref = writer._root_object.get(NameObject("/AcroForm"))
-    if acroform_ref is not None:
-        acroform = (
-            acroform_ref.get_object()
-            if hasattr(acroform_ref, "get_object")
-            else acroform_ref
-        )
-        acroform[NameObject("/NeedAppearances")] = BooleanObject(True)
-
-    for page in writer.pages:
-        writer.update_page_form_field_values(page, values)
-
-    buf = io.BytesIO()
-    writer.write(buf)
-    return buf.getvalue()
 
 
 def stitch_pdfs(pdf_bytes_list: list[bytes]) -> bytes:

@@ -8,7 +8,6 @@ from __future__ import annotations
 import json
 import os
 from functools import cache
-from typing import Optional
 
 from .policy import ProgramPolicy
 
@@ -24,11 +23,6 @@ def _policies() -> dict[str, ProgramPolicy]:
                 policy = ProgramPolicy.model_validate(json.load(fh))
             out[policy.program_id] = policy
     return out
-
-
-def get_policy(program_id: str) -> Optional[ProgramPolicy]:
-    policy = _policies().get(program_id)
-    return policy.model_copy(deep=True) if policy else None
 
 
 def list_policies() -> list[ProgramPolicy]:

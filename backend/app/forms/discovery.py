@@ -10,7 +10,7 @@ from the real field inventory instead of a static guess.
 from dataclasses import dataclass, field
 
 from .extract import extract_fields
-from .filler import _get_pdf_path
+from .filler import pdf_path
 
 # Accessibility artifacts that carry a fillable field but are not real data inputs.
 # Government PDFs annotate screen-reader helpers with these phrases in the tooltip (/TU).
@@ -61,11 +61,11 @@ def discover_fields(form_id: str) -> list[FieldInfo]:
 
     Returns an empty list when the form has no PDF template on disk.
     """
-    pdf_path = _get_pdf_path(form_id)
-    if not pdf_path:
+    template = pdf_path(form_id)
+    if not template:
         return []
     fields: list[FieldInfo] = []
-    for entry in extract_fields(pdf_path):
+    for entry in extract_fields(template):
         if is_junk(entry):
             continue
         fields.append(

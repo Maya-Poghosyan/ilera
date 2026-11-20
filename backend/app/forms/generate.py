@@ -35,7 +35,8 @@ from pydantic import BaseModel, Field
 from ..config import get_settings
 from .discovery import is_junk
 from .extract import extract_fields, extract_pages
-from .filler import SCHEMA_DIR, _get_pdf_path, load_schema
+from .filler import pdf_path
+from .schema_store import SCHEMA_DIR, load_schema
 from .profile_paths import describe_profile_paths
 from .validate import validate_fields
 
@@ -171,17 +172,17 @@ async def generate_form_map(form_id: str, only_pages: Optional[list[int]] = None
     """Draft `fields` for one form, one page per model call."""
     from pydantic_ai import Agent, ModelRetry
 
-    pdf_path = _get_pdf_path(form_id)
-    if not pdf_path:
+    template = pdf_path(form_id)
+    if not template:
         raise FileNotFoundError(f"No PDF on disk for form {form_id}")
 
     # Signatures and screen-reader artifacts are dropped by the same rule the question
     # builder uses, so the map never introduces a "field" the applicant would be asked
     # about but that discovery refuses to show.
     fields_by_name = {
-        f["name"]: f for f in extract_fields(pdf_path) if not is_junk(f)
+        f["name"]: f for f in extract_fields(template) if not is_junk(f)
     }
-    pages = extract_pages(pdf_path)
+    pages = extract_pages(template)
 
     agent = Agent(_model(), output_type=PageMap, system_prompt=SYSTEM_PROMPT, retries=3)
     # The validator belongs to the agent, not to a run, so it reads the page being

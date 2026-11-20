@@ -32,7 +32,8 @@ from pydantic import BaseModel, Field
 
 from .discovery import is_junk
 from .extract import extract_fields, extract_pages
-from .filler import SCHEMA_DIR, _get_pdf_path, load_schema
+from .filler import pdf_path
+from .schema_store import SCHEMA_DIR, load_schema
 from .generate import _describe_field, _model
 from .groups import (
     GroupInput,
@@ -853,8 +854,8 @@ async def generate_groups(
     """Draft the question groups for one form, one page per model call."""
     from pydantic_ai import Agent, ModelRetry
 
-    pdf_path = _get_pdf_path(form_id)
-    if not pdf_path:
+    template = pdf_path(form_id)
+    if not template:
         raise FileNotFoundError(f"No PDF on disk for form {form_id}")
 
     schema = load_schema(form_id)
@@ -866,7 +867,7 @@ async def generate_groups(
     askable = set(_askable(form_id))
     fields_by_name = {
         f["name"]: f
-        for f in extract_fields(pdf_path)
+        for f in extract_fields(template)
         if not is_junk(f) and f["name"] in askable
     }
 
@@ -885,7 +886,7 @@ async def generate_groups(
 
     merged: dict[str, QuestionGroup] = {}
     skipped: dict[str, SkippedField] = {}
-    for page in extract_pages(pdf_path):
+    for page in extract_pages(template):
         if only_pages and page["page"] not in only_pages:
             continue
         page_fields = [fields_by_name[n] for n in page["fields"] if n in fields_by_name]

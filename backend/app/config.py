@@ -84,12 +84,10 @@ class Settings(BaseSettings):
     document_openai_deployment: str = ""
     document_managed_identity_client_id: str = ""
 
-    # Government PDF form templates and public reference guides, in two containers of one
-    # Azure Blob Storage account, read with managed identity.
-    forms_blob_account_url: str = ""        # e.g. https://ileraforms.blob.core.windows.net
-    forms_blob_container: str = "forms"
+    # Public reference guides (PDFs fetched from agencies) in Azure Blob Storage, read with the
+    # API's managed identity. Form templates ship in the image under data/forms/.
+    reference_guides_blob_account_url: str = ""  # e.g. https://ilerastorage.blob.core.windows.net
     reference_guides_blob_container: str = "reference-guides"
-    forms_managed_identity_client_id: str = ""
 
 
 @lru_cache

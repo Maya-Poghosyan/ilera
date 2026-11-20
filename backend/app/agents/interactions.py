@@ -9,7 +9,7 @@ IRS Notice 2014-7, etc. This module grounds those cross-program interactions in 
 from __future__ import annotations
 
 from ..config import get_settings
-from ..models import CaseProfile, Citation, EligibilityResult, InteractionNote
+from ..models import CaseProfile, Citation, InteractionNote
 from ..rag.index import get_index
 from ..rag.scope import profile_scope
 from .output_contracts import InteractionsOutput
@@ -62,15 +62,6 @@ def _citation(h) -> Citation:
         page=h.page,
         program=h.program,
     )
-
-
-def analyze_interactions(
-    profile: CaseProfile, results: list[EligibilityResult]
-) -> list[InteractionNote]:
-    """Return cited cross-program interaction notes, given full specialist results."""
-    active = [r.program for r in results if r.status in ("likely", "possible", "needs_info")]
-    summary = "; ".join(f"{r.program}={r.status}({r.confidence:.2f})" for r in results)
-    return _analyze(profile, active, summary)
 
 
 def analyze_program_interactions(

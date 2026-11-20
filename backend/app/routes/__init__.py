@@ -2,12 +2,11 @@
 listed here; order matters where paths overlap (e.g. /api/reminders/templates must be
 registered before /api/reminders/{reminder_id})."""
 
-from . import applications, calendar, cases, forms, health, preferences, rag, records, reference_guides, reminders
+from . import applications, calendar, cases, forms, health, preferences, records, reference_guides, reminders
 
 ROUTERS = [
     health.router,
     cases.router,
-    rag.router,
     forms.router,
     reference_guides.router,
     reminders.router,

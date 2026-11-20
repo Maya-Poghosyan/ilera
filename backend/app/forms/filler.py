@@ -1,7 +1,8 @@
 """Form filling engine.
 
-Loads field-map schemas from data/form_schemas/<form_id>.json, resolves values
-from a CaseProfile, and writes them into fillable PDF AcroForms using pypdf.
+Loads field-map schemas from data/form_schemas/<form_id>.json, resolves values from a
+CaseProfile, and writes them into the fillable PDF templates under data/forms/ (shipped in
+the image; the single source for discovery, filling and authoring) using pypdf.
 """
 
 from __future__ import annotations
@@ -14,11 +15,8 @@ from pypdf import PdfReader, PdfWriter
 from pypdf.generic import BooleanObject, NameObject
 
 from ..models import CaseProfile
-from .pdf_store import get_pdf_bytes
-from .schema_store import all_schemas
-from .schema_store import load_schema as _load_schema_source
+from .schema_store import all_schemas, load_schema
 
-from .schema_store import SCHEMA_DIR
 FORMS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "forms")
 
 
@@ -62,11 +60,6 @@ def list_schemas() -> list[dict]:
             "total_schema_fields": total_in_map,
         })
     return sorted(schemas, key=lambda s: s["form_id"])
-
-
-def load_schema(form_id: str) -> dict:
-    """Load a field-map schema by form_id (case-insensitive)."""
-    return _load_schema_source(form_id)
 
 
 def resolve_fields(form_id: str, profile: CaseProfile) -> dict[str, Any]:
@@ -142,64 +135,32 @@ def resolve_fields(form_id: str, profile: CaseProfile) -> dict[str, Any]:
     }
 
 
-def _get_pdf_path(form_id: str) -> str | None:
-    """Local filesystem path to a form's PDF, if the bundled file exists.
-
-    Used by the authoring generators, which operate on local files. The runtime fill
-    path uses `_get_pdf_source`, which reads blob storage.
-    """
-    schema = load_schema(form_id)
-    meta = schema.get("_meta", {})
-    pdf_rel = meta.get("pdf_path", "")
-    if pdf_rel:
-        full = os.path.join(FORMS_DIR, pdf_rel)
-        if os.path.exists(full):
-            return full
-    return None
+def pdf_path(form_id: str) -> str | None:
+    """The form's PDF template, or None when the form has none."""
+    pdf_rel = load_schema(form_id).get("_meta", {}).get("pdf_path", "")
+    full = os.path.join(FORMS_DIR, pdf_rel) if pdf_rel else ""
+    return full if full and os.path.exists(full) else None
 
 
-def _get_pdf_source(form_id: str) -> io.BytesIO | None:
-    """A PdfReader-ready byte stream for a form's PDF, from blob storage."""
-    schema = load_schema(form_id)
-    pdf_rel = schema.get("_meta", {}).get("pdf_path", "")
-    data = get_pdf_bytes(pdf_rel)
-    return io.BytesIO(data) if data is not None else None
-
-
-def fill_pdf(form_id: str, profile: CaseProfile) -> bytes:
-    """Fill a PDF template with resolved CaseProfile values and return PDF bytes."""
-    pdf_source = _get_pdf_source(form_id)
-    if pdf_source is None:
+def write_values(form_id: str, values: dict[str, Any]) -> bytes:
+    """The form's PDF with `values` written into its AcroForm fields."""
+    path = pdf_path(form_id)
+    if path is None:
         raise FileNotFoundError(f"No PDF template found for form {form_id}")
-
-    result = resolve_fields(form_id, profile)
-    values = result["resolved"]
-
-    reader = PdfReader(pdf_source)
     writer = PdfWriter()
-
-    # Clone via append to preserve AcroForm structure
-    writer.append(reader)
-
-    # Set NeedAppearances so PDF viewers render filled values
+    writer.append(PdfReader(path))  # append preserves the AcroForm structure
     acroform_ref = writer._root_object.get(NameObject("/AcroForm"))
     if acroform_ref is not None:
         acroform = acroform_ref.get_object() if hasattr(acroform_ref, "get_object") else acroform_ref
+        # Viewers render the filled values instead of stale appearance streams.
         acroform[NameObject("/NeedAppearances")] = BooleanObject(True)
-
-    # Write values into form fields
     for page in writer.pages:
         writer.update_page_form_field_values(page, values)
-
     buf = io.BytesIO()
     writer.write(buf)
     return buf.getvalue()
 
 
-def stitch(pdf_paths: list[str], output_path: str) -> str:
-    writer = PdfWriter()
-    for p in pdf_paths:
-        writer.append(p)
-    with open(output_path, "wb") as fh:
-        writer.write(fh)
-    return output_path
+def fill_pdf(form_id: str, profile: CaseProfile) -> bytes:
+    """The form filled from a CaseProfile."""
+    return write_values(form_id, resolve_fields(form_id, profile)["resolved"])

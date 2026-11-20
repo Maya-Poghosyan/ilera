@@ -211,15 +211,6 @@ def connection() -> Iterator[Any]:
         yield conn
 
 
-def reset_pool() -> None:
-    """Drop the cached pool (tests that repoint DATABASE_URL)."""
-    global _pool
-    with _pool_lock:
-        if _pool is not None:
-            _pool.close()
-        _pool = None
-
-
 def ready() -> bool:
     try:
         with connection() as conn:
