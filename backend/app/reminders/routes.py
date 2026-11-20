@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.accounts.access import authorize_case
-from app.accounts.auth import User, get_optional_user
+from app.accounts.sessions import get_optional_user
+from app.accounts.users import User
 from app.reminders.service import (
     TEMPLATES,
     Reminder,

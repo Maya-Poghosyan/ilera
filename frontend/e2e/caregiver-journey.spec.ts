@@ -62,6 +62,8 @@ test("a caregiver submits intake, creates an account and keeps reminders across 
   const { code } = await lastMail(request, email, "otp");
   await other.getByLabel("Login code").fill(code!);
   await other.getByRole("button", { name: /verify|sign in|continue/i }).click();
+  // Signed in once the app moves on from the login page (it sets the session first).
+  await other.waitForURL(url => !url.pathname.startsWith("/login"));
   await other.goto("/dashboard");
   await expect(other.getByText("Refill blood pressure medication")).toBeVisible();
 });

@@ -5,7 +5,8 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, Field, SecretStr
 
-from app.accounts.auth import User, get_current_user
+from app.accounts.sessions import get_current_user
+from app.accounts.users import User
 from app.core.config import get_settings
 from app.cases.store import get_case_owner
 from app.email_ingestion.providers.microsoft import ProviderError

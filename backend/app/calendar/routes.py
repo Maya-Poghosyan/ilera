@@ -6,7 +6,8 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from app.accounts.auth import User, get_current_user
+from app.accounts.sessions import get_current_user
+from app.accounts.users import User
 from app.calendar.events import (
     CalendarEvent,
     _event_id_for_suggestion,

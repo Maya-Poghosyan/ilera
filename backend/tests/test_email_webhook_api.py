@@ -8,15 +8,12 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 import pytest
-
-from app.accounts import auth
 from app.core import db
-from app.cases import store
 from app.core.config import get_settings
 from app.email_ingestion import notifications
 from app.email_ingestion.models import MailboxConnection
 from app.email_ingestion.store import get_connection, save_connection
-from app.cases.models import CaseProfile
+from tests.factories import new_case, new_user
 
 URL = "/api/email/microsoft/notifications"
 STATE = "client-state-secret"
@@ -43,18 +40,9 @@ def queue(monkeypatch):
     get_settings.cache_clear()
 
 
-def user() -> auth.User:
-    account = auth.User(id=str(uuid.uuid4()), name="Owner", email=f"{uuid.uuid4().hex}@example.com",
-                        hashed_password="x", created_at="2026-01-01T00:00:00+00:00")
-    auth._save_user(account)
-    return account
-
-
 def connected_mailbox(**patch) -> MailboxConnection:
-    owner = user()
-    case_id = f"case-{uuid.uuid4().hex}"
-    store.save_profile(CaseProfile(id=case_id))
-    store.claim_case(case_id, owner.id)
+    owner = new_user("Owner")
+    case_id = new_case(owner)
     fields = dict(
         id=f"conn-{uuid.uuid4().hex}", user_id=owner.id, case_id=case_id, provider="microsoft",
         provider_account_id="account", credential_id="credential", tenant_id="tenant",
@@ -105,7 +93,7 @@ def test_forged_stale_or_mismatched_notices_are_acknowledged_and_dropped(client,
 def test_a_mailbox_whose_case_changed_hands_receives_nothing(client, queue):
     mailbox = connected_mailbox()
     with db.connection() as conn:
-        conn.execute("UPDATE cases SET owner_user_id = %s WHERE id = %s", (user().id, mailbox.case_id))
+        conn.execute("UPDATE cases SET owner_user_id = %s WHERE id = %s", (new_user().id, mailbox.case_id))
     assert client.post(URL, json={"value": [notice(mailbox)]}).status_code == 202
     assert queue == []
 

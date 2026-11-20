@@ -7,7 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.accounts.access import authorize_case, require_case_access
-from app.accounts.auth import User, get_optional_user
+from app.accounts.sessions import get_optional_user
+from app.accounts.users import User
 from app.records.service import (
     JournalEntry,
     RenewalItem,

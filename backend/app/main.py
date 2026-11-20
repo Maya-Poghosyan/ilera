@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import health
-from app.accounts import auth
+from app.accounts import routes as accounts
 from app.applications import routes as applications
 from app.calendar import routes as calendar
 from app.cases import routes as cases
@@ -35,6 +35,6 @@ app.add_middleware(
 )
 
 # Order matters where paths overlap (e.g. /api/reminders/templates before /api/reminders/{id}).
-for feature in (auth, eligibility, email, email_notifications, intake_documents, health, cases, forms,
+for feature in (accounts, eligibility, email, email_notifications, intake_documents, health, cases, forms,
                 reference_guides, reminders, applications, preferences, calendar, records):
     app.include_router(feature.router)

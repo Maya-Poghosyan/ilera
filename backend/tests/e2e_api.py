@@ -22,7 +22,7 @@ api_port, model_port = int(sys.argv[1]), int(sys.argv[2])
 os.environ.update(DOCUMENT_OPENAI_ENDPOINT="https://e2e.openai.azure.com", DOCUMENT_OPENAI_DEPLOYMENT="e2e-documents",
                   JWT_SECRET=os.environ.get("JWT_SECRET") or "e2e-secret")
 
-from app.accounts import auth  # noqa: E402
+from app.accounts import mail as account_mail  # noqa: E402
 from app.cases import pipeline  # noqa: E402
 from app.intake.documents import extractor  # noqa: E402
 from app.main import app  # noqa: E402
@@ -37,14 +37,14 @@ async def no_pipeline(profile):
     return f"eligibility-{profile.id}"
 
 
-mail: dict[str, list[dict]] = defaultdict(list)
+outbox: dict[str, list[dict]] = defaultdict(list)
 extractor.open_client = fake_client
 pipeline.start_eligibility_orchestration = no_pipeline
-auth._send_verification_email = lambda email, token: mail[email.lower()].append({"kind": "verify", "token": token})
-auth._send_otp_email = lambda email, code: mail[email.lower()].append({"kind": "otp", "code": code})
+account_mail.send_verification_link = lambda email, token: outbox[email.lower()].append({"kind": "verify", "token": token})
+account_mail.send_login_code = lambda email, code: outbox[email.lower()].append({"kind": "otp", "code": code})
 
 e2e = APIRouter(prefix="/__e2e")
-e2e.add_api_route("/mail/{address}", lambda address: mail[address.lower()], methods=["GET"])
+e2e.add_api_route("/mail/{address}", lambda address: outbox[address.lower()], methods=["GET"])
 e2e.add_api_route("/complete-intake", lambda: complete_current_intake(), methods=["GET"])
 app.include_router(e2e)
 

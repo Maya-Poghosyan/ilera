@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from app.cases import store
 from app.main import app
+from tests.factories import new_user
 from app.cases.models import CaseProfile
 from app.eligibility.policy import ProgramPolicy
 from app.eligibility import routes
@@ -44,10 +45,7 @@ def test_api_roundtrip_authorization_validation_and_persistence(monkeypatch):
     assert client.post(f"{base}/tasks/{task_id}/result", json=body).status_code == 200
     assert client.post(f"{base}/tasks/{task_id}/result", json={**body, "value": 80}).status_code == 409
     assert client.get("/api/eligibility-resolution/missing").status_code == 404
-    from app.accounts import auth
-    stranger = auth.User(id=f"stranger-{case_id}", name="S", email=f"{case_id}@example.com",
-                         hashed_password="x", created_at="2026-01-01T00:00:00+00:00")
-    auth._save_user(stranger)
+    stranger = new_user("Stranger")
     store.claim_case(case_id, stranger.id)
     assert client.get(base).status_code == 404
     assert client.post(f"{base}/tasks/{task_id}/result", json=body).status_code == 404

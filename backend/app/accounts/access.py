@@ -13,7 +13,8 @@ from typing import Optional
 from fastapi import Depends, HTTPException
 
 from app.cases import store
-from app.accounts.auth import User, get_optional_user
+from app.accounts.sessions import get_optional_user
+from app.accounts.users import User
 
 CASE_NOT_FOUND = HTTPException(status_code=404, detail="case not found")
 
