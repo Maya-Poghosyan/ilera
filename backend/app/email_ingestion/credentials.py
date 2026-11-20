@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 
 from pydantic import SecretStr
 
+from ..azure_identity import managed_identity
 from ..config import get_settings
 from ..providers.base import OAuthTokens
 from .privacy import private_transport_logs
@@ -24,17 +25,13 @@ class CredentialError(Exception):
 
 @contextmanager
 def _vault() -> Iterator:
-    from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
     from azure.keyvault.secrets import SecretClient
 
     settings = get_settings()
     url = urlparse(settings.email_key_vault_url)
     if url.scheme != "https" or not url.hostname or not url.hostname.endswith(".vault.azure.net"):
         raise CredentialError("Key Vault is not configured")
-    credential = (
-        ManagedIdentityCredential(client_id=settings.email_managed_identity_client_id or None)
-        if settings.email_use_managed_identity else DefaultAzureCredential()
-    )
+    credential = managed_identity(settings.email_managed_identity_client_id)
     with private_transport_logs(), credential:
         with SecretClient(vault_url=settings.email_key_vault_url, credential=credential,
                           logging_enable=False, connection_timeout=5, read_timeout=10, retry_total=2) as client:

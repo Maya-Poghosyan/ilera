@@ -7,7 +7,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Runtime configuration. Everything is optional so the app boots without keys."""
+    """Runtime configuration.
+
+    The API, the Functions app and the email worker share this class and each sets only the
+    settings it uses, so nothing is required here; code that needs a setting fails loudly
+    when it is missing. There are no switches or fallbacks: unset means misconfigured."""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -17,47 +21,27 @@ class Settings(BaseSettings):
     # IANA zone reminder schedules are interpreted in ("18:00" means 6pm here).
     default_timezone: str = "America/Los_Angeles"
     # Auth
-    jwt_secret: str = "ilera-dev-secret-change-in-production"
+    jwt_secret: str = ""
     jwt_algorithm: str = "HS256"
     jwt_expire_hours: int = 72
     # Intake runs before signup, so an abandoned intake leaves a case nobody ever claims —
-    # household data belonging to no account. Deleted after this many days; 0 keeps them.
-    unclaimed_case_ttl_days: int = 5
+    # household data belonging to no account. Deleted after this many days.
+    unclaimed_case_ttl_days: int = Field(default=5, ge=1)
 
-    # LLM (OpenAI or an OpenAI-compatible endpoint such as Azure OpenAI)
+    # Eligibility research LLM: the Azure OpenAI v1 endpoint
+    # (https://<resource>.openai.azure.com/openai/v1) and a deployment name on it.
     openai_api_key: str = ""
-    # Chat/completions model. On Azure OpenAI this must match a *deployment* name on the
-    # configured resource (see openai_base_url). Defaults to the deployment provisioned for
-    # Ilera; override via OPENAI_MODEL only when pointing at a resource that names it
-    # differently (e.g. plain OpenAI, or a separate Azure resource).
     openai_model: str = "gpt-5-mini"
-    # Optional OpenAI-compatible base URL (e.g. an Azure OpenAI v1 endpoint:
-    # https://<resource>.openai.azure.com/openai/v1). Empty = api.openai.com.
     openai_base_url: str = ""
     # Completion budgets include reasoning tokens. Keep room for validated JSON.
     eligibility_max_output_tokens: int = Field(default=4096, ge=1024, le=16384)
     research_max_output_tokens: int = Field(default=3072, ge=1024, le=16384)
-    # Empty omits this setting for deployments without reasoning-effort support.
-    agent_reasoning_effort: Literal["", "low", "medium", "high"] = "low"
+    agent_reasoning_effort: Literal["low", "medium", "high"] = "low"
     embedding_model: str = "text-embedding-3-small"
-    # Which embedding backend to use: "auto" (OpenAI if a key is set, else fastembed),
-    # "openai", or "fastembed". Force "fastembed" when the OpenAI/Azure endpoint has no
-    # embedding deployment (or to keep a fastembed-built index consistent).
-    embedding_provider: str = "auto"
-    # Local embedding model used when no OpenAI key is set (fastembed / ONNX, no API needed).
-    fastembed_model: str = "BAAI/bge-small-en-v1.5"
-    # Texts embedded per forward pass when indexing the corpus. Peak memory scales with it
-    # (attention is O(batch x seq^2)): fastembed's own default of 256 needs several GB for
-    # this corpus, which OOMs a small container.
-    embedding_batch_size: int = 8
-    # Texts per request when embedding through the hosted API, where the limit is round trips
-    # rather than memory.
+    # Texts per embeddings request; the limit is round trips rather than memory.
     embedding_api_batch_size: int = 128
     embedding_max_retries: int = 5
     embedding_timeout_seconds: float = 60.0
-    # onnxruntime intra-op threads for the local embedding model. Each thread carries its own
-    # activation arena, so keep it at 1 on a memory-constrained instance.
-    embedding_threads: int = 1
     # Chunks written to the index per round trip when (re)building it.
     index_write_batch_size: int = 200
     # Postgres + pgvector connection string. The store of record for accounts, cases, and every
@@ -68,22 +52,16 @@ class Settings(BaseSettings):
     # Azure Durable Functions (eligibility pipeline)
     # Base URL of the Function App, e.g. https://<app>.azurewebsites.net
     azure_functions_url: str = ""
-    # Function-level host key for securing the HTTP starter endpoint.
-    # Empty = no key header sent (use for local func host with anonymous auth).
+    # Function-level host key for the HTTP starter endpoint.
     azure_functions_key: str = ""
 
     # Email verification (Azure Communication Services — covered under Azure BAA)
-    # Connection string from your ACS resource. Without it the verification link is logged
-    # to stdout so developers can click it locally without an email service configured.
     acs_email_connection_string: str = ""
     # Public base URL of the frontend, used to build the verification link in emails.
-    app_url: str = "http://localhost:3000"
+    app_url: str = "https://ileracare.app"
     # "From" address — must match a domain verified in your ACS Email resource.
     from_email: str = "noreply@ileracare.app"
 
-    # Mailbox connection and scanning have independent rollout switches.
-    email_connections_enabled: bool = False
-    email_scanning_enabled: bool = False
     email_microsoft_tenant_id: str = ""
     email_microsoft_client_id: str = ""
     email_microsoft_redirect_uri: str = ""
@@ -94,47 +72,24 @@ class Settings(BaseSettings):
     email_service_bus_queue: str = "email.scan"
     # Public API origin, bypassing the authenticated frontend API proxy.
     email_microsoft_notification_url: str = ""
-    email_use_managed_identity: bool = True
+    # User-assigned identity (worker); empty = the app's system-assigned identity.
     email_managed_identity_client_id: str = ""
     email_openai_endpoint: str = ""
     email_openai_deployment: str = ""
     email_scan_max_deliveries: int = 5
 
     # Intake document assistance: a dedicated Azure OpenAI resource, separate from eligibility
-    # research and email scanning. Empty = uploads are offered but not read (503).
+    # research and email scanning, reached with managed identity.
     document_openai_endpoint: str = ""      # e.g. https://<resource>.openai.azure.com
     document_openai_deployment: str = ""
-    document_use_managed_identity: bool = True
     document_managed_identity_client_id: str = ""
-    # Only for a local OpenAI-compatible stand-in (http://127.0.0.1 or localhost) in e2e tests.
-    # Refused with a real Azure endpoint, which must use managed identity.
-    document_openai_api_key: str = ""
 
-    # Government PDF form templates (authored reference binaries). Stored in Azure Blob
-    # Storage so the library can grow with state coverage without bloating the DB or the
-    # container image. Empty account URL = fall back to the bundled files in data/forms/
-    # (local dev / keyless boot). Auth mirrors the email path: managed identity in Azure,
-    # DefaultAzureCredential otherwise.
+    # Government PDF form templates and public reference guides, in two containers of one
+    # Azure Blob Storage account, read with managed identity.
     forms_blob_account_url: str = ""        # e.g. https://ileraforms.blob.core.windows.net
     forms_blob_container: str = "forms"
-    forms_use_managed_identity: bool = True
-    forms_managed_identity_client_id: str = ""
-
-    # Public guide binaries live separately from application form templates.
-    reference_guides_blob_account_url: str = ""  # falls back to forms account URL
     reference_guides_blob_container: str = "reference-guides"
-
-    @property
-    def has_forms_blob(self) -> bool:
-        return bool(self.forms_blob_account_url)
-
-    @property
-    def has_postgres(self) -> bool:
-        return bool(self.database_url)
-
-    @property
-    def has_llm(self) -> bool:
-        return bool(self.openai_api_key)
+    forms_managed_identity_client_id: str = ""
 
 
 @lru_cache

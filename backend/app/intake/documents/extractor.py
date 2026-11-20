@@ -2,7 +2,7 @@
 
 from contextlib import ExitStack
 
-from ...azure_openai import is_dedicated_endpoint, is_loopback_endpoint, open_client, structured_completion
+from ...azure_openai import is_dedicated_endpoint, open_client, structured_completion
 from ...config import get_settings
 from ...private_logs import private_transport_logs
 from .fields import RawExtraction, prompt_rules, to_suggestions
@@ -25,18 +25,15 @@ NEVER include names, addresses, SSNs, Medicare numbers, claim/account/policy num
 diagnoses or any identifier in any field."""
 
 
-def _configured():
-    """The dedicated resource (managed identity), or a local stand-in with a key for e2e tests."""
+def _settings():
     s = get_settings()
-    endpoint, key = s.document_openai_endpoint, s.document_openai_api_key
-    if not s.document_openai_deployment or not (
-            (is_dedicated_endpoint(endpoint) and not key) or (is_loopback_endpoint(endpoint) and key)):
-        raise DocumentError(ErrorCode.UNCONFIGURED)
+    if not (s.document_openai_deployment and is_dedicated_endpoint(s.document_openai_endpoint)):
+        raise RuntimeError("DOCUMENT_OPENAI_ENDPOINT and DOCUMENT_OPENAI_DEPLOYMENT are required")
     return s
 
 
 def read_document(upload: Upload) -> DocumentReading:
-    settings = _configured()
+    settings = _settings()
     request = model_input(upload)
     import httpcore  # noqa: F401  (register transport loggers before suppressing them)
 
@@ -44,9 +41,8 @@ def read_document(upload: Upload) -> DocumentReading:
         stack.enter_context(private_transport_logs())
         try:
             client = open_client(stack, endpoint=settings.document_openai_endpoint,
-                                 use_managed_identity=settings.document_use_managed_identity,
                                  managed_identity_client_id=settings.document_managed_identity_client_id,
-                                 api_key=settings.document_openai_api_key, timeout=60)
+                                 timeout=60)
             raw = structured_completion(client, deployment=settings.document_openai_deployment,
                                         system=SYSTEM_PROMPT, content=request.content, output=RawExtraction,
                                         name="intake_document_suggestions")

@@ -5,7 +5,6 @@ field names. If a curated key drifts from the real PDF, pypdf silently fails to 
 These tests turn that silent failure into a loud one, and check that discovery drops
 non-data fields (signatures / accessibility artifacts).
 
-Runs against the in-memory store (no services). Run directly or via pytest.
 """
 import os
 import sys

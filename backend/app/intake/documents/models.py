@@ -15,14 +15,13 @@ class ErrorCode(StrEnum):
     UNREADABLE = "unreadable"
     NO_TEXT_LAYER = "no_text_layer"
     RATE_LIMITED = "rate_limited"
-    UNCONFIGURED = "unconfigured"
     EXTRACTION_FAILED = "extraction_failed"
 
 
 HTTP_STATUS: dict[ErrorCode, int] = {
     ErrorCode.EMPTY: 400, ErrorCode.TOO_LARGE: 413, ErrorCode.UNSUPPORTED_TYPE: 415,
     ErrorCode.ENCRYPTED_PDF: 422, ErrorCode.TOO_MANY_PAGES: 422, ErrorCode.UNREADABLE: 422,
-    ErrorCode.NO_TEXT_LAYER: 422, ErrorCode.RATE_LIMITED: 429, ErrorCode.UNCONFIGURED: 503,
+    ErrorCode.NO_TEXT_LAYER: 422, ErrorCode.RATE_LIMITED: 429,
     ErrorCode.EXTRACTION_FAILED: 502,
 }
 

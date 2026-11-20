@@ -22,14 +22,11 @@ blob key and display filename. The public `/api/reference-guides/{guide_id}`
 endpoint only serves whitelisted public guides. Storage stays private; the API
 streams the guide. It cannot expose arbitrary keys or user documents.
 
-The app reads `REFERENCE_GUIDES_BLOB_ACCOUNT_URL` (or, if unset, the existing
-`FORMS_BLOB_ACCOUNT_URL`) and `REFERENCE_GUIDES_BLOB_CONTAINER` (default
-`reference-guides`). It uses the existing configured managed identity in Azure;
-that identity needs Storage Blob Data Reader access to the guide container.
-Local development can use Azure CLI login via DefaultAzureCredential with
-`FORMS_USE_MANAGED_IDENTITY=false`. Local binaries under
-`backend/data/reference_guides/<blob_key>` are a fallback. If no hosted/local PDF
-is available, the browser is redirected to the official source.
+The app reads guides from `REFERENCE_GUIDES_BLOB_CONTAINER` (default
+`reference-guides`) in the `FORMS_BLOB_ACCOUNT_URL` storage account, with its
+managed identity; that identity needs Storage Blob Data Reader access to the
+guide container. Files under `backend/data/reference_guides/` are the upload
+source only; the app never serves them.
 
 ## Upload the EDD guide
 
@@ -73,7 +70,6 @@ backend/.venv/bin/python backend/scripts/upload_reference_guide.py \
   ssa-benefit-letter --account-name ilerastorage
 ```
 
-The local fallback is available immediately through `/api/reference-guides/ssa-benefit-letter`.
 The user confirmed this guide was uploaded successfully. No personal benefit
 letters are stored with public reference guides.
 

@@ -8,7 +8,7 @@
 # workflow — see api.tf). Set them on the API Container App from the outputs below:
 #   DOCUMENT_OPENAI_ENDPOINT   = document_openai_endpoint
 #   DOCUMENT_OPENAI_DEPLOYMENT = document_openai_deployment
-#   (DOCUMENT_USE_MANAGED_IDENTITY defaults to true; system-assigned needs no client id.)
+#   (The API's system-assigned identity needs no client id.)
 #
 # HIPAA, outside Terraform: this account must be covered by the Microsoft BAA and have
 # abuse monitoring / content logging opted out (Modified Abuse Monitoring request) before

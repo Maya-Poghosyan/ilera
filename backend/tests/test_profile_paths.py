@@ -8,7 +8,6 @@ an offered path, PDFs silently print blank instead of asking. Both directions ar
 checked here by mapping a synthetic, fully-answered intake plus the contact details an
 account contributes.
 
-Runs against the in-memory store (no services). Run directly or via pytest.
 """
 import os
 import sys

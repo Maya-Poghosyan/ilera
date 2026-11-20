@@ -2,18 +2,15 @@
 
 Postgres (the same database that backs the pgvector RAG index) is the store of record:
 accounts, CaseProfiles, reminders, care records, application state, preferences, and
-suggested events. Without `DATABASE_URL` every store falls back to an in-memory dict so
-the app still boots with no services, as elsewhere.
+suggested events. `DATABASE_URL` is required.
 
 Apart from `users`, rows keep the Pydantic model whole in a `doc jsonb` column rather than
 exploding it into columns: these models are deep, still-changing trees that are only ever
-read and written entirely. `JsonStore` is that shape, and it owns the in-memory fallback
-so callers never branch on whether a database is configured.
+read and written entirely. `JsonStore` is that shape.
 """
 
 from __future__ import annotations
 
-import json
 import logging
 import threading
 from contextlib import contextmanager
@@ -24,51 +21,6 @@ from .config import get_settings
 logger = logging.getLogger("ilera.db")
 
 _SCHEMA = """
--- ---------------------------------------------------------------------------
--- Namespacing: `public` holds per-case RUNTIME data (cases, applications, …).
--- `reference` holds AUTHORED data that is the same for every caregiver and
--- changes only when policy/forms/corpus change (eligibility policy models, form
--- field maps, the RAG source corpus, the intake schema). Separating them keeps
--- "the library of reference material" distinct from "this caregiver's state".
--- ---------------------------------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS reference;
-
--- Eligibility policy models, one row per program, authored and versioned.
--- `doc` is the serialized ProgramPolicy (pathways → criteria), standard JsonStore
--- shape. The ruleset version lives in the doc (doc->>'ruleset_version') and is
--- exposed as an index so a program can be queried/pinned by version without a scan.
-CREATE TABLE IF NOT EXISTS reference.program_policies (
-    program_id text PRIMARY KEY,
-    doc        jsonb NOT NULL,
-    updated_at timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX IF NOT EXISTS program_policies_version_idx
-    ON reference.program_policies ((doc->>'ruleset_version'));
-
--- Form field-map schemas, one row per form. `doc` is the full schema JSON (the same
--- shape as data/form_schemas/<form_id>.json: {_meta, fields}). form_id is stored
--- lower-cased to match the case-insensitive load_schema() lookup.
-CREATE TABLE IF NOT EXISTS reference.form_schemas (
-    form_id    text PRIMARY KEY,
-    doc        jsonb NOT NULL,
-    updated_at timestamptz NOT NULL DEFAULT now()
-);
-
--- RAG source corpus: the authored program documentation the ingest embeds. One row per
--- source document, carrying its manifest metadata + the full source text. This is the
--- SOURCE of truth the ingest reads; the embedded vectors live separately in the
--- public.rag_chunks table (written by the ingest, not here).
-CREATE TABLE IF NOT EXISTS reference.rag_sources (
-    document_id text PRIMARY KEY,
-    program     text NOT NULL DEFAULT '',
-    title       text NOT NULL DEFAULT '',
-    source_url  text NOT NULL DEFAULT '',
-    meta        jsonb NOT NULL DEFAULT '{}'::jsonb,  -- the full manifest entry
-    text        text NOT NULL,
-    updated_at  timestamptz NOT NULL DEFAULT now()
-);
-CREATE INDEX IF NOT EXISTS rag_sources_program_idx ON reference.rag_sources (program);
-
 CREATE TABLE IF NOT EXISTS users (
     id              text PRIMARY KEY,
     name            text NOT NULL,
@@ -231,18 +183,17 @@ _pool = None
 _pool_lock = threading.Lock()
 
 
-def available() -> bool:
-    return get_settings().has_postgres
-
-
 def _get_pool():
     global _pool
     with _pool_lock:
         if _pool is None:
             from psycopg_pool import ConnectionPool
 
+            dsn = get_settings().database_url
+            if not dsn:
+                raise RuntimeError("DATABASE_URL is required")
             pool = ConnectionPool(
-                get_settings().database_url, min_size=1, max_size=4, open=True, timeout=15,
+                dsn, min_size=1, max_size=4, open=True, timeout=15,
                 # Azure can terminate idle connections or restart the server. Check
                 # on checkout so the pool replaces stale connections before use.
                 check=ConnectionPool.check_connection,
@@ -269,22 +220,19 @@ def reset_pool() -> None:
         _pool = None
 
 
-def ready() -> Optional[bool]:
-    """True/False when Postgres is configured, None when it isn't."""
-    if not available():
-        return None
+def ready() -> bool:
     try:
         with connection() as conn:
             conn.execute("SELECT 1")
         return True
     except Exception:
-        logger.exception("Postgres is configured but unreachable")
+        logger.exception("Postgres is unreachable")
         return False
 
 
 class JsonStore:
-    """A `(key columns…, doc jsonb)` table, with an in-memory twin for when there is no
-    database. Values go in as the model's JSON and come back out as plain dicts.
+    """A `(key columns…, doc jsonb)` table. Values go in as the model's JSON and come back
+    out as plain dicts.
 
     `case_id` is a real column (not just part of the document) wherever entries are listed
     per case, so listing is an indexed lookup instead of a scan-and-filter.
@@ -295,16 +243,11 @@ class JsonStore:
         table: str,
         keys: Sequence[str] = ("id",),
         scoped_by_case: bool = False,
-        schema: str = "",
     ) -> None:
-        # A schema qualifies the table (e.g. reference.program_policies). Empty = the
-        # default search_path (public), which is where per-case runtime tables live.
-        self.schema = schema
-        self.table = f"{schema}.{table}" if schema else table
+        self.table = table
         self.keys = tuple(keys)
         # A store keyed by case_id is already scoped by it.
         self.scoped_by_case = scoped_by_case and "case_id" not in self.keys
-        self._memory: dict[tuple[str, ...], tuple[str, dict]] = {}
 
     def _columns(self) -> tuple[str, ...]:
         scope = ("case_id",) if self.scoped_by_case else ()
@@ -319,9 +262,6 @@ class JsonStore:
 
     def put(self, key: str | Sequence[str], payload: str, case_id: str = "") -> None:
         key = self._as_key(key)
-        if not available():
-            self._memory[key] = (case_id, json.loads(payload))
-            return
         columns = self._columns()
         values = [*key, *((case_id,) if self.scoped_by_case else ()), payload]
         placeholders = ", ".join(["%s"] * (len(values) - 1) + ["%s::jsonb"])
@@ -337,9 +277,6 @@ class JsonStore:
 
     def get(self, key: str | Sequence[str]) -> Optional[dict]:
         key = self._as_key(key)
-        if not available():
-            found = self._memory.get(key)
-            return found[1] if found else None
         with connection() as conn:
             row = conn.execute(
                 f"SELECT doc FROM {self.table} WHERE {self._where()}", key  # noqa: S608
@@ -348,8 +285,6 @@ class JsonStore:
 
     def delete(self, key: str | Sequence[str]) -> bool:
         key = self._as_key(key)
-        if not available():
-            return self._memory.pop(key, None) is not None
         with connection() as conn:
             cur = conn.execute(
                 f"DELETE FROM {self.table} WHERE {self._where()}", key  # noqa: S608
@@ -360,14 +295,6 @@ class JsonStore:
         """Every document, or only a case's when `case_id` is given (requires a case
         column or a case key)."""
         column = "case_id" if self.scoped_by_case or "case_id" in self.keys else ""
-        if not available():
-            if not case_id:
-                return [doc for _, doc in self._memory.values()]
-            return [
-                doc
-                for (scope, doc) in self._memory.values()
-                if scope == case_id or doc.get("case_id") == case_id
-            ]
         sql = f"SELECT doc FROM {self.table}"  # noqa: S608
         params: tuple[str, ...] = ()
         if case_id and column:

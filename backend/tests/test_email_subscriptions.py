@@ -44,7 +44,7 @@ def setup(monkeypatch):
     monkeypatch.setattr(s.connections, "_provider", Provider)
     monkeypatch.setattr(s.connections, "_write_connection", lambda conn, mailbox: state.saved.append(mailbox))
     state.settings = SimpleNamespace(
-        email_scanning_enabled=True, email_connections_enabled=True, has_postgres=True,
+        
         email_service_bus_namespace="bus",
         email_microsoft_notification_url="https://api.example.test/api/email/microsoft/notifications",
     )
@@ -121,8 +121,8 @@ def test_reject_bad_notification_url(setup, url):
     assert not setup.created
 
 
-def test_scanning_disabled_blocks_subscriptions(setup):
-    setup.settings.email_scanning_enabled = False
+def test_missing_service_bus_blocks_subscriptions(setup):
+    setup.settings.email_service_bus_namespace = ""
     with pytest.raises(RuntimeError):
         s.ensure_subscription("connection", "owner")
 

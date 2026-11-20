@@ -46,7 +46,7 @@ export function MailboxConnections() {
     // Defer the notification; the callback itself never contains email content.
     const timeout = setTimeout(() => {
       setNotice(result === "connected"
-        ? "Outlook connected. Automatic email scanning is not available yet."
+        ? "Outlook connected."
         : "Outlook could not connect. Please sign in and try again.");
     }, 0);
     url.searchParams.delete("mailbox");

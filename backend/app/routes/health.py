@@ -2,8 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import Response
 
 from .. import db
-from ..config import get_settings
-from ..rag.embeddings import provider as embedding_provider
+from ..rag.embeddings import model_id as embedding_model
 from ..rag.index import get_index
 
 router = APIRouter()
@@ -25,9 +24,9 @@ def readyz(response: Response) -> dict:
     Costs one SELECT 1, so it is cheap enough to poll every few seconds.
     """
     postgres = db.ready()
-    if postgres is False:
+    if not postgres:
         response.status_code = 503
-    return {"status": "ok" if postgres is not False else "unavailable", "postgres": postgres}
+    return {"status": "ok" if postgres else "unavailable", "postgres": postgres}
 
 
 @router.get("/health")
@@ -42,9 +41,7 @@ def health() -> dict:
     return {
         "status": "ok",
         "postgres": db.ready(),
-        "llm": get_settings().has_llm,
-
-        "embeddings": embedding_provider(),
+        "embeddings": embedding_model(),
         "rag_ready": index.size > 0,
         "rag_backend": index.backend,
         "rag_chunks": index.size,

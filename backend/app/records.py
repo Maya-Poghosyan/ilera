@@ -1,7 +1,7 @@
 """Records & Renewal — timekeeping, care journal, and renewal tracking.
 
 Persistence mirrors the CaseProfile pattern in store.py / reminders.py:
-Postgres when configured, else an in-memory dict.
+Postgres.
 """
 
 import re
@@ -105,7 +105,7 @@ class RenewalItem(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Persistence (Postgres / in-memory)
+# Persistence (Postgres)
 # ---------------------------------------------------------------------------
 
 _timekeeping = db.JsonStore("timekeeping", scoped_by_case=True)

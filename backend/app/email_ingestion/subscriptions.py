@@ -21,8 +21,7 @@ from .reconciliation import prune_orphan_subscriptions, reconcile
 def require_configuration() -> None:
     s = get_settings()
     url = urlparse(s.email_microsoft_notification_url)
-    if not (s.email_scanning_enabled and s.email_connections_enabled and s.has_postgres
-            and s.email_service_bus_namespace and url.scheme == "https" and url.hostname
+    if not (s.email_service_bus_namespace and url.scheme == "https" and url.hostname
             and not url.username and not url.password and not url.query and not url.fragment
             and url.path == "/api/email/microsoft/notifications"):
         raise RuntimeError("Email subscription maintenance is not configured")

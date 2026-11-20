@@ -17,8 +17,7 @@ resolves against), so a fact resolved for a criterion is the same fact that
 autocompletes a form. See docs/ilera_eligibility_action_planning_architecture.txt.
 
 This is authored reference data: one ProgramPolicy per program, versioned by
-`ruleset_version`, stored in the `reference.program_policies` table (seeded from the
-bundled JSON files when the table is empty).
+`ruleset_version`, authored as JSON under data/program_policies/.
 """
 
 from __future__ import annotations

@@ -18,8 +18,8 @@ separate background process; mailbox routes and notification ingress belong in t
 app, the hourly maintenance job `ilera-email-maint`, and all RBAC are provisioned via Terraform
 (`email-scanning.tfstate`). The Entra client secret and Fernet key are in Key Vault. Following
 BAA / abuse-monitoring opt-out confirmation for the `ilera-resource` Azure OpenAI account,
-`EMAIL_CONNECTIONS_ENABLED=true` and `EMAIL_SCANNING_ENABLED=true` are set on the API, worker,
-and maintenance job. The maintenance job runs clean (`checked=0 failed=0` with no mailboxes
+connections and scanning are on for the API, worker, and maintenance job (there are no
+rollout switches). The maintenance job runs clean (`checked=0 failed=0` with no mailboxes
 connected). Remaining: interactive live end-to-end — connect a real M365 mailbox in the
 browser, send a test email, and confirm a suggestion reaches the Care Calendar. See
 [infrastructure status](email-infra-status.md).
@@ -141,11 +141,11 @@ Completion criterion: both providers produce suggestions through the same worker
 
 ## Current implementation boundaries
 
-Microsoft OAuth initiation/callback, account validation, encrypted credential persistence, serialized refresh/disconnect, and a Graph adapter are implemented. The Care Calendar has connection controls, gated by EMAIL_CONNECTIONS_ENABLED and the required configuration. The callback uses the frontend session cookie and then posts to the backend; it requires the same Ilera user who initiated the flow.
+Microsoft OAuth initiation/callback, account validation, encrypted credential persistence, serialized refresh/disconnect, and a Graph adapter are implemented. The Care Calendar has connection controls. The callback uses the frontend session cookie and then posts to the backend; it requires the same Ilera user who initiated the flow.
 
 Tokens are encrypted in the existing Postgres database. A versioned Fernet key and the Microsoft application secret are read from Key Vault via managed identity. No raw credentials appear in connection API responses. Old encryption-key versions must remain available until records are re-encrypted. Microsoft disconnect deletes local credentials and attempts subscription removal; it does not revoke tenant-wide sessions or remove Microsoft's consent grant. Subscription cleanup failures are reported and the local connection becomes inactive regardless.
 
-Webhook ingress, subscription maintenance, the scan worker, and structured extraction now exist. The Care Calendar review flow (suggestion accept/dismiss with persisted status and idempotent calendar-event acceptance) is also implemented and unit-tested. Missed-message reconciliation and live end-to-end verification remain pending. OAuth infrastructure has been applied; scanning infrastructure has not (see [infrastructure status](email-infra-status.md)). No live OAuth round trip has been validated. Leave EMAIL_SCANNING_ENABLED=false until the ingestion path is ready.
+Webhook ingress, subscription maintenance, the scan worker, and structured extraction now exist. The Care Calendar review flow (suggestion accept/dismiss with persisted status and idempotent calendar-event acceptance) is also implemented and unit-tested. Missed-message reconciliation and live end-to-end verification remain pending. OAuth infrastructure has been applied; scanning infrastructure has not (see [infrastructure status](email-infra-status.md)). No live OAuth round trip has been validated.
 
 The public backend endpoint is `POST /api/email/microsoft/notifications`, used for both basic and lifecycle notifications. Configure `EMAIL_MICROSOFT_NOTIFICATION_URL` to this path on the public **API** origin, not the authenticated frontend proxy. Validation challenges return plain text without accessing the database. Normal deliveries require scanning, Postgres, and Service Bus configuration. Invalid/forged notices are acknowledged without enqueueing; database/queue failures return a fixed 503 so Graph retries. Partial-batch retries use the existing deterministic queue message IDs.
 
@@ -187,9 +187,8 @@ image from the repository root with:
 docker build -f backend/Dockerfile.email-worker -t ilera-email-worker backend
 ```
 
-The worker requires `DATABASE_URL`, the mailbox OAuth/Key Vault settings, Service Bus
-settings, `EMAIL_CONNECTIONS_ENABLED=true`, and `EMAIL_SCANNING_ENABLED=true` **only in
-an approved validation/rollout environment**. Leave production scanning disabled. Set
+The worker requires `DATABASE_URL`, the mailbox OAuth/Key Vault settings, and Service Bus
+settings. Set
 `EMAIL_OPENAI_ENDPOINT` to the dedicated configuration's Azure resource origin
 (`https://<resource>.openai.azure.com/`) and `EMAIL_OPENAI_DEPLOYMENT` to a deployment
 supporting strict structured outputs. No general OpenAI settings or API-key fallback

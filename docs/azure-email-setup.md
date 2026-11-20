@@ -53,18 +53,15 @@ production inputs for the OAuth slice are the defaults in
 
 | Setting | Value |
 | --- | --- |
-| EMAIL_CONNECTIONS_ENABLED | false during setup; true only when ready for a live connection check |
 | EMAIL_MICROSOFT_TENANT_ID | Approved organizational tenant UUID |
 | EMAIL_MICROSOFT_CLIENT_ID | Entra application/client UUID |
 | EMAIL_MICROSOFT_REDIRECT_URI | Exact registered HTTPS frontend callback |
 | EMAIL_KEY_VAULT_URL | `https://<vault-name>.vault.azure.net` |
 | EMAIL_MICROSOFT_CLIENT_SECRET_NAME | `ilera-microsoft-client-secret` |
 | EMAIL_TOKEN_ENCRYPTION_KEY_NAME | `ilera-email-token-key` |
-| EMAIL_USE_MANAGED_IDENTITY | true in Azure |
 | EMAIL_MANAGED_IDENTITY_CLIENT_ID | Empty for system-assigned identity; client ID for user-assigned identity |
-| EMAIL_SCANNING_ENABLED | false; the scan pipeline is not ready |
 
-Local development can use EMAIL_USE_MANAGED_IDENTITY=false with Azure CLI credentials and appropriate vault access. Use an HTTPS frontend development endpoint registered in Entra. Do not point local development at production mailboxes or credentials unintentionally. Current Anaconda base is Python 3.9; prepare a separate Anaconda Python 3.12 environment for runtime work when test runs resume.
+Mailbox connections and scanning are always on; there are no rollout switches. The app authenticates to Key Vault, Service Bus and Azure OpenAI only with its managed identity.
 
 ## Can be prepared for later milestones
 

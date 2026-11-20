@@ -136,8 +136,7 @@ a durable work outbox are future work.
 
 8. STORAGE AND API
 ResolutionState lives within existing CaseProfile JSON storage; no parallel task database
-is introduced. Postgres resolution mutations lock the case row in a transaction. The
-in-memory development store uses a process lock. Older read/modify/save code paths still
+is introduced. Postgres resolution mutations lock the case row in a transaction. Older read/modify/save code paths still
 need conversion to revision-aware transactions for full cross-flow concurrency protection.
 
 Implemented API, with existing case authorization:

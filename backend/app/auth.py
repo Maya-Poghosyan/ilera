@@ -1,6 +1,5 @@
 """Authentication: signup, login, JWT tokens, and user persistence."""
 
-import logging
 import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -15,7 +14,6 @@ from pydantic import BaseModel
 from . import db, store
 from .config import get_settings
 
-logger = logging.getLogger("ilera.auth")
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -59,10 +57,8 @@ def _public(user: User) -> UserPublic:
 
 
 # ---------------------------------------------------------------------------
-# Persistence (Postgres when available, else in-memory)
+# Persistence
 # ---------------------------------------------------------------------------
-
-_memory: dict[str, User] = {}
 
 _COLUMNS = "id, name, email, hashed_password, phone, created_at, email_verified"
 
@@ -80,9 +76,6 @@ def _row_to_user(row) -> User:
 
 
 def _save_user(user: User) -> None:
-    if not db.available():
-        _memory[user.id] = user
-        return
     with db.connection() as conn:
         conn.execute(
             f"""
@@ -107,8 +100,6 @@ def _save_user(user: User) -> None:
 
 
 def _get_user_by_id(user_id: str) -> Optional[User]:
-    if not db.available():
-        return _memory.get(user_id)
     with db.connection() as conn:
         row = conn.execute(
             f"SELECT {_COLUMNS} FROM users WHERE id = %s", (user_id,)
@@ -117,9 +108,6 @@ def _get_user_by_id(user_id: str) -> Optional[User]:
 
 
 def _get_user_by_email(email: str) -> Optional[User]:
-    if not db.available():
-        target = email.strip().lower()
-        return next((u for u in _memory.values() if u.email.lower() == target), None)
     with db.connection() as conn:
         row = conn.execute(
             f"SELECT {_COLUMNS} FROM users WHERE email = %s", (email.strip().lower(),)
@@ -131,14 +119,8 @@ def _get_user_by_email(email: str) -> Optional[User]:
 # Verification token persistence
 # ---------------------------------------------------------------------------
 
-_token_memory: dict[str, dict] = {}  # token -> {user_id, expires_at, used}
-_otp_memory: dict[str, dict] = {}   # id -> {user_id, code, expires_at, used, attempts}
-
 
 def _save_verification_token(token: str, user_id: str, expires_at: datetime) -> None:
-    if not db.available():
-        _token_memory[token] = {"user_id": user_id, "expires_at": expires_at, "used": False}
-        return
     with db.connection() as conn:
         conn.execute(
             "INSERT INTO verification_tokens (token, user_id, expires_at) VALUES (%s, %s, %s)",
@@ -149,12 +131,6 @@ def _save_verification_token(token: str, user_id: str, expires_at: datetime) -> 
 def _consume_verification_token(token: str) -> Optional[str]:
     """Validate and atomically consume a token. Returns user_id if valid, else None."""
     now = datetime.now(timezone.utc)
-    if not db.available():
-        entry = _token_memory.get(token)
-        if not entry or entry["used"] or entry["expires_at"] < now:
-            return None
-        entry["used"] = True
-        return entry["user_id"]
     with db.connection() as conn:
         row = conn.execute(
             """
@@ -182,15 +158,6 @@ def _create_otp(user_id: str) -> str:
     otp_id = str(uuid.uuid4())
     code = f"{secrets.randbelow(1000000):06d}"
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=10)
-    if not db.available():
-        _otp_memory[otp_id] = {
-            "user_id": user_id,
-            "code": code,
-            "expires_at": expires_at,
-            "used": False,
-            "attempts": 0,
-        }
-        return code
     with db.connection() as conn:
         conn.execute(
             "INSERT INTO login_otps (id, user_id, code, expires_at) VALUES (%s, %s, %s, %s)",
@@ -206,22 +173,6 @@ def _verify_otp(user_id: str, code: str) -> bool:
     """
     now = datetime.now(timezone.utc)
     max_attempts = 5
-
-    if not db.available():
-        entry = next(
-            (e for e in _otp_memory.values()
-             if e["user_id"] == user_id and not e["used"] and e["expires_at"] > now),
-            None,
-        )
-        if entry is None:
-            raise HTTPException(status_code=400, detail="Code expired. Please sign in again.")
-        if entry["attempts"] >= max_attempts:
-            raise HTTPException(status_code=400, detail="Too many attempts. Please sign in again.")
-        if entry["code"] != code:
-            entry["attempts"] += 1
-            return False
-        entry["used"] = True
-        return True
 
     with db.connection() as conn:
         row = conn.execute(
@@ -248,9 +199,6 @@ def _verify_otp(user_id: str, code: str) -> bool:
 
 def _send_otp_email(email: str, code: str) -> None:
     settings = get_settings()
-    if not settings.acs_email_connection_string:
-        logger.info("LOGIN OTP (dev — set ACS_EMAIL_CONNECTION_STRING to send real email): %s", code)
-        return
     from azure.communication.email import EmailClient  # lazy import
 
     client = EmailClient.from_connection_string(settings.acs_email_connection_string)
@@ -271,13 +219,6 @@ def _send_otp_email(email: str, code: str) -> None:
 def _send_verification_email(email: str, token: str) -> None:
     settings = get_settings()
     verify_url = f"{settings.app_url}/verify-email?token={token}"
-    if not settings.acs_email_connection_string:
-        # Dev mode: log the link so developers can click it without ACS configured.
-        logger.info(
-            "EMAIL VERIFICATION (dev — set ACS_EMAIL_CONNECTION_STRING to send real email): %s",
-            verify_url,
-        )
-        return
     from azure.communication.email import EmailClient  # lazy import
 
     client = EmailClient.from_connection_string(settings.acs_email_connection_string)
@@ -315,17 +256,24 @@ def _verify_password(password: str, hashed: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
+def _jwt_secret() -> str:
+    secret = get_settings().jwt_secret
+    if not secret:
+        raise RuntimeError("JWT_SECRET is required")
+    return secret
+
+
 def _create_token(user_id: str) -> str:
     settings = get_settings()
     expire = datetime.now(timezone.utc) + timedelta(hours=settings.jwt_expire_hours)
     payload = {"sub": user_id, "exp": expire}
-    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    return jwt.encode(payload, _jwt_secret(), algorithm=settings.jwt_algorithm)
 
 
 def _decode_token(token: str) -> Optional[str]:
     settings = get_settings()
     try:
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
+        payload = jwt.decode(token, _jwt_secret(), algorithms=[settings.jwt_algorithm])
         return payload.get("sub")
     except JWTError:
         return None

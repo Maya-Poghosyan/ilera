@@ -1,8 +1,6 @@
 """RAG index over official program documentation.
 
-Two backends with the same interface:
-- PgVectorIndex: chunks + vectors in Postgres, ANN in the database (used when DATABASE_URL is set).
-- RagIndex: in-memory cosine fallback (no infrastructure needed).
+Chunks + vectors live in Postgres (pgvector); the database does the KNN.
 
 Building an index means embedding the whole corpus, which is expensive in memory and time, so
 it happens only in the offline `app.rag.ingest` step. A serving process attaches to whatever
@@ -12,7 +10,6 @@ embedding on demand, and `build()` is reachable only through `rebuild_index()`.
 
 from __future__ import annotations
 
-import glob
 import hashlib
 import json
 import logging
@@ -23,14 +20,12 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 
 from ..config import get_settings
-from .embeddings import dim, embed, embed_one
+from .embeddings import DIM, embed, embed_one
 from .embeddings import model_id as embedding_id
-from .embeddings import provider as embedding_provider
 from .scope import PolicyMetadata, RetrievalScope
 
 _DATA = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 KNOWLEDGE_DIR = os.path.join(_DATA, "knowledge")
-DATA_DIR = os.path.join(_DATA, "program_docs")  # legacy sample docs (fallback)
 CHUNK_CHARS = 1400
 CHUNK_OVERLAP = 200
 _PAGE_RE = re.compile(r"\[page (\d+)\]")
@@ -61,18 +56,9 @@ class Document:
     text: str
     title: str = ""
     source_url: str = ""
-    legacy: bool = False
     policy: PolicyMetadata = field(default_factory=PolicyMetadata)
 
     def chunks(self) -> list[Chunk]:
-        if self.legacy:
-            text = self.text.replace("\x00", "")
-            return [
-                Chunk(id=f"{self.program}:{i}", program=self.program, text=piece,
-                      source=self.document_id, document_id=self.document_id, policy=self.policy)
-                for i in range(0, len(text), CHUNK_CHARS)
-                if (piece := text[i : i + CHUNK_CHARS].strip())
-            ]
         return [
             Chunk(
                 id=f"{self.document_id}:{n}",
@@ -97,7 +83,7 @@ class Document:
         """
         h = hashlib.sha256()
         for part in (self.text, self.program, self.title, self.source_url,
-                     str(CHUNK_CHARS), str(CHUNK_OVERLAP), embedding_provider(), embedding_id()):
+                     str(CHUNK_CHARS), str(CHUNK_OVERLAP), "openai", embedding_id()):
             h.update(part.encode("utf-8"))
             h.update(b"\x1f")
         return h.hexdigest()
@@ -135,11 +121,7 @@ def _chunk_text(text: str) -> list[tuple[str, str]]:
 
 
 def _iter_corpus_documents() -> Iterator[Document]:
-    """The authored RAG corpus, DB-first (reference.rag_sources) with a file fallback.
-
-    Source of truth moved into Postgres; this maps each source row/file to the Document
-    the chunker consumes. The embedded vectors remain in public.rag_chunks.
-    """
+    """The authored RAG corpus (data/knowledge), as the Documents the chunker consumes."""
     from .source_store import iter_sources
 
     for src in iter_sources():
@@ -153,56 +135,14 @@ def _iter_corpus_documents() -> Iterator[Document]:
         )
 
 
-def _iter_legacy_documents() -> Iterator[Document]:
-    for path in glob.glob(os.path.join(DATA_DIR, "*.txt")):
-        program = os.path.splitext(os.path.basename(path))[0]
-        with open(path, encoding="utf-8") as fh:
-            yield Document(
-                document_id=os.path.basename(path), program=program, text=fh.read(), legacy=True
-            )
-
-
 def iter_documents() -> Iterator[Document]:
-    """Stream the real knowledge corpus when present, else the bundled sample docs.
-
-    A generator, so indexing holds one document (and its chunks) at a time rather than the
-    whole corpus.
-    """
-    corpus = _iter_corpus_documents()
-    first = next(corpus, None)
-    if first is None:
-        yield from _iter_legacy_documents()
-        return
-    yield first
-    yield from corpus
+    """A generator, so indexing holds one document (and its chunks) at a time."""
+    return _iter_corpus_documents()
 
 
 def iter_chunks() -> Iterator[Chunk]:
     for doc in iter_documents():
         yield from doc.chunks()
-
-
-def load_chunks() -> list[Chunk]:
-    """Materialize the whole corpus. Prefer `iter_chunks` on the indexing path."""
-    return list(iter_chunks())
-
-
-def _embedded_batches() -> Iterator[list[tuple[Chunk, list[float]]]]:
-    """Stream the corpus as (chunk, vector) batches ready to be written to a backend.
-
-    Bounded memory by construction: only `index_write_batch_size` chunks and their vectors
-    exist at a time (and `embed` splits each window into smaller forward passes), instead of
-    holding every chunk, every vector, and a full write payload simultaneously.
-    """
-    size = max(1, get_settings().index_write_batch_size)
-    window: list[Chunk] = []
-    for chunk in iter_chunks():
-        window.append(chunk)
-        if len(window) >= size:
-            yield list(zip(window, embed([c.text for c in window])))
-            window = []
-    if window:
-        yield list(zip(window, embed([c.text for c in window])))
 
 
 def _embedded(chunks: list[Chunk]) -> Iterator[list[tuple[Chunk, list[float]]]]:
@@ -211,15 +151,6 @@ def _embedded(chunks: list[Chunk]) -> Iterator[list[tuple[Chunk, list[float]]]]:
     for i in range(0, len(chunks), size):
         window = chunks[i : i + size]
         yield list(zip(window, embed([c.text for c in window])))
-
-
-def _cosine(a: list[float], b: list[float]) -> float:
-    if not a or not b:
-        return 0.0
-    dot = sum(x * y for x, y in zip(a, b))
-    na = sum(x * x for x in a) ** 0.5 or 1.0
-    nb = sum(y * y for y in b) ** 0.5 or 1.0
-    return dot / (na * nb)
 
 
 @dataclass
@@ -243,50 +174,6 @@ def _no_build(backend: str) -> int:
     return 0
 
 
-class RagIndex:
-    """In-memory vector index."""
-
-    backend = "memory"
-
-    def __init__(self) -> None:
-        self._chunks: list[Chunk] = []
-
-    @property
-    def size(self) -> int:
-        return len(self._chunks)
-
-    def build(self) -> int:
-        chunks: list[Chunk] = []
-        for batch in _embedded_batches():
-            for c, v in batch:
-                c.vector = v
-                chunks.append(c)
-        self._chunks = chunks
-        return len(chunks)
-
-    def ensure(self) -> int:
-        if self._chunks:
-            return len(self._chunks)
-        return _no_build(self.backend)
-
-    def search(self, query: str, k: int = 4, *, scope: RetrievalScope) -> list[Retrieved]:
-        if not self._chunks:
-            return []
-        qv = embed_one(query)
-        results = [
-            Retrieved(
-                text=c.text, program=c.program, source=c.source, score=_cosine(qv, c.vector),
-                title=c.title, source_url=c.source_url, document_id=c.document_id, page=c.page,
-                policy=c.policy.evidence(),
-            )
-            for c in self._chunks
-            if c.policy.allows(scope)
-        ]
-        results.sort(key=lambda r: r.score, reverse=True)
-        return results[:k]
-
-
-
 class PgVectorIndex:
     """Chunks + vectors in Postgres; KNN in the database via pgvector.
 
@@ -301,7 +188,7 @@ class PgVectorIndex:
     def __init__(self, dsn: str) -> None:
         from psycopg_pool import ConnectionPool
 
-        self._dim = dim()
+        self._dim = DIM
         # Searches arrive from several agent worker threads at once, so hand each one its own
         # connection rather than sharing (a psycopg connection is not concurrently usable).
         self._pool = ConnectionPool(dsn, min_size=1, max_size=4, open=True, timeout=15)
@@ -348,7 +235,7 @@ class PgVectorIndex:
             logger.error(
                 "RAG index was built with %d-dim vectors but %s produces %d — re-run "
                 "`python -m app.rag.ingest`; searches will fail until you do.",
-                stored, embedding_provider(), self._dim,
+                stored, embedding_id(), self._dim,
             )
 
     def _stored_dim(self, conn) -> int:
@@ -555,28 +442,21 @@ _index = None
 _index_lock = threading.Lock()
 
 
-def _make_index(*, force: bool):
+def _make_index(*, force: bool) -> PgVectorIndex:
     """Attach to the store the ingest wrote to. `force` (ingest only) rebuilds it in place."""
-    settings = get_settings()
-    if settings.has_postgres:
-        if force:
-            # An explicit ingest must not quietly land somewhere else.
-            idx = PgVectorIndex(settings.database_url)
-            idx.build()
-            return idx
-        idx = PgVectorIndex(settings.database_url)
-        try:
-            idx.ensure()
-        except Exception:
-            idx._pool.close()
-            raise
-        return idx
-    idx = RagIndex()
-    idx.build() if force else idx.ensure()
+    dsn = get_settings().database_url
+    if not dsn:
+        raise RuntimeError("DATABASE_URL is required")
+    idx = PgVectorIndex(dsn)
+    try:
+        idx.build() if force else idx.ensure()
+    except Exception:
+        idx._pool.close()
+        raise
     return idx
 
 
-def get_index():
+def get_index() -> PgVectorIndex:
     global _index
     if _index is not None:
         return _index
@@ -586,28 +466,22 @@ def get_index():
     return _index
 
 
-def rebuild_index():
-    """Force a full re-ingest of the corpus into the active backend."""
+def rebuild_index() -> PgVectorIndex:
+    """Force a full re-ingest of the corpus."""
     global _index
     with _index_lock:
         _index = _make_index(force=True)
     return _index
 
 
-def sync_index() -> tuple[object, SyncResult]:
-    """Bring the active backend in line with the corpus, re-embedding only what changed.
-
-    Only pgvector tracks per-document fingerprints; the in-memory backend has no way to tell
-    what changed, so for it this is a full rebuild.
-    """
+def sync_index() -> tuple[PgVectorIndex, SyncResult]:
+    """Bring the index in line with the corpus, re-embedding only what changed."""
     global _index
+    dsn = get_settings().database_url
+    if not dsn:
+        raise RuntimeError("DATABASE_URL is required")
     with _index_lock:
-        settings = get_settings()
-        if settings.has_postgres:
-            idx = PgVectorIndex(settings.database_url)
-            result = idx.sync()
-        else:
-            idx = _make_index(force=True)
-            result = SyncResult(changed=-1, removed=0, total=idx.size)
+        idx = PgVectorIndex(dsn)
+        result = idx.sync()
         _index = idx
     return idx, result

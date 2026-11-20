@@ -248,7 +248,7 @@ async def specialist_activity(payload: dict) -> dict:
         s = get_settings()
         openai_client = AsyncOpenAI(
             api_key=s.openai_api_key,
-            base_url=s.openai_base_url or None,
+            base_url=s.openai_base_url,
             max_retries=6,
             timeout=90.0,
         )
@@ -259,7 +259,7 @@ async def specialist_activity(payload: dict) -> dict:
             output_type=ToolOutput(_SpecialistOutput, strict=True),
             model_settings={
                 "max_tokens": s.eligibility_max_output_tokens,
-                **({"openai_reasoning_effort": s.agent_reasoning_effort} if s.agent_reasoning_effort else {}),
+                "openai_reasoning_effort": s.agent_reasoning_effort,
             },
             system_prompt=_SYSTEM_TEMPLATE.format(program=program),
             tools=[make_gate_tool(doc_key), make_rag_tool(doc_key, scope)],

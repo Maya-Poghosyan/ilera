@@ -15,8 +15,7 @@ CaseProfile + ProgramPolicy -> ProgramEvaluation.required_fact_paths
 Models live in `backend/app/eligibility/resolution_models.py`; planning and completion
 live in `resolution.py`. The case's `resolution` bundle persists task history,
 deferrals and idempotency receipts together with its facts, using existing case JSON
-storage. Resolution mutations use a case-row transaction in Postgres or a process lock
-in the development in-memory store. There is no separate parallel fact/task store.
+storage. Resolution mutations use a case-row transaction in Postgres. There is no separate parallel fact/task store.
 
 API contract
 ------------

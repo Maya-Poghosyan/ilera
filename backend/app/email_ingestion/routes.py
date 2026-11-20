@@ -5,7 +5,6 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, Field, SecretStr
 
-from .. import db
 from ..auth import User, get_current_user
 from ..config import get_settings
 from ..store import get_case_owner
@@ -18,17 +17,12 @@ from .privacy import PrivateEmailRoute
 router = APIRouter(prefix="/api/email", tags=["email"], route_class=PrivateEmailRoute)
 
 
-def _configured() -> bool:
-    s = get_settings()
-    return bool(s.email_connections_enabled and s.has_postgres and s.email_key_vault_url
-                and s.email_microsoft_tenant_id and s.email_microsoft_client_id
-                and s.email_microsoft_redirect_uri and s.email_microsoft_client_secret_name
-                and s.email_token_encryption_key_name)
-
-
 def _require_connections() -> None:
-    if not _configured():
-        raise HTTPException(503, "Microsoft mailbox connections are not available yet")
+    s = get_settings()
+    if not (s.email_key_vault_url and s.email_microsoft_tenant_id and s.email_microsoft_client_id
+            and s.email_microsoft_redirect_uri and s.email_microsoft_client_secret_name
+            and s.email_token_encryption_key_name):
+        raise RuntimeError("Microsoft mailbox connection settings are missing")
 
 
 def _owner(case_id: str, user: User) -> None:
@@ -56,7 +50,7 @@ class PublicConnection(BaseModel):
 @router.get("/providers")
 def providers(response: Response, user: User = Depends(get_current_user)) -> dict:
     response.headers["Cache-Control"] = "no-store"
-    return {"microsoft": {"available": _configured(), "account_type": "organization"},
+    return {"microsoft": {"available": True, "account_type": "organization"},
             "google": {"available": False}}
 
 
@@ -64,8 +58,6 @@ def providers(response: Response, user: User = Depends(get_current_user)) -> dic
 def read_connections(case_id: str, response: Response, user: User = Depends(get_current_user)):
     response.headers["Cache-Control"] = "no-store"
     _owner(case_id, user)
-    if not db.available():
-        return []
     return [PublicConnection.from_mailbox(m) for m in list_connections(user_id=user.id, case_id=case_id)]
 
 
@@ -113,9 +105,6 @@ def callback(body: CallbackRequest, response: Response, user: User = Depends(get
 @router.delete("/connections/{connection_id}")
 def disconnect(connection_id: str, response: Response, user: User = Depends(get_current_user)) -> dict:
     response.headers["Cache-Control"] = "no-store"
-    # Disconnect stays available when new connections/scanning are disabled.
-    if not db.available():
-        raise HTTPException(404, "Connection not found")
     try:
         pending = connections.disconnect(connection_id=connection_id, user_id=user.id)
         return {"disconnected": True, "subscription_cleanup_pending": pending}

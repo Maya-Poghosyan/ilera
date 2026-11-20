@@ -59,12 +59,6 @@ variable "email_microsoft_notification_url" {
   default     = "https://api.ileracare.app/api/email/microsoft/notifications"
 }
 
-variable "email_scanning_enabled" {
-  description = "Master switch for processing real email content. Only true after BAA / abuse-monitoring opt-out is confirmed for the OpenAI account."
-  type        = string
-  default     = "true"
-}
-
 variable "mailbox_tenant_id" {
   type    = string
   default = "5c8a1e25-bdc4-4ced-b8c2-3cda51c721d9"

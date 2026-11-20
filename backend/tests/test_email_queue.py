@@ -42,8 +42,8 @@ def sdk(monkeypatch):
     monkeypatch.setitem(sys.modules, 'azure.servicebus', SimpleNamespace(
         ServiceBusClient=Client, ServiceBusMessage=lambda body, **kw: {'body': body, **kw}))
     monkeypatch.setattr(queue, 'get_settings', lambda: SimpleNamespace(
-        email_scanning_enabled=True, has_postgres=True, email_service_bus_namespace='bus',
-        email_use_managed_identity=True, email_managed_identity_client_id='', email_service_bus_queue='email.scan'))
+        email_service_bus_namespace='bus',
+        email_managed_identity_client_id='', email_service_bus_queue='email.scan'))
     return state
 
 

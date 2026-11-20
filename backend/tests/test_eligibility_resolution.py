@@ -157,7 +157,11 @@ def test_api_roundtrip_authorization_validation_and_persistence(monkeypatch):
     assert client.post(f"{base}/tasks/{task_id}/result", json=body).status_code == 200
     assert client.post(f"{base}/tasks/{task_id}/result", json={**body, "value": 80}).status_code == 409
     assert client.get("/api/eligibility-resolution/missing").status_code == 404
-    store.claim_case(case_id, "someone-else")
+    from app import auth
+    stranger = auth.User(id=f"stranger-{case_id}", name="S", email=f"{case_id}@example.com",
+                         hashed_password="x", created_at="2026-01-01T00:00:00+00:00")
+    auth._save_user(stranger)
+    store.claim_case(case_id, stranger.id)
     assert client.get(base).status_code == 404
     assert client.post(f"{base}/tasks/{task_id}/result", json=body).status_code == 404
 

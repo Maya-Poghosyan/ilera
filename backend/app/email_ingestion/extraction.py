@@ -89,7 +89,6 @@ class AzureExtractor:
             self._stack.enter_context(private_transport_logs())
             self.client = open_client(
                 self._stack, endpoint=settings.email_openai_endpoint,
-                use_managed_identity=settings.email_use_managed_identity,
                 managed_identity_client_id=settings.email_managed_identity_client_id)
             self.deployment = settings.email_openai_deployment
             return self

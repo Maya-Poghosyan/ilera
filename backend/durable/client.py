@@ -40,11 +40,9 @@ async def start_eligibility_orchestration(profile: CaseProfile) -> str:
         httpx.TimeoutException: Function App did not respond within the timeout.
     """
     s = get_settings()
-    base_url = (s.azure_functions_url or "").rstrip("/")
+    base_url = s.azure_functions_url.rstrip("/")
     url = f"{base_url}/api/eligibility/{profile.id}"
-    headers: dict[str, str] = {}
-    if getattr(s, "azure_functions_key", ""):
-        headers["x-functions-key"] = s.azure_functions_key
+    headers = {"x-functions-key": s.azure_functions_key}
 
     payload = CaseInput(
         case_id=profile.id,
@@ -83,13 +81,11 @@ async def get_orchestration_status(instance_id: str) -> dict:
         httpx.TimeoutException: Management endpoint timed out.
     """
     s = get_settings()
-    base_url = (s.azure_functions_url or "").rstrip("/")
+    base_url = s.azure_functions_url.rstrip("/")
     url = (
         f"{base_url}/runtime/webhooks/durabletask/instances/{instance_id}"
     )
-    headers: dict[str, str] = {}
-    if getattr(s, "azure_functions_key", ""):
-        headers["x-functions-key"] = s.azure_functions_key
+    headers = {"x-functions-key": s.azure_functions_key}
 
     async with httpx.AsyncClient(timeout=10.0) as client:
         resp = await client.get(url, headers=headers)

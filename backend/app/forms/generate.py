@@ -101,7 +101,7 @@ def _model() -> Any:
 
     client = AsyncOpenAI(
         api_key=s.openai_api_key,
-        base_url=s.openai_base_url or None,
+        base_url=s.openai_base_url,
         max_retries=6,
         timeout=180.0,
     )

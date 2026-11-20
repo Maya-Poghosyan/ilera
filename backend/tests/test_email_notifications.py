@@ -53,7 +53,7 @@ def setup(monkeypatch):
             n.enqueue_scan(job)
     monkeypatch.setattr(n, "ScanPublisher", Publisher)
     monkeypatch.setattr(n, "get_settings", lambda: SimpleNamespace(
-        email_scanning_enabled=True, has_postgres=True, email_service_bus_namespace="bus"))
+        email_service_bus_namespace="bus"))
     app = FastAPI()
     app.include_router(n.router)
     state.client = TestClient(app)

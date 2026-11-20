@@ -1,7 +1,7 @@
 """Application completion engine.
 
 Manages the lifecycle of benefit applications: program->form-set mapping,
-application status persistence (Postgres / in-memory), autofill + Q&A resolution,
+application status persistence (Postgres), autofill + Q&A resolution,
 and stitching multiple filled PDFs into a single combined document.
 """
 

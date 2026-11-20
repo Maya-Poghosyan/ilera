@@ -6,7 +6,6 @@ government form, while a group that misroutes an answer writes the wrong thing i
 Both are silent. These tests check the committed groups against the real PDFs and check
 that a grouped answer lands where the group says it does.
 
-Runs against the in-memory store (no services). Run directly or via pytest.
 """
 import os
 import re

@@ -46,9 +46,6 @@ type CalEvent = {
   description?: string;
 };
 
-// Fallback for the pre-intake demo case.
-const DEFAULT_CASE_ID = "demo";
-
 // Reminder times are wall-clock in the caregiver's own zone, not the server's.
 const LOCAL_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -147,10 +144,8 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [eventsFailed, setEventsFailed] = useState(false);
-  const [caseId] = useState(
-    () =>
-      (typeof window !== "undefined" ? localStorage.getItem("ilera_case_id") : null) ??
-      DEFAULT_CASE_ID
+  const [caseId] = useState<string | null>(
+    () => (typeof window !== "undefined" ? localStorage.getItem("ilera_case_id") : null)
   );
   const [toast, setToast] = useState<string | null>(null);
 
@@ -170,15 +165,19 @@ export default function CalendarPage() {
   }, []);
 
   const loadReminders = useCallback(async () => {
+    if (!caseId) {
+      setLoading(false);
+      return;
+    }
     try {
       const data = await listReminders(caseId);
       setReminders(data);
     } catch {
-      // API may not be running
+      showToast("Could not load reminders. Please refresh.");
     } finally {
       setLoading(false);
     }
-  }, [caseId]);
+  }, [caseId, showToast]);
 
   // Suggestions (pending review) and committed calendar events are loaded together so the
   // grid and the review panel stay consistent, and a failure surfaces a retry rather than a
@@ -248,7 +247,7 @@ export default function CalendarPage() {
         },
       });
       showToast("Reminder updated");
-    } else {
+    } else if (caseId) {
       const body: ReminderCreate = {
         case_id: caseId,
         kind: formKind,

@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel
 
+from .azure_identity import managed_identity
 from .private_logs import private_transport_logs
 
 M = TypeVar("M", bound=BaseModel)
@@ -22,24 +23,12 @@ def is_dedicated_endpoint(url: str) -> bool:
                 and u.path in ("", "/") and not u.query and not u.fragment)
 
 
-def is_loopback_endpoint(url: str) -> bool:
-    """A local OpenAI-compatible stand-in (end-to-end tests), never a remote host."""
-    u = urlparse(url)
-    return u.scheme in ("http", "https") and u.hostname in ("127.0.0.1", "localhost") and u.path in ("", "/")
-
-
-def open_client(stack: ExitStack, *, endpoint: str, use_managed_identity: bool,
-                managed_identity_client_id: str = "", timeout: float = 45, api_key: str = ""):
+def open_client(stack: ExitStack, *, endpoint: str, managed_identity_client_id: str = "", timeout: float = 45):
+    from azure.identity import get_bearer_token_provider
     from openai import OpenAI
 
-    if api_key:
-        auth = api_key
-    else:
-        from azure.identity import DefaultAzureCredential, ManagedIdentityCredential, get_bearer_token_provider
-        credential = stack.enter_context(
-            ManagedIdentityCredential(client_id=managed_identity_client_id or None)
-            if use_managed_identity else DefaultAzureCredential())
-        auth = get_bearer_token_provider(credential, "https://cognitiveservices.azure.com/.default")
+    credential = stack.enter_context(managed_identity(managed_identity_client_id))
+    auth = get_bearer_token_provider(credential, "https://cognitiveservices.azure.com/.default")
     return stack.enter_context(OpenAI(base_url=endpoint.rstrip("/") + "/openai/v1/", api_key=auth,
                                       timeout=timeout, max_retries=0))
 

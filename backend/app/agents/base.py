@@ -3,4 +3,4 @@
 
 class SpecialistAgent:
     program: str
-    doc_key: str  # matches the program_docs/<doc_key>.txt filename
+    doc_key: str  # the program key used for retrieval scope and gates

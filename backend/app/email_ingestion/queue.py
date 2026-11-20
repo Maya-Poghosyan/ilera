@@ -8,6 +8,7 @@ from contextlib import ExitStack
 
 from .models import EmailScanJob
 from .privacy import private_transport_logs
+from ..azure_identity import managed_identity
 from ..config import get_settings
 
 
@@ -31,17 +32,12 @@ class ScanPublisher:
 
         if self._sender is None:
             settings = get_settings()
-            if not (settings.email_scanning_enabled and settings.has_postgres
-                    and settings.email_service_bus_namespace):
+            if not settings.email_service_bus_namespace:
                 raise RuntimeError("Email queue is unavailable")
-            from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
             from azure.servicebus import ServiceBusClient
 
             self._stack.enter_context(private_transport_logs())
-            credential = self._stack.enter_context(
-                ManagedIdentityCredential(client_id=settings.email_managed_identity_client_id or None)
-                if settings.email_use_managed_identity else DefaultAzureCredential()
-            )
+            credential = self._stack.enter_context(managed_identity(settings.email_managed_identity_client_id))
             client = self._stack.enter_context(ServiceBusClient(
                 fully_qualified_namespace=settings.email_service_bus_namespace,
                 credential=credential, logging_enable=False, retry_total=0,

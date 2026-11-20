@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import RedirectResponse, Response
+from fastapi.responses import Response
 
 from ..reference_guides.store import get_guide_bytes
 
@@ -18,8 +18,6 @@ def reference_guide(guide_id: str):
         raise HTTPException(404, 'Reference guide not found')
     # Fixed catalog keys only: this endpoint cannot retrieve arbitrary private blobs.
     content = get_guide_bytes(guide['blob_key'])
-    if content is None:
-        return RedirectResponse(guide['source_url'], status_code=307)
     return Response(content, media_type=guide.get('media_type', 'application/pdf'), headers={
         'Content-Disposition': f'inline; filename="{guide["filename"]}"',
         'Cache-Control': 'public, max-age=3600',

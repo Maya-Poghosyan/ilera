@@ -1,29 +1,19 @@
-"""Read guides from a dedicated private container, with a local fallback."""
-import logging
-from pathlib import Path
-
+"""Read public guide binaries from their own container in the forms storage account."""
+from ..azure_identity import managed_identity
 from ..config import get_settings
 
-logger = logging.getLogger(__name__)
-LOCAL_DIR = Path(__file__).resolve().parents[2] / 'data/reference_guides'
 _client = None
 
 
-def get_guide_bytes(key: str) -> bytes | None:
+def get_guide_bytes(key: str) -> bytes:
     global _client
-    settings = get_settings()
-    account = settings.reference_guides_blob_account_url or settings.forms_blob_account_url
-    if account:
-        try:
-            if _client is None:
-                from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
-                from azure.storage.blob import BlobServiceClient
-                credential = (ManagedIdentityCredential(client_id=settings.forms_managed_identity_client_id or None)
-                              if settings.forms_use_managed_identity else DefaultAzureCredential())
-                service = BlobServiceClient(account_url=account, credential=credential)
-                _client = service.get_container_client(settings.reference_guides_blob_container)
-            return _client.download_blob(key).readall()
-        except Exception:
-            logger.warning('Reference guide unavailable in blob storage: %s', key)
-    path = LOCAL_DIR / key
-    return path.read_bytes() if path.is_file() else None
+    from azure.storage.blob import BlobServiceClient
+
+    if _client is None:
+        s = get_settings()
+        if not s.forms_blob_account_url:
+            raise RuntimeError("FORMS_BLOB_ACCOUNT_URL is required")
+        service = BlobServiceClient(account_url=s.forms_blob_account_url,
+                                    credential=managed_identity(s.forms_managed_identity_client_id))
+        _client = service.get_container_client(s.reference_guides_blob_container)
+    return _client.download_blob(key).readall()

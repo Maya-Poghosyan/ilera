@@ -1,4 +1,4 @@
-"""Suggested events storage — persisted in Postgres or in-memory fallback.
+"""Suggested events storage.
 
 Suggested events are provider-independent calendar suggestions. Each event includes a title, an ISO date, optional
 time/kind, and a description of where it was detected.
@@ -55,17 +55,14 @@ def save_suggested_event(event: SuggestedEvent) -> SuggestedEvent:
 
 
 def list_suggested_events(*, user_id: Optional[str] = None) -> list[SuggestedEvent]:
-    if user_id is not None and db.available():
+    if user_id is not None:
         with db.connection() as conn:
             rows = conn.execute(
                 "SELECT doc FROM suggested_events WHERE doc->>'user_id' = %s",
                 (user_id,),
             ).fetchall()
         return [SuggestedEvent.model_validate(row[0]) for row in rows]
-    return [
-        SuggestedEvent.model_validate(doc) for doc in _store.list()
-        if user_id is None or doc.get("user_id") == user_id
-    ]
+    return [SuggestedEvent.model_validate(doc) for doc in _store.list()]
 
 
 def get_suggested_event(event_id: str) -> Optional[SuggestedEvent]:

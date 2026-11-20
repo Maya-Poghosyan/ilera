@@ -81,18 +81,14 @@ def accept_from_suggestion(
 
 
 def list_calendar_events(*, user_id: Optional[str] = None) -> list[CalendarEvent]:
-    if user_id is not None and db.available():
+    if user_id is not None:
         with db.connection() as conn:
             rows = conn.execute(
                 "SELECT doc FROM calendar_events WHERE doc->>'user_id' = %s",
                 (user_id,),
             ).fetchall()
         return [CalendarEvent.model_validate(row[0]) for row in rows]
-    return [
-        CalendarEvent.model_validate(doc)
-        for doc in _store.list()
-        if user_id is None or doc.get("user_id") == user_id
-    ]
+    return [CalendarEvent.model_validate(doc) for doc in _store.list()]
 
 
 def get_calendar_event(event_id: str) -> Optional[CalendarEvent]:

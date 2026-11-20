@@ -8,8 +8,7 @@ import pytest
 from app.rag import index
 from app.rag.scope import PolicyMetadata, RetrievalScope
 
-DSN = os.environ.get("TEST_RAG_DATABASE_URL")
-pytestmark = pytest.mark.skipif(not DSN, reason="TEST_RAG_DATABASE_URL not set")
+DSN = os.environ["TEST_DATABASE_URL"]
 
 
 def test_real_postgres_scoped_search_and_metadata_updates(monkeypatch):

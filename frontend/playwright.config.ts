@@ -1,8 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// End-to-end: real Next app → real FastAPI backend → local stand-in for the Azure model.
-// No database (in-memory store) and no general LLM key, so nothing reaches shared services.
+// End-to-end: real Next app → real FastAPI backend (local test Postgres) → local stand-in for
+// the Azure document model. Needs TEST_DATABASE_URL (see backend/tests/README.md).
 const WEB = 3517, API = 8517, MODEL = 4517;
+const DATABASE_URL = process.env.TEST_DATABASE_URL;
+if (!DATABASE_URL) throw new Error("TEST_DATABASE_URL is required (see backend/tests/README.md)");
 
 export default defineConfig({
   testDir: "e2e",
@@ -16,16 +18,11 @@ export default defineConfig({
   webServer: [
     { command: "node e2e/fake-azure-openai.mjs", port: MODEL, env: { FAKE_OPENAI_PORT: String(MODEL) }, reuseExistingServer: false },
     {
-      command: `.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port ${API}`,
+      command: `.venv/bin/python tests/e2e_api.py ${API} ${MODEL}`,
       cwd: "../backend",
       url: `http://127.0.0.1:${API}/healthz`,
       reuseExistingServer: false,
-      env: {
-        DATABASE_URL: "", OPENAI_API_KEY: "", EMAIL_OPENAI_ENDPOINT: "",
-        DOCUMENT_OPENAI_ENDPOINT: `http://127.0.0.1:${MODEL}`,
-        DOCUMENT_OPENAI_DEPLOYMENT: "e2e-documents",
-        DOCUMENT_OPENAI_API_KEY: "e2e-only",
-      },
+      env: { DATABASE_URL, OPENAI_API_KEY: "", EMAIL_OPENAI_ENDPOINT: "" },
     },
     {
       command: `npx next dev --port ${WEB} --hostname 127.0.0.1`,

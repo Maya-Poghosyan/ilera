@@ -1,18 +1,15 @@
-"""CaseProfile persistence. Uses Postgres when configured, else an in-memory dict.
+"""CaseProfile persistence.
 
-The Postgres path stores the profile whole as `jsonb` in the `cases` table.
+Stores the profile whole as `jsonb` in the `cases` table.
 """
 
 from typing import Callable, Optional, TypeVar
-from threading import RLock
 
 from . import db
 from .intake.mapping import apply_account_contact
 from .models import CaseProfile, EligibilityResult, SpecialistFinding
 
 _cases = db.JsonStore("cases")
-# Fallback (no-database) case_id -> owning user id; the column does this with Postgres.
-_owners: dict[str, str] = {}
 
 
 # ---------------------------------------------------------------------------
@@ -24,8 +21,6 @@ _owners: dict[str, str] = {}
 # ---------------------------------------------------------------------------
 def get_case_owner(case_id: str) -> Optional[str]:
     """The owning user's id, or None for a case nobody has claimed yet."""
-    if not db.available():
-        return _owners.get(case_id)
     with db.connection() as conn:
         row = conn.execute(
             "SELECT owner_user_id FROM cases WHERE id = %s", (case_id,)
@@ -39,12 +34,6 @@ def claim_case(case_id: str, user_id: str) -> bool:
     The guard is in the UPDATE rather than a read-then-write so two simultaneous claims can't
     both succeed.
     """
-    if not db.available():
-        if _cases.get(case_id) is None:
-            return False
-        if _owners.setdefault(case_id, user_id) != user_id:
-            return False
-        return True
     with db.connection() as conn:
         cur = conn.execute(
             "UPDATE cases SET owner_user_id = %s "
@@ -56,9 +45,6 @@ def claim_case(case_id: str, user_id: str) -> bool:
 
 def get_case_id_for_user(user_id: str) -> Optional[str]:
     """The user's case. Most recently touched one, if they somehow own several."""
-    if not db.available():
-        owned = [c for c, owner in _owners.items() if owner == user_id]
-        return owned[-1] if owned else None
     with db.connection() as conn:
         row = conn.execute(
             "SELECT id FROM cases WHERE owner_user_id = %s ORDER BY updated_at DESC LIMIT 1",
@@ -70,10 +56,6 @@ def get_case_id_for_user(user_id: str) -> Optional[str]:
 def purge_unclaimed_cases(older_than_days: int) -> int:
     """Delete cases nobody claimed within the window. An abandoned intake is otherwise kept
     forever, and it holds the household data of someone who never made an account."""
-    if older_than_days <= 0:
-        return 0
-    if not db.available():
-        return 0
     with db.connection() as conn:
         cur = conn.execute(
             "DELETE FROM cases WHERE owner_user_id IS NULL "
@@ -128,23 +110,14 @@ def get_profile(case_id: str) -> Optional[CaseProfile]:
 
 
 _MutationResult = TypeVar("_MutationResult")
-_case_mutation_lock = RLock()
 
 
 def mutate_profile(case_id: str, operation: Callable[[CaseProfile], tuple[CaseProfile, _MutationResult]]) -> _MutationResult:
     """Serialize resolution mutations and commit profile/tasks/results together.
 
-    An exception rolls back the operation. Postgres locks the existing case row;
-    the development fallback uses a process lock. Operations must not perform I/O.
+    An exception rolls back the operation; the case row is locked for its duration.
+    Operations must not perform I/O.
     """
-    if not db.available():
-        with _case_mutation_lock:
-            profile = get_profile(case_id)
-            if profile is None:
-                raise KeyError(case_id)
-            updated, result = operation(profile)
-            save_profile(updated)
-            return result
     with db.connection() as conn:
         with conn.transaction():
             row = conn.execute("SELECT doc FROM cases WHERE id = %s FOR UPDATE", (case_id,)).fetchone()

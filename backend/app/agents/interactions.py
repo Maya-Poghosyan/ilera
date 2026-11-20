@@ -4,9 +4,6 @@ Caregiver benefits interact: IHSS generally requires active Medi-Cal, Medicare i
 secondary payer to Medi-Cal, IHSS/waiver wages can be federally tax-excludable under
 IRS Notice 2014-7, etc. This module grounds those cross-program interactions in the
 **inter-eligibility advising documents** in the corpus and returns cited notes.
-
-Falls back to a small rule set when no LLM key is configured so the app still works
-with zero keys.
 """
 
 from __future__ import annotations
@@ -67,30 +64,6 @@ def _citation(h) -> Citation:
     )
 
 
-def _heuristic(active: set[str]) -> list[InteractionNote]:
-    notes: list[InteractionNote] = []
-    if "IHSS" in active and "Medi-Cal" in active:
-        notes.append(InteractionNote(
-            note="IHSS eligibility generally requires active Medi-Cal.",
-            programs=["IHSS", "Medi-Cal"],
-            action="Sequence Medi-Cal first, then apply for IHSS.",
-        ))
-    if "Medicare" in active and "Medi-Cal" in active:
-        notes.append(InteractionNote(
-            note="For dual-eligibles, Medicare pays first and Medi-Cal wraps around it.",
-            programs=["Medicare", "Medi-Cal"],
-            action="Confirm dual-eligible status and Medicare Savings Program enrollment.",
-        ))
-    if "Caregiver Tax Relief" in active and "IHSS" in active:
-        notes.append(InteractionNote(
-            note="IHSS provider wages for in-home care to a household member may be "
-                 "federally excludable under IRS Notice 2014-7.",
-            programs=["IHSS", "Caregiver Tax Relief"],
-            action="Check Notice 2014-7 / Medicaid-waiver payment exclusion eligibility.",
-        ))
-    return notes
-
-
 def analyze_interactions(
     profile: CaseProfile, results: list[EligibilityResult]
 ) -> list[InteractionNote]:
@@ -116,11 +89,9 @@ def _analyze(
     if len(active_set) < 2:
         return []
     s = get_settings()
-    if not s.has_llm:
-        return _heuristic(active_set)
     hits = _retrieve(active, profile)
     if not hits:
-        return _heuristic(active_set)
+        return []
     context = "\n\n".join(
         f"[{h.title or h.source}" + (f", p.{h.page}" if h.page else "") + f"] Policy metadata: {h.policy}\n{h.text}"
         for h in hits
@@ -140,32 +111,26 @@ def _analyze(
         f"CAREGIVER CASE PROFILE (JSON):\n{profile.model_dump_json(indent=2)}\n\n"
         f"INTER-ELIGIBILITY ADVISING DOCUMENTATION:\n{context}\n\n{_SCHEMA_HINT}"
     )
-    try:
-        from openai import OpenAI
-        from pydantic_ai.profiles.openai import OpenAIJsonSchemaTransformer
-        client = OpenAI(
-            api_key=s.openai_api_key,
-            base_url=s.openai_base_url or None,
-        )
-        resp = client.chat.completions.create(
-            model=s.openai_model,
-            max_completion_tokens=s.research_max_output_tokens,
-            **({"reasoning_effort": s.agent_reasoning_effort} if s.agent_reasoning_effort else {}),
-            response_format={"type": "json_schema", "json_schema": {
-                "name": "program_interactions", "strict": True,
-                "schema": OpenAIJsonSchemaTransformer(InteractionsOutput.model_json_schema(), strict=True).walk(),
-            }},
-            messages=[
-                {"role": "system", "content": _SYSTEM},
-                {"role": "user", "content": user},
-            ],
-        )
-        choice = resp.choices[0]
-        if choice.finish_reason != "stop" or choice.message.refusal or not choice.message.content:
-            raise ValueError("Incomplete interaction output")
-        data = InteractionsOutput.model_validate_json(choice.message.content).model_dump()
-    except Exception:
-        return _heuristic(active_set)
+    from openai import OpenAI
+    from pydantic_ai.profiles.openai import OpenAIJsonSchemaTransformer
+    client = OpenAI(api_key=s.openai_api_key, base_url=s.openai_base_url)
+    resp = client.chat.completions.create(
+        model=s.openai_model,
+        max_completion_tokens=s.research_max_output_tokens,
+        reasoning_effort=s.agent_reasoning_effort,
+        response_format={"type": "json_schema", "json_schema": {
+            "name": "program_interactions", "strict": True,
+            "schema": OpenAIJsonSchemaTransformer(InteractionsOutput.model_json_schema(), strict=True).walk(),
+        }},
+        messages=[
+            {"role": "system", "content": _SYSTEM},
+            {"role": "user", "content": user},
+        ],
+    )
+    choice = resp.choices[0]
+    if choice.finish_reason != "stop" or choice.message.refusal or not choice.message.content:
+        raise ValueError("Incomplete interaction output")
+    data = InteractionsOutput.model_validate_json(choice.message.content).model_dump()
     notes: list[InteractionNote] = []
     for item in data.get("interactions", []) or []:
         note = str(item.get("note", "")).strip()
@@ -185,4 +150,4 @@ def _analyze(
             action=str(item.get("action", "")),
             citations=citations,
         ))
-    return notes or _heuristic(active_set)
+    return notes

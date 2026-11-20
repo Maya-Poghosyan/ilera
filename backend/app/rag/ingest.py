@@ -15,7 +15,7 @@ import argparse
 import logging
 from collections import Counter
 
-from .embeddings import batch_size, model_id, provider
+from .embeddings import batch_size, model_id
 from .index import iter_documents, rebuild_index, sync_index
 
 
@@ -33,10 +33,7 @@ def main() -> None:
     if args.metadata_only:
         from app.config import get_settings
         from .index import PgVectorIndex
-        settings = get_settings()
-        if not settings.has_postgres:
-            parser.error("--metadata-only requires DATABASE_URL")
-        index = PgVectorIndex(settings.database_url)
+        index = PgVectorIndex(get_settings().database_url)
         try:
             print(f"Updated scope metadata for {index.sync_metadata()} documents; vectors unchanged.")
         finally:
@@ -52,16 +49,13 @@ def main() -> None:
     print(f"Corpus: {docs} documents")
     for program, n in sorted(by_program.items()):
         print(f"  {program:16} {n:>3} documents")
-    print(f"Embedding with {provider()}/{model_id()} (batch={batch_size()}) ...")
+    print(f"Embedding with {model_id()} (batch={batch_size()}) ...")
 
     if args.rebuild:
         index = rebuild_index()
         print(f"Done. backend={index.backend} rebuilt={index.size} chunks")
         return
     index, result = sync_index()
-    if result.changed < 0:  # backend can't diff; it was a full rebuild
-        print(f"Done. backend={index.backend} rebuilt={result.total} chunks")
-        return
     print(
         f"Done. backend={index.backend} documents_reindexed={result.changed} "
         f"documents_removed={result.removed} chunks={result.total}"

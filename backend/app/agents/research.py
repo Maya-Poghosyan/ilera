@@ -64,7 +64,7 @@ async def _answer_question(client, settings, program, question, scope, evidence)
         system_prompt=SYSTEM.format(program=program),
         model_settings={
             "max_tokens": settings.research_max_output_tokens,
-            **({"openai_reasoning_effort": settings.agent_reasoning_effort} if settings.agent_reasoning_effort else {}),
+            "openai_reasoning_effort": settings.agent_reasoning_effort,
         },
         retries=1,
     )
@@ -104,10 +104,6 @@ async def run(args: argparse.Namespace) -> dict:
     from app.rag.index import PgVectorIndex
 
     settings = get_settings()
-    if not settings.has_postgres:
-        raise ValueError("DATABASE_URL is required; research will not silently use a local fallback.")
-    if not args.retrieve_only and not settings.has_llm:
-        raise ValueError("OPENAI_API_KEY is required for answers; use --retrieve-only for evidence.")
     programs = list(PROGRAMS) if "all" in args.program else list(dict.fromkeys(args.program))
     queries = list(dict.fromkeys(args.query or [args.question]))
     index = PgVectorIndex(settings.database_url)
@@ -118,7 +114,7 @@ async def run(args: argparse.Namespace) -> dict:
         if not args.retrieve_only:
             from openai import AsyncOpenAI
             client = AsyncOpenAI(api_key=settings.openai_api_key,
-                                 base_url=settings.openai_base_url or None,
+                                 base_url=settings.openai_base_url,
                                  timeout=90, max_retries=2)
         semaphore = asyncio.Semaphore(3)
 

@@ -1,8 +1,7 @@
 """Tests for Care Calendar review (milestone §5): review-status persistence, idempotent
 acceptance of suggestions into calendar events, and owner isolation.
 
-With TEST_DATABASE_URL set these run against Postgres; otherwise they exercise the
-in-memory fallback. Run directly (`python tests/test_calendar_review.py`) or via pytest.
+Runs against the test Postgres (TEST_DATABASE_URL). Run directly (`python tests/test_calendar_review.py`) or via pytest.
 """
 import os
 import sys
@@ -10,7 +9,7 @@ import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-os.environ["DATABASE_URL"] = os.environ.get("TEST_DATABASE_URL", "")
+os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
 
 from fastapi import HTTPException  # noqa: E402
 
@@ -152,9 +151,6 @@ def test_delete_suggestion_also_removes_accepted_calendar_event():
 
 
 if __name__ == "__main__":
-    from app import db  # noqa: E402
-
-    print("backend:", "postgres" if db.available() else "in-memory")
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failed = 0
     for t in tests:

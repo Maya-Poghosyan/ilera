@@ -12,6 +12,7 @@ import threading
 import uuid
 
 from .. import db
+from ..azure_identity import managed_identity
 from ..config import get_settings
 from ..suggested_events import SuggestedEvent
 from ..providers.microsoft import ReauthorizationRequired
@@ -75,8 +76,6 @@ def _commit_result(conn, job: EmailScanJob, original: MailboxConnection, extract
 
 
 def process_job(job: EmailScanJob, extractor) -> str:
-    if not get_settings().email_scanning_enabled or not db.available():
-        raise RetryScan("email_scanning_unavailable")
     if job.provider != "microsoft":
         return "unsupported"
     with db.connection() as conn:
@@ -151,19 +150,16 @@ def settle_message(receiver, message, extractor) -> str:
 def run_worker() -> None:
     settings = get_settings()
     require_extraction_configuration()
-    if not (settings.email_scanning_enabled and settings.has_postgres and settings.email_service_bus_namespace
-            and settings.email_connections_enabled and settings.email_key_vault_url
+    if not (settings.email_service_bus_namespace and settings.email_key_vault_url
             and settings.email_microsoft_client_id and settings.email_microsoft_tenant_id
             and settings.email_microsoft_redirect_uri and 1 <= settings.email_scan_max_deliveries <= 5):
         raise RuntimeError("email_worker_unconfigured")
-    from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
     from azure.servicebus import AutoLockRenewer, ServiceBusClient, ServiceBusReceiveMode
 
     stop = threading.Event()
     for signum in (signal.SIGTERM, signal.SIGINT):
         signal.signal(signum, lambda *_: stop.set())
-    credential = (ManagedIdentityCredential(client_id=settings.email_managed_identity_client_id or None)
-                  if settings.email_use_managed_identity else DefaultAzureCredential())
+    credential = managed_identity(settings.email_managed_identity_client_id)
     with private_transport_logs(), credential, AzureExtractor() as extractor:
         with ServiceBusClient(settings.email_service_bus_namespace, credential=credential,
                               logging_enable=False) as client:

@@ -22,11 +22,3 @@ def test_readyz_unavailable_when_postgres_unreachable(monkeypatch: pytest.Monkey
     res = client.get("/readyz")
     assert res.status_code == 503
     assert res.json()["postgres"] is False
-
-
-def test_readyz_ok_without_postgres_configured(monkeypatch: pytest.MonkeyPatch) -> None:
-    """In-memory mode (no DATABASE_URL) is a valid way to run, so it stays ready."""
-    monkeypatch.setattr(db, "ready", lambda: None)
-    res = client.get("/readyz")
-    assert res.status_code == 200
-    assert res.json() == {"status": "ok", "postgres": None}

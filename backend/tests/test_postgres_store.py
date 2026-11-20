@@ -1,8 +1,6 @@
 """Round-trip tests for the Postgres-backed stores.
 
-With TEST_DATABASE_URL set (any Postgres; pgvector not required) these run against the
-database, creating their tables on first use. Without it they exercise the in-memory
-fallback instead, so they are worth running either way.
+Runs against the test Postgres (TEST_DATABASE_URL), creating tables on first use.
 Run directly (`python tests/test_postgres_store.py`) or via pytest if installed.
 """
 import os
@@ -11,7 +9,7 @@ import uuid
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-os.environ["DATABASE_URL"] = os.environ.get("TEST_DATABASE_URL", "")
+os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
 
 from fastapi import HTTPException  # noqa: E402
 
@@ -184,9 +182,6 @@ def test_suggested_event_crud():
 
 
 if __name__ == "__main__":
-    from app import db  # noqa: E402
-
-    print("backend:", "postgres" if db.available() else "in-memory")
     tests = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failed = 0
     for t in tests:

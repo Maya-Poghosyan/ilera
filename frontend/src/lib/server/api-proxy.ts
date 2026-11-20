@@ -11,7 +11,9 @@ export const SESSION_COOKIE = "ilera_session";
  * Deliberately not `NEXT_PUBLIC_`: that would inline the value into the browser bundle at build
  * time, which is what made a missing build arg silently produce same-origin requests. */
 function apiUrl(): string {
-  return process.env.API_URL || "http://localhost:8000";
+  const url = process.env.API_URL;
+  if (!url) throw new Error("API_URL is required");
+  return url;
 }
 
 export async function sessionToken(): Promise<string | undefined> {

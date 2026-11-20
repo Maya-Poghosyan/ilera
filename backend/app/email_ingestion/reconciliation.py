@@ -143,8 +143,7 @@ def prune_orphan_subscriptions(connection_id: str, user_id: str) -> int:
 def reconcile_pending() -> dict[str, int]:
     """Reconcile every flagged, connected, owned Microsoft mailbox. Fixed counters only."""
     settings = get_settings()
-    if not (settings.email_scanning_enabled and settings.email_connections_enabled
-            and settings.has_postgres and settings.email_service_bus_namespace):
+    if not settings.email_service_bus_namespace:
         raise RuntimeError("Email reconciliation is not configured")
     with db.connection() as conn:
         rows = conn.execute(

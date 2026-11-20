@@ -220,7 +220,7 @@ def test_research_waits_for_siblings_before_closing_shared_resources(monkeypatch
         state['finished']=True
         return ResearchAnswer(conclusion='Resolve the missing fact.')
     monkeypatch.setattr(idx,'PgVectorIndex',Index)
-    monkeypatch.setattr(config,'get_settings',lambda:NS(has_postgres=True,has_llm=True,database_url='test',openai_api_key='test',openai_base_url='',openai_model='gpt-5-mini'))
+    monkeypatch.setattr(config,'get_settings',lambda:NS(database_url='test',openai_api_key='test',openai_base_url='',openai_model='gpt-5-mini'))
     monkeypatch.setattr(openai,'AsyncOpenAI',lambda **kw:Client())
     monkeypatch.setattr(r,'_answer_question',answer)
     args=NS(program=['ihss','tax'],query=None,question='Question',retrieve_only=False,state='CA',as_of=date(2026,11,15),k=1)

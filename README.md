@@ -17,11 +17,11 @@ dashboard: care calendar, timekeeping, journal, renewals, and auto-filled govern
 
 ```
 Next.js frontend  ──REST──▶  FastAPI backend
-  intake wizard                 accounts, CaseProfile, records (Postgres / in-memory)
+  intake wizard                 accounts, CaseProfile, records (Postgres)
   eligibility cards               │
   applications flow               ├─ Routing Agent ──▶ specialist agents (IHSS, Medi-Cal, PFL, VA, …)
   dashboard                       │       pydantic-ai, each grounded in program-scoped RAG
-                                  ├─ RAG over program docs (pgvector / in-memory fallback)
+                                  ├─ RAG over program docs (pgvector)
                                   └─ form fill + stitch (pypdf / fillpdf)
                           planned: Outlook + Gmail email scanning → care calendar
 ```
@@ -35,19 +35,20 @@ frontend/   Next.js + TypeScript + Tailwind + shadcn/ui
 backend/    FastAPI app
   app/
     agents/     routing coordinator + specialist agents
-    rag/        embeddings + vector index (pgvector, in-memory fallback)
+    rag/        embeddings + vector index (pgvector)
     forms/      PDF field-map fill + stitch
     models.py   CaseProfile + EligibilityResult + supporting types
     main.py     API endpoints
   data/
-    program_docs/   official program text for RAG
+    knowledge/      official program text for RAG (manifest + text)
+    program_policies/  eligibility policy models
     form_schemas/   PDF field → CaseProfile path maps
 ```
 
 ## Quickstart
 
-Everything boots **without any API keys** — RAG falls back to a local embedding model and
-the data stores fall back to in-memory. Add keys to go production-grade.
+There are no local fallbacks: the app runs against Postgres (pgvector) and Azure services,
+and a missing setting fails loudly where it is used. See `backend/.env.example`.
 
 ### Backend
 
@@ -58,9 +59,9 @@ cd backend
 # The containers run Python 3.12. `uv` creates a matching local env from the committed
 # lockfile so local == container. Install uv once: https://docs.astral.sh/uv/
 make setup                  # fetches Python 3.12, builds .venv from requirements.lock
-cp .env.example .env        # optional: add Postgres / LLM keys
+cp .env.example .env        # fill in Postgres and Azure settings
 make run                    # uvicorn app.main:app --reload --port 8000
-make test                   # run the full test suite in the venv
+TEST_DATABASE_URL=... make test   # tests need a Postgres with pgvector; see tests/conftest.py
 ```
 
 Dependencies live in `requirements.txt` (what the containers install). `requirements.lock`
@@ -86,9 +87,7 @@ Merging a change under `backend/data/knowledge/` is enough in practice —
 to `main`. It needs `DATABASE_URL` and `OPENAI_API_KEY` as repository secrets, an
 `OPENAI_BASE_URL` variable, and the database to accept connections from GitHub's runners.
 
-Without `DATABASE_URL`, the index falls back to memory (no fingerprints, so every sync is a
-full rebuild). If you deploy before ingesting, retrieval returns nothing — `/health` reports
-`rag_chunks: 0`.
+If you deploy before ingesting, retrieval returns nothing — `/health` reports `rag_chunks: 0`.
 
 ### Frontend
 
@@ -193,18 +192,13 @@ rather than 403 to avoid confirming the case exists. Unclaimed cases are deleted
 
 - **Postgres:** set `DATABASE_URL` — all stores persist (`users`, `cases`, `reminders`,
   `timekeeping`, `journal`, `renewal_items`, `applications`, `preferences`, `suggested_events`,
-  `calendar_events`) and the same database serves the pgvector RAG index. Without it, every
-  store falls back to an in-process dict.
-- **LLM:** set `OPENAI_API_KEY` (OpenAI or Azure OpenAI via `OPENAI_BASE_URL`).
-- **Email:** Microsoft 365 OAuth connection management is implemented behind
-  `EMAIL_CONNECTIONS_ENABLED`; configure Entra and Key Vault using
-  [the Azure setup handoff](docs/azure-email-setup.md). Live integration validation is pending.
-  The Care Calendar review flow (accept/dismiss suggestions with persisted status and
-  idempotent calendar-event acceptance) is implemented. Webhook ingestion, the scan worker,
-  and Gmail remain gated; keep `EMAIL_SCANNING_ENABLED=false` until the ingestion path is
-  validated. Reminder records remain available, but automatic delivery and text check-ins
-  are unavailable.
-- **Forms:** drop fillable government PDFs into `backend/data/` and fill out the corresponding
-  field-map JSONs in `backend/data/form_schemas/`.
+  `calendar_events`) and the same database serves the pgvector RAG index.
+- **LLM:** set `OPENAI_API_KEY` and `OPENAI_BASE_URL` (Azure OpenAI v1 endpoint).
+- **Email:** Microsoft 365 mailbox connections and scanning; configure Entra and Key Vault
+  using [the Azure setup handoff](docs/azure-email-setup.md). Gmail is not supported.
+  Reminder records remain available, but automatic delivery and text check-ins are
+  unavailable.
+- **Forms:** fillable government PDFs live in blob storage (`FORMS_BLOB_ACCOUNT_URL`) with
+  authoring copies under `backend/data/forms/`; field maps are in `backend/data/form_schemas/`.
 
 Email scanning implementation milestones and current status: [Azure email roadmap](docs/email-scanning-milestones.md).

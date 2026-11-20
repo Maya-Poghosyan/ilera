@@ -22,7 +22,6 @@ const MESSAGES: Record<string, string> = {
   too_many_pages: "This PDF has too many pages. Upload just the pages you need.",
   unreadable: "We couldn't open this file.",
   no_text_layer: "This looks like a scanned PDF. Try a clear photo of the page instead.",
-  unconfigured: "Reading documents isn't available yet. Please enter your answers.",
   rate_limited: "We're reading a lot of documents right now. Please try again later or enter your answers.",
 };
 const FALLBACK = "We couldn't read this document. Please enter your answers.";

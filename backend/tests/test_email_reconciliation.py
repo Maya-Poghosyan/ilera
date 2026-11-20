@@ -152,8 +152,7 @@ def test_reconcile_pending_counts_and_isolates_failures(setup, monkeypatch):
     monkeypatch.setattr(r.db, "connection", connection)
     monkeypatch.setattr(
         r, "get_settings",
-        lambda: SimpleNamespace(email_scanning_enabled=True, email_connections_enabled=True,
-                                has_postgres=True, email_service_bus_namespace="bus"),
+        lambda: SimpleNamespace(email_service_bus_namespace="bus"),
     )
 
     def reconcile_one(connection_id, user_id, **kw):
@@ -169,8 +168,7 @@ def test_reconcile_pending_counts_and_isolates_failures(setup, monkeypatch):
 def test_reconcile_pending_requires_configuration(monkeypatch):
     monkeypatch.setattr(
         r, "get_settings",
-        lambda: SimpleNamespace(email_scanning_enabled=False, email_connections_enabled=True,
-                                has_postgres=True, email_service_bus_namespace="bus"),
+        lambda: SimpleNamespace(email_service_bus_namespace=""),
     )
     with pytest.raises(RuntimeError):
         r.reconcile_pending()

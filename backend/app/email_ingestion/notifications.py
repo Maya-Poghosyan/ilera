@@ -106,8 +106,7 @@ async def notifications(request: Request):
             raise HTTPException(400, "Invalid validation token")
         return PlainTextResponse(token, headers={"Cache-Control": "no-store"})
     settings = get_settings()
-    if not (settings.email_scanning_enabled and settings.has_postgres
-            and settings.email_service_bus_namespace):
+    if not settings.email_service_bus_namespace:
         raise HTTPException(503, "Email notifications are unavailable")
     body = bytearray()
     async for chunk in request.stream():

@@ -1,4 +1,4 @@
-"""Reminder scheduling — model, persistence (Postgres / in-memory), and templates.
+"""Reminder scheduling — model, persistence (Postgres), and templates.
 
 A Reminder stores a schedule (daily, weekly, once). Delivery is not configured.
 Persistence mirrors the CaseProfile pattern in store.py.
@@ -114,7 +114,7 @@ def advance_next_run(reminder: Reminder) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Persistence (Postgres / in-memory)
+# Persistence (Postgres)
 # ---------------------------------------------------------------------------
 
 _store = db.JsonStore("reminders")

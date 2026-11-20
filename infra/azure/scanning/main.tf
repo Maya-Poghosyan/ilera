@@ -112,14 +112,6 @@ resource "azurerm_container_app" "scan_worker" {
         secret_name = "database-url"
       }
       env {
-        name  = "EMAIL_CONNECTIONS_ENABLED"
-        value = "true"
-      }
-      env {
-        name  = "EMAIL_SCANNING_ENABLED"
-        value = var.email_scanning_enabled
-      }
-      env {
         name  = "EMAIL_MICROSOFT_TENANT_ID"
         value = var.mailbox_tenant_id
       }
@@ -150,10 +142,6 @@ resource "azurerm_container_app" "scan_worker" {
       env {
         name  = "EMAIL_KEY_VAULT_URL"
         value = local.vault_uri
-      }
-      env {
-        name  = "EMAIL_USE_MANAGED_IDENTITY"
-        value = "true"
       }
       # The worker's managed identity is user-assigned; tell the SDKs which client id to use.
       env {
@@ -222,8 +210,6 @@ resource "azurerm_role_assignment" "worker_openai_user" {
 # Hourly Container Apps job that renews Graph subscriptions, reconciles missed
 # notifications, and prunes orphaned subscriptions. Runs the full API image (which has the
 # whole app) under the worker's user-assigned identity (Key Vault read + Service Bus send).
-# It is effective only when EMAIL_SCANNING_ENABLED=true; otherwise it exits with a fixed
-# "unavailable" outcome by design.
 resource "azurerm_container_app_job" "maintenance" {
   name                         = "ilera-email-maint-prod"
   resource_group_name          = var.resource_group
@@ -292,21 +278,8 @@ resource "azurerm_container_app_job" "maintenance" {
         value = "ilera-email-token-key"
       }
       env {
-        name  = "EMAIL_USE_MANAGED_IDENTITY"
-        value = "true"
-      }
-      env {
         name  = "EMAIL_MANAGED_IDENTITY_CLIENT_ID"
         value = azurerm_user_assigned_identity.scan_worker.client_id
-      }
-      env {
-        name  = "EMAIL_CONNECTIONS_ENABLED"
-        value = "true"
-      }
-      # Flipped to true only after BAA/abuse-monitoring confirmation and validation.
-      env {
-        name  = "EMAIL_SCANNING_ENABLED"
-        value = var.email_scanning_enabled
       }
       env {
         name  = "EMAIL_SERVICE_BUS_NAMESPACE"

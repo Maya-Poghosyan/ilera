@@ -103,9 +103,8 @@ persistent Azure catalog migration are separate operations.
 
 ## Validation
 
-`test_rag_scope.py` covers wrong-state/program exclusion, inclusive starts,
-exclusive ends, shared federal sources, missing jurisdiction, unknown dates,
+`test_rag_scope.py` covers scope validation, date boundaries,
 serialized defaults, conflicting facts, required API scope, and tool failures.
-`test_rag_scope_postgres.py` repeats the critical search checks on real pgvector
-when `TEST_RAG_DATABASE_URL` is provided, using only session-local temporary tables.
+`test_rag_scope_postgres.py` runs the critical search checks on real pgvector
+(`TEST_DATABASE_URL`), using only session-local temporary tables.
 It confirms metadata updates leave vectors untouched.

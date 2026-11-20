@@ -154,7 +154,7 @@ async def synthesis_activity(payload: dict) -> dict:
         s = get_settings()
         openai_client = AsyncOpenAI(
             api_key=s.openai_api_key,
-            base_url=s.openai_base_url or None,
+            base_url=s.openai_base_url,
             max_retries=6,
             timeout=90.0,
         )
@@ -164,7 +164,7 @@ async def synthesis_activity(payload: dict) -> dict:
             output_type=ToolOutput(StrategyOutput, strict=True),
             model_settings={
                 "max_tokens": s.eligibility_max_output_tokens,
-                **({"openai_reasoning_effort": s.agent_reasoning_effort} if s.agent_reasoning_effort else {}),
+                "openai_reasoning_effort": s.agent_reasoning_effort,
             },
             retries=1,
             system_prompt=_SYNTHESIS_SYSTEM,

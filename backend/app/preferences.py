@@ -1,4 +1,4 @@
-"""Per-case caregiver preferences (Postgres or in-memory fallback).
+"""Per-case caregiver preferences.
 
 Legacy inbox-monitoring preferences are retained for stored-record compatibility.
 Future mailbox connections must collect their own provider-specific OAuth consent.

@@ -7,7 +7,6 @@ from a CaseProfile, and writes them into fillable PDF AcroForms using pypdf.
 from __future__ import annotations
 
 import io
-import json
 import os
 from typing import Any
 
@@ -19,7 +18,7 @@ from .pdf_store import get_pdf_bytes
 from .schema_store import all_schemas
 from .schema_store import load_schema as _load_schema_source
 
-SCHEMA_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "form_schemas")
+from .schema_store import SCHEMA_DIR
 FORMS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "data", "forms")
 
 
@@ -44,7 +43,7 @@ def _transform(value: Any, transform: str) -> Any:
 
 
 def list_schemas() -> list[dict]:
-    """Return metadata for all available form schemas (DB-first, file fallback)."""
+    """Return metadata for all available form schemas."""
     schemas: list[dict] = []
     for data in all_schemas():
         meta = data.get("_meta", {})
@@ -66,7 +65,7 @@ def list_schemas() -> list[dict]:
 
 
 def load_schema(form_id: str) -> dict:
-    """Load a field-map schema by form_id (case-insensitive), DB-first with file fallback."""
+    """Load a field-map schema by form_id (case-insensitive)."""
     return _load_schema_source(form_id)
 
 
@@ -74,26 +73,12 @@ def resolve_fields(form_id: str, profile: CaseProfile) -> dict[str, Any]:
     """Return resolved field values and lists of missing/needs_user_input fields."""
     schema = load_schema(form_id)
     fields_map = schema.get("fields", {})
-    if not fields_map and "fields" not in schema:
-        # Fall back to legacy flat schema (form_id -> profile_path)
-        fields_map = {k: v for k, v in schema.items() if k != "_meta"}
-        if fields_map:
-            return _resolve_legacy(fields_map, profile)
 
     resolved: dict[str, Any] = {}
     missing: list[str] = []
     needs_user_input: list[dict] = []
 
     for pdf_field, spec in fields_map.items():
-        if isinstance(spec, str):
-            # Legacy format: direct profile_path string
-            value = _dig(profile, spec)
-            if value in (None, "", []):
-                missing.append(pdf_field)
-            else:
-                resolved[pdf_field] = value
-            continue
-
         profile_path = spec.get("profile_path")
         label = spec.get("label", pdf_field)
         field_type = spec.get("type", "text")
@@ -157,23 +142,11 @@ def resolve_fields(form_id: str, profile: CaseProfile) -> dict[str, Any]:
     }
 
 
-def _resolve_legacy(fields_map: dict[str, str], profile: CaseProfile) -> dict[str, Any]:
-    resolved: dict[str, Any] = {}
-    missing: list[str] = []
-    for pdf_field, profile_path in fields_map.items():
-        value = _dig(profile, profile_path)
-        if value in (None, "", []):
-            missing.append(pdf_field)
-        else:
-            resolved[pdf_field] = value
-    return {"resolved": resolved, "missing": missing, "needs_user_input": []}
-
-
 def _get_pdf_path(form_id: str) -> str | None:
     """Local filesystem path to a form's PDF, if the bundled file exists.
 
     Used by the authoring generators, which operate on local files. The runtime fill
-    path uses `_get_pdf_source`, which is blob-aware with a local fallback.
+    path uses `_get_pdf_source`, which reads blob storage.
     """
     schema = load_schema(form_id)
     meta = schema.get("_meta", {})
@@ -186,7 +159,7 @@ def _get_pdf_path(form_id: str) -> str | None:
 
 
 def _get_pdf_source(form_id: str) -> io.BytesIO | None:
-    """A PdfReader-ready byte stream for a form's PDF: blob-first, local fallback."""
+    """A PdfReader-ready byte stream for a form's PDF, from blob storage."""
     schema = load_schema(form_id)
     pdf_rel = schema.get("_meta", {}).get("pdf_path", "")
     data = get_pdf_bytes(pdf_rel)

@@ -11,8 +11,8 @@ The mailbox-OAuth infrastructure AND the scanning pipeline are provisioned via T
 applied to production (`ilera-subscription`). Service Bus (`ilera-email-bus`/`email.scan`), the
 scan worker container app, the hourly maintenance job (`ilera-email-maint`), and all RBAC are
 live. The Entra client secret and Fernet key are in Key Vault. BAA / abuse-monitoring opt-out
-for the `ilera-resource` Azure OpenAI account is confirmed, so `EMAIL_CONNECTIONS_ENABLED=true`
-and `EMAIL_SCANNING_ENABLED=true` are set on the API, worker, and maintenance job. The
+for the `ilera-resource` Azure OpenAI account is confirmed; connections and scanning are on
+(they no longer have switches). The
 maintenance job runs clean (`checked=0 failed=0`). Remaining: interactive live end-to-end
 validation (connect a real M365 mailbox in the browser → send a test email → confirm a
 suggestion reaches the Care Calendar).
@@ -70,11 +70,7 @@ Decisions made along the way (context for future changes):
    EMAIL_KEY_VAULT_URL                = https://ilera-email-01a341d5.vault.azure.net
    EMAIL_MICROSOFT_CLIENT_SECRET_NAME = ilera-microsoft-client-secret
    EMAIL_TOKEN_ENCRYPTION_KEY_NAME    = ilera-email-token-key
-   EMAIL_USE_MANAGED_IDENTITY         = true
-   EMAIL_CONNECTIONS_ENABLED          = true   # the switch
-   EMAIL_SCANNING_ENABLED             = false  # keep false until the pipeline is live
    ```
-   `backend/app/config.py` has safe defaults, so the app runs today with these unset/false.
 3. **Verify the Entra app registration** has: single-tenant (`AzureADMyOrg`), web redirect
    `…/api/email/microsoft/callback`, delegated Graph scopes `Mail.Read`, `openid`, `profile`,
    `offline_access`. Admin consent may be required by tenant policy.
@@ -110,7 +106,6 @@ Prerequisites, then apply:
    acceptance) is implemented and unit-tested. Still pending: live end-to-end verification. No
    maintenance schedule or scanning deployment has been applied. The backend suite is 216
    passing on a Python 3.12 conda env with full requirements.txt installed.
-   Keep `EMAIL_SCANNING_ENABLED=false` until the full pipeline is ready and validated.
 
 ### C. Hardening / follow-ups (optional, not blocking)
 

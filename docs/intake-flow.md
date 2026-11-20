@@ -122,10 +122,10 @@ Upload limits are served as `document_upload` in the schema. Documents form one 
   `answer` / `member_income` suggestions. Nothing is stored or logged; `store=False`, no tools.
 - Frontend: `src/components/intake/documents/` — upload card, suggestion panel, shared-collection hook,
   and the response parser.
-- Requires a dedicated Azure OpenAI resource: `DOCUMENT_OPENAI_ENDPOINT`, `DOCUMENT_OPENAI_DEPLOYMENT`
-  (vision-capable), managed identity via `DOCUMENT_USE_MANAGED_IDENTITY` /
-  `DOCUMENT_MANAGED_IDENTITY_CLIENT_ID`. Never falls back to `OPENAI_API_KEY`; unconfigured → 503.
-  `DOCUMENT_OPENAI_API_KEY` is accepted only with a loopback endpoint (end-to-end tests).
+- Requires the dedicated Azure OpenAI resource `ilera-documents-openai`
+  (`infra/azure/oauth/documents.tf`): `DOCUMENT_OPENAI_ENDPOINT`, `DOCUMENT_OPENAI_DEPLOYMENT`
+  (vision-capable), reached only with the API's managed identity. Never uses `OPENAI_API_KEY`;
+  missing settings are a server error, not a disabled feature.
 - Suggestions are applied only when the caregiver selects "Use this answer". Conflicting values are
   all shown; tax figures from a different year than `tax.year` are flagged.
 - Spend limit: 300 documents per hour per API replica, shared by all users.
@@ -133,5 +133,6 @@ Upload limits are served as `document_upload` in the schema. Documents form one 
 `tax.entry_method` opens the Tax Information section: Use my documents / Enter answers myself / Skip
 tax savings for now. Skipping hides only the tax questions; the tax eligibility gate still runs.
 
-End-to-end tests: `cd frontend && npm run test:e2e` starts the backend (no database), the Next app and
-a local model stand-in (`e2e/fake-azure-openai.mjs`).
+End-to-end tests: `cd frontend && TEST_DATABASE_URL=... npm run test:e2e` starts the backend against the
+test Postgres through `backend/tests/e2e_api.py` (which swaps only the document model client for the
+local stand-in `e2e/fake-azure-openai.mjs`) and the Next app.

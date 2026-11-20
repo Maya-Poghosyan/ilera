@@ -99,10 +99,7 @@ terraform plan      # read-only; review before applying
 terraform apply
 ```
 
-`plan` is the equivalent of the old `setup_email.py` read-only preview. The email settings
-`EMAIL_CONNECTIONS_ENABLED` and `EMAIL_SCANNING_ENABLED` are set to `"false"` directly in
-`data.tf`: applying wires up the infrastructure without turning email on. Change them there
-when you're ready — the plan diff shows the change.
+`plan` is the equivalent of the old `setup_email.py` read-only preview.
 
 ## CI/CD
 
@@ -262,8 +259,7 @@ terraform apply
 
 The queue uses duplicate detection, bounded delivery (5), and dead-lettering; the API is a
 Service Bus **sender** and the worker a **receiver**, both by managed identity. Broker dedup
-does not replace worker idempotency. Set `EMAIL_SCANNING_ENABLED` to `"true"` in the OAuth
-module's `data.tf` only once the pipeline and calendar review are validated.
+does not replace worker idempotency.
 
 ## Verification
 

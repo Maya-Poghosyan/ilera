@@ -36,12 +36,9 @@ locals {
 # container app's template (env vars + secret refs) is owned by the app deployment
 # pipeline; this module writing it would clobber the app's existing secrets. Reference
 # values for the app deployment to set (all read from Key Vault by managed identity):
-#   EMAIL_CONNECTIONS_ENABLED           = "false"   (flip when ready)
-#   EMAIL_SCANNING_ENABLED              = "false"   (flip when the pipeline is live)
 #   EMAIL_MICROSOFT_TENANT_ID           = var.tenant_id
 #   EMAIL_MICROSOFT_CLIENT_ID           = var.mailbox_client_id
 #   EMAIL_MICROSOFT_REDIRECT_URI        = var.redirect_uri
 #   EMAIL_KEY_VAULT_URL                 = "https://<vault>.vault.azure.net"
 #   EMAIL_MICROSOFT_CLIENT_SECRET_NAME  = var.client_secret_name
 #   EMAIL_TOKEN_ENCRYPTION_KEY_NAME     = var.encryption_key_name
-#   EMAIL_USE_MANAGED_IDENTITY          = "true"

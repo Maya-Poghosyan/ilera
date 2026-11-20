@@ -13,8 +13,7 @@ AS_OF = date(2026, 10, 14)
 
 @pytest.fixture(autouse=True)
 def offline_embedding_identity(monkeypatch):
-    # Fingerprint tests exercise invalidation, not model downloads/API access.
-    monkeypatch.setattr(index, "embedding_provider", lambda: "test")
+    # Fingerprint tests exercise invalidation, not API access.
     monkeypatch.setattr(index, "embedding_id", lambda: "test-model")
 
 
@@ -22,30 +21,6 @@ def metadata(programs=("medical",), jurisdictions=("CA",), start=None, end=None)
     return PolicyMetadata.from_dict({"applicable_programs": list(programs),
                                     "jurisdictions": list(jurisdictions),
                                     "effective_from": start, "effective_to": end}, programs[0])
-
-
-def test_scope_filters_program_state_and_effective_interval_before_top_k(monkeypatch):
-    monkeypatch.setattr(index, "embed_one", lambda _: [1.0, 0.0])
-    idx = index.RagIndex()
-    policies = {
-        "wrong-state": metadata(jurisdictions=("NY",)),
-        "wrong-program": metadata(programs=("tax",)),
-        "expired": metadata(end="2026-10-14"),
-        "future": metadata(start="2026-10-15"),
-        "unclassified": metadata(jurisdictions=()),
-        "state": metadata(start="2026-10-14"),
-        "federal-shared": metadata(programs=("tax", "medical"), jurisdictions=("US",)),
-    }
-    idx._chunks = [index.Chunk(id=key, program=policy.applicable_programs[0],
-                               text=key, source=key, document_id=key, vector=[1.0, 0.0], policy=policy)
-                   for key, policy in policies.items()]
-    hits = idx.search("test", k=2, scope=RetrievalScope("medical", "CA", AS_OF))
-    assert {h.document_id for h in hits} == {"state", "federal-shared"}
-    assert next(h for h in hits if h.document_id == "federal-shared").policy["date_status"] == "unverified"
-    hits = idx.search("test", scope=RetrievalScope("medical", "NY", AS_OF))
-    assert {h.document_id for h in hits} == {"wrong-state", "federal-shared"}
-    hits = idx.search("test", scope=RetrievalScope("medical", None, AS_OF))
-    assert {h.document_id for h in hits} == {"federal-shared"}
 
 
 def test_scope_validation_and_date_boundaries():
@@ -87,8 +62,8 @@ def test_metadata_changes_do_not_require_reembedding():
 
 
 def test_bundled_corpus_has_explicit_jurisdiction_and_authority():
-    from app.rag.source_store import iter_source_files
-    docs = list(iter_source_files())
+    from app.rag.source_store import iter_sources
+    docs = list(iter_sources())
     assert len(docs) >= 35
     assert all(d.policy.jurisdictions and d.policy.authority_level for d in docs)
     assert next(d for d in docs if d.document_id == "ACWDL-25-14").policy.jurisdictions == ("CA",)
@@ -167,40 +142,17 @@ def test_rag_api_requires_explicit_scope():
     assert query.as_of == AS_OF
 
 
-def test_hosted_scope_failure_cannot_fall_back_to_local(monkeypatch):
+def test_index_attach_failure_closes_pool_and_raises(monkeypatch):
     closed = []
     class BrokenIndex:
         def __init__(self, dsn):
             self._pool = SimpleNamespace(close=lambda: closed.append(True))
         def ensure(self):
             raise RuntimeError("scope catalog absent")
-    monkeypatch.setattr(index, "get_settings", lambda: SimpleNamespace(has_postgres=True, database_url="test"))
+    monkeypatch.setattr(index, "get_settings", lambda: SimpleNamespace(database_url="test"))
     monkeypatch.setattr(index, "PgVectorIndex", BrokenIndex)
     with pytest.raises(RuntimeError, match="catalog absent"):
         index._make_index(force=False)
     assert closed == [True]
 
 
-def test_source_metadata_backfill_preserves_explicit_db_scope(monkeypatch):
-    from contextlib import contextmanager
-    from app.rag import source_store
-    rows = [
-        ("old", "medical", "Old", "", "text", {"authority_level": "manual"}),
-        ("new", "medical", "New", "", "text", {"jurisdictions": ["NY"]}),
-        ("unclassified", "medical", "Unknown", "", "text", {"jurisdictions": []}),
-    ]
-    @contextmanager
-    def connection():
-        yield SimpleNamespace(execute=lambda _: SimpleNamespace(fetchall=lambda: rows))
-    monkeypatch.setattr(source_store, "_db_has_sources", lambda: True)
-    monkeypatch.setattr(source_store.db, "connection", connection)
-    monkeypatch.setattr(source_store, "_manifest_entries", lambda: {
-        "old": {"jurisdictions": ["CA"], "authority_level": "letter"},
-        "new": {"jurisdictions": ["CA"]},
-        "unclassified": {"jurisdictions": ["CA"]},
-    })
-    docs = list(source_store.iter_sources())
-    assert docs[0].policy.jurisdictions == ("CA",)
-    assert docs[0].policy.authority_level == "manual"
-    assert docs[1].policy.jurisdictions == ("NY",)
-    assert docs[2].policy.jurisdictions == ()
