@@ -43,7 +43,13 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 /** The session lives in an httpOnly cookie set by /api/auth/{signup,login}, so it travels with
  * every request automatically and there is no token for this code to hold or hand out. */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUserState] = useState<AuthUser | null>(null);
+  // The account's case is the caregiver's case on every device. Pages read it from storage, so
+  // record it before they render (a fresh browser has nothing stored).
+  const setUser = useCallback((u: AuthUser | null) => {
+    if (u?.case_id) localStorage.setItem("ilera_case_id", u.case_id);
+    setUserState(u);
+  }, []);
   const [loading, setLoading] = useState(true);
 
   const authenticate = useCallback(
@@ -59,13 +65,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setUser((await res.json()) as AuthUser);
     },
-    [],
+    [setUser],
   );
 
   const logout = useCallback(() => {
+    localStorage.removeItem("ilera_case_id");
     setUser(null);
     void fetch("/api/auth/logout", { method: "POST" });
-  }, []);
+  }, [setUser]);
 
   // Restore the session on mount: whether the cookie is still valid is the server's call.
   useEffect(() => {
@@ -82,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [setUser]);
 
   const signup = useCallback(async (details: SignupDetails): Promise<void> => {
     const res = await fetch("/api/auth/signup", {
@@ -126,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!res.ok) throw new Error(`Update failed: ${res.status}`);
       setUser((await res.json()) as AuthUser);
     },
-    [],
+    [setUser],
   );
 
   const value = useMemo(

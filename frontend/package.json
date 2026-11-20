@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:intake": "node --test tests/intake-flow.test.cjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {

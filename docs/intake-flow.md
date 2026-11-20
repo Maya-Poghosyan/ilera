@@ -86,12 +86,8 @@ from each card, so caregivers can return to the list after making corrections.
 
 ## Verification
 
-Run `npm run test:intake`, `npx tsc --noEmit`, and ESLint in `frontend`.
-Frontend contract checks load the real backend schema. Browser walkthroughs cover
-actual controls and navigation. In-memory HTTP checks cover complete validation
-and profile projection, replacing only the external eligibility starter so
-synthetic cases are not sent to Azure. No new backend unit tests were added for
-this restructure. Backend/frontend must ship together; no deployment was requested.
+See "Testing" in the root README: browser journeys in `frontend/e2e/` and API QA in
+`backend/tests/`. Backend and frontend must ship together.
 
 Support goals use seven plain-language choices. Saved legacy choices are translated
 and deduplicated. VA follow-ups use military/coverage evidence; merging general care

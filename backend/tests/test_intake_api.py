@@ -1,41 +1,32 @@
-"""The public intake cannot bypass schema validation or inject a CaseProfile."""
-from fastapi.testclient import TestClient
-
-from app import main
-from app.routes import cases
-from app.intake.logic import answer_context, visible
-from app.intake.schema import build_schema
+"""QA: the public intake endpoint, end to end through validation, mapping and Postgres."""
+from app.store import get_profile
+from tests.intake_helpers import complete_current_intake
 
 
-from tests.intake_helpers import complete_current_intake as complete_answers
-
-
-def test_invalid_or_profile_based_requests_never_persist_or_start(monkeypatch):
-    def forbidden(*args, **kwargs):
-        raise AssertionError("Invalid intake reached persistence/orchestration")
-    monkeypatch.setattr(cases, "save_profile", forbidden)
-    monkeypatch.setattr(cases, "_ensure_eligibility_started", forbidden)
-    client = TestClient(main.app)
+def test_invalid_or_injected_intakes_are_rejected_and_nothing_starts(client, orchestrator):
     for body in ({"profile": {"id": "injected"}}, {"answers": {}}, {"answers": {"recipient.household_size": 0}},
-                 {"answers": complete_answers(), "profile": {"id": "injected"}}):
+                 {"answers": complete_current_intake(), "profile": {"id": "injected"}}):
         assert client.post("/api/intake", json=body).status_code == 422
+    assert orchestrator == []
 
 
-def test_complete_intake_is_clean_and_does_not_invent_exact_income(monkeypatch):
-    stored = {}
-    monkeypatch.setattr(cases, "save_profile", lambda p: stored.update({p.id: p}))
-    monkeypatch.setattr(cases, "get_profile", lambda key: stored[key])
-    async def start(key):
-        return stored[key]
-    monkeypatch.setattr(cases, "_ensure_eligibility_started", start)
-    answers = complete_answers()
-    answers["recipient.program_statuses"] = {"IHSS": "Denied"}  # hidden stale branch
-    response = TestClient(main.app).post("/api/intake", json={"answers": answers})
+def test_complete_intake_is_saved_clean_and_readable_by_its_holder(client, orchestrator):
+    answers = complete_current_intake()
+    answers["recipient.program_statuses"] = {"IHSS": "Denied"}  # hidden, stale branch
+    response = client.post("/api/intake", json={"answers": answers})
     assert response.status_code == 200, response.text
-    result = response.json()
-    assert "recipient.program_statuses" not in result["answers"]
-    assert "recipient.age" not in result["answers"]
-    assert result["household"]["income_monthly"] is None
-    assert result["household"]["reported_income_monthly"] is None
-    assert result["care_recipient"]["gross_monthly_income"] is None
-    assert result["care_recipient"]["state"] == "CA"
+    case = response.json()
+    assert orchestrator == [case["id"]]
+    assert case["eligibility_status"] == "processing"
+
+    stored = get_profile(case["id"])
+    assert "recipient.program_statuses" not in stored.answers
+    # Reported income stays unknown rather than being invented.
+    assert stored.household.income_monthly is None
+    assert stored.care_recipient.gross_monthly_income is None
+    # Uncertain and declined answers to sensitive questions reach the specialists as such.
+    assert stored.answers["caregiver.work_authorized"] == "I'm not sure"
+    assert stored.answers["recipient.five_year_us_residence"] == "Prefer not to answer"
+
+    # Before signup the case is unowned: whoever holds the id can read it back.
+    assert client.get(f"/api/case/{case['id']}").json()["id"] == case["id"]

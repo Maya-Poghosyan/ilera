@@ -64,6 +64,22 @@ make run                    # uvicorn app.main:app --reload --port 8000
 TEST_DATABASE_URL=... make test   # tests need a Postgres with pgvector; see tests/conftest.py
 ```
 
+### Testing
+
+Two layers, both against a real Postgres (pgvector) — nothing is mocked except outside
+services (email, the eligibility pipeline, Azure OpenAI):
+
+- **Browser journeys** (`frontend/e2e/`, Playwright): the real web app and API. Covers intake
+  with document reading, signup → email verification → one-time-code login, and dashboard
+  persistence across devices. `cd frontend && TEST_DATABASE_URL=... npm run test:e2e`
+- **API QA** (`backend/tests/`, pytest): HTTP behavior — validation, access control,
+  persistence, the Graph webhook trust boundary — plus eligibility scenarios and checks on
+  committed content (form maps fill, policies and corpus validate). `TEST_DATABASE_URL=... make test`
+
+Start the test database once with:
+`docker run -d --name ilera-test-pg -e POSTGRES_PASSWORD=ilera -e POSTGRES_DB=ilera_test -p 55432:5432 pgvector/pgvector:pg16`
+and use `TEST_DATABASE_URL=postgresql://postgres:ilera@127.0.0.1:55432/ilera_test`.
+
 Dependencies live in `requirements.txt` (what the containers install). `requirements.lock`
 pins exact, hash-verified versions for local reproducibility; regenerate it with `make lock`
 after editing `requirements.txt`, and commit both. `.python-version` pins the interpreter.

@@ -19,3 +19,29 @@ from app.config import Settings, get_settings  # noqa: E402
 
 Settings.model_config["env_file"] = None
 get_settings.cache_clear()
+
+
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def orchestrator(monkeypatch):
+    """The Azure Functions pipeline is the one external call intake makes; record it instead."""
+    import durable.client
+
+    started = []
+
+    async def start(profile):
+        started.append(profile.id)
+        return f"eligibility-{profile.id}"
+
+    monkeypatch.setattr(durable.client, "start_eligibility_orchestration", start)
+    return started
+
+
+@pytest.fixture
+def client():
+    from app.main import app
+
+    return TestClient(app)

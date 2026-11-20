@@ -1,4 +1,4 @@
-"""Guards for the committed `form_schemas/*.json` field maps.
+"""QA for committed content: form field maps, program policies and the RAG corpus.
 
 A bad map fails silently in production: `resolve_fields` reports a field whose
 `profile_path` resolves to nothing as `missing` rather than asking the user, so the PDF
@@ -125,3 +125,15 @@ def test_every_mapped_form_still_fills():
         pdf_bytes = filler.fill_pdf(form_id, profile)
         assert pdf_bytes.startswith(b"%PDF"), f"{form_id}: did not produce a PDF"
         assert len(pdf_bytes) > 1000, f"{form_id}: suspiciously small output"
+
+
+def test_every_program_policy_loads_and_validates():
+    from app.eligibility.loader import list_policies
+    assert {p.program_id for p in list_policies()} >= {"ihss"}
+
+
+def test_every_rag_document_is_scoped_to_a_jurisdiction_and_authority():
+    from app.rag.source_store import iter_sources
+    docs = list(iter_sources())
+    assert len(docs) >= 35
+    assert all(d.policy.jurisdictions and d.policy.authority_level for d in docs)

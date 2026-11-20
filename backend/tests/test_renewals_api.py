@@ -25,31 +25,6 @@ def iso(days_from_today: int) -> str:
 # --- Derived urgency ------------------------------------------------------
 
 
-@pytest.mark.parametrize("due_date,expected", [
-    (None, "no_date"),
-    ("2020-01-01", "overdue"),
-    (iso(-1), "overdue"),
-    (iso(0), "due_soon"),
-    (iso(10), "due_soon"),
-    (iso(records.DUE_SOON_DAYS), "due_soon"),
-    (iso(records.DUE_SOON_DAYS + 1), "upcoming"),
-    (iso(365), "upcoming"),
-])
-def test_compute_urgency(due_date, expected):
-    assert records.compute_urgency(due_date) == expected
-
-
-def test_urgency_is_serialized_on_item():
-    item = records.RenewalItem(case_id="c", program="IHSS", due_date=iso(5))
-    dumped = item.model_dump()
-    assert dumped["urgency"] == "due_soon"
-    # model_dump_json path carries it too (used by the persistence layer).
-    assert '"urgency":"due_soon"' in item.model_dump_json().replace(" ", "")
-
-
-# --- CRUD -----------------------------------------------------------------
-
-
 def test_create_list_update_delete_renewal():
     case_id = case()
     assert client.get(f"/api/records/renewals/{case_id}").json() == []

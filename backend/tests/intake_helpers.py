@@ -30,7 +30,8 @@ def household_answers(*, recipient=None, caregiver=None, spouse=None, others=())
             "household.members": members}
 
 
-def complete_current_intake():
+def complete_current_intake(**overrides):
+    """A valid, complete intake; overrides apply first so their follow-ups get answered."""
     values = {
         'caregiver.first_name': 'Alex', 'caregiver.last_name': 'Caregiver',
         'caregiver.date_of_birth': '1980-01-01', 'caregiver.us_citizen': False,
@@ -53,6 +54,7 @@ def complete_current_intake():
                 'gross_monthly_income': "I'm not sure", 'income_sources': ["I'm not sure"],
                 'income_other': '', 'income_varies': "I'm not sure"}
     values['household.members'] = [member('recipient', 'Self'), member('caregiver', 'Child')]
+    values.update(overrides)
     for _ in range(10):
         added = False
         for question in QUESTIONS.values():

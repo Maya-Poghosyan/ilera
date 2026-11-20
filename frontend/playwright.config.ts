@@ -1,10 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // End-to-end: real Next app → real FastAPI backend (local test Postgres) → local stand-in for
-// the Azure document model. Needs TEST_DATABASE_URL (see backend/tests/README.md).
+// the Azure document model. Needs TEST_DATABASE_URL (see backend/tests/conftest.py).
 const WEB = 3517, API = 8517, MODEL = 4517;
 const DATABASE_URL = process.env.TEST_DATABASE_URL;
-if (!DATABASE_URL) throw new Error("TEST_DATABASE_URL is required (see backend/tests/README.md)");
+if (!DATABASE_URL) throw new Error("TEST_DATABASE_URL is required (see backend/tests/conftest.py)");
+// Specs read captured email and fixtures straight from the test API (see backend/tests/e2e_api.py).
+process.env.E2E_API_URL = `http://127.0.0.1:${API}`;
 
 export default defineConfig({
   testDir: "e2e",
