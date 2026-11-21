@@ -50,7 +50,8 @@ async function upload(page: Page, ...files: { name: string; mimeType: string; bu
 /** Click Next/Continue until the question is on screen. */
 async function advanceTo(page: Page, fieldId: string) {
   const question = page.locator(`[data-field-id="${fieldId}"]`);
-  for (let i = 0; i < 40 && !(await question.isVisible()); i++) {
+  const shown = () => question.waitFor({ timeout: 500 }).then(() => true, () => false);
+  for (let i = 0; i < 40 && !(await shown()); i++) {
     await page.getByRole("button", { name: /^(Next|Continue)$/ }).click();
   }
   await expect(question).toBeVisible();
@@ -111,6 +112,23 @@ test("skipping tax savings moves straight on and keeps household answers", async
   const draft = await page.evaluate(() => JSON.parse(localStorage.getItem("ilera_intake_draft") ?? "{}"));
   expect(draft.answers["household.members"]).toHaveLength(2);
   expect(Object.keys(draft.answers).filter(k => k.startsWith("tax.") && k !== "tax.entry_method")).toEqual([]);
+});
+
+test("a DD-214 fills a veteran's service record", async ({ page }) => {
+  await startAt(page, "coverage_benefits");
+  await expect(page.getByText("DD-214, for a veteran")).toBeVisible();
+  await expect(page.getByText("Cover the SSN in block 3 first.")).toBeVisible();
+  await upload(page, file("dd214.pdf", "DD214 Certificate of Release"));
+  await expect(page.getByText("4 suggested answers to review in the questions ahead")).toBeVisible();
+
+  await advanceTo(page, "recipient.military_status");
+  await panel(page).getByRole("button", { name: "Use this answer" }).click();
+  await expect(page.locator('[data-field-id="recipient.military_status"]').getByRole("button", { name: "Veteran", pressed: true })).toBeVisible();
+  await advanceTo(page, "recipient.va_pension_status");
+  await page.locator('[data-field-id="recipient.va_pension_status"]').getByRole("button", { name: "Aid and Attendance" }).click();
+  await advanceTo(page, "recipient.va_service_start");
+  await panel(page).getByRole("button", { name: "Use this answer" }).first().click();
+  await expect(page.locator('[data-field-id="recipient.va_service_start"] input')).toHaveValue("1968-03-04");
 });
 
 test("unreadable files and untrusted model output are handled at the boundary", async ({ page, request }) => {

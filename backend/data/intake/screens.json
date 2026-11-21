@@ -700,17 +700,7 @@
   {
     "id": "work_caregiving",
     "title": "Work and Caregiving",
-    "intro_text": "Tell us about your work and caregiving. Have these handy if available:",
-    "intro_documents": [
-      {
-        "document": "Recent pay statements",
-        "location": "Your payroll portal"
-      },
-      {
-        "document": "Employer benefit information",
-        "location": "Your benefits or HR portal"
-      }
-    ],
+    "intro_text": "Tell us about your work and caregiving.",
     "questions": [
       {
         "field_id": "caregiver.work_authorized",
@@ -1358,25 +1348,7 @@
   {
     "id": "household_assets",
     "title": "Household and Assets",
-    "intro_text": "Tell us about your household, income and assets. Have these handy if available:",
-    "intro_documents": [
-      {
-        "document": "Social Security benefit letters",
-        "location": "Your my Social Security account"
-      },
-      {
-        "document": "VA benefit letters",
-        "location": "Your VA.gov account"
-      },
-      {
-        "document": "Pension benefit statements",
-        "location": "Your pension provider’s online account"
-      },
-      {
-        "document": "Account statements and bank balances",
-        "location": "Your bank’s website or app"
-      }
-    ],
+    "intro_text": "Tell us about your household, income and assets. Answer what you know. Amounts can be looked up later.",
     "intro_emphasis": "Answer what you know. Amounts can be looked up later.",
     "questions": [
       {
@@ -2211,17 +2183,7 @@
   {
     "id": "tax_information",
     "title": "Tax Information",
-    "intro_text": "These questions help check caregiving-related tax savings. Have these handy if available:",
-    "intro_documents": [
-      {
-        "document": "A recent tax return and W-2s",
-        "location": "Your tax software, tax preparer or saved records"
-      },
-      {
-        "document": "Care and medical expense records",
-        "location": "Your receipts, invoices or payment records"
-      }
-    ],
+    "intro_text": "These questions help check caregiving-related tax savings. To upload your return and W-2s, choose “Use my documents” on the next page. Answer what you know. Amounts can be looked up later.",
     "intro_emphasis": "Answer what you know. Amounts can be looked up later.",
     "questions": [
       {
@@ -2827,7 +2789,7 @@
   {
     "id": "coverage_benefits",
     "title": "Current Coverage and Benefits",
-    "intro_text": "A Medicare card, Medi-Cal coverage information, benefit letters and application confirmations can help. ",
+    "intro_text": "Tell us about their health coverage and benefits.",
     "questions": [
       {
         "field_id": "recipient.medicaid_covered",

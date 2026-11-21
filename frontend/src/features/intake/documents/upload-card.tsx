@@ -44,8 +44,11 @@ export function UploadCard({ suggested, limits, documents, onAdd, onRemove }: {
       </CardHeader>
       <CardContent className="-mt-3 space-y-4 text-sm text-muted-foreground">
         <p>We&rsquo;ll read these and suggest answers in the questions ahead. You review every suggestion, and you can always enter answers yourself.</p>
-        <ul className="list-disc space-y-1 pl-5">
-          {suggested.map(s => <li key={s.document}><span className="text-foreground">{s.document}</span>{s.note && <> &mdash; {s.note}</>}</li>)}
+        <ul className="space-y-3">
+          {suggested.map(s => <li key={s.document}>
+            <p><span className="font-medium text-foreground">{s.document}</span> &mdash; {s.fills}</p>
+            <p className="text-xs">From {s.location}{s.cover && <>. Cover {s.cover} first</>}.</p>
+          </li>)}
         </ul>
         <input ref={inputRef} type="file" multiple accept={limits.accept.join(",")} className="sr-only" tabIndex={-1}
           aria-label="Document files" onChange={e => handleFiles(e.target.files)} />

@@ -1,5 +1,5 @@
 import { type Answers, type IntakeSchema, type Question, type UploadDocument, evalCondition, validateQuestions } from '@/features/intake/schema';
-export interface IntakePage { key: string; title: string; introText?: string; introDocuments?: { document: string; location: string }[]; introEmphasis?: string; helperText?: string; helperLink?: {text:string;href:string}; uploadDocuments?: UploadDocument[]; showIntro: boolean; kind: 'intro'|'questions'; questions: Question[]; }
+export interface IntakePage { key: string; title: string; introText?: string; introEmphasis?: string; helperText?: string; helperLink?: {text:string;href:string}; uploadDocuments?: UploadDocument[]; showIntro: boolean; kind: 'intro'|'questions'; questions: Question[]; }
 export function paginate(questions: Question[]): Question[][] {
   const pages: Question[][]=[];
   for (const question of questions) {
@@ -13,7 +13,7 @@ export function buildPages(schema: IntakeSchema,answers: Answers): IntakePage[] 
   return schema.screens.flatMap(section=>{
     const groups=paginate(section.questions.filter(q=>evalCondition(q.show_when,answers)));
     if(!groups.length)return [];
-    return [{key:`section:${section.id}`,title:section.title,introText:section.intro_text,introDocuments:section.intro_documents,introEmphasis:section.intro_emphasis,uploadDocuments:section.upload_documents,showIntro:true,kind:'intro' as const,questions:[]},...groups.map(questions=>({key:questions[0].field_id,title:questions[0].page_title??section.title,helperText:questions[0].page_helper_text,helperLink:questions[0].page_helper_link,uploadDocuments:questions.some(q=>q.upload_when&&evalCondition(q.upload_when,answers))?section.upload_documents:undefined,showIntro:false,kind:'questions' as const,questions}))];
+    return [{key:`section:${section.id}`,title:section.title,introText:section.intro_text,introEmphasis:section.intro_emphasis,uploadDocuments:section.upload_documents,showIntro:true,kind:'intro' as const,questions:[]},...groups.map(questions=>({key:questions[0].field_id,title:questions[0].page_title??section.title,helperText:questions[0].page_helper_text,helperLink:questions[0].page_helper_link,uploadDocuments:questions.some(q=>q.upload_when&&evalCondition(q.upload_when,answers))?section.upload_documents:undefined,showIntro:false,kind:'questions' as const,questions}))];
   });
 }
 export function pageIndex(pages: IntakePage[],questionId: string|null): number {

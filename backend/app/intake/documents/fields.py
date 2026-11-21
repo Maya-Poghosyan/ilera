@@ -35,6 +35,12 @@ def _va_rating(raw: str) -> str:
     return "70% or higher" if pct >= 70 else "Less than 70%"
 
 
+def _ihss(raw: str) -> str:
+    if raw.upper() != "IHSS":
+        raise ValueError
+    return "IHSS"
+
+
 @dataclass(frozen=True)
 class FieldSpec:
     people: frozenset[str]           # whose fact it may be; anything else is dropped
@@ -45,12 +51,22 @@ class FieldSpec:
 
 
 SPECS: dict[str, FieldSpec] = {
+    # Paystubs, W-2s, employer benefits, EDD and IHSS provider records
     "caregiver.sdi_deductions": FieldSpec(
-        CAREGIVER, "only when a paystub shows a CASDI, CA SDI or SDI deduction", values=("Yes",)),
+        CAREGIVER, "only when a paystub deduction or W-2 box 14 shows CASDI, CA SDI or SDI", values=("Yes",)),
     "tax.dependent_care_fsa_available": FieldSpec(
-        CAREGIVER, '"Yes, and I use it" for an enrollment confirmation or paid claim; '
+        CAREGIVER, '"Yes, and I use it" for an enrollment confirmation, paid claim or a W-2 box 10 amount above 0; '
         '"Yes, but I do not use it" for a plan guide or offer only; "No" only when stated',
         values=("Yes, and I use it", "Yes, but I do not use it", "No")),
+    "caregiver.pfl_used_last_12_months": FieldSpec(
+        CAREGIVER, "only when an EDD Paid Family Leave notice or payment is dated within the last 12 months",
+        values=("Yes",)),
+    "caregiver.payment_status": FieldSpec(
+        CAREGIVER, "only when an IHSS or other public-program provider pay stub shows the caregiver is paid",
+        values=("Yes, through Medicaid, a waiver, IHSS, or another public program",)),
+    "tax.public_payment_program": FieldSpec(
+        CAREGIVER, '"IHSS" only when an IHSS provider pay stub shows the caregiver is paid', parse=_ihss),
+    # Filed returns: Form 1040, W-2, Form 2441
     "tax.year": FieldSpec(FILERS, "the 4-digit tax year of a filed return, W-2 or Form 2441", parse=_past_tax_year),
     "tax.adjusted_gross_income": FieldSpec(
         FILERS, "adjusted gross income on a filed Form 1040, as a plain number", needs_tax_year=True),
@@ -58,17 +74,46 @@ SPECS: dict[str, FieldSpec] = {
         FILERS, "only the status checked on a filed Form 1040", needs_tax_year=True,
         values=("Single", "Married filing jointly", "Married filing separately", "Head of household",
                 "Qualifying surviving spouse")),
+    "tax.paid_care_to_work": FieldSpec(
+        FILERS, "only when Form 2441 Part II lists qualified care expenses", values=("Yes",), needs_tax_year=True),
+    "tax.paid_care_amount": FieldSpec(
+        FILERS, "total qualified expenses paid on Form 2441 Part II (line 2), as a plain number", needs_tax_year=True),
+    "tax.care_reimbursements": FieldSpec(
+        FILERS, "dependent care benefits in W-2 box 10 or Form 2441 Part III line 12, as a plain number",
+        needs_tax_year=True),
+    # Coverage and benefit notices
     "recipient.medicaid_covered": FieldSpec(
         RECIPIENT, '"true" only when a current Medi-Cal notice says coverage is approved or active'),
+    "case.has_applied_or_received": FieldSpec(
+        RECIPIENT, "only when an IHSS notice of action or other program notice concerns them", values=("Yes",)),
     "recipient.medicare_parts": FieldSpec(
         RECIPIENT, 'parts shown as active, separated by "; "', values=("Part A (hospital)", "Part B (medical)")),
     "recipient.medicare_part_a_start": FieldSpec(RECIPIENT, "Part A start date as YYYY-MM-DD"),
     "recipient.medicare_part_b_start": FieldSpec(RECIPIENT, "Part B start date as YYYY-MM-DD"),
+    "recipient.ssdi_start": FieldSpec(
+        RECIPIENT, "the date Social Security disability (SSDI) benefits began on an award or benefit letter, "
+        "as YYYY-MM-DD"),
+    # VA letters and DD-214
+    "recipient.va_contact": FieldSpec(RECIPIENT, "when any VA letter or card is about them", values=("Yes",)),
+    "recipient.va_health_enrolled": FieldSpec(
+        RECIPIENT, "only when a VA letter or card states VA health care enrollment", values=("Yes",)),
+    "recipient.va_rating_assigned": FieldSpec(
+        RECIPIENT, "only when a VA letter states a combined disability rating", values=("Yes",)),
     "recipient.va_rating": FieldSpec(
         RECIPIENT, 'the combined VA disability rating as a whole-number percentage, e.g. "40"', parse=_va_rating),
     "recipient.va_pension_status": FieldSpec(
         RECIPIENT, "only when the letter says they receive it; a rating, pension and health enrollment differ",
         values=("VA pension only", "Aid and Attendance", "Housebound")),
+    "recipient.military_status": FieldSpec(
+        RECIPIENT, "only when a DD-214 shows release or discharge from active duty", values=("Veteran",)),
+    "recipient.military_discharge_status": FieldSpec(
+        RECIPIENT, "only when a DD-214 shows release or discharge from active duty", values=("Yes",)),
+    "recipient.va_service_start": FieldSpec(RECIPIENT, "DD-214 block 12a date entered active duty, as YYYY-MM-DD"),
+    "recipient.va_service_end": FieldSpec(RECIPIENT, "DD-214 block 12b separation date, as YYYY-MM-DD"),
+    "recipient.va_discharge_character": FieldSpec(
+        RECIPIENT, "DD-214 block 24 character of service",
+        values=("Honorable", "General (under honorable conditions)", "Other than honorable", "Bad conduct",
+                "Dishonorable")),
 }
 
 # Fail at import, not in production traffic, if the intake schema drifts from these specs.
@@ -81,7 +126,8 @@ Period = Literal["weekly", "biweekly", "semimonthly", "monthly", "annual"]
 MONTHLY = {"weekly": 52 / 12, "biweekly": 26 / 12, "semimonthly": 2, "monthly": 1, "annual": 1 / 12}
 DocumentKind = Literal[
     "paystub", "social_security_letter", "pension_statement", "employer_benefit_document", "tax_return",
-    "w2", "form_2441", "medi_cal_notice", "ihss_notice", "medicare_card", "va_letter", "other"]
+    "w2", "form_2441", "medi_cal_notice", "ihss_notice", "ihss_provider_paystub", "edd_pfl_notice",
+    "medicare_card", "va_letter", "dd214", "other"]
 
 
 class _Raw(BaseModel):
@@ -109,7 +155,7 @@ class RawExtraction(BaseModel):
     """What the model must return (strict JSON schema)."""
     model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
     document_kind: DocumentKind  # focuses the model; not returned to the client
-    suggestions: list[RawAnswer | RawIncome] = Field(max_length=12)
+    suggestions: list[RawAnswer | RawIncome] = Field(max_length=16)
 
 
 def prompt_rules() -> str:

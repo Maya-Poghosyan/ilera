@@ -78,24 +78,43 @@ DOCUMENT_UPLOAD = {
     'max_pdf_pages': 12,
     'accept': ['application/pdf', 'image/jpeg', 'image/png'],
 }
+# Each section's one document list: what it fills, where to get it, what to cover first.
 UPLOAD_DOCUMENTS = {
     'work_caregiving': [
-        {'document': 'A recent paystub', 'note': 'Shows CASDI (SDI) deductions and pay period'},
-        {'document': 'Employer dependent-care plan guide or enrollment confirmation'},
+        {'document': 'A recent paystub', 'fills': 'Pay and CASDI (SDI) deductions',
+         'location': 'your payroll portal'},
+        {'document': 'Dependent Care FSA plan guide or enrollment', 'fills': 'Whether you have or use a Dependent Care FSA',
+         'location': 'your benefits or HR portal'},
+        {'document': 'EDD Paid Family Leave notice', 'fills': 'Paid Family Leave in the past 12 months',
+         'location': 'your myEDD account'},
+        {'document': 'IHSS provider pay stub', 'fills': 'Whether you are paid to provide care',
+         'location': 'the IHSS Electronic Services Portal'},
     ],
     'household_assets': [
-        {'document': 'A recent paystub for anyone in the household'},
-        {'document': 'A current Social Security or pension benefit letter'},
+        {'document': 'A recent paystub for anyone in the household', 'fills': 'Monthly income',
+         'location': 'their payroll portal'},
+        {'document': 'Social Security or pension benefit letter', 'fills': 'Monthly benefit and SSDI start date',
+         'location': 'my Social Security account or the pension provider’s site'},
     ],
     'tax_information': [
-        {'document': 'Selected pages of a filed Form 1040', 'note': 'Pages with filing status and adjusted gross income'},
-        {'document': 'W-2s', 'note': 'Box 10 shows dependent care benefits'},
-        {'document': 'Form 2441, if you filed one'},
+        {'document': 'Form 1040, pages 1–2', 'fills': 'Tax year, filing status and adjusted gross income',
+         'location': 'your tax software, preparer or saved records'},
+        {'document': 'W-2s', 'fills': 'Box 10 dependent care benefits and box 14 CASDI',
+         'location': 'your payroll portal or tax records', 'cover': 'the SSN in box a'},
+        {'document': 'Form 2441, if you filed one', 'fills': 'Care costs paid and employer care benefits',
+         'location': 'your filed return', 'cover': 'provider SSNs or EINs in Part I'},
     ],
     'coverage_benefits': [
-        {'document': 'A current Medi-Cal or IHSS notice'},
-        {'document': 'Their Medicare card or coverage record', 'note': 'Cover the Medicare number before uploading'},
-        {'document': "A short VA benefit summary letter, if they're a veteran"},
+        {'document': 'Medi-Cal notice', 'fills': 'Whether Medi-Cal is active',
+         'location': 'their BenefitsCal account or county mail'},
+        {'document': 'IHSS notice of action', 'fills': 'Whether they have applied for or receive IHSS',
+         'location': 'mail from the county IHSS office'},
+        {'document': 'Medicare card or coverage record', 'fills': 'Active Medicare parts and start dates',
+         'location': 'their card or Medicare.gov account', 'cover': 'the Medicare number'},
+        {'document': 'VA benefit summary letter', 'fills': 'Disability rating, pension and VA health care',
+         'location': 'the letters page on VA.gov'},
+        {'document': 'DD-214, for a veteran', 'fills': 'Service dates and character of discharge',
+         'location': 'their records or the National Archives (eVetRecs)', 'cover': 'the SSN in block 3'},
     ],
 }
 for _screen in SCREENS:

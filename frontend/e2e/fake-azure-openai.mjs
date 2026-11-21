@@ -19,6 +19,12 @@ const REPLIES = {
   RETURN2025: { document_kind: "tax_return", suggestions: [
     answer("tax.adjusted_gross_income", "61000", "caregiver", { tax_year: 2025, evidence: "Form 1040 line 11", as_of: "2025" }),
   ] },
+  DD214: { document_kind: "dd214", suggestions: [
+    answer("recipient.military_status", "Veteran", "recipient", { evidence: "Block 23: release from active duty" }),
+    answer("recipient.va_service_start", "1968-03-04", "recipient", { evidence: "Block 12a" }),
+    answer("recipient.va_service_end", "1971-03-03", "recipient", { evidence: "Block 12b" }),
+    answer("recipient.va_discharge_character", "Honorable", "recipient", { evidence: "Block 24" }),
+  ] },
   // Model output the backend must not trust: wrong person, invalid option, identifier in evidence.
   HOSTILE: { document_kind: "paystub", suggestions: [
     answer("caregiver.sdi_deductions", "Yes", "spouse"),

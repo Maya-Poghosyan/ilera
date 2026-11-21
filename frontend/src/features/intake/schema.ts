@@ -70,13 +70,12 @@ export interface Screen {
   id: string;
   title: string;
   intro_text?: string;
-  intro_documents?: { document: string; location: string }[];
   intro_emphasis?: string;
   upload_documents?: UploadDocument[];
   questions: Question[];
 }
 
-export interface UploadDocument { document: string; note?: string }
+export interface UploadDocument { document: string; fills: string; location: string; cover?: string }
 
 export interface IntakeSchema {
   version: string;
