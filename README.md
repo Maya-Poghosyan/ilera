@@ -47,8 +47,8 @@ backend/    FastAPI app
 
 ## Quickstart
 
-There are no local fallbacks: the app runs against Postgres (pgvector) and Azure services,
-and a missing setting fails loudly where it is used. See `backend/.env.example`.
+The app runs against Postgres (pgvector) and Azure services; each process checks its settings
+at startup. See `backend/.env.example`.
 
 ### Backend
 
@@ -66,8 +66,8 @@ TEST_DATABASE_URL=... make test   # tests need a Postgres with pgvector; see tes
 
 ### Testing
 
-Two layers, both against a real Postgres (pgvector) — nothing is mocked except outside
-services (email, the eligibility pipeline, Azure OpenAI):
+Two layers, both against a real Postgres (pgvector), with stand-ins only for outside services
+(email, the eligibility pipeline, Azure OpenAI):
 
 - **Browser journeys** (`frontend/e2e/`, Playwright): the real web app and API. Covers intake
   with document reading, signup → email verification → one-time-code login, and dashboard

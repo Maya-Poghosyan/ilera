@@ -73,18 +73,17 @@ ileracare.app ─▶ ilera-web-prod-eastus2 ─▶ api.ileracare.app ─▶ iler
 
 ## Managing it
 
-- **Terraform** (`oauth/`: Key Vault, API identity roles, audit logging, `ilera-documents-openai`;
-  `scanning/`: Service Bus, worker, maintenance job). State is in `ileratfstate`. Merges to
-  `main` that touch `infra/azure/**` plan and then wait for approval on the `infra-production`
-  environment before applying `oauth/`; `scanning/` is applied by running the Terraform
-  workflow manually. The Entra app registration is managed outside Terraform.
-- **App deploys** (`.github/workflows/deploy.yml`): every backend or frontend push to `main`
-  builds in the registry and rolls the API, web app, Functions and email worker forward, then
-  moves every job that runs the API image (maintenance, purge, RAG ingest, and any added
-  later) to the same build. Terraform ignores those images so it never reverts them. App
-  settings on the API are set on the container app, not in Terraform.
-- **Key Vault safety**: purge protection is on and Terraform never re-keys the encryption key;
-  rotating it means re-encrypting stored tokens first.
-- **HIPAA**: the Microsoft BAA covers these services. The email docs record an approved
-  abuse-monitoring opt-out for `ilera-resource`, but neither Azure OpenAI account currently
-  shows the opt-out flag; confirm it, and request it for `ilera-documents-openai`.
+- **Terraform:** `oauth/` (Key Vault, API identity roles, audit logging, `ilera-documents-openai`)
+  and `scanning/` (Service Bus, worker, maintenance and purge jobs); state in `ileratfstate`.
+- **Infra changes:** a merge touching `infra/azure/**` plans `oauth/` and applies it after
+  approval on the `infra-production` environment; `scanning/` applies from a manual run.
+- **Entra app registration:** managed in the Entra portal.
+- **Deploys:** each push to `main` builds the API, web app, Functions and email worker and rolls
+  them forward.
+- **Jobs:** every job running the API image (maintenance, purge, RAG ingest, any new one) moves
+  to the API's build on each deploy; Terraform leaves those images to the deploy.
+- **API settings:** set on the `ilera-api-prod-eastus2` container app.
+- **Key Vault:** purge protection on; rotating the encryption key means re-encrypting stored
+  tokens first.
+- **HIPAA:** the Microsoft BAA covers these services. Confirm the abuse-monitoring opt-out flag on
+  `ilera-resource` and request it for `ilera-documents-openai`.

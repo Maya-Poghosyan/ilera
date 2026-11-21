@@ -12,10 +12,9 @@ CONSUMER_TENANT = "9188040d-6c67-4c5b-b112-36a304b66dad"  # personal Microsoft a
 class Settings(BaseSettings):
     """Runtime configuration, validated at the boundary.
 
-    Formats are checked here whenever a value is set. Which settings must be set depends on the
-    process (the API, the Functions app, the email worker and jobs share this class), so each
-    entry point calls `require_for(process)` at startup; past that, code can trust its settings.
-    There are no switches or fallbacks: unset means misconfigured."""
+    - Formats are checked when a value is set.
+    - Each process (API, Functions, email worker, jobs) calls `require_for(process)` at startup,
+      which checks the settings listed for it in REQUIRED."""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

@@ -114,9 +114,8 @@ jobs:
           # every roll-forward is what makes the setting survive a rebuild.
           az containerapp update -n "$APP" -g "$RG" \
             --image "$REGISTRY.azurecr.io/$tag" --min-replicas 1
-          # Every Container Apps job that runs the API image (email maintenance, unclaimed-case
-          # purge, RAG ingest, and any added later) moves to this build, so a scheduled or manual
-          # run never executes older code than the API serves.
+          # Every Container Apps job running the API image (maintenance, purge, RAG ingest, any
+          # new one) moves to this build, so jobs run the same code as the API.
           if [ "${{ matrix.app }}" = api ]; then
             for job in $(az containerapp job list -g "$RG" \
                 --query "[?contains(properties.template.containers[0].image, '/ilera-api:')].name" -o tsv); do
@@ -157,8 +156,8 @@ jobs:
       # broken one turns a failed deploy into a longer outage. A red check plus the log line above
       # is enough — you decide what to point the app at.
 
-  # The email worker has no HTTP endpoint and scales to zero when the queue is empty, so it is
-  # checked by importing its entry points inside the built image and by the new revision's state.
+  # The email worker reads a queue and scales to zero when idle: the deploy imports its entry
+  # points inside the built image, then waits for the new revision to report healthy.
   deploy-worker:
     needs: plan
     if: needs.plan.outputs.worker == 'true'

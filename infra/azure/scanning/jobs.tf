@@ -61,8 +61,7 @@ resource "azurerm_container_app_job" "purge_unclaimed" {
 
   depends_on = [azurerm_role_assignment.worker_acr_pull]
 
-  # The deploy workflow moves every API-image job to each new build; keep image drift out of
-  # this plan so the two don't revert each other.
+  # The deploy workflow sets this image on every build.
   lifecycle {
     ignore_changes = [template[0].container[0].image]
   }
