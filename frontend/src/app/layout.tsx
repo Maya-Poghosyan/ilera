@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Newsreader, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/lib/auth-context";
+import { AuthProvider } from "@/features/accounts/auth-context";
 
 const geist = Geist({
   variable: "--font-geist",

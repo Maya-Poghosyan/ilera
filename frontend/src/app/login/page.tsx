@@ -10,8 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SiteHeader } from "@/components/site-header";
-import { useAuth } from "@/lib/auth-context";
-import { clearPendingCaseId, getPendingCaseId } from "@/lib/pending-case";
+import { useAuth } from "@/features/accounts/auth-context";
+import { clearPendingCaseId, getPendingCaseId } from "@/features/cases/pending-case";
 
 export default function LoginPage() {
   const router = useRouter();

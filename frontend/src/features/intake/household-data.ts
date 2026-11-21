@@ -1,4 +1,4 @@
-import type { Answers, AnswerValue, HouseholdMember } from './intake-schema';
+import type { Answers, AnswerValue, HouseholdMember } from '@/features/intake/schema';
 export const INCOME_SOURCES = ['Wages', 'Self-employment', 'Social Security retirement or survivor benefits', 'SSDI', 'SSI', 'Pension or retirement payments', 'VA benefits', 'Interest, investments or rental income', 'Other income', 'No income', "I'm not sure"];
 export const MEMBER_EMPLOYMENT = ['Employed full time', 'Employed part time', 'Self-employed', 'Not working', 'Retired', 'Student', 'Other', "I'm not sure"];
 export const HOUSEHOLD_RELATIONSHIPS = ['Self', 'Spouse or partner', 'Child', 'Parent', 'Sibling', 'Other relative', 'Grandparent', 'Grandchild', 'Parent-in-law', 'Child-in-law', 'Friend or neighbor', 'Unrelated person', 'Other'];

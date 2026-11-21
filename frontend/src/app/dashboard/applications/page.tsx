@@ -5,26 +5,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { QuestionField } from "@/components/intake/question-field";
-import {
-  completeApplication,
-  listApplications,
-  previewApplication,
-  startApplication,
-  updateAppStatus,
-} from "@/lib/api";
+import { QuestionField } from "@/features/intake/components/question-field";
+import { completeApplication, listApplications, previewApplication, startApplication, updateAppStatus } from "@/features/applications/api";
 import {
   type Answers,
   type AnswerValue,
   type Question,
   validateQuestions,
-} from "@/lib/intake-schema";
-import type {
-  AppQuestion,
-  AppStatus,
-  ApplicationEntry,
-  EligibilityStatus,
-} from "@/lib/types";
+} from "@/features/intake/schema";
+import type { AppQuestion, AppStatus, ApplicationEntry } from "@/features/applications/types";
+import type { EligibilityStatus } from "@/features/cases/types";
+import { useCaseId } from "@/features/accounts/auth-context";
 
 const eligibilityColor: Record<EligibilityStatus, string> = {
   likely: "border-transparent bg-emerald-500 text-white",
@@ -144,8 +135,8 @@ function shouldAsk(
 
 export default function ApplicationsPage() {
   const [apps, setApps] = useState<ApplicationEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [caseId, setCaseId] = useState<string | null>(null);
+  const caseId = useCaseId();
+  const [loading, setLoading] = useState(caseId !== null);
 
   // Flow state
   const [flowStep, setFlowStep] = useState<FlowStep>("list");
@@ -169,22 +160,12 @@ export default function ApplicationsPage() {
   const currentQuestions = currentScreen.flat();
 
   useEffect(() => {
-    const stored =
-      typeof window !== "undefined"
-        ? localStorage.getItem("ilera_case_id")
-        : null;
-    if (stored) {
-      // Read the browser-only case after hydration.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCaseId(stored);
-      listApplications(stored)
-        .then((data) => setApps(data.applications))
-        .catch(() => setApps([]))
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
-  }, []);
+    if (!caseId) return;
+    listApplications(caseId)
+      .then((data) => setApps(data.applications))
+      .catch(() => setApps([]))
+      .finally(() => setLoading(false));
+  }, [caseId]);
 
   function handleStatusChange(program: string, newStatus: AppStatus) {
     if (!caseId) return;

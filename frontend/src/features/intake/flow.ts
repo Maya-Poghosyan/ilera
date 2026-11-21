@@ -1,4 +1,4 @@
-import { type Answers, type IntakeSchema, type Question, type UploadDocument, evalCondition, validateQuestions } from './intake-schema';
+import { type Answers, type IntakeSchema, type Question, type UploadDocument, evalCondition, validateQuestions } from '@/features/intake/schema';
 export interface IntakePage { key: string; title: string; introText?: string; introDocuments?: { document: string; location: string }[]; introEmphasis?: string; helperText?: string; helperLink?: {text:string;href:string}; uploadDocuments?: UploadDocument[]; showIntro: boolean; kind: 'intro'|'questions'; questions: Question[]; }
 export function paginate(questions: Question[]): Question[][] {
   const pages: Question[][]=[];

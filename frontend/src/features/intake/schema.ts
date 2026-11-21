@@ -1,5 +1,5 @@
-import { householdDetails, validHouseholdMembers } from "./household-data";
-export { validHouseholdMembers, HOUSEHOLD_RELATIONSHIPS, HOUSEHOLD_TAX_LINKS } from "./household-data";
+import { householdDetails, validHouseholdMembers } from "@/features/intake/household-data";
+export { validHouseholdMembers, HOUSEHOLD_RELATIONSHIPS, HOUSEHOLD_TAX_LINKS } from "@/features/intake/household-data";
 // Types + helpers for the schema-driven intake form. The schema itself is served
 // by the backend at GET /api/intake/schema; this file mirrors its shape and
 // implements show_when evaluation, [recipient name] interpolation, and validation.

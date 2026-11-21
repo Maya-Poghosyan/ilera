@@ -3,7 +3,7 @@ import "server-only";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
 
-import { SESSION_COOKIE, callApi, sessionCookieOptions } from "./api-proxy";
+import { SESSION_COOKIE, callApi, sessionCookieOptions } from "@/lib/server/api-proxy";
 
 /** Seconds until the token expires, from its own `exp` claim.
  *

@@ -1,8 +1,8 @@
 "use client";
 // The intake's shared document collection. Kept in memory only, never in the saved draft.
 import { useCallback, useState } from "react";
-import { readDocument, type Suggestion } from "./reading";
-import { questionFor } from "./suggestions";
+import { readDocument, type Suggestion } from "@/features/intake/documents/reading";
+import { questionFor } from "@/features/intake/documents/suggestions";
 
 export type IntakeDocument = { id: string; name: string } & (
   | { status: "reading" }

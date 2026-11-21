@@ -4,8 +4,8 @@ import { AlertCircle, CheckCircle2, FileText, Loader2, Upload, X } from "lucide-
 import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { UploadDocument } from "@/lib/intake-schema";
-import type { IntakeDocument } from "./use-intake-documents";
+import type { UploadDocument } from "@/features/intake/schema";
+import type { IntakeDocument } from "@/features/intake/documents/use-intake-documents";
 
 const mb = (bytes: number) => `${Math.round(bytes / 1024 / 1024)} MB`;
 

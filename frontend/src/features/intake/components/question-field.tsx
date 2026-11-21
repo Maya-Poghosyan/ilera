@@ -5,9 +5,9 @@ import { ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { TagInput } from "@/components/intake/tag-input";
-import { HouseholdMembers } from "@/components/intake/household-members";
-import { ProgramDetails } from "@/components/intake/program-details";
+import { TagInput } from "@/features/intake/components/tag-input";
+import { HouseholdMembers } from "@/features/intake/components/household-members";
+import { ProgramDetails } from "@/features/intake/components/program-details";
 import { cn } from "@/lib/utils";
 import {
   type AnswerValue,
@@ -17,7 +17,7 @@ import {
   effectiveOptions,
   interpolateName,
   questionHelperText,
-} from "@/lib/intake-schema";
+} from "@/features/intake/schema";
 
 interface Props {
   question: Question;

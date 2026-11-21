@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, Check, ChevronLeft, ChevronRight, Sparkles, X } from "lucide-react";
 
-import { MailboxConnections } from "@/components/mailbox-connections";
+import { MailboxConnections } from "@/features/mailbox/mailbox-connections";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,22 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import {
-  createReminder,
-  deleteReminder,
-  listCalendarEvents,
-  listReminders,
-  listSuggestedEvents,
-  reviewSuggestedEvent,
-  updateReminder,
-} from "@/lib/api";
-import type { CalendarEventAPI, SuggestedEventAPI } from "@/lib/api";
-import type {
-  Reminder,
-  ReminderCreate,
-  ReminderKind,
-  ScheduleFreq,
-} from "@/lib/types";
+import { createReminder, deleteReminder, listReminders, updateReminder } from "@/features/reminders/api";
+import { listCalendarEvents, listSuggestedEvents, reviewSuggestedEvent } from "@/features/calendar/api";
+import type { CalendarEventAPI, SuggestedEventAPI } from "@/features/calendar/api";
+import type { Reminder, ReminderCreate, ReminderKind, ScheduleFreq } from "@/features/reminders/types";
+import { useCaseId } from "@/features/accounts/auth-context";
 
 // ---------------------------------------------------------------------------
 // Calendar grid helpers
@@ -144,9 +133,7 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [eventsFailed, setEventsFailed] = useState(false);
-  const [caseId] = useState<string | null>(
-    () => (typeof window !== "undefined" ? localStorage.getItem("ilera_case_id") : null)
-  );
+  const caseId = useCaseId();
   const [toast, setToast] = useState<string | null>(null);
 
   // Reminder form

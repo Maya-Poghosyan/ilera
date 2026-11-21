@@ -3,18 +3,19 @@
 import { useRouter } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
-import { SuggestionPanel } from "@/components/intake/documents/suggestion-panel";
-import { UploadCard } from "@/components/intake/documents/upload-card";
-import { useIntakeDocuments } from "@/components/intake/documents/use-intake-documents";
-import { QuestionField } from "@/components/intake/question-field";
+import { SuggestionPanel } from "@/features/intake/documents/suggestion-panel";
+import { UploadCard } from "@/features/intake/documents/upload-card";
+import { useIntakeDocuments } from "@/features/intake/documents/use-intake-documents";
+import { QuestionField } from "@/features/intake/components/question-field";
 import { LoadFailure } from "@/components/load-failure";
 import { Button } from "@/components/ui/button";
 import { UncurlingArrow } from "@/components/uncurling-arrow";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useAuth } from "@/lib/auth-context";
-import { ApiError, getIntakeSchema, lookupCounty, submitIntakeAnswers } from "@/lib/api";
-import { setPendingCaseId } from "@/lib/pending-case";
+import { useAuth } from "@/features/accounts/auth-context";
+import { ApiError } from "@/lib/http";
+import { getIntakeSchema, lookupCounty, submitIntakeAnswers } from "@/features/intake/api";
+import { setPendingCaseId } from "@/features/cases/pending-case";
 import {
   type Answers,
   type AnswerValue,
@@ -23,9 +24,9 @@ import {
   cleanAnswers,
   interpolateName,
   recipientName,
-} from "@/lib/intake-schema";
+} from "@/features/intake/schema";
 
-import { buildPages, pageIndex, resumePage, intakeIssues } from "@/lib/intake-flow";
+import { buildPages, pageIndex, resumePage, intakeIssues } from "@/features/intake/flow";
 
 // Save responses and the current card automatically on this browser.
 const DRAFT_KEY = "ilera_intake_draft";
@@ -362,7 +363,6 @@ export default function IntakePage() {
     try {
       const created = await submitIntakeAnswers(cleanAnswers(schema!, answers));
       localStorage.removeItem(DRAFT_KEY);
-      localStorage.setItem("ilera_case_id", created.id);
       // Straight to the results screen — an account is offered there, once there is a strategy
       // worth saving. The case id is parked so that signup can claim it.
       setPendingCaseId(created.id);

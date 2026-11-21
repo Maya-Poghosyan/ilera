@@ -43,13 +43,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 /** The session lives in an httpOnly cookie set by /api/auth/{signup,login}, so it travels with
  * every request automatically and there is no token for this code to hold or hand out. */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUserState] = useState<AuthUser | null>(null);
-  // The account's case is the caregiver's case on every device. Pages read it from storage, so
-  // record it before they render (a fresh browser has nothing stored).
-  const setUser = useCallback((u: AuthUser | null) => {
-    if (u?.case_id) localStorage.setItem("ilera_case_id", u.case_id);
-    setUserState(u);
-  }, []);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   const authenticate = useCallback(
@@ -69,7 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(() => {
-    localStorage.removeItem("ilera_case_id");
     setUser(null);
     void fetch("/api/auth/logout", { method: "POST" });
   }, [setUser]);
@@ -148,4 +141,9 @@ export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
+}
+
+/** The signed-in caregiver's case. The account owns it, so it is the same on every device. */
+export function useCaseId(): string | null {
+  return useAuth().user?.case_id ?? null;
 }

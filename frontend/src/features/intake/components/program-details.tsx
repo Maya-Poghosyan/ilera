@@ -1,7 +1,7 @@
 "use client";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { type Answers, type AnswerValue, type Question, type ProgramAnswers } from '@/lib/intake-schema';
+import { type Answers, type AnswerValue, type Question, type ProgramAnswers } from '@/features/intake/schema';
 export function ProgramDetails({ question, value, answers, onChange }: { question: Question; value: AnswerValue; answers: Answers; onChange: (v: AnswerValue) => void }) {
   const selected = answers['recipient.programs_touched'];
   const programs = Array.isArray(selected) ? selected.filter(p => typeof p === 'string') as string[] : [];

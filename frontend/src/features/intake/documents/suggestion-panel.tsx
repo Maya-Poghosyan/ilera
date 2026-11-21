@@ -2,9 +2,9 @@
 
 import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { Answers, AnswerValue } from "@/lib/intake-schema";
-import { answerChange, describe, isApplied, otherTaxYear } from "./suggestions";
-import type { PendingSuggestion } from "./use-intake-documents";
+import type { Answers, AnswerValue } from "@/features/intake/schema";
+import { answerChange, describe, isApplied, otherTaxYear } from "@/features/intake/documents/suggestions";
+import type { PendingSuggestion } from "@/features/intake/documents/use-intake-documents";
 
 /** Proposed answers for one question: value, document, page, date. Applied only on confirmation. */
 export function SuggestionPanel({ pending, answers, recipientName, onApply, onDismiss }: {

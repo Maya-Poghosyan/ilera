@@ -1,6 +1,6 @@
 // How a reviewed suggestion becomes an intake answer.
-import type { Answers, AnswerValue, HouseholdMember } from "@/lib/intake-schema";
-import type { HouseholdPerson, Suggestion } from "./reading";
+import type { Answers, AnswerValue, HouseholdMember } from "@/features/intake/schema";
+import type { HouseholdPerson, Suggestion } from "@/features/intake/documents/reading";
 
 export const ROSTER_QUESTION = "household.members";
 

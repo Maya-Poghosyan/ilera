@@ -4,24 +4,21 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { getFormDownloadUrl, listForms } from "@/lib/api";
-import type { FormSchema } from "@/lib/types";
+import { getFormDownloadUrl, listForms } from "@/features/forms/api";
+import type { FormSchema } from "@/features/forms/types";
+import { useCaseId } from "@/features/accounts/auth-context";
 
 export default function DocumentsPage() {
   const [forms, setForms] = useState<FormSchema[]>([]);
   const [loading, setLoading] = useState(true);
-  const [caseId, setCaseId] = useState<string | null>(null);
+  const caseId = useCaseId();
   const [downloading, setDownloading] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem("ilera_case_id") : null;
     listForms()
       .then((data) => setForms(data.forms))
       .catch(() => setForms([]))
-      .finally(() => {
-        setCaseId(stored);
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, []);
 
   function handleDownload(formId: string) {

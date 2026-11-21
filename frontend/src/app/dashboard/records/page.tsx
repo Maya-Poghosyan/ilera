@@ -8,22 +8,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  createJournal,
-  createRenewal,
-  createTimekeeping,
-  deleteJournalEntry,
-  deleteRenewalItem,
-  deleteTimekeepingEntry,
-  listJournal,
-  listRenewals,
-  listTimekeeping,
-  updateRenewalItem,
-  updateTimekeeping,
-  updateJournal,
-  reviewIncident,
-} from "@/lib/api";
-import type { JournalEntry, RenewalItem, RenewalStatus, RenewalUrgency, ServiceType, TimekeepingEntry } from "@/lib/types";
+import { createJournal, createRenewal, createTimekeeping, deleteJournalEntry, deleteRenewalItem, deleteTimekeepingEntry, listJournal, listRenewals, listTimekeeping, updateRenewalItem, updateTimekeeping, updateJournal, reviewIncident } from "@/features/records/api";
+import type { JournalEntry, RenewalItem, RenewalStatus, RenewalUrgency, ServiceType, TimekeepingEntry } from "@/features/records/types";
+import { useCaseId } from "@/features/accounts/auth-context";
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
   personal_care: "Personal Care",
@@ -83,11 +70,11 @@ function relativeDue(iso: string | null): string {
 }
 
 export default function RecordsPage() {
-  const [caseId, setCaseId] = useState<string | null>(null);
+  const caseId = useCaseId();
   const [timekeeping, setTimekeeping] = useState<TimekeepingEntry[]>([]);
   const [journal, setJournal] = useState<JournalEntry[]>([]);
   const [renewals, setRenewals] = useState<RenewalItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(caseId !== null);
 
   const [loadError, setLoadError] = useState(false);
   const [saveError, setSaveError] = useState("");
@@ -143,16 +130,10 @@ export default function RecordsPage() {
   }, []);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? localStorage.getItem("ilera_case_id") : null;
-    if (stored) {
-      // Read the browser-only case after hydration.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCaseId(stored);
-      loadData(stored);
-    } else {
-      setLoading(false);
-    }
-  }, [loadData]);
+    // loadData also backs the Retry button, so it resets loading itself; harmless here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (caseId) void loadData(caseId);
+  }, [caseId, loadData]);
 
   const fallEntries = journal.filter((j) => j.fall_flagged && j.incident_status !== "dismissed");
   const inRange = (date: string) => (!fromDate || date >= fromDate) && (!toDate || date <= toDate);

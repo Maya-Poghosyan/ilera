@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
-import { useAuth } from "@/lib/auth-context";
+import { useAuth } from "@/features/accounts/auth-context";
 
 export default function GetStartedPage() {
   const router = useRouter();

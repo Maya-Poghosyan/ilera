@@ -4,15 +4,8 @@ import { useEffect, useState } from "react";
 import { Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/auth-context";
-import {
-  connectMicrosoftMailbox,
-  disconnectMailbox,
-  getEmailProviders,
-  listMailboxConnections,
-  type EmailProviders,
-  type MailboxConnection,
-} from "@/lib/api";
+import { useAuth } from "@/features/accounts/auth-context";
+import { connectMicrosoftMailbox, disconnectMailbox, getEmailProviders, listMailboxConnections, type EmailProviders, type MailboxConnection } from "@/features/mailbox/api";
 
 export function MailboxConnections() {
   const { user } = useAuth();

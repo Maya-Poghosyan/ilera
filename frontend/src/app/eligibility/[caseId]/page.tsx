@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadFailure } from "@/components/load-failure";
 import { SiteHeader } from "@/components/site-header";
-import { useAuth } from "@/lib/auth-context";
-import { determineEligibility, getEligibility } from "@/lib/api";
-import type { EligibilityResponse } from "@/lib/types";
+import { useAuth } from "@/features/accounts/auth-context";
+import { determineEligibility, getEligibility } from "@/features/cases/api";
+import type { EligibilityResponse } from "@/features/cases/types";
 
 const statusColor: Record<string, string> = {
   likely: "border-transparent bg-emerald-600 text-white",

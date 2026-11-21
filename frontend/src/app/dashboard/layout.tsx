@@ -2,8 +2,8 @@
 
 import { Logo } from "@/components/logo";
 import { DashboardNav } from "@/components/dashboard-nav";
-import { RequireAuth } from "@/components/require-auth";
-import { useAuth } from "@/lib/auth-context";
+import { RequireAuth } from "@/features/accounts/require-auth";
+import { useAuth } from "@/features/accounts/auth-context";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
