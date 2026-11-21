@@ -6,7 +6,10 @@ import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { SuggestionPanel } from "@/features/intake/documents/suggestion-panel";
 import { UploadCard } from "@/features/intake/documents/upload-card";
 import { useIntakeDocuments } from "@/features/intake/documents/use-intake-documents";
-import { QuestionField } from "@/features/intake/components/question-field";
+import { IntroContent } from "@/features/intake/components/intro-content";
+import { QuestionList } from "@/features/intake/components/question-list";
+import { ReviewScreen } from "@/features/intake/components/review-screen";
+import { clearDraft, type Draft, readDraft, writeDraft } from "@/features/intake/draft";
 import { LoadFailure } from "@/components/load-failure";
 import { Button } from "@/components/ui/button";
 import { UncurlingArrow } from "@/components/uncurling-arrow";
@@ -28,104 +31,6 @@ import {
 
 import { buildPages, pageIndex, resumePage, intakeIssues } from "@/features/intake/flow";
 
-// Save responses and the current card automatically on this browser.
-const DRAFT_KEY = "ilera_intake_draft";
-
-interface Draft {
-  answers: Answers;
-  questionId: string | null;
-  version?: string;
-  review?: boolean;
-}
-
-function readDraft(): Draft | null {
-  try {
-    const raw = localStorage.getItem(DRAFT_KEY);
-    if (!raw) return null;
-    const draft = JSON.parse(raw) as Draft;
-    if (!draft.answers || Object.keys(draft.answers).length === 0) return null;
-    return { answers: draft.answers, questionId: draft.questionId ?? null, version: draft.version, review: draft.review === true };
-  } catch {
-    return null;
-  }
-}
-
-// Stacked on narrow screens, side by side once there's room for readable fields.
-const INLINE_COLS: Record<number, string> = {
-  1: "grid-cols-1",
-  2: "grid-cols-1 sm:grid-cols-2",
-  3: "grid-cols-1 sm:grid-cols-3",
-};
-const INLINE_COLS_FALLBACK = "grid-cols-1 sm:grid-cols-2";
-
-function renderQuestions(
-  questions: Question[],
-  name: string,
-  answers: Answers,
-  errors: Record<string, string>,
-  setAnswer: (fieldId: string, value: AnswerValue) => void,
-  before: (question: Question) => React.ReactNode = () => null,
-) {
-  const elements: React.ReactNode[] = [];
-  let i = 0;
-  while (i < questions.length) {
-    const cur = questions[i];
-    if (cur.layout === "inline") {
-      const inlineGroup: Question[] = [cur];
-      const g = cur.group;
-      let j = i + 1;
-      while (j < questions.length && questions[j].layout === "inline" && questions[j].group === g) {
-        inlineGroup.push(questions[j]);
-        j++;
-      }
-      for (const iq of inlineGroup) {
-        const prefix = before(iq);
-        if (prefix) elements.push(<div key={`before-${iq.field_id}`}>{prefix}</div>);
-      }
-      elements.push(
-        <div
-          key={`inline-${cur.field_id}`}
-          className={`grid items-end gap-5 ${INLINE_COLS[inlineGroup.length] ?? INLINE_COLS_FALLBACK}`}
-        >
-          {inlineGroup.map((iq) => (
-            <QuestionField
-              key={iq.field_id}
-              question={iq}
-              answers={answers}
-              value={answers[iq.field_id] ?? null}
-              name={name}
-              error={errors[iq.field_id]}
-              onChange={(v) => setAnswer(iq.field_id, v)}
-            />
-          ))}
-        </div>,
-      );
-      i = j;
-    } else {
-      const prefix = before(cur);
-      if (prefix) elements.push(<div key={`before-${cur.field_id}`}>{prefix}</div>);
-      elements.push(
-        <QuestionField
-          key={cur.field_id}
-          question={cur}
-          answers={answers}
-          value={answers[cur.field_id] ?? null}
-          name={name}
-          error={errors[cur.field_id]}
-          onChange={(v) => setAnswer(cur.field_id, v)}
-        />,
-      );
-      i++;
-    }
-  }
-  return elements;
-}
-
-/**
- * Arrow that grows to the right on hover, pushing its head into the extra padding.
- * Rendered at 1 viewBox unit per px, so the head's translate matches the shaft's growth.
- * The box is only as wide as the resting art; the growth overflows into that padding.
- */
 export default function IntakePage() {
   const router = useRouter();
   const { user, updateUser } = useAuth();
@@ -173,13 +78,7 @@ export default function IntakePage() {
     queueMicrotask(() => {
       if (cancelled || submittingRef.current) return;
       try {
-        if (Object.keys(draft.answers).length) {
-          localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
-          setSaveMessage("Saved on this browser");
-        } else {
-          localStorage.removeItem(DRAFT_KEY);
-          setSaveMessage(null);
-        }
+        setSaveMessage(writeDraft(draft) === "saved" ? "Saved on this browser" : null);
       } catch {
         setSaveMessage("Couldn’t save. Keep this tab open.");
       }
@@ -199,7 +98,7 @@ export default function IntakePage() {
   function startOver() {
     if (submittingRef.current) return;
     try {
-      localStorage.removeItem(DRAFT_KEY);
+      clearDraft();
     } catch {
       setSaveMessage("We couldn’t clear your saved progress on this browser. Your answers have been kept.");
       return;
@@ -285,7 +184,6 @@ export default function IntakePage() {
   const safeIndex = pageIndex(pages, activeQuestionId);
   const page = pages[safeIndex];
   const sectionTitle = pages.slice(0, safeIndex + 1).findLast((p) => p.kind === "intro")?.title;
-  const visibleQuestions = page.questions;
 
   function prefillCounty(zipFieldId: string, zip: AnswerValue) {
     const prefix = zipFieldId.slice(0, -"zip".length);
@@ -362,7 +260,7 @@ export default function IntakePage() {
     setSubmitting(true);
     try {
       const created = await submitIntakeAnswers(cleanAnswers(schema!, answers));
-      localStorage.removeItem(DRAFT_KEY);
+      clearDraft();
       // Straight to the results screen — an account is offered there, once there is a strategy
       // worth saving. The case id is parked so that signup can claim it.
       setPendingCaseId(created.id);
@@ -385,38 +283,23 @@ export default function IntakePage() {
   }
 
   if (showReview) {
-    const sections = [...new Set(issues.map(issue => issue.section))];
     return (
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-14">
-        <h1 id="intake-review-title" tabIndex={-1} className="text-2xl">{issues.length ? "Complete your answers" : "Ready to submit"}</h1>
-        {sections.map(section => (
-          <Card key={section}>
-            <CardHeader><CardTitle>{interpolateName(section, name)}</CardTitle></CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                {issues.filter(issue => issue.section === section).map(issue => (
-                  <li key={issue.question.field_id}>
-                    <a href={`#intake-${issue.question.field_id}`} className="text-primary underline underline-offset-4" onClick={event => {
-                      event.preventDefault();
-                      pendingFocus.current = issue.question.field_id;
-                      setErrors(Object.fromEntries(issues.map(item => [item.question.field_id, item.message])));
-                      setActiveQuestionId(issue.question.field_id);
-                      setShowReview(false);
-                      window.scrollTo({ top: 0 });
-                    }}>{interpolateName(issue.question.text, name)}</a>
-                    <p className="mt-1 text-sm text-destructive">{issue.message}</p>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        ))}
-        <div className="flex justify-between gap-4">
-          <Button variant="outline" disabled={submitting} onClick={() => setShowReview(false)}>Back to intake</Button>
-          <Button disabled={submitting || issues.length > 0} onClick={() => void finish()}>{submitting ? "Submitting…" : schema.submit_button}</Button>
-        </div>
-        {saveMessage && <p role="status" className="text-sm text-muted-foreground">{saveMessage}</p>}
-      </main>
+      <ReviewScreen
+        issues={issues}
+        name={name}
+        submitting={submitting}
+        submitLabel={schema.submit_button}
+        saveMessage={saveMessage}
+        onJump={(fieldId) => {
+          pendingFocus.current = fieldId;
+          setErrors(Object.fromEntries(issues.map((item) => [item.question.field_id, item.message])));
+          setActiveQuestionId(fieldId);
+          setShowReview(false);
+          window.scrollTo({ top: 0 });
+        }}
+        onBack={() => setShowReview(false)}
+        onSubmit={() => void finish()}
+      />
     );
   }
 
@@ -439,24 +322,9 @@ export default function IntakePage() {
               <ExternalLink className="size-3.5" aria-hidden="true" />
             </a>}
           </div>}
-          {page.kind === "intro" ? <div className="space-y-4 text-base text-muted-foreground">
-            <p>{page.introEmphasis && page.introText?.includes(page.introEmphasis) ? <>{page.introText.slice(0, page.introText.indexOf(page.introEmphasis))}<strong className="font-semibold">{page.introEmphasis}</strong>{page.introText.slice(page.introText.indexOf(page.introEmphasis) + page.introEmphasis.length)}</> : page.introText}</p>
-            {page.introDocuments && <table className="w-full table-fixed text-left text-sm sm:text-base">
-              <thead className="text-foreground">
-                <tr>
-                  <th scope="col" className="w-[45%] pb-3 pr-6 font-medium">Document</th>
-                  <th scope="col" className="pb-3 font-medium">Where to find it</th>
-                </tr>
-              </thead>
-              <tbody>
-                {page.introDocuments.map(item => <tr key={item.document} className="align-top">
-                  <td className="py-2 pr-6">{item.document}</td>
-                  <td className="py-2">{item.location}</td>
-                </tr>)}
-              </tbody>
-            </table>}
-            {page.introEmphasis && !page.introText?.includes(page.introEmphasis) && <p><strong className="font-semibold">{page.introEmphasis}</strong></p>}
-          </div> : renderQuestions(visibleQuestions, name, answers, errors, setAnswer, suggestionPanel)}
+          {page.kind === "intro"
+            ? <IntroContent page={page} />
+            : <QuestionList questions={page.questions} name={name} answers={answers} errors={errors} onAnswer={setAnswer} before={suggestionPanel} />}
         </CardContent>
       </Card>
 
