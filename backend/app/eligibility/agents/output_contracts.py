@@ -99,3 +99,36 @@ class InteractionsOutput(CompactOutput):
     def concise(self) -> InteractionsOutput:
         _check_words([p for item in self.interactions for p in [item.note, item.action]], 150)
         return self
+
+
+class ReportItem(CompactOutput):
+    point: str = Field(min_length=1, max_length=200, description="One point that answers the question; at most 25 words.")
+    programs: list[Annotated[str, Field(min_length=1, max_length=40)]] = Field(min_length=1, max_length=6)
+    citations: list[EvidenceRef] = Field(min_length=1, max_length=4)
+
+
+class ResearchReport(CompactOutput):
+    """The answer to a research question: one merged list plus an optional short note."""
+    items: list[ReportItem] = Field(min_length=1, max_length=8)
+    note: str = Field(default="", max_length=300, description="Optional; at most 40 words; only what changes how to read the list.")
+
+    @model_validator(mode="after")
+    def concise(self) -> ResearchReport:
+        for item in self.items:
+            _check_words([item.point], 25)
+        _check_words([self.note], 40)
+        _check_words([self.note, *(i.point for i in self.items)], 220)
+        return self
+
+    def validate_citations(self, allowed: set[tuple[str, str]]) -> None:
+        if any((ref.document_id, ref.page) not in allowed for item in self.items for ref in item.citations):
+            raise ValueError("Cite only document/page pairs the specialists cited.")
+
+    def markdown(self, question: str) -> str:
+        lines = [f"**{question}**", ""]
+        for item in self.items:
+            refs = "; ".join(f"{r.document_id}" + (f" p. {r.page}" if r.page else "") for r in item.citations)
+            lines.append(f"- {item.point} _({', '.join(item.programs)} — {refs})_")
+        if self.note:
+            lines += ["", self.note]
+        return "\n".join(lines) + "\n"

@@ -9,7 +9,7 @@ from pathlib import Path
 from app.rag.scope import RetrievalScope, normalize_state, today
 from datetime import date
 from app.eligibility.agents.model_settings import REASONING_EFFORT, RESEARCH_MAX_TOKENS
-from app.eligibility.agents.output_contracts import ResearchAnswer
+from app.eligibility.agents.output_contracts import ResearchAnswer, ResearchReport
 
 PROGRAMS = ("ihss", "medical", "pfl", "va", "medicare", "tax")
 SYSTEM = """You are Ilera's policy research specialist for {program}. Answer the question
@@ -51,6 +51,45 @@ verification and tax filing. Next steps must match the requested stage and actor
 Copy citation pairs verbatim from allowed_citations. Do not shorten a page range,
 add a p. prefix, substitute a publication title, or use a passage's list position.
 """
+
+
+REPORT_SYSTEM = """You merge Ilera policy specialists' answers into ONE list that answers the
+question. Use only the specialists' findings and conclusions; add no new claims.
+- Every item answers the question directly. Drop anything that does not, however true.
+- Merge items that say the same thing across programs; list each program it applies to.
+- Order by how much the item matters to the question.
+- note: empty unless one caveat changes how to read the whole list (at most 40 words).
+- Copy citation pairs verbatim from allowed_citations."""
+
+
+async def _merge_answers(client, settings, question: str, results: list[dict]) -> ResearchReport:
+    from pydantic_ai import Agent, ModelRetry, ToolOutput
+    from pydantic_ai.models.openai import OpenAIChatModel
+    from pydantic_ai.providers.openai import OpenAIProvider
+
+    answers = [{"program": r["program"], **r["answer"]} for r in results if r["answer"]]
+    allowed = {(c["document_id"], c["page"]) for a in answers for f in a["findings"] for c in f["citations"]}
+    agent = Agent(
+        model=OpenAIChatModel(settings.openai_model, provider=OpenAIProvider(openai_client=client)),
+        output_type=ToolOutput(ResearchReport, strict=True),
+        system_prompt=REPORT_SYSTEM,
+        model_settings={"max_tokens": RESEARCH_MAX_TOKENS, "openai_reasoning_effort": REASONING_EFFORT},
+        retries=2,
+    )
+
+    @agent.output_validator
+    def check_citations(report: ResearchReport) -> ResearchReport:
+        try:
+            report.validate_citations(allowed)
+        except ValueError as exc:
+            raise ModelRetry(str(exc)) from None
+        return report
+
+    result = await agent.run(json.dumps({
+        "question": question, "specialist_answers": answers,
+        "allowed_citations": [{"document_id": d, "page": p} for d, p in sorted(allowed)],
+    }, ensure_ascii=False))
+    return result.output
 
 
 async def _answer_question(client, settings, program, question, scope, evidence) -> ResearchAnswer:
@@ -95,8 +134,9 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--as-of", type=date.fromisoformat, default=today(), help="Policy applicability date YYYY-MM-DD (default: current UTC date)")
     p.add_argument("--k", type=int, default=5, help="Passages per query and program (1–20)")
     p.add_argument("--retrieve-only", action="store_true", help="Skip model calls; return source passages")
-    p.add_argument("--output", type=Path, help="Save JSON evidence and answers")
-    p.add_argument("--include-evidence", action="store_true", help="Include retrieved passages in console output (saved files always include them)")
+    p.add_argument("--output", type=Path, help="Save the report (.md) and the full run with evidence (.json) at this path")
+    p.add_argument("--json", action="store_true", help="Print the full run (specialist answers) instead of the report")
+    p.add_argument("--include-evidence", action="store_true", help="With --json, include retrieved passages")
     return p
 
 
@@ -146,7 +186,10 @@ async def run(args: argparse.Namespace) -> dict:
         for result in results:
             if isinstance(result, BaseException):
                 raise result
-        return {"question": args.question, "queries": queries, "backend": "pgvector",
+        report = None
+        if client and any(r["answer"] and r["answer"]["findings"] for r in results):
+            report = (await _merge_answers(client, settings, args.question, results)).model_dump()
+        return {"question": args.question, "report": report, "queries": queries, "backend": "pgvector",
                 "state": args.state, "as_of": args.as_of.isoformat(),
                 "model": None if args.retrieve_only else settings.openai_model, "results": results}
     finally:
@@ -169,15 +212,18 @@ def main() -> None:
     except Exception as exc:
         # Connection exceptions may contain credentials; keep those out of terminal output.
         p.exit(1, f"Research failed ({type(exc).__name__}); check hosted database/model configuration and connectivity.\n")
+    report = ResearchReport.model_validate(result["report"]).markdown(args.question) if result.get("report") else None
     if args.output:
-        args.output.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    else:
-        # Audit passages can be large; expose them only on explicit request.
+        args.output.with_suffix(".json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        if report:
+            args.output.with_suffix(".md").write_text(report, encoding="utf-8")
+    if args.json or args.retrieve_only or not report:
         if not args.include_evidence and not args.retrieve_only:
-            result = {**result, "results": [
-                {k: v for k, v in row.items() if k != "evidence"} for row in result["results"]
-            ]}
+            # Audit passages can be large; expose them only on explicit request.
+            result = {**result, "results": [{k: v for k, v in row.items() if k != "evidence"} for row in result["results"]]}
         print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        print(report, end="")
 
 
 if __name__ == "__main__":
