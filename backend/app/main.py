@@ -31,7 +31,7 @@ async def lifespan(_: FastAPI):
 # Scheduled work (e.g. the unclaimed-case purge) runs as Container Apps Jobs,
 # not in this process, so scaling out replicas never multiplies it.
 # No /docs, /redoc or /openapi.json: the API is public and scanners probe it constantly.
-app = FastAPI(title=settings.app_name, docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
+app = FastAPI(title="Ilera API", docs_url=None, redoc_url=None, openapi_url=None, lifespan=lifespan)
 configure_email_access_logging()
 
 app.add_middleware(

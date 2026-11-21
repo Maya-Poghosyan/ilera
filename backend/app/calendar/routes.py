@@ -31,7 +31,6 @@ router = APIRouter()
 def api_list_suggested_events(
     user: User = Depends(get_current_user),
 ) -> list[SuggestedEvent]:
-    # Unowned legacy suggestions remain stored, but cannot safely be assigned to a user.
     return list_suggested_events(user_id=user.id)
 
 

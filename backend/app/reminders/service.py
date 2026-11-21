@@ -13,7 +13,9 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from pydantic import BaseModel, Field, model_validator
 
 from app.core import db
-from app.core.config import get_settings
+
+# Reminder times without a zone are read in California time ("18:00" means 6pm here).
+DEFAULT_TIMEZONE = "America/Los_Angeles"
 
 # ---------------------------------------------------------------------------
 # Model
@@ -38,7 +40,7 @@ class ReminderSchedule(BaseModel):
     time: str = "09:00"  # HH:MM in 24-hour format, in `timezone`
     weekday: Optional[int] = None  # 0=Mon … 6=Sun, used when freq=weekly
     date: Optional[str] = None  # ISO date, used when freq=once
-    # IANA name; None falls back to settings.default_timezone. A caregiver's
+    # IANA name; None means DEFAULT_TIMEZONE. A caregiver's
     # "6pm check-in" is 6pm where they live, not 6pm UTC.
     timezone: Optional[str] = None
 
@@ -72,7 +74,7 @@ class Reminder(BaseModel):
 
 
 def _zone(schedule: ReminderSchedule) -> ZoneInfo:
-    name = schedule.timezone or get_settings().default_timezone
+    name = schedule.timezone or DEFAULT_TIMEZONE
     try:
         return ZoneInfo(name)
     except (ZoneInfoNotFoundError, ValueError):

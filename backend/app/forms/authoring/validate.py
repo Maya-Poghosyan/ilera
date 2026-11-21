@@ -45,9 +45,6 @@ def validate_fields(
         if name not in by_name:
             problems.append(f'"{name}" is not a field in this PDF; it can never be filled')
             continue
-        if isinstance(spec, str):
-            problems.append(f'"{name}" uses the legacy bare-string form; expected an object')
-            continue
 
         path = spec.get("profile_path")
         if path is not None and path not in allowed_paths:

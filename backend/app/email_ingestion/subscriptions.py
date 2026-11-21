@@ -44,9 +44,6 @@ def ensure_subscription(connection_id: str, user_id: str) -> None:
         if valid:
             subscription = asyncio.run(provider.renew_subscription(token, mailbox.subscription_id))
         else:
-            # Clear legacy subscriptions without a verifiable clientState before recreating.
-            if mailbox.subscription_id and mailbox.subscription_expires_at and mailbox.subscription_expires_at > now:
-                asyncio.run(provider.unsubscribe(token, mailbox.subscription_id))
             state = secrets.token_urlsafe(32)
             subscription = asyncio.run(provider.subscribe(
                 token, notification_url=get_settings().email_microsoft_notification_url, client_state=state,

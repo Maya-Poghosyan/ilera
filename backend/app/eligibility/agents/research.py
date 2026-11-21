@@ -8,6 +8,7 @@ from dataclasses import asdict
 from pathlib import Path
 from app.rag.scope import RetrievalScope, normalize_state, today
 from datetime import date
+from app.eligibility.agents.model_settings import REASONING_EFFORT, RESEARCH_MAX_TOKENS
 from app.eligibility.agents.output_contracts import ResearchAnswer
 
 PROGRAMS = ("ihss", "medical", "pfl", "va", "medicare", "tax")
@@ -63,8 +64,8 @@ async def _answer_question(client, settings, program, question, scope, evidence)
         output_type=ToolOutput(ResearchAnswer, strict=True),
         system_prompt=SYSTEM.format(program=program),
         model_settings={
-            "max_tokens": settings.research_max_output_tokens,
-            "openai_reasoning_effort": settings.agent_reasoning_effort,
+            "max_tokens": RESEARCH_MAX_TOKENS,
+            "openai_reasoning_effort": REASONING_EFFORT,
         },
         retries=1,
     )

@@ -33,9 +33,7 @@ def read_document(upload: Upload) -> DocumentReading:
     with ExitStack() as stack:
         stack.enter_context(private_transport_logs())
         try:
-            client = open_client(stack, endpoint=settings.document_openai_endpoint,
-                                 managed_identity_client_id=settings.document_managed_identity_client_id,
-                                 timeout=60)
+            client = open_client(stack, endpoint=settings.document_openai_endpoint, timeout=60)
             raw = structured_completion(client, deployment=settings.document_openai_deployment,
                                         system=SYSTEM_PROMPT, content=request.content, output=RawExtraction,
                                         name="intake_document_suggestions")

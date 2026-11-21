@@ -9,6 +9,7 @@ IRS Notice 2014-7, etc. This module grounds those cross-program interactions in 
 from __future__ import annotations
 
 from app.core.config import get_settings
+from app.eligibility.agents.model_settings import REASONING_EFFORT, RESEARCH_MAX_TOKENS
 from app.cases.models import CaseProfile, Citation, InteractionNote
 from app.rag.index import get_index
 from app.rag.scope import profile_scope
@@ -107,8 +108,8 @@ def _analyze(
     client = OpenAI(api_key=s.openai_api_key, base_url=s.openai_base_url)
     resp = client.chat.completions.create(
         model=s.openai_model,
-        max_completion_tokens=s.research_max_output_tokens,
-        reasoning_effort=s.agent_reasoning_effort,
+        max_completion_tokens=RESEARCH_MAX_TOKENS,
+        reasoning_effort=REASONING_EFFORT,
         response_format={"type": "json_schema", "json_schema": {
             "name": "program_interactions", "strict": True,
             "schema": OpenAIJsonSchemaTransformer(InteractionsOutput.model_json_schema(), strict=True).walk(),

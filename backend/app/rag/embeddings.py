@@ -9,6 +9,9 @@ from app.core.config import get_settings
 logger = logging.getLogger(__name__)
 
 DIM = 1536  # text-embedding-3-small
+BATCH_SIZE = 128  # texts per request; the limit is round trips, not memory
+MAX_RETRIES = 5
+TIMEOUT_SECONDS = 60.0
 _openai_client = None
 
 
@@ -27,8 +30,8 @@ def _get_openai_client():
         _openai_client = OpenAI(
             api_key=s.openai_api_key,
             base_url=s.openai_base_url,
-            max_retries=s.embedding_max_retries,
-            timeout=s.embedding_timeout_seconds,
+            max_retries=MAX_RETRIES,
+            timeout=TIMEOUT_SECONDS,
         )
     return _openai_client
 
@@ -41,14 +44,14 @@ def _embed_batch(texts: list[str]) -> list[list[float]]:
     """
     s = get_settings()
     delay = 5.0
-    for attempt in range(s.embedding_max_retries + 1):
+    for attempt in range(MAX_RETRIES + 1):
         try:
             resp = _get_openai_client().embeddings.create(
                 model=s.embedding_model, input=texts
             )
             return [d.embedding for d in resp.data]
         except Exception as exc:
-            if attempt == s.embedding_max_retries:
+            if attempt == MAX_RETRIES:
                 raise
             wait = max(delay, _retry_after(exc))
             logger.warning(
@@ -72,8 +75,7 @@ def _retry_after(exc: Exception) -> float:
 
 
 def batch_size() -> int:
-    """Texts per embedding request; the limit is round trips, not memory."""
-    return max(1, get_settings().embedding_api_batch_size)
+    return BATCH_SIZE
 
 
 def embed_iter(texts: Iterable[str]) -> Iterator[list[float]]:

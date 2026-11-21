@@ -27,6 +27,7 @@ _DATA = os.path.join(os.path.dirname(__file__), "..", "..", "data")
 KNOWLEDGE_DIR = os.path.join(_DATA, "knowledge")
 CHUNK_CHARS = 1400
 CHUNK_OVERLAP = 200
+WRITE_BATCH = 200  # chunks written per round trip during ingest
 _PAGE_RE = re.compile(r"\[page (\d+)\]")
 
 logger = logging.getLogger(__name__)
@@ -141,7 +142,7 @@ def iter_chunks() -> Iterator[Chunk]:
 
 def _embedded(chunks: list[Chunk]) -> Iterator[list[tuple[Chunk, list[float]]]]:
     """Same, for the chunks of a single document (the unit an incremental sync rewrites)."""
-    size = max(1, get_settings().index_write_batch_size)
+    size = WRITE_BATCH
     for i in range(0, len(chunks), size):
         window = chunks[i : i + size]
         yield list(zip(window, embed([c.text for c in window])))

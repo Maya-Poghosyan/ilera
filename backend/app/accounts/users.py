@@ -15,7 +15,7 @@ class User(BaseModel):
     hashed_password: str
     phone: str = ""
     created_at: str = ""
-    email_verified: bool = True  # True so existing pre-verification rows are not locked out
+    email_verified: bool
 
 
 _COLUMNS = "id, name, email, hashed_password, phone, created_at, email_verified"

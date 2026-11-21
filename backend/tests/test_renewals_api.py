@@ -1,4 +1,4 @@
-"""Multi-renewal: model urgency, CRUD endpoints, back-compat, and access control."""
+"""QA: renewals — CRUD, ordering, validation, summary, and access control."""
 from datetime import date, timedelta
 
 import pytest
@@ -77,15 +77,11 @@ def test_create_renewal_validation(payload):
     assert client.post("/api/records/renewals", json=body).status_code == 422
 
 
-# --- Back-compat with the legacy single-renewal endpoint ------------------
-
-
 def test_summary_includes_renewals_list():
     case_id = new_case()
     client.post("/api/records/renewals", json={"case_id": case_id, "program": "IHSS", "due_date": iso(3)})
     summary = client.get(f"/api/records/{case_id}").json()
     assert "renewals" in summary
-    assert "renewal" not in summary  # legacy single-renewal key is gone
     assert summary["renewals"][0]["program"] == "IHSS"
     assert summary["renewals"][0]["urgency"] == "due_soon"
 

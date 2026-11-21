@@ -24,7 +24,7 @@ export type Cell = { day: number; inMonth: boolean };
 function toCalEvent(e: CalendarEventAPI | SuggestedEventAPI, suggested: boolean): CalEvent {
   return {
     id: e.id, day: e.day, date: e.date ?? undefined, title: e.title, time: e.time,
-    kind: (e.kind as EventKind) || "Appointment", suggested, description: e.description,
+    kind: e.kind as EventKind, suggested, description: e.description,
   };
 }
 
@@ -79,7 +79,7 @@ export function useCalendar(notify: (message: string) => void) {
   }, [load]);
 
   // Only suggestions awaiting a decision are reviewed; accepted ones become calendar events.
-  const pending = suggestions.filter((s) => (s.status ?? "pending") === "pending");
+  const pending = suggestions.filter((s) => s.status === "pending");
   // Pending suggestions that carry a date are previewed on the grid, styled as tentative.
   const events = [...calendarEvents, ...pending.filter((s) => s.date).map((s) => toCalEvent(s, true))];
 

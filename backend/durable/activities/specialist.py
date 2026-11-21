@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 from app.eligibility.agents.specialists import ALL_SPECIALISTS
 from app.eligibility.agents.output_contracts import SpecialistOutput as _SpecialistOutput
 from app.core.config import get_settings
+from app.eligibility.agents.model_settings import ELIGIBILITY_MAX_TOKENS, REASONING_EFFORT
 from app.rag.scope import profile_scope
 from app.cases.models import CaseProfile, EligibilityResult, FollowupQuestion
 from durable.models import PeerQueryResult, SpecialistInput, SpecialistResult
@@ -258,8 +259,8 @@ async def specialist_activity(payload: dict) -> dict:
             model=model,
             output_type=ToolOutput(_SpecialistOutput, strict=True),
             model_settings={
-                "max_tokens": s.eligibility_max_output_tokens,
-                "openai_reasoning_effort": s.agent_reasoning_effort,
+                "max_tokens": ELIGIBILITY_MAX_TOKENS,
+                "openai_reasoning_effort": REASONING_EFFORT,
             },
             system_prompt=_SYSTEM_TEMPLATE.format(program=program),
             tools=[make_gate_tool(doc_key), make_rag_tool(doc_key, scope)],

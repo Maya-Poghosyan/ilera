@@ -10,6 +10,9 @@ from jose import JWTError, jwt
 from app.accounts.users import User, get_user_by_id
 from app.core.config import get_settings
 
+ALGORITHM = "HS256"
+SESSION_HOURS = 72
+
 _bearer = HTTPBearer(auto_error=False)
 
 
@@ -18,9 +21,8 @@ def _secret() -> str:
 
 
 def create_token(user_id: str) -> str:
-    settings = get_settings()
-    expire = datetime.now(timezone.utc) + timedelta(hours=settings.jwt_expire_hours)
-    return jwt.encode({"sub": user_id, "exp": expire}, _secret(), algorithm=settings.jwt_algorithm)
+    expire = datetime.now(timezone.utc) + timedelta(hours=SESSION_HOURS)
+    return jwt.encode({"sub": user_id, "exp": expire}, _secret(), algorithm=ALGORITHM)
 
 
 async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(_bearer)) -> Optional[User]:
@@ -28,7 +30,7 @@ async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] 
         return None
     try:
         user_id = jwt.decode(credentials.credentials, _secret(),
-                             algorithms=[get_settings().jwt_algorithm]).get("sub")
+                             algorithms=[ALGORITHM]).get("sub")
     except JWTError:
         return None
     return get_user_by_id(user_id) if user_id else None

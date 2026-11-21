@@ -172,9 +172,9 @@ Save those three as repository **secrets**.
 Intake is anonymous — a case exists before an account does. `cases.owner_user_id` is
 nullable. An unowned case is reachable by whoever holds its ID. Signing up or logging in
 claims it permanently; a stranger who guesses a case ID can neither read it nor attach it to
-their account. Every case-scoped route enforces this via `app/access.py`, responding 404
-rather than 403 to avoid confirming the case exists. Unclaimed cases are deleted after
-`UNCLAIMED_CASE_TTL_DAYS`.
+their account. Every case-scoped route enforces this via `app/accounts/access.py`, responding 404
+rather than 403 to avoid confirming the case exists. The daily purge job deletes cases
+unclaimed after 5 days (`app/cases/purge.py`).
 
 ## API reference
 

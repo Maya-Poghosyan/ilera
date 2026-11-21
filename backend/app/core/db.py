@@ -21,21 +21,16 @@ from app.core.config import get_settings
 logger = logging.getLogger("ilera.db")
 
 _SCHEMA = """
+-- Accounts. Email must be confirmed before a session is issued; phone is asked for at signup.
 CREATE TABLE IF NOT EXISTS users (
     id              text PRIMARY KEY,
     name            text NOT NULL,
     email           text NOT NULL UNIQUE,
     hashed_password text NOT NULL,
-    created_at      text NOT NULL DEFAULT ''
+    created_at      text NOT NULL DEFAULT '',
+    phone           text NOT NULL DEFAULT '',
+    email_verified  boolean NOT NULL DEFAULT false
 );
-
--- The phone number is asked for at signup, which happens after the strategy is shown, so it
--- arrives later than the rest of the account and existing rows have none.
-ALTER TABLE users ADD COLUMN IF NOT EXISTS phone text NOT NULL DEFAULT '';
-
--- Email must be confirmed before a session is issued.  Existing rows (pre-verification
--- rollout) default to verified so that current accounts are not locked out.
-ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified boolean NOT NULL DEFAULT true;
 
 -- Single-use, time-limited tokens e-mailed to confirm an address at signup.
 CREATE TABLE IF NOT EXISTS verification_tokens (
@@ -57,31 +52,14 @@ CREATE TABLE IF NOT EXISTS login_otps (
 
 -- owner_user_id is nullable because intake runs before there is an account: a case starts
 -- unowned, reachable only by whoever holds its id, and is claimed at signup. The foreign key
--- makes an owner that isn't a real user impossible; ownership checks are enforced in access.py.
+-- makes every owner a real user; accounts/access.py checks ownership on every case route.
 CREATE TABLE IF NOT EXISTS cases (
     id            text PRIMARY KEY,
     owner_user_id text REFERENCES users (id) ON DELETE CASCADE,
     doc           jsonb NOT NULL,
     updated_at    timestamptz NOT NULL DEFAULT now()
 );
-ALTER TABLE cases ADD COLUMN IF NOT EXISTS owner_user_id text REFERENCES users (id) ON DELETE CASCADE;
 CREATE INDEX IF NOT EXISTS cases_owner_idx ON cases (owner_user_id);
-
--- Ownership used to be a users.case_id pointer, which allowed two users to name the same case
--- and let a case outlive any claim to it. Adopt those pointers as ownership, then drop them so
--- cases.owner_user_id is the only answer to "whose case is this".
-DO $$
-BEGIN
-    IF EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_name = 'users' AND column_name = 'case_id'
-    ) THEN
-        UPDATE cases c SET owner_user_id = u.id
-          FROM users u
-         WHERE u.case_id = c.id AND c.owner_user_id IS NULL;
-        ALTER TABLE users DROP COLUMN case_id;
-    END IF;
-END $$;
 
 CREATE TABLE IF NOT EXISTS reminders (
     id         text PRIMARY KEY,

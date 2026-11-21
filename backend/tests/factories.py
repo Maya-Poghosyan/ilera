@@ -9,7 +9,7 @@ from app.cases.models import CaseProfile
 
 def new_user(name: str = "Caregiver") -> User:
     user = User(id=str(uuid.uuid4()), name=name, email=f"{uuid.uuid4().hex}@example.com",
-                hashed_password="unused", created_at="2026-01-01T00:00:00+00:00")
+                hashed_password="unused", created_at="2026-01-01T00:00:00+00:00", email_verified=True)
     save_user(user)
     return user
 

@@ -34,15 +34,6 @@ class SuggestedEvent(BaseModel):
     model_version: Optional[str] = None
     status: Literal["pending", "accepted", "dismissed"] = "pending"
 
-    @model_validator(mode="before")
-    @classmethod
-    def _upgrade_day_only(cls, data: object) -> object:
-        """Read records written before events carried a full date."""
-        if isinstance(data, dict) and not data.get("date") and data.get("day"):
-            today = date_cls.today()
-            data = {**data, "date": today.replace(day=int(data["day"])).isoformat()}
-        return data
-
     @model_validator(mode="after")
     def _date_matches_status(self) -> "SuggestedEvent":
         if (self.date_status == "known") != (self.date is not None):

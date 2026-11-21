@@ -8,10 +8,13 @@ each deploy restarted the loop's 24h timer, so with frequent deploys it rarely f
 from app.core.config import require_for
 from app.cases.store import purge_unclaimed_cases
 
+# Abandoned intakes hold household data that belongs to no account; kept this many days.
+UNCLAIMED_CASE_TTL_DAYS = 5
+
 if __name__ == "__main__":
-    settings = require_for("purge")
+    require_for("purge")
     try:
-        deleted = purge_unclaimed_cases(settings.unclaimed_case_ttl_days)
+        deleted = purge_unclaimed_cases(UNCLAIMED_CASE_TTL_DAYS)
     except Exception:
         print("unclaimed_case_purge_failed")
         raise SystemExit(1) from None

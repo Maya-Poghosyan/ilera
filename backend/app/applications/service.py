@@ -198,9 +198,6 @@ def submit_answers(
                     continue
                 for target in question.fields or [field_id]:
                     merged_values[target] = pdf_value
-            elif isinstance(raw, str) and raw:
-                # Legacy: answer keyed directly by PDF field name.
-                merged_values[field_id] = raw
 
         try:
             pdf_bytes = write_values(form_id, merged_values)

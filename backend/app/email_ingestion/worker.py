@@ -22,6 +22,8 @@ from app.email_ingestion.extraction import AzureExtractor, EXTRACTION_VERSION, E
 from app.email_ingestion.models import EmailScanJob, MailboxConnection, ScanResult
 from app.email_ingestion.privacy import private_transport_logs
 
+MAX_DELIVERIES = 5  # matches the queue's max delivery count; then the message is dead-lettered
+
 
 class RetryScan(Exception):
     pass
@@ -139,7 +141,7 @@ def settle_message(receiver, message, extractor) -> str:
     try:
         outcome = process_job(job, extractor)
     except Exception:
-        if message.delivery_count >= get_settings().email_scan_max_deliveries:
+        if message.delivery_count >= MAX_DELIVERIES:
             receiver.dead_letter_message(message, reason="email_scan_failed", error_description="Processing failed")
             return "dead_lettered"
         receiver.abandon_message(message)

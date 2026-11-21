@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 from app.eligibility.agents.interactions import analyze_program_interactions
 from app.eligibility.agents.output_contracts import StrategyOutput
 from app.core.config import get_settings
+from app.eligibility.agents.model_settings import ELIGIBILITY_MAX_TOKENS, REASONING_EFFORT
 from app.cases.models import CaseProfile, EligibilityResult, SpecialistFinding
 from app.cases.store import finding_to_result, get_profile, save_profile
 from app.eligibility.strategy_text import format_strategy
@@ -163,8 +164,8 @@ async def synthesis_activity(payload: dict) -> dict:
             model=model,
             output_type=ToolOutput(StrategyOutput, strict=True),
             model_settings={
-                "max_tokens": s.eligibility_max_output_tokens,
-                "openai_reasoning_effort": s.agent_reasoning_effort,
+                "max_tokens": ELIGIBILITY_MAX_TOKENS,
+                "openai_reasoning_effort": REASONING_EFFORT,
             },
             retries=1,
             system_prompt=_SYNTHESIS_SYSTEM,

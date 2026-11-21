@@ -4,7 +4,7 @@ export type SuggestedEventAPI = {
   id: string;
   /** ISO YYYY-MM-DD, or null when email did not establish a date. */
   date: string | null;
-  date_status?: "known" | "ambiguous" | "missing";
+  date_status: "known" | "ambiguous" | "missing";
   timezone?: string | null;
   day: number;
   title: string;
@@ -14,7 +14,7 @@ export type SuggestedEventAPI = {
   source: string;
   confidence?: number | null;
   action_required?: string | null;
-  status?: "pending" | "accepted" | "dismissed";
+  status: "pending" | "accepted" | "dismissed";
 };
 
 /** A committed calendar entry (an accepted suggestion or a manual event). */

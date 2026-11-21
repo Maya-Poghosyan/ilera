@@ -2,13 +2,16 @@
 
 from app.core.config import get_settings
 
+APP_URL = "https://ileracare.app"  # verification links open the web app
+FROM_EMAIL = "noreply@ileracare.app"  # a verified ACS sender domain
+
 
 def _send(email: str, subject: str, html: str) -> None:
     from azure.communication.email import EmailClient
 
     settings = get_settings()
     EmailClient.from_connection_string(settings.acs_email_connection_string).begin_send({
-        "senderAddress": settings.from_email,
+        "senderAddress": FROM_EMAIL,
         "recipients": {"to": [{"address": email}]},
         "content": {"subject": subject, "html": html},
     })
@@ -23,7 +26,7 @@ def send_login_code(email: str, code: str) -> None:
 
 
 def send_verification_link(email: str, token: str) -> None:
-    verify_url = f"{get_settings().app_url}/verify-email?token={token}"
+    verify_url = f"{APP_URL}/verify-email?token={token}"
     _send(email, "Verify your Ilera account", (
         "<p>Thanks for creating an Ilera account.</p>"
         "<p>Click the link below to verify your email address. "

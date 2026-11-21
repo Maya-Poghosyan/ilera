@@ -49,11 +49,6 @@ resource "azurerm_container_app_job" "purge_unclaimed" {
         name        = "DATABASE_URL"
         secret_name = "database-url"
       }
-      # Matches the API's default; set here so changing the retention window is one edit.
-      env {
-        name  = "UNCLAIMED_CASE_TTL_DAYS"
-        value = "5"
-      }
     }
   }
 

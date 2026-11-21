@@ -13,5 +13,5 @@ def get_guide_bytes(key: str) -> bytes:
         s = get_settings()
         service = BlobServiceClient(account_url=s.reference_guides_blob_account_url,
                                     credential=managed_identity())
-        _client = service.get_container_client(s.reference_guides_blob_container)
+        _client = service.get_container_client("reference-guides")
     return _client.download_blob(key).readall()
