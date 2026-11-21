@@ -1,19 +1,8 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-// Records against the real API and Postgres; the session is created through the app's own
-// auth routes, with the verification email read from the test API's outbox.
-const API = process.env.E2E_API_URL!;
+import { signedInWithCase } from "./helpers";
 
-async function signedInWithCase(page: Page) {
-  const email = `records-${Date.now()}@example.test`;
-  await page.request.post("/api/auth/signup", { data: { name: "Alex", email, phone: "5105550100", password: "correct horse" } });
-  const mail: { kind: string; token?: string }[] = await (await page.request.get(`${API}/__e2e/mail/${email}`)).json();
-  await page.request.post("/api/auth/verify-email", { data: { token: mail.at(-1)!.token } });
-  const answers = await (await page.request.get(`${API}/__e2e/complete-intake`)).json();
-  const caseId = (await (await page.request.post("/api/intake", { data: { answers } })).json()).id;
-  expect((await page.request.patch("/api/auth/me", { data: { case_id: caseId } })).ok()).toBeTruthy();
-}
-
+// Records against the real API and Postgres.
 test("a caregiver logs hours, tracks a renewal and reviews a possible fall", async ({ page }) => {
   await signedInWithCase(page);
   await page.goto("/dashboard/records");

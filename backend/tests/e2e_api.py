@@ -2,7 +2,8 @@
 
 - the document model client → the local fake (frontend/e2e/fake-azure-openai.mjs)
 - outgoing email (ACS) → captured, readable at GET /__e2e/mail/{address}
-- the Azure Functions eligibility pipeline → not started (cases stay "processing")
+- the Azure Functions eligibility pipeline → not started (cases stay "processing";
+  POST /__e2e/cases/{id}/eligible/{program} records one program's result)
 
 Also serves GET /__e2e/complete-intake: a valid, complete set of intake answers, built by the
 same helper the API tests use, so browser tests don't hand-maintain one.
@@ -58,6 +59,20 @@ account_mail.send_login_code = lambda email, code: outbox[email.lower()].append(
 e2e = APIRouter(prefix="/__e2e")
 e2e.add_api_route("/mail/{address}", lambda address: outbox[address.lower()], methods=["GET"])
 e2e.add_api_route("/complete-intake", lambda: complete_current_intake(), methods=["GET"])
+
+
+def mark_eligible(case_id: str, program: str):
+    """Stand in for the eligibility pipeline's result for one program."""
+    from app.cases import store
+    from app.cases.models import EligibilityResult
+    profile = store.get_profile(case_id)
+    profile.eligibility[program] = EligibilityResult(program=program, confidence=0.8, status="likely",
+                                                     rationale="Marked eligible for the browser test.")
+    store.save_profile(profile)
+    return {"ok": True}
+
+
+e2e.add_api_route("/cases/{case_id}/eligible/{program}", mark_eligible, methods=["POST"])
 app.include_router(e2e)
 
 uvicorn.run(app, host="127.0.0.1", port=api_port)

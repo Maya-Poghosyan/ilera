@@ -1,581 +1,101 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { QuestionField } from "@/features/intake/components/question-field";
-import { completeApplication, listApplications, previewApplication, startApplication, updateAppStatus } from "@/features/applications/api";
-import {
-  type Answers,
-  type AnswerValue,
-  type Question,
-  validateQuestions,
-} from "@/features/intake/schema";
-import type { AppQuestion, AppStatus, ApplicationEntry } from "@/features/applications/types";
-import type { EligibilityStatus } from "@/features/cases/types";
 import { useCaseId } from "@/features/accounts/auth-context";
+import { ApplicationList } from "@/features/applications/components/application-list";
+import { QuestionScreen } from "@/features/applications/components/question-screen";
+import { useApplicationFlow } from "@/features/applications/use-application-flow";
 
-const eligibilityColor: Record<EligibilityStatus, string> = {
-  likely: "border-transparent bg-emerald-500 text-white",
-  possible: "border-transparent bg-amber-500 text-white",
-  unlikely: "border-transparent bg-rose-500 text-white",
-  needs_info: "border-transparent bg-sky-600 text-white",
-};
-
-const APP_STATUS_LABELS: Record<AppStatus, string> = {
-  open: "Open",
-  in_progress: "In progress",
-  needs_info: "Needs info",
-  completed: "Completed",
-};
-
-type FlowStep = "list" | "loading" | "questions" | "completing" | "preview";
-
-/** The inputs the backend put under one `group_id`: one thing a person knows. */
-function groupQuestions(questions: AppQuestion[]): AppQuestion[][] {
-  const groups: AppQuestion[][] = [];
-  for (const question of questions) {
-    const last = groups[groups.length - 1];
-    if (last && question.group_id && last[0].group_id === question.group_id) {
-      last.push(question);
-    } else {
-      groups.push([question]);
-    }
-  }
-  return groups;
-}
-
-const INPUTS_PER_SCREEN = 6;
-
-// Generic input labels that repeat the answer control instead of naming a question:
-// a Yes/No group prints "Yes or No" above its two buttons, a select prints "Select one".
-const GENERIC_INPUT_LABELS = new Set([
-  "yes or no",
-  "yes/no",
-  "yes / no",
-  "select one",
-  "select",
-  "choose one",
-]);
-
-/**
- * Whether a single-input group's input label is redundant with its prompt.
- *
- * These forms carry the real question in the group prompt ("Is the patient a family
- * member?") and give the lone input a filler label ("Yes or No"). Rendered as-is the
- * screen stutters: the question, then a generic label, then the buttons. When a group
- * has exactly one input and that input's label adds nothing — it is generic, empty, or
- * just repeats the prompt — the label is dropped so the prompt stands alone.
- */
-function inputLabelIsRedundant(group: AppQuestion[]): boolean {
-  if (group.length !== 1) return false;
-  const only = group[0];
-  if (!only.group_prompt) return false;
-  const label = (only.text ?? "").trim().toLowerCase();
-  if (!label) return true;
-  if (GENERIC_INPUT_LABELS.has(label)) return true;
-  return label === only.group_prompt.trim().toLowerCase();
-}
-
-/**
- * Groups gathered onto screens, so a yes/no question doesn't get a page to itself.
- *
- * Neighbouring groups come from the same part of the form, so they read as one short
- * page of related questions. The packing is done before any answers are given and
- * never changes, so answering something can't shuffle the screens underneath you.
- */
-function toScreens(groups: AppQuestion[][]): AppQuestion[][][] {
-  const screens: AppQuestion[][][] = [];
-  for (const group of groups) {
-    const last = screens[screens.length - 1];
-    const filled = last?.reduce((n, g) => n + g.length, 0) ?? 0;
-    if (last && filled + group.length <= INPUTS_PER_SCREEN) {
-      last.push(group);
-    } else {
-      screens.push([group]);
-    }
-  }
-  return screens;
-}
-
-/**
- * Whether a follow-up screen is worth showing, given what has been answered.
- *
- * The backend sends the "if yes, ..." parts of a form with an `ask_when` naming the
- * answer they depend on, e.g. `past_ihss.received_ihss_before == "Yes"`. An unmet
- * condition skips the screen. A condition nobody can answer — the question it names
- * isn't asked here — shows it, since an unasked question is a blank box on a
- * government form.
- */
-function shouldAsk(
-  group: AppQuestion[],
-  answers: Answers,
-  asked: Set<string>
-): boolean {
-  const condition = group[0]?.ask_when;
-  if (!condition) return true;
-  const match = /^\s*([\w.]+)\s*(==|!=)\s*(.+?)\s*$/.exec(condition);
-  if (!match) return true;
-  const [, path, op, rawExpected] = match;
-  const answer = answers[path];
-  if (answer === undefined || answer === null || answer === "") {
-    // Still blank. A section the applicant hasn't opted into isn't shown while it is
-    // undecided — an appendix appears when they say it applies, not before.
-    return !asked.has(path);
-  }
-  const expected = rawExpected.replace(/^['"]|['"]$/g, "").toLowerCase();
-  const given = (Array.isArray(answer) ? answer : [answer]).map((v) =>
-    String(v).toLowerCase()
-  );
-  const matches = given.includes(expected);
-  return op === "==" ? matches : !matches;
-}
-
-export default function ApplicationsPage() {
-  const [apps, setApps] = useState<ApplicationEntry[]>([]);
-  const caseId = useCaseId();
-  const [loading, setLoading] = useState(caseId !== null);
-
-  // Flow state
-  const [flowStep, setFlowStep] = useState<FlowStep>("list");
-  const [activeProgram, setActiveProgram] = useState<string | null>(null);
-  const [questions, setQuestions] = useState<AppQuestion[]>([]);
-  const [answers, setAnswers] = useState<Answers>({});
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [autofilled, setAutofilled] = useState(0);
-  const [totalFields, setTotalFields] = useState(0);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [stepIndex, setStepIndex] = useState(0);
-
-  // Screens, not questions: the backend puts the inputs making up one thing a person
-  // knows (an address, an employer) under a shared group_id, and a handful of those
-  // groups share a screen.
-  const asked = new Set(questions.map((q) => q.field_id));
-  const screens = toScreens(groupQuestions(questions))
-    .map((screen) => screen.filter((group) => shouldAsk(group, answers, asked)))
-    .filter((screen) => screen.length > 0);
-  const currentScreen = screens[stepIndex] ?? [];
-  const currentQuestions = currentScreen.flat();
-
-  useEffect(() => {
-    if (!caseId) return;
-    listApplications(caseId)
-      .then((data) => setApps(data.applications))
-      .catch(() => setApps([]))
-      .finally(() => setLoading(false));
-  }, [caseId]);
-
-  function handleStatusChange(program: string, newStatus: AppStatus) {
-    if (!caseId) return;
-    updateAppStatus(caseId, program, newStatus).then(() => {
-      setApps((prev) =>
-        prev.map((a) =>
-          a.program === program ? { ...a, status: newStatus } : a
-        )
-      );
-    });
-  }
-
-  function handleStartApplication(program: string) {
-    if (!caseId) return;
-    setActiveProgram(program);
-    setFlowStep("loading");
-    setAnswers({});
-    setErrors({});
-    setStepIndex(0);
-
-    startApplication(caseId, program).then((result) => {
-      setAutofilled(result.autofilled);
-      setTotalFields(result.total_fields);
-      setQuestions(result.questions);
-      if (result.questions.length === 0) {
-        handleGeneratePreview(program, {});
-      } else {
-        setFlowStep("questions");
-      }
-    });
-  }
-
-  function setAnswer(fieldId: string, value: AnswerValue) {
-    setAnswers((prev) => ({ ...prev, [fieldId]: value }));
-    setErrors((prev) => {
-      if (!prev[fieldId]) return prev;
-      const next = { ...prev };
-      delete next[fieldId];
-      return next;
-    });
-  }
-
-  function goToNextQuestion() {
-    if (currentQuestions.length === 0) return;
-    const errs = validateQuestions(currentQuestions as Question[], answers);
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs);
-      return;
-    }
-    if (stepIndex >= screens.length - 1) {
-      if (activeProgram) handleGeneratePreview(activeProgram, answers);
-      return;
-    }
-    setStepIndex((i) => i + 1);
-  }
-
-  function goToPrevQuestion() {
-    setErrors({});
-    setStepIndex((i) => Math.max(0, i - 1));
-  }
-
-  function handleGeneratePreview(
-    program: string,
-    finalAnswers: Answers
-  ) {
-    if (!caseId) return;
-    setFlowStep("completing");
-    previewApplication(caseId, program, finalAnswers).then((blob) => {
-      const url = URL.createObjectURL(blob);
-      setPdfUrl(url);
-      setFlowStep("preview");
-    });
-  }
-
-  function handleExportAndReturn() {
-    if (!caseId || !activeProgram || !pdfUrl) return;
-
-    const a = document.createElement("a");
-    a.href = pdfUrl;
-    a.download = `${activeProgram.toLowerCase().replace(/\s+/g, "_")}_${caseId}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    completeApplication(caseId, activeProgram).then(() => {
-      setApps((prev) =>
-        prev.map((app) =>
-          app.program === activeProgram
-            ? { ...app, status: "completed" }
-            : app
-        )
-      );
-      setFlowStep("list");
-      setActiveProgram(null);
-      setPdfUrl(null);
-    });
-  }
-
-  function handleBackToList() {
-    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
-    setFlowStep("list");
-    setActiveProgram(null);
-    setPdfUrl(null);
-  }
-
-  // -----------------------------------------------------------------------
-  // LOADING step
-  // -----------------------------------------------------------------------
-  if (flowStep === "loading") {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
-        <h2 className="text-lg">
-          Auto-filling forms for {activeProgram}&hellip;
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Resolving your profile against form templates.
-        </p>
-      </div>
-    );
-  }
-
-  // -----------------------------------------------------------------------
-  // Q&A step
-  // -----------------------------------------------------------------------
-  if (flowStep === "questions" && activeProgram) {
-    const isLastQuestion = stepIndex >= screens.length - 1;
-    const pct = ((stepIndex + 1) / screens.length) * 100;
-    return (
-      <div className="mx-auto w-full max-w-2xl space-y-6">
-        <Button variant="ghost" size="sm" onClick={handleBackToList}>
-          &larr; Back to applications
-        </Button>
-
-        <div className="space-y-1">
-          <h1 className="text-2xl">
-            {activeProgram}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Filled {autofilled} of {totalFields} fields automatically. We need a
-            few more answers to complete your forms.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Progress value={pct} />
-          <p className="text-xs text-muted-foreground">
-            Step {stepIndex + 1} of {screens.length}
-          </p>
-        </div>
-
-        <Card>
-          <CardContent className="divide-y pt-6">
-            {currentScreen.map((group, g) => {
-              // Inputs of a group tend to repeat one explanation ("the Primary Contact
-              // must be 18 or older") under every box. It is said once, above them.
-              const shared = group[0]?.why_this_matters ?? "";
-              // A lone Yes/No or select input labels itself with filler that repeats the
-              // prompt or the buttons; drop it so the prompt is the only question shown.
-              const dropLabel = inputLabelIsRedundant(group);
-              return (
-                <div
-                  key={group[0].group_id || group[0].field_id}
-                  className={`space-y-4 pb-5 ${g === 0 ? "" : "pt-5"}`}
-                >
-                  {group[0].group_prompt && (
-                    <div className="space-y-1">
-                      <p className="text-base font-semibold">
-                        {group[0].group_prompt}
-                      </p>
-                      {shared && (
-                        <p className="text-xs text-muted-foreground">{shared}</p>
-                      )}
-                    </div>
-                  )}
-                  {group.map((question, i) => {
-                    const cleaned =
-                      question.why_this_matters === shared ||
-                      question.why_this_matters === group[i - 1]?.why_this_matters
-                        ? { ...question, why_this_matters: "" }
-                        : { ...question };
-                    if (dropLabel) cleaned.text = "";
-                    return (
-                      <QuestionField
-                        key={question.field_id}
-                        question={cleaned as Question}
-                        value={answers[question.field_id] ?? null}
-                        name=""
-                        error={errors[question.field_id]}
-                        onChange={(v) => setAnswer(question.field_id, v)}
-                      />
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        <div className="flex justify-between">
-          <Button
-            variant="outline"
-            disabled={stepIndex === 0}
-            onClick={goToPrevQuestion}
-          >
-            Back
-          </Button>
-          <Button onClick={goToNextQuestion}>
-            {isLastQuestion ? "Generate preview" : "Next"}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // -----------------------------------------------------------------------
-  // COMPLETING step (generating PDF)
-  // -----------------------------------------------------------------------
-  if (flowStep === "completing") {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
-        <h2 className="text-lg">
-          Generating combined PDF for {activeProgram}&hellip;
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Filling remaining fields and stitching forms together.
-        </p>
-      </div>
-    );
-  }
-
-  // -----------------------------------------------------------------------
-  // PREVIEW step (show stitched PDF)
-  // -----------------------------------------------------------------------
-  if (flowStep === "preview" && pdfUrl && activeProgram) {
-    return (
-      <div className="flex flex-1 flex-col gap-4">
-        <Button variant="ghost" size="sm" onClick={handleBackToList}>
-          &larr; Back to applications
-        </Button>
-
-        <div className="space-y-1">
-          <h1 className="text-2xl">
-            {activeProgram} &mdash; Preview
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Review the completed forms below, then export.
-          </p>
-        </div>
-
-        <div className="flex-1 overflow-hidden rounded-lg border border-border">
-          <iframe
-            src={`${pdfUrl}#navpanes=0`}
-            className="h-[75vh] w-full"
-            title="PDF Preview"
-          />
-        </div>
-
-        <div className="flex justify-end pb-4">
-          <Button onClick={handleExportAndReturn}>
-            Export &amp; return to dashboard
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // -----------------------------------------------------------------------
-  // LIST VIEW — eligibility-style cards
-  // -----------------------------------------------------------------------
+function Working({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl">
-          Your applications
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Programs ranked by eligibility. Click to fill and download the
-          required forms.
-        </p>
-      </div>
-
-      {!caseId && !loading && (
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-sm text-muted-foreground">
-              Complete the intake wizard and eligibility assessment first.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {loading && (
-        <div className="flex items-center gap-3 py-8">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-primary" />
-          <p className="text-sm text-muted-foreground">
-            Loading applications&hellip;
-          </p>
-        </div>
-      )}
-
-      {apps.length === 0 && !loading && caseId && (
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-sm text-muted-foreground">
-              No eligible programs found yet. Complete the eligibility
-              assessment to see available applications.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {apps.map((app) => {
-          return (
-            <Card key={app.program} className="gap-3">
-              <CardHeader className="gap-2">
-                <div className="flex items-center justify-between gap-2">
-                  <CardTitle className="text-base">{app.program}</CardTitle>
-                  {app.eligibility_status && (
-                    <Badge className={eligibilityColor[app.eligibility_status]}>
-                      {app.eligibility_status.replace("_", " ")}
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">{app.rationale}</p>
-              </CardHeader>
-
-              <CardContent className="space-y-2.5 text-xs">
-
-                {app.roadblocks.length > 0 && (
-                  <Detail label="Roadblocks" items={app.roadblocks} />
-                )}
-                {app.required_documents.length > 0 && (
-                  <Detail
-                    label="Required documents"
-                    items={app.required_documents}
-                  />
-                )}
-                {app.next_steps.length > 0 && (
-                  <Detail label="Next steps" items={app.next_steps} />
-                )}
-                {app.sources.length > 0 && (
-                  <p className="text-[11px] text-muted-foreground">
-                    Sources: {app.sources.join(", ")}
-                  </p>
-                )}
-
-                {/* Application controls */}
-                <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
-                  <div className="flex items-center gap-2">
-                    <select
-                      className="h-7 rounded-md border bg-transparent px-2 text-xs"
-                      value={app.status}
-                      onChange={(e) =>
-                        handleStatusChange(
-                          app.program,
-                          e.target.value as AppStatus
-                        )
-                      }
-                    >
-                      {Object.entries(APP_STATUS_LABELS).map(([val, label]) => (
-                        <option key={val} value={val}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                    {app.has_forms && (
-                      <span className="text-[11px] text-muted-foreground">
-                        {app.form_ids.length} form
-                        {app.form_ids.length !== 1 ? "s" : ""}
-                      </span>
-                    )}
-                  </div>
-                  {app.has_forms ? (
-                    <Button
-                      size="sm"
-                      onClick={() => handleStartApplication(app.program)}
-                    >
-                      {app.status === "completed"
-                        ? "Re-fill"
-                        : app.status === "in_progress"
-                          ? "Continue"
-                          : "Fill forms"}
-                    </Button>
-                  ) : (
-                    <span className="text-[11px] text-muted-foreground italic">
-                      No forms mapped yet
-                    </span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
+      <h2 className="text-lg">{title}</h2>
+      <p className="text-sm text-muted-foreground">{detail}</p>
     </div>
   );
 }
 
-function Detail({ label, items }: { label: string; items: string[] }) {
+export default function ApplicationsPage() {
+  const caseId = useCaseId();
+  const f = useApplicationFlow(caseId);
+  const { flow } = f;
+
+  if (flow.step === "loading") {
+    return <Working title={`Auto-filling forms for ${flow.program}…`} detail="Resolving your profile against form templates." />;
+  }
+  if (flow.step === "completing") {
+    return <Working title={`Generating combined PDF for ${flow.program}…`} detail="Filling remaining fields and stitching forms together." />;
+  }
+
+  if (flow.step === "questions") {
+    const last = f.stepIndex >= f.screens.length - 1;
+    return (
+      <div className="mx-auto w-full max-w-2xl space-y-6">
+        <Button variant="ghost" size="sm" onClick={f.close}>&larr; Back to applications</Button>
+        <div className="space-y-1">
+          <h1 className="text-2xl">{flow.program}</h1>
+          <p className="text-sm text-muted-foreground">
+            Filled {flow.autofilled} of {flow.totalFields} fields automatically. We need a few more answers to complete your forms.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Progress value={((f.stepIndex + 1) / f.screens.length) * 100} />
+          <p className="text-xs text-muted-foreground">Step {f.stepIndex + 1} of {f.screens.length}</p>
+        </div>
+        <Card>
+          <CardContent className="divide-y pt-6">
+            <QuestionScreen screen={f.currentScreen} answers={f.answers} errors={f.errors} onAnswer={f.answer} />
+          </CardContent>
+        </Card>
+        <div className="flex justify-between">
+          <Button variant="outline" disabled={f.stepIndex === 0} onClick={f.back}>Back</Button>
+          <Button onClick={f.next}>{last ? "Generate preview" : "Next"}</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (flow.step === "preview") {
+    return (
+      <div className="flex flex-1 flex-col gap-4">
+        <Button variant="ghost" size="sm" onClick={f.close}>&larr; Back to applications</Button>
+        <div className="space-y-1">
+          <h1 className="text-2xl">{flow.program} &mdash; Preview</h1>
+          <p className="text-sm text-muted-foreground">Review the completed forms below, then export.</p>
+        </div>
+        <div className="flex-1 overflow-hidden rounded-lg border border-border">
+          <iframe src={`${flow.pdfUrl}#navpanes=0`} className="h-[75vh] w-full" title="PDF Preview" />
+        </div>
+        <div className="flex justify-end pb-4">
+          <Button onClick={f.exportAndClose}>Export &amp; return to dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <p className="font-medium">{label}</p>
-      <ul className="list-disc pl-5 text-muted-foreground">
-        {items.map((i) => (
-          <li key={i}>{i}</li>
-        ))}
-      </ul>
+    <div className="space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl">Your applications</h1>
+        <p className="text-sm text-muted-foreground">Programs ranked by eligibility. Click to fill and download the required forms.</p>
+      </div>
+      {f.failure && <p role="alert" className="text-sm text-destructive">{f.failure}</p>}
+      {!caseId && !f.loading && (
+        <Card><CardContent className="py-6"><p className="text-sm text-muted-foreground">Complete the intake wizard and eligibility assessment first.</p></CardContent></Card>
+      )}
+      {f.loading && (
+        <div className="flex items-center gap-3 py-8">
+          <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-primary" />
+          <p className="text-sm text-muted-foreground">Loading applications&hellip;</p>
+        </div>
+      )}
+      {f.apps.length === 0 && !f.loading && caseId && (
+        <Card><CardContent className="py-6"><p className="text-sm text-muted-foreground">No eligible programs found yet. Complete the eligibility assessment to see available applications.</p></CardContent></Card>
+      )}
+      <ApplicationList apps={f.apps} onStatus={f.setStatus} onStart={f.start} />
     </div>
   );
 }
