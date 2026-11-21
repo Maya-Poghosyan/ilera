@@ -28,6 +28,7 @@ ileracare.app ─▶ ilera-web-prod-eastus2 ─▶ api.ileracare.app ─▶ iler
 | `ilera-api-prod-eastus2` | API (FastAPI) at **api.ileracare.app**: intake, accounts, records, forms, eligibility status, email webhooks, document reading |
 | `ilera-email-worker-prod` | Reads queued Outlook messages and turns appointments into calendar suggestions |
 | `ilera-email-maint-prod` (job, hourly) | Renews Microsoft Graph subscriptions, recovers missed mail, prunes orphans |
+| `ilera-purge-unclaimed` (job, daily 10:00 UTC) | Deletes anonymous intakes no account claimed within 5 days (household data with no owner) |
 | `ilera-rag-ingest` (job, on demand) | Embeds `backend/data/knowledge` into the search index; started by the RAG ingest workflow on merges |
 | `ilera-agent-orchestration` + `ASP-Ilera-3782` | Azure Functions (Flex Consumption, subnet `ilera-functions`): the Durable eligibility pipeline — gates, per-program specialist agents, synthesis |
 | `caff3fa0d6e7acr` | Container registry (Basic) for the API, web, worker and ingest images |
@@ -77,9 +78,11 @@ ileracare.app ─▶ ilera-web-prod-eastus2 ─▶ api.ileracare.app ─▶ iler
   `main` that touch `infra/azure/**` plan and then wait for approval on the `infra-production`
   environment before applying `oauth/`; `scanning/` is applied by running the Terraform
   workflow manually. The Entra app registration is managed outside Terraform.
-- **App deploys** (`.github/workflows/deploy.yml`): every push to `main` builds in the registry
-  and rolls the API, web app and Functions forward. The worker image is updated through
-  `scanning/`. App settings on the API are set on the container app, not in Terraform.
+- **App deploys** (`.github/workflows/deploy.yml`): every backend or frontend push to `main`
+  builds in the registry and rolls the API, web app, Functions and email worker forward, then
+  moves every job that runs the API image (maintenance, purge, RAG ingest, and any added
+  later) to the same build. Terraform ignores those images so it never reverts them. App
+  settings on the API are set on the container app, not in Terraform.
 - **Key Vault safety**: purge protection is on and Terraform never re-keys the encryption key;
   rotating it means re-encrypting stored tokens first.
 - **HIPAA**: the Microsoft BAA covers these services. The email docs record an approved

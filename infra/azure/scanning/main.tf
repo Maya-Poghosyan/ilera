@@ -79,6 +79,7 @@ resource "azurerm_container_app" "scan_worker" {
   name                         = "ilera-email-worker-prod"
   resource_group_name          = var.resource_group
   container_app_environment_id = data.azurerm_container_app_environment.shared.id
+  workload_profile_name        = "Consumption"
   revision_mode                = "Single"
 
   identity {
@@ -215,6 +216,7 @@ resource "azurerm_container_app_job" "maintenance" {
   resource_group_name          = var.resource_group
   location                     = var.location
   container_app_environment_id = data.azurerm_container_app_environment.shared.id
+  workload_profile_name        = "Consumption"
 
   replica_timeout_in_seconds = 600
   replica_retry_limit        = 1

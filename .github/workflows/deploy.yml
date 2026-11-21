@@ -7,7 +7,7 @@ name: Deploy
 #
 # One-time setup (see README):
 #   variables: AZURE_RESOURCE_GROUP, AZURE_REGISTRY, API_APP, WEB_APP, API_HOST, WEB_HOST,
-#              WORKER_APP, MAINT_JOB
+#              WORKER_APP
 #   secrets:   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID  (OIDC, no password)
 on:
   push:
@@ -114,10 +114,15 @@ jobs:
           # every roll-forward is what makes the setting survive a rebuild.
           az containerapp update -n "$APP" -g "$RG" \
             --image "$REGISTRY.azurecr.io/$tag" --min-replicas 1
-          # The hourly email maintenance job runs the API image; keep it on the same build.
+          # Every Container Apps job that runs the API image (email maintenance, unclaimed-case
+          # purge, RAG ingest, and any added later) moves to this build, so a scheduled or manual
+          # run never executes older code than the API serves.
           if [ "${{ matrix.app }}" = api ]; then
-            az containerapp job update -n "${{ vars.MAINT_JOB }}" -g "$RG" \
-              --image "$REGISTRY.azurecr.io/$tag"
+            for job in $(az containerapp job list -g "$RG" \
+                --query "[?contains(properties.template.containers[0].image, '/ilera-api:')].name" -o tsv); do
+              echo "job $job -> $tag"
+              az containerapp job update -n "$job" -g "$RG" --image "$REGISTRY.azurecr.io/$tag" -o none
+            done
           fi
 
       - if: steps.gate.outputs.run == 'true'

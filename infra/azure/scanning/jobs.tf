@@ -9,6 +9,7 @@ resource "azurerm_container_app_job" "purge_unclaimed" {
   resource_group_name          = var.resource_group
   location                     = var.location
   container_app_environment_id = data.azurerm_container_app_environment.shared.id
+  workload_profile_name        = "Consumption"
 
   replica_timeout_in_seconds = 300
   replica_retry_limit        = 1
@@ -59,4 +60,10 @@ resource "azurerm_container_app_job" "purge_unclaimed" {
   tags = var.tags
 
   depends_on = [azurerm_role_assignment.worker_acr_pull]
+
+  # The deploy workflow moves every API-image job to each new build; keep image drift out of
+  # this plan so the two don't revert each other.
+  lifecycle {
+    ignore_changes = [template[0].container[0].image]
+  }
 }
