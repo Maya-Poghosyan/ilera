@@ -17,6 +17,7 @@ from app.calendar.events import (
     get_calendar_event,
     list_calendar_events,
 )
+from app.calendar.timezones import calendar_timezone
 from app.calendar.suggestions import (
     SuggestedEvent,
     delete_suggested_event,
@@ -69,6 +70,9 @@ def api_review_suggested_event(
         event.date, event.date_status = body.date, "known"
     if "time" in edits:
         event.time = body.time
+        # A time typed without a zone is in the caregiver's calendar zone.
+        if event.time and not event.timezone and event.case_id:
+            event.timezone = calendar_timezone(event.case_id)[0]
     if body.status is None and not edits:
         raise HTTPException(status_code=422, detail="nothing to change")
     if body.status is not None:

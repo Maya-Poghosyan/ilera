@@ -34,6 +34,10 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   await googleSignsIn(page, baseURL!, address);
 
   await page.goto("/dashboard");
+  // The calendar's time zone starts from the intake address (California).
+  const zone = page.getByLabel("Calendar time zone");
+  await expect(zone).toHaveValue("America/Los_Angeles");
+  await expect(page.getByText("from your intake")).toBeVisible();
   await page.getByRole("button", { name: "Connect Gmail" }).click();
   await expect(page.getByText("Gmail connected.")).toBeVisible();
   await expect(page.getByText(`${address} · Connected`)).toBeVisible();
@@ -79,6 +83,23 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   await expect(suggestions.locator('[data-leaving="accepted"]')).toHaveCount(1);
   await expect(page.getByText("Added to your calendar")).toBeVisible();
   await expect(suggestions.getByText("No suggestions to review.", { exact: false })).toBeVisible();
+
+  // The email gave no zone, so it took the calendar's (Pacific). Switching the calendar to Eastern
+  // labels it with its own zone; the choice is kept.
+  // Show December 2026, whatever month the test runs in.
+  const target = new Date(2026, 11, 1), today = new Date();
+  const months = (target.getFullYear() - today.getFullYear()) * 12 + target.getMonth() - today.getMonth();
+  for (let i = 0; i < Math.abs(months); i++) await page.getByRole("button", { name: months > 0 ? "Next month" : "Previous month" }).click();
+  await expect(page.getByRole("heading", { name: "December 2026" })).toBeVisible();
+  const grid = page.getByText("IHSS reassessment visit", { exact: false }).last();
+  await expect(grid).toContainText("11:30");
+  await expect(grid).not.toContainText("PST");
+  await zone.selectOption("America/New_York");
+  await expect(page.getByText("Time zone saved.", { exact: false })).toBeVisible();
+  await expect(grid).toContainText("11:30 PST");
+  await page.reload();
+  await expect(zone).toHaveValue("America/New_York");
+  await expect(page.getByText("from your intake")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Disconnect" }).click();
   await expect(page.getByText("Gmail disconnected and saved credentials deleted.")).toBeVisible();

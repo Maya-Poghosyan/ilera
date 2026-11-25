@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { SuggestedEventAPI, SuggestionEdits } from "@/features/calendar/api";
+import { zoneSuffix } from "@/features/calendar/timezone";
 
 function formatISODate(iso: string): string {
   const [year, month, day] = iso.split("-").map(Number);
@@ -61,8 +62,10 @@ function SuggestionEditor({ suggestion, onSave, onCancel }: {
   );
 }
 
-export function SuggestionsPanel({ pending, arrived, loading, failed, onRetry, onReview, onEdit }: {
+export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, onRetry, onReview, onEdit }: {
   pending: SuggestedEventAPI[];
+  /** The calendar's zone; a suggestion in another zone shows its zone's name. */
+  timezone: string | null;
   /** Suggestions that just arrived; they animate in once. */
   arrived: ReadonlySet<string>;
   loading: boolean;
@@ -137,7 +140,7 @@ export function SuggestionsPanel({ pending, arrived, loading, failed, onRetry, o
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {e.date ? formatISODate(e.date) : "Date needs review"}
-                    {e.time ? ` · ${e.time}` : ""}{" · "}
+                    {e.time ? ` · ${e.time}${zoneSuffix(e.timezone, e.date, timezone)}` : ""}{" · "}
                     {e.kind}
                   </p>
                   {e.action_required && (

@@ -65,3 +65,17 @@ export function listCalendarEvents(): Promise<CalendarEventAPI[]> {
 export function deleteCalendarEvent(id: string): Promise<{ deleted: boolean }> {
   return request<{ deleted: boolean }>(`/api/calendar-events/${id}`, { method: "DELETE" });
 }
+
+/** The calendar's time zone: the caregiver's setting, else their intake state's zone. */
+export type CalendarTimezone = { timezone: string | null; source: "setting" | "intake" | null };
+
+export function getCalendarTimezone(caseId: string): Promise<CalendarTimezone> {
+  return request<CalendarTimezone>(`/api/preferences/${encodeURIComponent(caseId)}/timezone`);
+}
+
+export function setCalendarTimezone(caseId: string, timezone: string): Promise<CalendarTimezone> {
+  return request<CalendarTimezone>(`/api/preferences/${encodeURIComponent(caseId)}/timezone`, {
+    method: "PUT",
+    body: JSON.stringify({ timezone }),
+  });
+}

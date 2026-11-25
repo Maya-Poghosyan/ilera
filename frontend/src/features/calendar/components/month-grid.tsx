@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { zoneSuffix } from "@/features/calendar/timezone";
 import type { CalEvent, Cell } from "@/features/calendar/use-calendar";
 import { cn } from "@/lib/utils";
 
@@ -13,11 +14,13 @@ function inMonth(e: CalEvent, year: number, month: number): boolean {
   return y === year && m === month + 1;
 }
 
-export function MonthGrid({ year, month, cells, events, onMonth, onToday }: {
+export function MonthGrid({ year, month, cells, events, timezone, onMonth, onToday }: {
   year: number;
   month: number; // 0-indexed
   cells: Cell[];
   events: CalEvent[];
+  /** The calendar's zone; an event in another zone shows its zone's name. */
+  timezone: string | null;
   onMonth: (delta: number) => void;
   onToday: () => void;
 }) {
@@ -82,10 +85,10 @@ export function MonthGrid({ year, month, cells, events, onMonth, onToday }: {
                         ? "border border-dashed border-primary/40 bg-brand-subtle/50 text-primary/70"
                         : "bg-brand-subtle text-primary",
                     )}
-                    title={e.time ? `${e.title} · ${e.time}` : e.title}
+                    title={e.time ? `${e.title} · ${e.time}${zoneSuffix(e.timezone, e.date, timezone)}` : e.title}
                   >
                     {e.suggested && <Sparkles className="mb-0.5 inline size-2.5" />}{" "}
-                    {e.time && <span className="tabular-nums">{e.time} </span>}
+                    {e.time && <span className="tabular-nums">{e.time}{zoneSuffix(e.timezone, e.date, timezone)} </span>}
                     {e.title}
                   </div>
                 ))}

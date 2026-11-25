@@ -15,6 +15,8 @@ class Preferences(BaseModel):
     case_id: str
     monitor_inboxes: bool = False
     monitor_inboxes_updated_at: str = ""
+    # The caregiver's chosen calendar time zone (IANA). Unset = the intake state's zone.
+    timezone: str | None = None
 
 
 def get_preferences(case_id: str) -> Preferences:

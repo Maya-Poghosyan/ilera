@@ -15,6 +15,7 @@ from app.core import db
 from app.core.azure_identity import managed_identity
 from app.core.config import get_settings, require_for
 from app.calendar.suggestions import SuggestedEvent
+from app.calendar.timezones import calendar_timezone
 from app.email_ingestion.providers.base import ReauthorizationRequired
 from app.email_ingestion import connections
 from app.email_ingestion.store import write_connection
@@ -48,6 +49,8 @@ def _commit_result(conn, job: EmailScanJob, original: MailboxConnection, extract
             or current.consented_at != original.consented_at):
         return "inactive"
     event_ids = []
+    # A stated time with no zone is in the caregiver's calendar zone (setting, else intake state).
+    zone, _source = calendar_timezone(current.case_id)
     # Preserve first-seen order, but remove repeated identical events within this email.
     seen = set()
     for item in extraction.events:
@@ -57,7 +60,8 @@ def _commit_result(conn, job: EmailScanJob, original: MailboxConnection, extract
         seen.add(fingerprint)
         event_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"ilera:email:{job.deduplication_id}:{len(event_ids)}"))
         event = SuggestedEvent(
-            id=event_id, date=item.date, date_status=item.date_status, timezone=item.timezone,
+            id=event_id, date=item.date, date_status=item.date_status,
+            timezone=item.timezone or (zone if item.time else None),
             title=item.title, time=item.time, kind=item.kind, description=item.explanation,
             source="email", user_id=current.user_id, case_id=current.case_id,
             connection_id=current.id, provider_message_id=job.message_id,

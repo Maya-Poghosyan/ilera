@@ -21,6 +21,7 @@ export type CalEvent = {
   kind: EventKind;
   suggested?: boolean;
   description?: string;
+  timezone?: string | null;
 };
 
 export type Cell = { day: number; inMonth: boolean };
@@ -28,7 +29,7 @@ export type Cell = { day: number; inMonth: boolean };
 function toCalEvent(e: CalendarEventAPI | SuggestedEventAPI, suggested: boolean): CalEvent {
   return {
     id: e.id, day: e.day, date: e.date ?? undefined, title: e.title, time: e.time,
-    kind: e.kind as EventKind, suggested, description: e.description,
+    kind: e.kind as EventKind, suggested, description: e.description, timezone: e.timezone,
   };
 }
 

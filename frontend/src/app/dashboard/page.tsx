@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useCaseId } from "@/features/accounts/auth-context";
 import { MonthGrid } from "@/features/calendar/components/month-grid";
 import { SuggestionsPanel } from "@/features/calendar/components/suggestions-panel";
+import { TimezoneSetting } from "@/features/calendar/components/timezone-setting";
 import { useCalendar } from "@/features/calendar/use-calendar";
+import { useCalendarTimezone } from "@/features/calendar/use-calendar-timezone";
 import { MailboxConnections } from "@/features/mailbox/mailbox-connections";
 import { ReminderForm } from "@/features/reminders/components/reminder-form";
 import { ReminderList } from "@/features/reminders/components/reminder-list";
@@ -18,8 +20,10 @@ export default function CalendarPage() {
     setToast(message);
     setTimeout(() => setToast(null), 3000);
   }, []);
+  const caseId = useCaseId();
   const calendar = useCalendar(notify);
-  const reminders = useReminders(useCaseId(), notify);
+  const zone = useCalendarTimezone(caseId, notify);
+  const reminders = useReminders(caseId, notify);
 
   return (
     <div className="space-y-8">
@@ -29,7 +33,10 @@ export default function CalendarPage() {
 
       <div className="space-y-6">
         <div className="space-y-3">
-          <h1 className="text-4xl">Care Calendar</h1>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h1 className="text-4xl">Care Calendar</h1>
+            <TimezoneSetting timezone={zone.timezone} source={zone.source} onChange={zone.change} />
+          </div>
           <p className="max-w-xl text-sm text-muted-foreground">
             Email scanning will surface care appointments and deadlines here.
           </p>
@@ -51,6 +58,7 @@ export default function CalendarPage() {
       <SuggestionsPanel
         pending={calendar.pending}
         arrived={calendar.arrived}
+        timezone={zone.timezone}
         loading={calendar.loading}
         failed={calendar.failed}
         onRetry={calendar.retry}
@@ -63,6 +71,7 @@ export default function CalendarPage() {
         month={calendar.viewMonth}
         cells={calendar.cells}
         events={calendar.events}
+        timezone={zone.timezone}
         onMonth={calendar.goToMonth}
         onToday={calendar.goToday}
       />
