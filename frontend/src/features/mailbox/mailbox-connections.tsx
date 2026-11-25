@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Mail } from "lucide-react";
 
@@ -99,7 +100,8 @@ export function MailboxConnections() {
       </div>
       <p className="text-sm text-muted-foreground">
         Connect a mailbox with read-only access. New emails about appointments, deadlines and renewals
-        become suggestions you review below. Gmail is checked about once an hour.
+        become suggestions you review below. Gmail is checked about once an hour.{" "}
+        <Link href="/privacy#email" className="underline">How Ilera uses your email</Link>
       </p>
       {current?.connections.filter((connection) => connection.status !== "disconnected").map((connection) => (
         <div key={connection.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3">
