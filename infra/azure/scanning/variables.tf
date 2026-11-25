@@ -95,7 +95,7 @@ variable "tags" {
 variable "google_client_id" {
   description = "Gmail OAuth web client id (<number>-<id>.apps.googleusercontent.com). Empty = Gmail is off for the worker and maintenance job."
   type        = string
-  default     = ""
+  default     = "816584170783-m4j85gmre1m2umtu8hcuu46gbekoinsr.apps.googleusercontent.com"
 }
 
 variable "google_redirect_uri" {
