@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { zoneSuffix } from "@/features/calendar/timezone";
@@ -14,13 +15,15 @@ function inMonth(e: CalEvent, year: number, month: number): boolean {
   return y === year && m === month + 1;
 }
 
-export function MonthGrid({ year, month, cells, events, timezone, onMonth, onToday }: {
+export function MonthGrid({ year, month, cells, events, timezone, actions, onMonth, onToday }: {
   year: number;
   month: number; // 0-indexed
   cells: Cell[];
   events: CalEvent[];
   /** The calendar's zone; an event in another zone shows its zone's name. */
   timezone: string | null;
+  /** Controls shown in the top bar, before the month navigation. */
+  actions?: ReactNode;
   onMonth: (delta: number) => void;
   onToday: () => void;
 }) {
@@ -30,9 +33,11 @@ export function MonthGrid({ year, month, cells, events, timezone, onMonth, onTod
   const monthName = new Date(year, month, 1).toLocaleString("en-US", { month: "long" });
   return (
     <div className="overflow-hidden rounded-xl border border-brand-subtle bg-card shadow-xs">
-      <div className="flex items-center justify-between border-b border-brand-subtle bg-brand-subtle/40 px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-brand-subtle bg-brand-subtle/40 px-4 py-3">
         <h2 className="text-lg">{monthName} {year}</h2>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-3">
+          {actions}
+          <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon-sm" aria-label="Previous month" onClick={() => onMonth(-1)}>
             <ChevronLeft />
           </Button>
@@ -40,6 +45,7 @@ export function MonthGrid({ year, month, cells, events, timezone, onMonth, onTod
           <Button variant="ghost" size="icon-sm" aria-label="Next month" onClick={() => onMonth(1)}>
             <ChevronRight />
           </Button>
+          </div>
         </div>
       </div>
 

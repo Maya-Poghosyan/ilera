@@ -4,7 +4,7 @@ import { Globe } from "lucide-react";
 
 import { US_TIMEZONES, timezoneLabel } from "@/features/calendar/timezone";
 
-/** The calendar's time zone, next to its title. Emails that give a time without a zone use it. */
+/** The calendar's time zone, in its top bar. Emails that give a time without a zone use it. */
 export function TimezoneSetting({ timezone, source, onChange }: {
   timezone: string | null;
   source: "setting" | "intake" | null;
@@ -13,19 +13,22 @@ export function TimezoneSetting({ timezone, source, onChange }: {
   const options = timezone && !US_TIMEZONES.some((z) => z.zone === timezone)
     ? [...US_TIMEZONES, { zone: timezone, label: timezoneLabel(timezone) }] : US_TIMEZONES;
   return (
-    <label className="flex items-center gap-2 text-sm text-muted-foreground">
-      <Globe className="size-4" aria-hidden="true" />
-      <span className="sr-only">Calendar time zone</span>
+    <div className="relative">
+      <Globe className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
       <select
         aria-label="Calendar time zone"
-        className="rounded-md border border-input bg-card px-2 py-1 text-sm text-foreground"
+        title="Emails that give a time without a time zone use this one"
+        className="h-7 rounded-md border border-input bg-card pr-2 pl-7 text-[0.8rem] text-foreground shadow-xs focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
         value={timezone ?? ""}
         onChange={(e) => onChange(e.target.value)}
       >
-        {!timezone && <option value="" disabled>Choose time zone</option>}
-        {options.map((z) => <option key={z.zone} value={z.zone}>{z.label} time</option>)}
+        {!timezone && <option value="" disabled>Time zone</option>}
+        {options.map((z) => (
+          <option key={z.zone} value={z.zone}>
+            {z.label} time{z.zone === timezone && source === "intake" ? " (from your intake)" : ""}
+          </option>
+        ))}
       </select>
-      {source === "intake" && <span className="text-xs">from your intake</span>}
-    </label>
+    </div>
   );
 }

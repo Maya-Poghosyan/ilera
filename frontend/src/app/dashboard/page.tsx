@@ -33,10 +33,7 @@ export default function CalendarPage() {
 
       <div className="space-y-6">
         <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h1 className="text-4xl">Care Calendar</h1>
-            <TimezoneSetting timezone={zone.timezone} source={zone.source} onChange={zone.change} />
-          </div>
+          <h1 className="text-4xl">Care Calendar</h1>
           <p className="max-w-xl text-sm text-muted-foreground">
             Email scanning will surface care appointments and deadlines here.
           </p>
@@ -72,6 +69,7 @@ export default function CalendarPage() {
         cells={calendar.cells}
         events={calendar.events}
         timezone={zone.timezone}
+        actions={<TimezoneSetting timezone={zone.timezone} source={zone.source} onChange={zone.change} />}
         onMonth={calendar.goToMonth}
         onToday={calendar.goToday}
       />
