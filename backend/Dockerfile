@@ -10,6 +10,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# The commit this image was built from, reported by /healthz so a deploy can see its own build serving.
+# Declared after the dependency layer so a new commit doesn't invalidate it.
+ARG BUILD_SHA=dev
+ENV BUILD_SHA=$BUILD_SHA
+
 RUN addgroup --system app && adduser --system --ingroup app --no-create-home app \
     && chown -R app:app /app
 USER app

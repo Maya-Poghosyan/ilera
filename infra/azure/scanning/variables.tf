@@ -1,5 +1,5 @@
-# Inputs for the scanning pipeline. Required inputs (worker image, OpenAI account) have
-# no default: leaving them unset fails at plan time rather than silently doing nothing.
+# Inputs for the scanning pipeline. The images and database URL have no default: CI reads them
+# from Azure (terraform.yml), and leaving one unset fails at plan time.
 
 variable "subscription_id" {
   type    = string
@@ -28,22 +28,24 @@ variable "container_apps_environment_name" {
 }
 
 variable "scan_worker_image" {
-  description = "Container image for the scan worker. Required — no default."
+  description = "Container image for the scan worker, used only when the app is created (CI rolls it after). CI passes the live image."
   type        = string
 }
 
 variable "existing_openai_account_name" {
-  description = "Name of the existing Azure OpenAI (Cognitive Services) account the worker calls. Required — no default."
+  description = "Name of the existing Azure OpenAI (Cognitive Services) account the worker calls."
   type        = string
+  default     = "ilera-resource"
 }
 
 variable "container_registry_name" {
-  description = "Name of the existing Azure Container Registry holding the worker image (no .azurecr.io). Required — no default."
+  description = "Name of the existing Azure Container Registry holding the worker image (no .azurecr.io)."
   type        = string
+  default     = "caff3fa0d6e7acr"
 }
 
 variable "api_image" {
-  description = "Full API image reference (has the whole app) used by the maintenance job. Required — no default."
+  description = "Full API image reference used when the maintenance and purge jobs are created (CI rolls it after). CI passes the live image."
   type        = string
 }
 
@@ -77,6 +79,7 @@ variable "mailbox_redirect_uri" {
 variable "email_openai_deployment_name" {
   description = "Name of the deployment on the existing Azure OpenAI account for extraction."
   type        = string
+  default     = "gpt-5-mini"
 }
 
 variable "tags" {

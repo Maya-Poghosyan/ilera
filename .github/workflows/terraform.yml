@@ -2,12 +2,12 @@ name: Terraform (email infra)
 
 # Terraform for the email infrastructure under infra/azure/. Two modules:
 #   oauth/     — mailbox OAuth slice (vault, Entra app, API identity, audit logs)
-#   scanning/  — Service Bus + scan worker + OpenAI wiring (opt-in; needs a worker image)
+#   scanning/  — Service Bus + scan worker + OpenAI wiring + scheduled jobs (reads oauth's state)
 #
 # Flow:
 #   - Pull request touching infra/azure/**  -> fmt check + validate + plan (read-only)
-#   - Push to main                          -> apply, gated behind the `infra-production`
-#                                              GitHub Environment (required reviewers)
+#   - Push to main                          -> apply both modules, oauth first, gated behind
+#                                              the `infra-production` Environment (required reviewers)
 #
 # State lives in the ileratfstate storage account (see infra/azure/README.md). The CI
 # identity below needs, on top of resource/Entra permissions:
@@ -60,14 +60,12 @@ jobs:
   # PLAN — runs on PRs and on main before apply. Read-only.
   # ---------------------------------------------------------------------------
   plan:
-    # Scanning is opt-in: on automatic triggers only plan oauth. Use workflow_dispatch to
-    # target scanning explicitly once its worker image exists.
     if: github.event_name != 'workflow_dispatch' || inputs.action == 'plan'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        module: [oauth]
+        module: ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', inputs.module) || '["oauth", "scanning"]') }}
     defaults:
       run:
         working-directory: infra/azure/${{ matrix.module }}
@@ -83,6 +81,25 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # scanning's images (used only at creation; CI rolls them after) and database URL come from
+      # what is live, so the plan shows no drift and no credential is copied into GitHub.
+      - name: Inputs read from Azure
+        if: matrix.module == 'scanning'
+        env:
+          RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+          API_APP: ${{ vars.API_APP }}
+          WORKER_APP: ${{ vars.WORKER_APP }}
+        run: |
+          set -euo pipefail
+          image() { az containerapp show -n "$1" -g "$RG" --query "properties.template.containers[0].image" -o tsv; }
+          db=$(az containerapp secret show -n "$API_APP" -g "$RG" --secret-name database-url --query value -o tsv)
+          echo "::add-mask::$db"
+          {
+            echo "TF_VAR_database_url=$db"
+            echo "TF_VAR_api_image=$(image "$API_APP")"
+            echo "TF_VAR_scan_worker_image=$(image "$WORKER_APP")"
+          } >> "$GITHUB_ENV"
 
       - name: Format check
         run: terraform fmt -check -recursive
@@ -128,9 +145,14 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.action == 'apply')
     runs-on: ubuntu-latest
     environment: infra-production # required reviewers configured here = manual approval gate
+    strategy:
+      # scanning reads oauth's state, so oauth applies first and a failure stops the rest.
+      max-parallel: 1
+      matrix:
+        module: ${{ fromJSON(github.event_name == 'workflow_dispatch' && format('["{0}"]', inputs.module) || '["oauth", "scanning"]') }}
     defaults:
       run:
-        working-directory: infra/azure/${{ github.event_name == 'workflow_dispatch' && inputs.module || 'oauth' }}
+        working-directory: infra/azure/${{ matrix.module }}
     steps:
       - uses: actions/checkout@v5
 
@@ -143,6 +165,25 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # scanning's images (used only at creation; CI rolls them after) and database URL come from
+      # what is live, so the plan shows no drift and no credential is copied into GitHub.
+      - name: Inputs read from Azure
+        if: matrix.module == 'scanning'
+        env:
+          RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+          API_APP: ${{ vars.API_APP }}
+          WORKER_APP: ${{ vars.WORKER_APP }}
+        run: |
+          set -euo pipefail
+          image() { az containerapp show -n "$1" -g "$RG" --query "properties.template.containers[0].image" -o tsv; }
+          db=$(az containerapp secret show -n "$API_APP" -g "$RG" --secret-name database-url --query value -o tsv)
+          echo "::add-mask::$db"
+          {
+            echo "TF_VAR_database_url=$db"
+            echo "TF_VAR_api_image=$(image "$API_APP")"
+            echo "TF_VAR_scan_worker_image=$(image "$WORKER_APP")"
+          } >> "$GITHUB_ENV"
 
       - name: Init
         run: terraform init -input=false

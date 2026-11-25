@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter
 from fastapi.responses import Response
 
@@ -10,8 +12,8 @@ router = APIRouter()
 
 @router.get("/healthz")
 def healthz() -> dict:
-    """Liveness only — cheap enough for a platform health check."""
-    return {"status": "ok"}
+    """Liveness, plus the commit this image was built from (the deploy waits for its own build)."""
+    return {"status": "ok", "build": os.environ.get("BUILD_SHA", "dev")}
 
 
 @router.get("/readyz")

@@ -2,12 +2,18 @@ name: Deploy
 
 # Deploying from a laptop is how the frontend image ended up in the API's container app: the
 # command takes whichever directory you happen to be in. Here the app names, contexts and tags
-# are fixed, only main can trigger it, and a revision that doesn't answer its health endpoint is
-# rolled back instead of left serving errors.
+# are fixed and only main can trigger it.
+#
+# How a commit reaches production:
+# - Each app's live image tag is the commit it was built from. `plan` compares that commit with
+#   this one and deploys every app whose files changed since, so a skipped, cancelled or failed
+#   run is caught up by the next one.
+# - deploy/<app>.env is the app's full list of environment variables, applied on every deploy.
+# - A deploy passes only once the public /healthz reports this commit's build.
 #
 # One-time setup (see README):
 #   variables: AZURE_RESOURCE_GROUP, AZURE_REGISTRY, API_APP, WEB_APP, API_HOST, WEB_HOST,
-#              WORKER_APP
+#              WORKER_APP, FUNCTIONS_APP
 #   secrets:   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID  (OIDC, no password)
 on:
   push:
@@ -15,13 +21,15 @@ on:
     paths:
       - "backend/**"
       - "frontend/**"
+      - "deploy/**"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
     inputs:
       apps:
-        description: Which apps to deploy
+        description: Which apps to deploy (changed = only apps behind main)
         type: choice
-        default: all
-        options: [all, api, web, functions, worker]
+        default: changed
+        options: [changed, all, api, web, functions, worker]
 
 # Two deploys of the same app at once would race over which image the app ends up on.
 concurrency:
@@ -44,24 +52,47 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - id: pick
-        name: Decide which apps changed
+        name: Decide which apps are behind this commit
         env:
-          MANUAL: ${{ inputs.apps }}
-          BEFORE: ${{ github.event.before }}
+          MANUAL: ${{ inputs.apps || 'changed' }}
+          RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+          API_APP: ${{ vars.API_APP }}
+          WEB_APP: ${{ vars.WEB_APP }}
+          WORKER_APP: ${{ vars.WORKER_APP }}
+          FUNC_APP: ${{ vars.FUNCTIONS_APP }}
         run: |
           set -euo pipefail
-          case "${MANUAL:-}" in
-            api)       echo "api=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
-            web)       echo "web=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
-            functions) echo "functions=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
-            worker)    echo "worker=true" >> "$GITHUB_OUTPUT"; exit 0 ;;
-            all)       printf 'api=true\nweb=true\nfunctions=true\nworker=true\n' >> "$GITHUB_OUTPUT"; exit 0 ;;
-          esac
-          changed=$(git diff --name-only "$BEFORE" "${{ github.sha }}")
-          echo "$changed"
-          grep -q '^backend/'  <<<"$changed" && printf 'api=true\nfunctions=true\nworker=true\n' >> "$GITHUB_OUTPUT" || true
-          grep -q '^frontend/' <<<"$changed" && echo "web=true" >> "$GITHUB_OUTPUT" || true
+          image_commit() {
+            az containerapp show -n "$1" -g "$RG" --query "properties.template.containers[0].image" -o tsv | sed 's/.*://'
+          }
+          # Prints why, and succeeds when the app should deploy.
+          behind() {
+            local app=$1 live=$2; shift 2
+            if [ "$MANUAL" = all ] || [ "$MANUAL" = "$app" ]; then echo "$app: requested"; return 0; fi
+            if [ "$MANUAL" != changed ]; then return 1; fi
+            if [ -z "$live" ] || ! git cat-file -e "$live^{commit}" 2>/dev/null; then
+              echo "$app: live build '${live:-none}' is not a known commit"; return 0
+            fi
+            if git diff --quiet "$live" "$GITHUB_SHA" -- "$@"; then echo "$app: current at $live"; return 1; fi
+            echo "$app: $live -> ${GITHUB_SHA::12}"; git diff --stat "$live" "$GITHUB_SHA" -- "$@" | tail -1
+          }
+          self=.github/workflows/deploy.yml
+          behind api "$(image_commit "$API_APP")" backend deploy/api.env "$self" \
+            && echo "api=true" >> "$GITHUB_OUTPUT" || true
+          behind web "$(image_commit "$WEB_APP")" frontend deploy/web.env "$self" \
+            && echo "web=true" >> "$GITHUB_OUTPUT" || true
+          behind worker "$(image_commit "$WORKER_APP")" backend "$self" \
+            && echo "worker=true" >> "$GITHUB_OUTPUT" || true
+          behind functions "$(az functionapp show -n "$FUNC_APP" -g "$RG" --query 'tags."deployed-commit"' -o tsv)" backend "$self" \
+            && echo "functions=true" >> "$GITHUB_OUTPUT" || true
 
   deploy:
     needs: plan
@@ -104,16 +135,19 @@ jobs:
           APP: ${{ matrix.app == 'api' && vars.API_APP || vars.WEB_APP }}
         run: |
           set -euo pipefail
-          tag="${{ matrix.image }}:${GITHUB_SHA::12}"
+          sha="${GITHUB_SHA::12}"
+          tag="${{ matrix.image }}:$sha"
+          # The app's complete environment, comments and blank lines dropped.
+          mapfile -t settings < <(grep -Ev '^[[:space:]]*(#|$)' "deploy/${{ matrix.app }}.env")
           # Built by ACR itself: no docker credentials in CI, and the app pulls from the same
           # registry it was built in.
-          az acr build --registry "$REGISTRY" --image "$tag" "${{ matrix.context }}"
+          az acr build --registry "$REGISTRY" --image "$tag" --build-arg "BUILD_SHA=$sha" "${{ matrix.context }}"
           # --min-replicas 1 keeps one instance warm so a visitor never waits on a cold
-          # start. Scale lives with the deploy (not the Terraform infra, which must not
-          # write these apps' templates — see infra/azure/oauth/api.tf), so pinning it on
-          # every roll-forward is what makes the setting survive a rebuild.
-          az containerapp update -n "$APP" -g "$RG" \
-            --image "$REGISTRY.azurecr.io/$tag" --min-replicas 1
+          # start. Scale and settings live with the deploy (not the Terraform infra, which must
+          # not write these apps' templates — see infra/azure/oauth/api.tf).
+          az containerapp update -n "$APP" -g "$RG" -o none \
+            --image "$REGISTRY.azurecr.io/$tag" --min-replicas 1 \
+            --replace-env-vars "${settings[@]}"
           # Every Container Apps job running the API image (maintenance, purge, RAG ingest, any
           # new one) moves to this build, so jobs run the same code as the API.
           if [ "${{ matrix.app }}" = api ]; then
@@ -125,39 +159,47 @@ jobs:
           fi
 
       - if: steps.gate.outputs.run == 'true'
-        name: Wait for the new revision to answer
+        name: Wait for this build to serve
         env:
           HOST: ${{ matrix.app == 'api' && vars.API_HOST || vars.WEB_HOST }}
           RG: ${{ vars.AZURE_RESOURCE_GROUP }}
           APP: ${{ matrix.app == 'api' && vars.API_APP || vars.WEB_APP }}
         run: |
           set -uo pipefail
-          # Checked against the public endpoint rather than a revision field, because what
-          # matters is whether a visitor gets an answer. /readyz on the API also proves Postgres
-          # is reachable from the new revision.
-          paths="/healthz"
-          [ "${{ matrix.app }}" = api ] && paths="/healthz /readyz"
-          # Long enough to cover the image pull and ingress moving traffic onto the new revision.
+          sha="${GITHUB_SHA::12}"
+          revision=$(az containerapp show -n "$APP" -g "$RG" --query properties.latestRevisionName -o tsv)
+          # The previous revision keeps answering until this one is ready, so a plain 200 proves
+          # nothing: wait for /healthz to name this build. Covers the image pull and the traffic
+          # switch.
           deadline=$((SECONDS + 600))
-          for path in $paths; do
-            until code=$(curl -sS -o /dev/null -m 10 -w '%{http_code}' "https://$HOST$path") \
-              && [ "$code" = 200 ]; do
-              if [ $SECONDS -ge $deadline ]; then
-                echo "::error::https://$HOST$path answered ${code:-000} for 10 minutes — check"\
-                  "az containerapp logs show -n $APP -g $RG"
-                exit 1
-              fi
+          fail() {
+            echo "::error::$1 — check: az containerapp logs show -n $APP -g $RG --revision $revision"
+            exit 1
+          }
+          until [ "$(curl -sS -m 10 "https://$HOST/healthz" | jq -r '.build // empty' 2>/dev/null)" = "$sha" ]; do
+            state=$(az containerapp revision show -n "$APP" -g "$RG" --revision "$revision" \
+              --query properties.provisioningState -o tsv)
+            [ "$state" = Failed ] && fail "$revision failed to provision"
+            [ $SECONDS -ge $deadline ] && fail "https://$HOST/healthz did not report build $sha within 10 minutes ($revision: $state)"
+            sleep 10
+          done
+          echo "https://$HOST/healthz -> build $sha"
+          # /readyz on the API also proves Postgres is reachable from the new revision.
+          if [ "${{ matrix.app }}" = api ]; then
+            until [ "$(curl -sS -o /dev/null -m 10 -w '%{http_code}' "https://$HOST/readyz")" = 200 ]; do
+              [ $SECONDS -ge $deadline ] && fail "https://$HOST/readyz did not answer 200 within 10 minutes"
               sleep 5
             done
-            echo "https://$HOST$path -> 200"
-          done
+            echo "https://$HOST/readyz -> 200"
+          fi
 
       # No automatic rollback: the previous image is not known to be good, and reverting to a
       # broken one turns a failed deploy into a longer outage. A red check plus the log line above
       # is enough — you decide what to point the app at.
 
   # The email worker reads a queue and scales to zero when idle: the deploy imports its entry
-  # points inside the built image, then waits for the new revision to report healthy.
+  # points inside the built image, then waits for the new revision to report healthy. Its
+  # settings are Terraform's (infra/azure/scanning).
   deploy-worker:
     needs: plan
     if: needs.plan.outputs.worker == 'true'
@@ -236,3 +278,25 @@ jobs:
             -n "$FUNC_APP" -g "$RG" \
             --src /tmp/ilera-durable.zip \
             --build-remote false
+
+      - name: Check the functions loaded, then record the deployed commit
+        env:
+          RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+          FUNC_APP: ${{ vars.FUNCTIONS_APP }}
+        run: |
+          set -euo pipefail
+          # A Python import error leaves the host running with no functions indexed.
+          for _ in $(seq 30); do
+            count=$(az functionapp function list -n "$FUNC_APP" -g "$RG" --query "length(@)" -o tsv)
+            [ "${count:-0}" -gt 0 ] && break
+            sleep 10
+          done
+          if [ "${count:-0}" -eq 0 ]; then
+            echo "::error::$FUNC_APP has no functions after deploy — check its Application Insights traces"
+            exit 1
+          fi
+          echo "$FUNC_APP: $count functions"
+          # `plan` reads this tag to know which commit the Functions app runs.
+          az resource tag --is-incremental -o none \
+            --ids "$(az functionapp show -n "$FUNC_APP" -g "$RG" --query id -o tsv)" \
+            --tags "deployed-commit=${GITHUB_SHA::12}"

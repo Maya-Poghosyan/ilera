@@ -137,10 +137,23 @@ holds a token, so an XSS bug has nothing to steal.
 
 ## Deploying
 
-`.github/workflows/deploy.yml` deploys on every push to `main` that touches `backend/**` or
-`frontend/**`, sending each to its own container app on Azure. Images are built by ACR and
-tagged with the commit SHA. After each update the workflow polls `/healthz` (and `/readyz`
-for the API) for ten minutes, so a revision that fails to come up shows as a failed CI run.
+`.github/workflows/deploy.yml` runs on every push to `main` that touches `backend/**`,
+`frontend/**` or `deploy/**`:
+
+- Images are built by ACR and tagged with the first 12 characters of the commit SHA.
+- Each app's live tag says which commit it runs (the Functions app keeps it in a
+  `deployed-commit` resource tag). The workflow deploys every app whose files changed since
+  that commit, so a cancelled or failed run is caught up by the next push.
+- `deploy/api.env` and `deploy/web.env` hold each app's full environment and are applied on
+  every deploy; a variable missing from the file is removed from the app. Secrets appear as
+  `secretref:<name>`, set once with `az containerapp secret set`.
+- A deploy passes once `https://<host>/healthz` reports the new build (and the API's `/readyz`
+  answers 200), within ten minutes.
+- Run it by hand from the Actions tab: `changed` deploys only apps behind `main`; `all` or one
+  app name rebuilds regardless.
+
+`.github/workflows/terraform.yml` plans both Terraform modules on pull requests and applies them
+on `main` after an `infra-production` reviewer approves.
 
 One-time setup — repository variables:
 
@@ -149,6 +162,7 @@ One-time setup — repository variables:
 | `AZURE_RESOURCE_GROUP` | `Ilera` |
 | `AZURE_REGISTRY` | ACR name (no `.azurecr.io`) |
 | `API_APP` / `WEB_APP` | the two container app names |
+| `WORKER_APP` / `FUNCTIONS_APP` | the email worker container app / the Functions app |
 | `API_HOST` / `WEB_HOST` | `api.ileracare.app` / `ileracare.app` |
 
 Federated credentials (no stored passwords):
