@@ -52,6 +52,13 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* A suggestion that arrives while the dashboard is open: slides in, then a brief glow fades. */
+  --animate-suggestion-arrive: suggestion-arrive 1.8s ease-out;
+  @keyframes suggestion-arrive {
+    0% { opacity: 0; transform: translateY(-6px); box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 35%, transparent); }
+    20% { opacity: 1; transform: none; box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 25%, transparent); }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
 }
 
 :root {

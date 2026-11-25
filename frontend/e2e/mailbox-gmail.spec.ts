@@ -52,6 +52,8 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   await expect(suggestions.getByText("IHSS reassessment visit")).toBeVisible();
   await expect(suggestions.getByText("From email")).toBeVisible();
   await expect(suggestions.getByText("December 8, 2026 · 10:00 · Appointment")).toBeVisible();
+  // It arrived while the page was open, so it animates in; on a fresh page load nothing does.
+  await expect(suggestions.locator("[data-arrived]")).toHaveCount(1);
   // The model's own reasoning and confidence stay out of the caregiver's view.
   await expect(suggestions.getByText(/confidence/i)).toHaveCount(0);
   await expect(suggestions.getByText("A county IHSS notice schedules a reassessment visit.")).toHaveCount(0);
@@ -63,6 +65,7 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   await expect(suggestions.getByText("December 8, 2026 · 11:30 · Appointment")).toBeVisible();
   await page.reload();
   await expect(suggestions.getByText("December 8, 2026 · 11:30 · Appointment")).toBeVisible();
+  await expect(suggestions.locator("[data-arrived]")).toHaveCount(0);
 
   // The next pass overlaps the last by a second, so a just-read email can be listed again; the
   // worker's ledger keeps it from being read twice.

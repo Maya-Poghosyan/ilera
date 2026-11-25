@@ -50,6 +50,7 @@ export default function CalendarPage() {
 
       <SuggestionsPanel
         pending={calendar.pending}
+        arrived={calendar.arrived}
         loading={calendar.loading}
         failed={calendar.failed}
         onRetry={calendar.retry}

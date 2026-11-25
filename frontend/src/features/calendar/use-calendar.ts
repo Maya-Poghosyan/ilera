@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { editSuggestedEvent, listCalendarEvents, listSuggestedEvents, reviewSuggestedEvent } from "@/features/calendar/api";
 import type { CalendarEventAPI, SuggestedEventAPI, SuggestionEdits } from "@/features/calendar/api";
@@ -53,6 +53,9 @@ export function useCalendar(notify: (message: string) => void) {
   const [calendarEvents, setCalendarEvents] = useState<CalEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  // Suggestions that appeared since the previous load (none on the first), to animate in.
+  const [arrived, setArrived] = useState<ReadonlySet<string>>(new Set());
+  const known = useRef<ReadonlySet<string> | null>(null);
 
   // Suggestions and committed events load together so the grid and the review panel stay
   // consistent, and a failure surfaces a retry rather than a silently empty calendar. State is
@@ -60,6 +63,9 @@ export function useCalendar(notify: (message: string) => void) {
   const load = useCallback(async () => {
     try {
       const [sug, cal] = await Promise.all([listSuggestedEvents(), listCalendarEvents()]);
+      const previous = known.current;
+      known.current = new Set(sug.map((s) => s.id));
+      setArrived(previous ? new Set(sug.filter((s) => !previous.has(s.id)).map((s) => s.id)) : new Set());
       setSuggestions(sug);
       setCalendarEvents(cal.map((e) => toCalEvent(e, false)));
       setFailed(false);
@@ -72,7 +78,6 @@ export function useCalendar(notify: (message: string) => void) {
 
   useEffect(() => {
     // load() only sets state after its request resolves, so this cannot cascade renders.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
     const refresh = () => { if (document.visibilityState === "visible") void load(); };
     const timer = setInterval(refresh, REFRESH_MS);
@@ -134,5 +139,5 @@ export function useCalendar(notify: (message: string) => void) {
     setViewMonth(t.getMonth());
   };
 
-  return { viewYear, viewMonth, cells, events, pending, loading, failed, retry, review, edit, goToMonth, goToday };
+  return { viewYear, viewMonth, cells, events, pending, arrived, loading, failed, retry, review, edit, goToMonth, goToday };
 }

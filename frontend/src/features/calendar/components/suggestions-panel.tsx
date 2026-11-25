@@ -57,8 +57,10 @@ function SuggestionEditor({ suggestion, onSave, onCancel }: {
   );
 }
 
-export function SuggestionsPanel({ pending, loading, failed, onRetry, onReview, onEdit }: {
+export function SuggestionsPanel({ pending, arrived, loading, failed, onRetry, onReview, onEdit }: {
   pending: SuggestedEventAPI[];
+  /** Suggestions that just arrived; they animate in once. */
+  arrived: ReadonlySet<string>;
   loading: boolean;
   failed: boolean;
   onRetry: () => void;
@@ -97,7 +99,8 @@ export function SuggestionsPanel({ pending, loading, failed, onRetry, onReview, 
                   return saved;
                 }} />
             ) : (
-              <div key={e.id} className="flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-card px-3 py-2.5">
+              <div key={e.id} data-arrived={arrived.has(e.id) || undefined}
+                className={`flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-card px-3 py-2.5 ${arrived.has(e.id) ? "motion-safe:animate-suggestion-arrive" : ""}`}>
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-medium text-foreground">{e.title}</p>
