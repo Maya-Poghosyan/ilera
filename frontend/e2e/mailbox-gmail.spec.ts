@@ -41,7 +41,7 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   // A county notice arrives; the hourly pass finds it and the worker reads it.
   await page.request.post(`${GOOGLE}/__mail`, { data: { email: address, id: "new-1",
     from: "IHSS <ihss@county.example>", subject: "Your IHSS reassessment",
-    body: "IHSSVISIT A social worker will visit on December 8, 2026 at 10:00 AM Pacific." } });
+    body: "IHSSVISIT A social worker will visit on December 8, 2026 at 10:00 AM." } });
   expect(await (await page.request.post(`${API}/__e2e/email/maintain`)).json())
     .toMatchObject({ checked: 1, enqueued: 1, failed: 0 });
   expect(await (await page.request.post(`${API}/__e2e/email/scan`)).json()).toEqual(["suggested"]);

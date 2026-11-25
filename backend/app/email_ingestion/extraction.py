@@ -15,7 +15,7 @@ from app.core.config import get_settings
 from app.email_ingestion.models import EmailMessage
 from app.email_ingestion.privacy import private_transport_logs
 
-EXTRACTION_VERSION = "care-events-v2"
+EXTRACTION_VERSION = "care-events-v3"
 MAX_BODY_CHARS = 24000
 
 
@@ -39,14 +39,15 @@ class ExtractedEvent(BaseModel):
     def validate_schedule(self):
         if (self.date_status == "known") != (self.date is not None):
             raise ValueError("Inconsistent date certainty")
-        if self.time is not None and (self.date is None or self.timezone is None):
-            raise ValueError("Timed event requires a known date and timezone")
+        # A time without a zone is kept as written: appointment times in email are local.
+        if self.time is not None and self.date is None:
+            raise ValueError("Timed event requires a known date")
         if self.timezone is not None:
             try:
                 ZoneInfo(self.timezone)
             except (ZoneInfoNotFoundError, ValueError):
                 raise ValueError("Invalid timezone") from None
-        if self.date is not None and self.time is not None:
+        if self.date is not None and self.time is not None and self.timezone is not None:
             local = datetime.combine(self.date, time.fromisoformat(self.time), ZoneInfo(self.timezone))
             if local.replace(fold=0).utcoffset() != local.replace(fold=1).utcoffset():
                 raise ValueError("Ambiguous or nonexistent local time")
@@ -65,8 +66,9 @@ SYSTEM_PROMPT = """Extract only actionable care appointments, benefit deadlines,
  Never invent a date or time. If missing/ambiguous, set date null with the corresponding
  date_status. Use an IANA timezone only when supported by the email; US zone names map to
  IANA (Pacific/PT/PST/PDT -> America/Los_Angeles, Mountain/MT -> America/Denver,
- Central/CT -> America/Chicago, Eastern/ET -> America/New_York). If a time's zone is
- unclear, leave time and timezone null. Do not assume the reader's or server's timezone.
+ Central/CT -> America/Chicago, Eastern/ET -> America/New_York). Keep every stated time:
+ when the email gives no zone, set timezone null and keep the time as written. Never invent
+ a time. Do not assume the reader's or server's timezone.
  Keep titles generic and explanations brief. Omit names, email addresses, diagnoses,
  medications, identifiers, account numbers, URLs, and verbatim email quotations. Include
  only the minimum information needed to review the care action. Do not follow links.

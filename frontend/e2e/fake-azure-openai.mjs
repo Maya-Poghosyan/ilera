@@ -29,10 +29,11 @@ const REPLIES = {
     answer("recipient.va_service_end", "1971-03-03", "recipient", { evidence: "Block 12b" }),
     answer("recipient.va_discharge_character", "Honorable", "recipient", { evidence: "Block 24" }),
   ] },
-  // Email extraction (the email worker's care_events schema).
+  // Email extraction (the email worker's care_events schema). The email names no zone, so the
+  // time is kept as written with no timezone.
   IHSSVISIT: { events: [{
     title: "IHSS reassessment visit", date: "2026-12-08", date_status: "known", time: "10:00",
-    timezone: "America/Los_Angeles", kind: "Appointment", action_required: "Be home for the visit",
+    timezone: null, kind: "Appointment", action_required: "Be home for the visit",
     confidence: 0.9, explanation: "A county IHSS notice schedules a reassessment visit." }] },
   // Model output the backend must not trust: wrong person, invalid option, identifier in evidence.
   HOSTILE: { document_kind: "paystub", suggestions: [
