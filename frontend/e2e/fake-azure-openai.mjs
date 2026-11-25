@@ -19,6 +19,10 @@ const REPLIES = {
   RETURN2025: { document_kind: "tax_return", suggestions: [
     answer("tax.adjusted_gross_income", "61000", "caregiver", { tax_year: 2025, evidence: "Form 1040 line 11", as_of: "2025" }),
   ] },
+  W2: { document_kind: "w2", suggestions: [
+    answer("caregiver.sdi_deductions", "Yes", "caregiver", { evidence: "W-2 box 14: CASDI", as_of: "2025" }),
+    answer("tax.care_reimbursements", "1200", "caregiver", { tax_year: 2025, evidence: "W-2 box 10", as_of: "2025" }),
+  ] },
   DD214: { document_kind: "dd214", suggestions: [
     answer("recipient.military_status", "Veteran", "recipient", { evidence: "Block 23: release from active duty" }),
     answer("recipient.va_service_start", "1968-03-04", "recipient", { evidence: "Block 12a" }),

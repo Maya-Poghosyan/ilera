@@ -57,6 +57,16 @@ async function advanceTo(page: Page, fieldId: string) {
   await expect(question).toBeVisible();
 }
 
+/** Click Back until the question is on screen. */
+async function backTo(page: Page, fieldId: string) {
+  const question = page.locator(`[data-field-id="${fieldId}"]`);
+  const shown = () => question.waitFor({ timeout: 500 }).then(() => true, () => false);
+  for (let i = 0; i < 40 && !(await shown()); i++) {
+    await page.getByRole("button", { name: "Back" }).click();
+  }
+  await expect(question).toBeVisible();
+}
+
 const panel = (page: Page) => page.getByRole("region", { name: "Suggestions from your documents" });
 
 test("a paystub fills answers in two sections only after the caregiver confirms", async ({ page }) => {
@@ -101,6 +111,18 @@ test("tax: documents that disagree are both shown, and a year mismatch is flagge
   await expect(panel(page).getByText("This is from 2024, not the tax year you chose.")).toHaveCount(1);
   await panel(page).getByRole("button", { name: "Use this answer" }).last().click();
   await expect(page.locator('[data-field-id="tax.adjusted_gross_income"] input')).toHaveValue("61000");
+});
+
+test("a W-2 read in the tax section points back to the CASDI question it fills", async ({ page }) => {
+  await startAt(page, "tax_information");
+  await expect(page.getByText("Box 10 dependent care benefits")).toBeVisible();
+  await upload(page, file("w2.pdf", "W2 Wage and Tax Statement"));
+  await expect(page.getByText("1 suggested answer to review in the questions ahead, and 1 for a question you've already passed. Use Back to review it.")).toBeVisible();
+
+  await backTo(page, "caregiver.sdi_deductions");
+  await expect(panel(page)).toContainText("W-2 box 14: CASDI");
+  await panel(page).getByRole("button", { name: "Use this answer" }).click();
+  await expect(page.locator('[data-field-id="caregiver.sdi_deductions"]').getByRole("button", { name: "Yes", pressed: true })).toBeVisible();
 });
 
 test("skipping tax savings moves straight on and keeps household answers", async ({ page }) => {

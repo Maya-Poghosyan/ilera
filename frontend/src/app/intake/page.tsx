@@ -332,6 +332,7 @@ export default function IntakePage() {
         suggested={page.uploadDocuments}
         limits={schema.document_upload}
         documents={documents.documents}
+        passed={new Set(pages.slice(0, safeIndex).flatMap((p) => p.questions.map((q) => q.field_id)))}
         onAdd={documents.add}
         onRemove={documents.remove}
       />}

@@ -99,7 +99,7 @@ UPLOAD_DOCUMENTS = {
     'tax_information': [
         {'document': 'Form 1040, pages 1–2', 'fills': 'Tax year, filing status and adjusted gross income',
          'location': 'your tax software, preparer or saved records'},
-        {'document': 'W-2s', 'fills': 'Box 10 dependent care benefits and box 14 CASDI',
+        {'document': 'W-2s', 'fills': 'Box 10 dependent care benefits',
          'location': 'your payroll portal or tax records', 'cover': 'the SSN in box a'},
         {'document': 'Form 2441, if you filed one', 'fills': 'Care costs paid and employer care benefits',
          'location': 'your filed return', 'cover': 'provider SSNs or EINs in Part I'},
