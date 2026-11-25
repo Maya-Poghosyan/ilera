@@ -74,7 +74,9 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   await page.reload();
   await expect(suggestions.getByText("IHSS reassessment visit")).toHaveCount(1);
 
+  // Accepting animates the suggestion out before the list reloads.
   await suggestions.getByRole("button", { name: "Accept" }).click();
+  await expect(suggestions.locator('[data-leaving="accepted"]')).toHaveCount(1);
   await expect(page.getByText("Added to your calendar")).toBeVisible();
   await expect(suggestions.getByText("No suggestions to review.", { exact: false })).toBeVisible();
 

@@ -14,6 +14,10 @@ function formatISODate(iso: string): string {
 }
 
 const iconButton = "flex size-7 items-center justify-center rounded-full bg-brand-subtle transition-colors disabled:opacity-40";
+// A reviewed suggestion fades (and, when dismissed, slides) out while its space collapses; the
+// decision is sent once the motion ends, so the list never jumps.
+const EXIT_MS = 280;
+type Decision = "accepted" | "dismissed";
 
 /** The caregiver's corrections to one suggestion, made before accepting it. */
 function SuggestionEditor({ suggestion, onSave, onCancel }: {
@@ -64,10 +68,25 @@ export function SuggestionsPanel({ pending, arrived, loading, failed, onRetry, o
   loading: boolean;
   failed: boolean;
   onRetry: () => void;
-  onReview: (s: SuggestedEventAPI, decision: "accepted" | "dismissed") => void;
+  onReview: (s: SuggestedEventAPI, decision: Decision) => Promise<boolean>;
   onEdit: (s: SuggestedEventAPI, edits: SuggestionEdits) => Promise<boolean>;
 }) {
   const [editing, setEditing] = useState<string | null>(null);
+  const [leaving, setLeaving] = useState<Record<string, Decision>>({});
+
+  function decide(e: SuggestedEventAPI, decision: Decision) {
+    setLeaving((prev) => ({ ...prev, [e.id]: decision }));
+    const wait = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : EXIT_MS;
+    setTimeout(async () => {
+      // Saved: the reload has already removed it from the list. Not saved: it comes back.
+      await onReview(e, decision);
+      setLeaving((prev) => {
+        const next = { ...prev };
+        delete next[e.id];
+        return next;
+      });
+    }, wait);
+  }
   return (
     <section aria-label="Suggested events" className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
       <div className="flex items-center gap-2 text-primary">
@@ -90,17 +109,23 @@ export function SuggestionsPanel({ pending, arrived, loading, failed, onRetry, o
               ? "Detected from your connected mailbox. Review each one before it joins your calendar."
               : "No suggestions to review. New ones appear here after a connected mailbox is scanned."}
           </p>
-          <div className="space-y-2">
+          <div>
             {pending.map((e) => editing === e.id ? (
-              <SuggestionEditor key={e.id} suggestion={e} onCancel={() => setEditing(null)}
+              <div key={e.id} className="pb-2">
+              <SuggestionEditor suggestion={e} onCancel={() => setEditing(null)}
                 onSave={async (edits) => {
                   const saved = await onEdit(e, edits);
                   if (saved) setEditing(null);
                   return saved;
                 }} />
+              </div>
             ) : (
-              <div key={e.id} data-arrived={arrived.has(e.id) || undefined}
-                className={`flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-card px-3 py-2.5 ${arrived.has(e.id) ? "motion-safe:animate-suggestion-arrive" : ""}`}>
+              <div key={e.id} data-leaving={leaving[e.id]}
+                className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out motion-reduce:transition-none ${leaving[e.id] ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100"}`}>
+              <div className={`min-h-0 ${leaving[e.id] ? "overflow-hidden" : ""}`}>
+              <div className="pb-2">
+              <div data-arrived={arrived.has(e.id) || undefined}
+                className={`flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-card px-3 py-2.5 transition-transform duration-300 ease-out motion-reduce:transition-none ${leaving[e.id] === "dismissed" ? "-translate-x-6" : ""} ${arrived.has(e.id) ? "motion-safe:animate-suggestion-arrive" : ""}`}>
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-medium text-foreground">{e.title}</p>
@@ -124,6 +149,7 @@ export function SuggestionsPanel({ pending, arrived, loading, failed, onRetry, o
                     className={`${iconButton} text-muted-foreground hover:bg-primary hover:text-white`}
                     aria-label={`Edit ${e.title}`}
                     title="Edit"
+                    disabled={!!leaving[e.id]}
                     onClick={() => setEditing(e.id)}
                   >
                     <Pencil className="size-3.5" />
@@ -132,19 +158,23 @@ export function SuggestionsPanel({ pending, arrived, loading, failed, onRetry, o
                     className={`${iconButton} text-primary hover:bg-primary hover:text-white`}
                     aria-label="Accept"
                     title={e.date ? "Add to calendar" : "Add a date first (edit)"}
-                    disabled={!e.date}
-                    onClick={() => onReview(e, "accepted")}
+                    disabled={!e.date || !!leaving[e.id]}
+                    onClick={() => decide(e, "accepted")}
                   >
                     <Check className="size-3.5" />
                   </button>
                   <button
                     className={`${iconButton} text-muted-foreground hover:bg-red-100 hover:text-red-600`}
                     aria-label="Dismiss"
-                    onClick={() => onReview(e, "dismissed")}
+                    disabled={!!leaving[e.id]}
+                    onClick={() => decide(e, "dismissed")}
                   >
                     <X className="size-3.5" />
                   </button>
                 </div>
+              </div>
+              </div>
+              </div>
               </div>
             ))}
           </div>

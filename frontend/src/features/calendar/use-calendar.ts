@@ -101,17 +101,20 @@ export function useCalendar(notify: (message: string) => void) {
   // Pending suggestions that carry a date are previewed on the grid, styled as tentative.
   const events = [...calendarEvents, ...pending.filter((s) => s.date).map((s) => toCalEvent(s, true))];
 
-  const review = async (s: SuggestedEventAPI, decision: "accepted" | "dismissed") => {
+  /** Whether the decision was saved; the panel brings the suggestion back when it wasn't. */
+  const review = async (s: SuggestedEventAPI, decision: "accepted" | "dismissed"): Promise<boolean> => {
     if (decision === "accepted" && !s.date) {
       notify("Add a date before accepting — this suggestion needs review.");
-      return;
+      return false;
     }
     try {
       await reviewSuggestedEvent(s.id, decision);
       notify(decision === "accepted" ? "Added to your calendar" : "Suggestion dismissed");
       await load();
+      return true;
     } catch {
       notify(decision === "accepted" ? "Couldn't accept — try again." : "Couldn't dismiss — try again.");
+      return false;
     }
   };
 
