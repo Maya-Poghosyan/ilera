@@ -2,8 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { listCalendarEvents, listSuggestedEvents, reviewSuggestedEvent } from "@/features/calendar/api";
-import type { CalendarEventAPI, SuggestedEventAPI } from "@/features/calendar/api";
+import { editSuggestedEvent, listCalendarEvents, listSuggestedEvents, reviewSuggestedEvent } from "@/features/calendar/api";
+import type { CalendarEventAPI, SuggestedEventAPI, SuggestionEdits } from "@/features/calendar/api";
+
+// Mailboxes are scanned in the background, so new suggestions are fetched every minute while the
+// dashboard is visible, and as soon as the caregiver comes back to it.
+const REFRESH_MS = 60_000;
 
 export type EventKind = "Appointment" | "Visit" | "Deadline";
 
@@ -70,6 +74,15 @@ export function useCalendar(notify: (message: string) => void) {
     // load() only sets state after its request resolves, so this cannot cascade renders.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void load();
+    const refresh = () => { if (document.visibilityState === "visible") void load(); };
+    const timer = setInterval(refresh, REFRESH_MS);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
   }, [load]);
 
   const retry = useCallback(async () => {
@@ -97,6 +110,18 @@ export function useCalendar(notify: (message: string) => void) {
     }
   };
 
+  const edit = async (s: SuggestedEventAPI, edits: SuggestionEdits): Promise<boolean> => {
+    try {
+      await editSuggestedEvent(s.id, edits);
+      notify("Suggestion updated");
+      await load();
+      return true;
+    } catch {
+      notify("Couldn't save your changes — try again.");
+      return false;
+    }
+  };
+
   const cells = useMemo(() => buildCells(viewYear, viewMonth), [viewYear, viewMonth]);
   const goToMonth = (delta: number) => {
     const d = new Date(viewYear, viewMonth + delta, 1);
@@ -109,5 +134,5 @@ export function useCalendar(notify: (message: string) => void) {
     setViewMonth(t.getMonth());
   };
 
-  return { viewYear, viewMonth, cells, events, pending, loading, failed, retry, review, goToMonth, goToday };
+  return { viewYear, viewMonth, cells, events, pending, loading, failed, retry, review, edit, goToMonth, goToday };
 }

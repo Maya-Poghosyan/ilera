@@ -54,6 +54,7 @@ export default function CalendarPage() {
         failed={calendar.failed}
         onRetry={calendar.retry}
         onReview={calendar.review}
+        onEdit={calendar.edit}
       />
 
       <MonthGrid

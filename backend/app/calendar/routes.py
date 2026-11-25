@@ -1,10 +1,11 @@
 """Suggested events (provider-independent storage) and the calendar events accepted from
 them or entered manually."""
 
+from datetime import date as date_cls
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.accounts.sessions import get_current_user
 from app.accounts.users import User
@@ -35,7 +36,13 @@ def api_list_suggested_events(
 
 
 class SuggestedEventReview(BaseModel):
-    status: Literal["pending", "accepted", "dismissed"]
+    """A review decision, and/or the caregiver's corrections to a pending suggestion.
+
+    Only the fields sent are changed. `time: null` clears the time."""
+    status: Literal["pending", "accepted", "dismissed"] | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=120)
+    date: date_cls | None = None
+    time: str | None = Field(default=None, pattern=r"^([01][0-9]|2[0-3]):[0-5][0-9]$")
 
 
 @router.patch("/api/suggested-events/{event_id}")
@@ -44,16 +51,33 @@ def api_review_suggested_event(
     body: SuggestedEventReview,
     user: User = Depends(get_current_user),
 ) -> SuggestedEvent:
-    """Persist a review decision (accept/dismiss/reset) on a suggestion.
+    """Persist corrections and/or a review decision (accept/dismiss/reset) on a suggestion.
 
-    Accepting also materializes an idempotent calendar event; dismissing or resetting
-    removes any calendar event previously accepted from this suggestion.
+    - Corrections apply to pending suggestions only; a corrected date counts as known
+    - Accepting also materializes an idempotent calendar event; dismissing or resetting
+      removes any calendar event previously accepted from this suggestion
     """
     event = get_suggested_event(event_id)
     if event is None or event.user_id != user.id:
         raise HTTPException(status_code=404, detail="suggested event not found")
-    event.status = body.status
+    edits = body.model_fields_set - {"status"}
+    if edits and event.status != "pending":
+        raise HTTPException(status_code=409, detail="only pending suggestions can be edited")
+    if "title" in edits and body.title is not None:
+        event.title = body.title.strip() or event.title
+    if "date" in edits and body.date is not None:
+        event.date, event.date_status = body.date, "known"
+    if "time" in edits:
+        event.time = body.time
+    if body.status is None and not edits:
+        raise HTTPException(status_code=422, detail="nothing to change")
+    if body.status is not None:
+        event.status = body.status
+    if event.status == "accepted" and event.date is None:
+        raise HTTPException(status_code=422, detail="add a date before accepting")
     save_suggested_event(event)
+    if body.status is None:
+        return event
     if body.status == "accepted":
         accept_from_suggestion(
             suggestion_id=event.id,

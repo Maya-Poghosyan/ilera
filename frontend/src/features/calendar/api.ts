@@ -12,7 +12,6 @@ export type SuggestedEventAPI = {
   kind: string;
   description?: string;
   source: string;
-  confidence?: number | null;
   action_required?: string | null;
   status: "pending" | "accepted" | "dismissed";
 };
@@ -42,6 +41,16 @@ export function reviewSuggestedEvent(
   return request<SuggestedEventAPI>(`/api/suggested-events/${id}`, {
     method: "PATCH",
     body: JSON.stringify({ status }),
+  });
+}
+
+export type SuggestionEdits = { title?: string; date?: string; time?: string | null };
+
+/** Correct a pending suggestion before deciding on it. */
+export function editSuggestedEvent(id: string, edits: SuggestionEdits): Promise<SuggestedEventAPI> {
+  return request<SuggestedEventAPI>(`/api/suggested-events/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(edits),
   });
 }
 

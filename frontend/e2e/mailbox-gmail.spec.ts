@@ -46,16 +46,34 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
     .toMatchObject({ checked: 1, enqueued: 1, failed: 0 });
   expect(await (await page.request.post(`${API}/__e2e/email/scan`)).json()).toEqual(["suggested"]);
 
+  // No reload: the dashboard re-checks when the caregiver comes back to the tab (and every minute).
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  const suggestions = page.getByRole("region", { name: "Suggested events" });
+  await expect(suggestions.getByText("IHSS reassessment visit")).toBeVisible();
+  await expect(suggestions.getByText("From email")).toBeVisible();
+  await expect(suggestions.getByText("December 8, 2026 · 10:00 · Appointment")).toBeVisible();
+  // The model's own reasoning and confidence stay out of the caregiver's view.
+  await expect(suggestions.getByText(/confidence/i)).toHaveCount(0);
+  await expect(suggestions.getByText("A county IHSS notice schedules a reassessment visit.")).toHaveCount(0);
+
+  // The caregiver corrects the time before accepting it.
+  await suggestions.getByRole("button", { name: "Edit IHSS reassessment visit" }).click();
+  await suggestions.getByLabel("Time (optional)").fill("11:30");
+  await suggestions.getByRole("button", { name: "Save" }).click();
+  await expect(suggestions.getByText("December 8, 2026 · 11:30 · Appointment")).toBeVisible();
   await page.reload();
-  await expect(page.getByText("IHSS reassessment visit")).toBeVisible();
-  await expect(page.getByText("From email")).toBeVisible();
+  await expect(suggestions.getByText("December 8, 2026 · 11:30 · Appointment")).toBeVisible();
 
   // The next pass overlaps the last by a second, so a just-read email can be listed again; the
   // worker's ledger keeps it from being read twice.
   expect(await (await page.request.post(`${API}/__e2e/email/maintain`)).json()).toMatchObject({ checked: 1, failed: 0 });
   for (const outcome of await (await page.request.post(`${API}/__e2e/email/scan`)).json()) expect(outcome).toBe("duplicate");
   await page.reload();
-  await expect(page.getByText("IHSS reassessment visit")).toHaveCount(1);
+  await expect(suggestions.getByText("IHSS reassessment visit")).toHaveCount(1);
+
+  await suggestions.getByRole("button", { name: "Accept" }).click();
+  await expect(page.getByText("Added to your calendar")).toBeVisible();
+  await expect(suggestions.getByText("No suggestions to review.", { exact: false })).toBeVisible();
 
   await page.getByRole("button", { name: "Disconnect" }).click();
   await expect(page.getByText("Gmail disconnected and saved credentials deleted.")).toBeVisible();
