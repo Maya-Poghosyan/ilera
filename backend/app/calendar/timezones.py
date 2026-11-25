@@ -7,7 +7,7 @@
 
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError, available_timezones
 
-from app.cases.store import get_profile
+from app.core import db
 from app.preferences.service import get_preferences
 
 # Each state's main zone. States split across zones use the one most of their people live in.
@@ -36,8 +36,10 @@ def valid_timezone(name: str) -> bool:
 
 
 def intake_timezone(case_id: str) -> str | None:
-    profile = get_profile(case_id)
-    return STATE_TIMEZONES.get(profile.caregiver.state.upper()) if profile else None
+    # One field, read directly: the email worker's image carries no intake data to load a profile.
+    with db.connection() as conn:
+        row = conn.execute("SELECT doc->'caregiver'->>'state' FROM cases WHERE id = %s", (case_id,)).fetchone()
+    return STATE_TIMEZONES.get((row[0] or "").upper()) if row else None
 
 
 def calendar_timezone(case_id: str) -> tuple[str | None, str | None]:
