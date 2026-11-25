@@ -1,5 +1,7 @@
-"""Missed-notification reconciliation: recover messages that arrived while a mailbox had no
-working subscription.
+"""Missed-notification reconciliation for Microsoft, and the regular sync for Gmail.
+
+Gmail has no subscription: every maintenance pass lists its inbox messages received since the
+last covered instant, exactly as a Microsoft gap is recovered below.
 
 A Graph subscription can lapse (expiry, replacement, `subscriptionRemoved`/`missed` lifecycle
 events, reconnect). Messages delivered during that gap produce no webhook, so they would never
@@ -52,19 +54,19 @@ def reconcile(connection_id: str, user_id: str, *, publish=None) -> int:
 
     Returns the number of identifiers enqueued this pass. Raises on provider/queue failure so
     the caller counts it as failed and the flag remains set. Does nothing (returns 0) when the
-    connection is not flagged, not connected, not owned, or not Microsoft.
+    connection is not connected or not owned, or is a Microsoft mailbox that isn't flagged.
+    Gmail mailboxes are always due: polling is how their new mail is found.
     """
-    # Cheap pre-check without decrypting credentials or hitting Graph.
+    # Cheap pre-check without decrypting credentials or hitting the provider.
     with db.connection() as conn:
         mailbox = connections._owned_connection(conn, connection_id, user_id)
-        if not (mailbox.reconciliation_required and mailbox.status == "connected"
-                and mailbox.provider == "microsoft"):
+        if not (_due(mailbox) and mailbox.status == "connected"):
             return 0
 
     # Refresh/fetch the token outside the transaction lock (refresh takes the lock itself).
     token = connections.access_token(connection_id=connection_id, user_id=user_id)
     now = datetime.now(timezone.utc)
-    provider = connections._provider()
+    provider = connections._provider(mailbox.provider)
     message_ids = asyncio.run(provider.list_message_ids_since(token, since=_window_start(mailbox)))
     del token
 
@@ -73,14 +75,14 @@ def reconcile(connection_id: str, user_id: str, *, publish=None) -> int:
         connections.lock_mailbox(conn, user_id, mailbox.case_id)
         current = connections._owned_connection(conn, connection_id, user_id)
         # Re-check under the lock: disconnect/reconnect during listing invalidates this pass.
-        if (not current.reconciliation_required or current.status != "connected"
-                or current.provider != "microsoft" or current.consented_at != mailbox.consented_at):
+        if (not _due(current) or current.status != "connected"
+                or current.consented_at != mailbox.consented_at):
             return 0
         if publish is not None:
-            enqueued = _enqueue_all(publish, connection_id, message_ids)
+            enqueued = _enqueue_all(publish, current, message_ids)
         else:
             with ScanPublisher() as publisher:
-                enqueued = _enqueue_all(publisher.send, connection_id, message_ids)
+                enqueued = _enqueue_all(publisher.send, current, message_ids)
         # Only reached if every enqueue above succeeded (a raise propagates out, flag intact).
         current.reconciled_through = now
         current.reconciliation_required = False
@@ -88,7 +90,11 @@ def reconcile(connection_id: str, user_id: str, *, publish=None) -> int:
     return enqueued
 
 
-def _enqueue_all(send, connection_id: str, message_ids: list[str]) -> int:
+def _due(mailbox: MailboxConnection) -> bool:
+    return mailbox.provider == "google" or mailbox.reconciliation_required
+
+
+def _enqueue_all(send, mailbox: MailboxConnection, message_ids: list[str]) -> int:
     count = 0
     seen: set[str] = set()
     for message_id in message_ids:
@@ -96,7 +102,7 @@ def _enqueue_all(send, connection_id: str, message_ids: list[str]) -> int:
         if message_id in seen:
             continue
         seen.add(message_id)
-        send(EmailScanJob(provider="microsoft", connection_id=connection_id, message_id=message_id))
+        send(EmailScanJob(provider=mailbox.provider, connection_id=mailbox.id, message_id=message_id))
         count += 1
     return count
 
@@ -117,7 +123,7 @@ def prune_orphan_subscriptions(connection_id: str, user_id: str) -> int:
 
     our_url = get_settings().email_microsoft_notification_url
     token = connections.access_token(connection_id=connection_id, user_id=user_id)
-    provider = connections._provider()
+    provider = connections._provider("microsoft")
     subscriptions = asyncio.run(provider.list_subscriptions(token))
 
     deleted = 0
@@ -142,12 +148,12 @@ def prune_orphan_subscriptions(connection_id: str, user_id: str) -> int:
 
 
 def reconcile_pending() -> dict[str, int]:
-    """Reconcile every flagged, connected, owned Microsoft mailbox. Fixed counters only."""
+    """Reconcile every flagged Microsoft mailbox and poll every Gmail one. Fixed counters only."""
     with db.connection() as conn:
         rows = conn.execute(
             "SELECT e.doc FROM email_connections e JOIN cases c ON c.id = e.case_id "
-            "WHERE e.doc->>'provider' = 'microsoft' AND e.doc->>'status' = 'connected' "
-            "AND (e.doc->>'reconciliation_required')::boolean IS TRUE "
+            "WHERE e.doc->>'status' = 'connected' AND (e.doc->>'provider' = 'google' "
+            "OR (e.doc->>'reconciliation_required')::boolean IS TRUE) "
             "AND c.owner_user_id = e.doc->>'user_id'"
         ).fetchall()
     counts = {"reconciled": 0, "enqueued": 0, "failed": 0}

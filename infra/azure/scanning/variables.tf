@@ -91,3 +91,14 @@ variable "tags" {
     managed-by  = "terraform"
   }
 }
+
+variable "google_client_id" {
+  description = "Gmail OAuth web client id (<number>-<id>.apps.googleusercontent.com). Empty = Gmail is off for the worker and maintenance job."
+  type        = string
+  default     = ""
+}
+
+variable "google_redirect_uri" {
+  type    = string
+  default = "https://ileracare.app/api/email/google/callback"
+}

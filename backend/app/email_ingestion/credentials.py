@@ -34,10 +34,11 @@ def _vault() -> Iterator:
             yield client
 
 
-def client_secret() -> SecretStr:
+def client_secret(name: str) -> SecretStr:
+    """An OAuth client secret held in the vault under `name`."""
     try:
         with _vault() as client:
-            value = client.get_secret(get_settings().email_microsoft_client_secret_name).value
+            value = client.get_secret(name).value
         if not value:
             raise ValueError("empty secret")
         return SecretStr(value)

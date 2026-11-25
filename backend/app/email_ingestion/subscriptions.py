@@ -1,6 +1,7 @@
-"""Subscription maintenance entry point: python -m app.email_ingestion.subscriptions.
+"""Mailbox maintenance entry point: python -m app.email_ingestion.subscriptions.
 
-Run periodically (at least hourly) once the scanning pipeline is deployed. The same
+Run hourly. Microsoft mailboxes get their Graph subscription renewed and any gap reconciled;
+Gmail mailboxes are polled for new inbox mail (reconciliation.py). The same
 case lock used by OAuth/disconnect prevents stale maintenance from reviving a mailbox.
 Only fixed counters are printed; provider errors never reach logs.
 """
@@ -40,7 +41,7 @@ def ensure_subscription(connection_id: str, user_id: str) -> None:
                  and mailbox.subscription_expires_at > now and mailbox.subscription_client_state_hash)
         if valid and mailbox.subscription_expires_at > now + timedelta(days=1) and not mailbox.subscription_renewal_required:
             return
-        provider = connections._provider()
+        provider = connections._provider("microsoft")
         if valid:
             subscription = asyncio.run(provider.renew_subscription(token, mailbox.subscription_id))
         else:
@@ -61,15 +62,15 @@ def maintain_subscriptions() -> dict[str, int]:
     with db.connection() as conn:
         rows = conn.execute(
             "SELECT e.doc FROM email_connections e JOIN cases c ON c.id = e.case_id "
-            "WHERE e.doc->>'provider' = 'microsoft' AND e.doc->>'status' = 'connected' "
-            "AND c.owner_user_id = e.doc->>'user_id'"
+            "WHERE e.doc->>'status' = 'connected' AND c.owner_user_id = e.doc->>'user_id'"
         ).fetchall()
     counts = {"checked": 0, "failed": 0, "reconciled": 0, "enqueued": 0, "pruned": 0}
     for row in rows:
         mailbox = None
         try:
             mailbox = MailboxConnection.model_validate(row[0])
-            ensure_subscription(mailbox.id, mailbox.user_id)
+            if mailbox.provider == "microsoft":
+                ensure_subscription(mailbox.id, mailbox.user_id)
             counts["checked"] += 1
         except Exception:
             counts["failed"] += 1
@@ -85,6 +86,8 @@ def maintain_subscriptions() -> dict[str, int]:
                 counts["failed"] += 1
             # Clean up any subscription we leaked (create succeeded, DB commit didn't).
             # Isolated from renew/reconcile so one failure never blocks the others.
+            if mailbox.provider != "microsoft":
+                continue
             try:
                 counts["pruned"] += prune_orphan_subscriptions(mailbox.id, mailbox.user_id)
             except Exception:

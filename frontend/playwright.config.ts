@@ -1,8 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// End-to-end: real Next app → real FastAPI backend (local test Postgres) → local stand-in for
-// the Azure document model. Needs TEST_DATABASE_URL (see backend/tests/conftest.py).
-const WEB = 3517, API = 8517, MODEL = 4517;
+// End-to-end: real Next app → real FastAPI backend (local test Postgres) → local stand-ins for
+// the Azure OpenAI models and for Google sign-in and Gmail. Needs TEST_DATABASE_URL (see backend/tests/conftest.py).
+const WEB = 3517, API = 8517, MODEL = 4517, GOOGLE = 4518;
 const DATABASE_URL = process.env.TEST_DATABASE_URL;
 if (!DATABASE_URL) throw new Error("TEST_DATABASE_URL is required (see backend/tests/conftest.py)");
 // Specs read captured email and fixtures straight from the test API (see backend/tests/e2e_api.py).
@@ -19,8 +19,9 @@ export default defineConfig({
   use: { baseURL: `http://127.0.0.1:${WEB}`, trace: "retain-on-failure", ...devices["Desktop Chrome"] },
   webServer: [
     { command: "node e2e/fake-azure-openai.mjs", port: MODEL, env: { FAKE_OPENAI_PORT: String(MODEL) }, reuseExistingServer: false },
+    { command: "node e2e/fake-google.mjs", port: GOOGLE, env: { FAKE_GOOGLE_PORT: String(GOOGLE) }, reuseExistingServer: false },
     {
-      command: `.venv/bin/python tests/e2e_api.py ${API} ${MODEL}`,
+      command: `.venv/bin/python tests/e2e_api.py ${API} ${MODEL} ${GOOGLE}`,
       cwd: "../backend",
       url: `http://127.0.0.1:${API}/healthz`,
       reuseExistingServer: false,

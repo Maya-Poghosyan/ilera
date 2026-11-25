@@ -23,7 +23,7 @@ Next.js frontend  ──REST──▶  FastAPI backend
   dashboard                       │       pydantic-ai, each grounded in program-scoped RAG
                                   ├─ RAG over program docs (pgvector)
                                   └─ form fill + stitch (pypdf / fillpdf)
-                          planned: Outlook + Gmail email scanning → care calendar
+                          email scanning (Outlook, Gmail) → suggested care calendar events
 ```
 
 The **`CaseProfile`** is the shared spine: every agent reads from it and writes findings back to it.
@@ -224,8 +224,15 @@ unclaimed after 5 days (`app/cases/purge.py`).
   `timekeeping`, `journal`, `renewal_items`, `applications`, `preferences`, `suggested_events`,
   `calendar_events`) and the same database serves the pgvector RAG index.
 - **LLM:** set `OPENAI_API_KEY` and `OPENAI_BASE_URL` (Azure OpenAI v1 endpoint).
-- **Email:** Microsoft 365 mailbox connections and scanning; configure Entra and Key Vault
-  (see [infra/azure/README.md](infra/azure/README.md)). Gmail is not supported.
+- **Email:** mailbox connections and scanning; configure Entra and Key Vault
+  (see [infra/azure/README.md](infra/azure/README.md)).
+  - Microsoft 365: Graph change notifications, renewed by the hourly maintenance job
+  - Gmail: polled by the hourly maintenance job. Needs a Google OAuth web client: its id in
+    `EMAIL_GOOGLE_CLIENT_ID` (`deploy/api.env`, and `google_client_id` in Terraform for the worker
+    and job), its secret in Key Vault as `ilera-google-client-secret`. It uses the restricted
+    `gmail.readonly` scope, so until Google verifies the app (including a CASA security
+    assessment) users see an "unverified app" warning and the Google Cloud project is capped at
+    100 users for its lifetime
   Reminder records remain available, but automatic delivery and text check-ins are
   unavailable.
 - **Forms:** fillable government PDFs live in blob storage (`FORMS_BLOB_ACCOUNT_URL`) with

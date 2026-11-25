@@ -4,7 +4,7 @@ import { request } from "@/lib/http";
 export type MailboxConnection = {
   id: string;
   case_id: string;
-  provider: "microsoft" | "google";
+  provider: MailboxProvider;
   status: "pending" | "connected" | "reauthorization_required" | "disconnected";
   mailbox_address: string | null;
   consented_at: string;
@@ -24,8 +24,10 @@ export function listMailboxConnections(caseId: string): Promise<MailboxConnectio
   return request<MailboxConnection[]>(`/api/email/connections?case_id=${encodeURIComponent(caseId)}`);
 }
 
-export function connectMicrosoftMailbox(caseId: string): Promise<{ authorization_url: string }> {
-  return request<{ authorization_url: string }>("/api/email/microsoft/connect", {
+export type MailboxProvider = "microsoft" | "google";
+
+export function connectMailbox(provider: MailboxProvider, caseId: string): Promise<{ authorization_url: string }> {
+  return request<{ authorization_url: string }>(`/api/email/${provider}/connect`, {
     method: "POST",
     body: JSON.stringify({ case_id: caseId }),
   });

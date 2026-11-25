@@ -140,6 +140,17 @@ resource "azurerm_container_app" "scan_worker" {
         name  = "EMAIL_SERVICE_BUS_QUEUE"
         value = azurerm_servicebus_queue.scan.name
       }
+      # Gmail: refreshing tokens and reading mail need the client id; the secret is in Key Vault.
+      dynamic "env" {
+        for_each = var.google_client_id == "" ? {} : {
+          EMAIL_GOOGLE_CLIENT_ID    = var.google_client_id
+          EMAIL_GOOGLE_REDIRECT_URI = var.google_redirect_uri
+        }
+        content {
+          name  = env.key
+          value = env.value
+        }
+      }
       env {
         name  = "EMAIL_KEY_VAULT_URL"
         value = local.vault_uri
@@ -295,6 +306,17 @@ resource "azurerm_container_app_job" "maintenance" {
         name  = "EMAIL_MICROSOFT_NOTIFICATION_URL"
         value = var.email_microsoft_notification_url
       }
+      # Gmail: refreshing tokens and reading mail need the client id; the secret is in Key Vault.
+      dynamic "env" {
+        for_each = var.google_client_id == "" ? {} : {
+          EMAIL_GOOGLE_CLIENT_ID    = var.google_client_id
+          EMAIL_GOOGLE_REDIRECT_URI = var.google_redirect_uri
+        }
+        content {
+          name  = env.key
+          value = env.value
+        }
+      }
     }
   }
 
@@ -306,8 +328,9 @@ resource "azurerm_container_app_job" "maintenance" {
 
   tags = var.tags
 
-  # CI rolls the image forward; keep it out of the plan like the worker/API.
+  # CI rolls the image forward; keep it out of the plan like the worker/API. Its settings are
+  # managed here, like the worker's.
   lifecycle {
-    ignore_changes = [template[0].container[0].image, template[0].container[0].env]
+    ignore_changes = [template[0].container[0].image]
   }
 }

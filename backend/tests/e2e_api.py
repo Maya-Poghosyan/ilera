@@ -1,26 +1,34 @@
 """Launch the real API for the browser tests, replacing only the external services.
 
-- the document model client → the local fake (frontend/e2e/fake-azure-openai.mjs)
+- the document and email model clients → the local fake (frontend/e2e/fake-azure-openai.mjs)
 - the PDF parse time limit → 2 seconds
+- Google sign-in and the Gmail API → the local fake (frontend/e2e/fake-google.mjs)
+- Key Vault → an in-process vault, so mailbox tokens are still encrypted by the real code
+- the email scan queue (Service Bus) → an in-process list. POST /__e2e/email/maintain runs the
+  hourly mailbox pass; POST /__e2e/email/scan runs the worker over everything queued
+- mailbox tables → emptied at startup, so the hourly pass sees only the specs' mailboxes
 - outgoing email (ACS) → captured, readable at GET /__e2e/mail/{address}
 - the Azure Functions eligibility pipeline → not started (cases stay "processing";
   POST /__e2e/cases/{id}/eligible/{program} records one program's result)
 
 Also serves GET /__e2e/complete-intake: a valid, complete set of intake answers, built by the
 same helper the API tests use, so browser tests don't hand-maintain one.
-Usage: python tests/e2e_api.py <api_port> <fake_model_port>
+Usage: python tests/e2e_api.py <api_port> <fake_model_port> <fake_google_port>
 """
 import os
 import sys
 from collections import defaultdict
+from contextlib import contextmanager
 from pathlib import Path
+from types import SimpleNamespace
 
 import uvicorn
+from cryptography.fernet import Fernet
 from fastapi import APIRouter
 from openai import OpenAI
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-api_port, model_port = int(sys.argv[1]), int(sys.argv[2])
+api_port, model_port, google_port = int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])
 # Every setting the API requires at startup; external services are replaced below, so these
 # only need to be well-formed.
 os.environ.update(
@@ -34,10 +42,15 @@ os.environ.update(
     EMAIL_KEY_VAULT_URL="https://e2e.vault.azure.net", EMAIL_SERVICE_BUS_NAMESPACE="e2e.servicebus.windows.net",
     DOCUMENT_OPENAI_ENDPOINT="https://e2e.openai.azure.com", DOCUMENT_OPENAI_DEPLOYMENT="e2e-documents",
     REFERENCE_GUIDES_BLOB_ACCOUNT_URL="https://e2e.blob.core.windows.net",
+    EMAIL_OPENAI_ENDPOINT="https://e2e-email.openai.azure.com", EMAIL_OPENAI_DEPLOYMENT="e2e-email",
+    EMAIL_GOOGLE_CLIENT_ID="123-e2e.apps.googleusercontent.com",
+    EMAIL_GOOGLE_REDIRECT_URI="https://e2e.test/api/email/google/callback",
 )
 
 from app.accounts import mail as account_mail  # noqa: E402
 from app.cases import pipeline  # noqa: E402
+from app.email_ingestion import credentials, extraction, reconciliation, subscriptions, worker  # noqa: E402
+from app.email_ingestion.providers import google  # noqa: E402
 from app.intake.documents import extractor, upload  # noqa: E402
 from app.main import app  # noqa: E402
 from tests.intake_helpers import complete_current_intake  # noqa: E402
@@ -56,12 +69,62 @@ extractor.open_client = fake_client
 # A short PDF time limit, so the spec's slow-but-valid PDF hits it in seconds.
 upload.PDF_TIMEOUT_S = 2
 pipeline.start_eligibility_orchestration = no_pipeline
+
+# Email scanning: Google, the vault, the queue and the email model are local.
+extraction.open_client = fake_client
+fake_google = f"http://127.0.0.1:{google_port}"
+google.TOKEN_URL, google.CERTS_URL = f"{fake_google}/token", f"{fake_google}/certs"
+google.REVOKE_URL, google.GMAIL_API = f"{fake_google}/revoke", f"{fake_google}/gmail/v1/users/me"
+_vault_secrets = {"ilera-email-token-key": Fernet.generate_key().decode(),
+                  "ilera-google-client-secret": "e2e-google-secret", "ilera-microsoft-client-secret": "e2e"}
+
+
+class _Vault:
+    def get_secret(self, name, version=None):
+        return SimpleNamespace(value=_vault_secrets[name], properties=SimpleNamespace(version="e2e-1"))
+
+
+credentials._vault = contextmanager(lambda: (yield _Vault()))
+scan_queue: list = []
+
+
+class _Queue:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+    def send(self, job):
+        scan_queue.append(job)
+
+
+reconciliation.ScanPublisher = _Queue
+
+
+def _no_mailboxes() -> None:
+    """The hourly pass visits every connected mailbox, so the e2e API starts with none (the API
+    test suite shares this database and leaves its own behind)."""
+    from app.core import db
+    with db.connection() as conn:
+        conn.execute("TRUNCATE email_connections, email_credentials, email_oauth_states, email_scan_results")
+
+
+_no_mailboxes()
+
+
+def run_scans() -> list[str]:
+    jobs, scan_queue[:] = list(scan_queue), []
+    with extraction.AzureExtractor() as model:
+        return [worker.process_job(job, model) for job in jobs]
 account_mail.send_verification_link = lambda email, token: outbox[email.lower()].append({"kind": "verify", "token": token})
 account_mail.send_login_code = lambda email, code: outbox[email.lower()].append({"kind": "otp", "code": code})
 
 e2e = APIRouter(prefix="/__e2e")
 e2e.add_api_route("/mail/{address}", lambda address: outbox[address.lower()], methods=["GET"])
 e2e.add_api_route("/complete-intake", lambda: complete_current_intake(), methods=["GET"])
+e2e.add_api_route("/email/maintain", lambda: subscriptions.maintain_subscriptions(), methods=["POST"])
+e2e.add_api_route("/email/scan", run_scans, methods=["POST"])
 
 
 def mark_eligible(case_id: str, program: str):

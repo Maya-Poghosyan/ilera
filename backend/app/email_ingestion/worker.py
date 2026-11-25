@@ -15,7 +15,7 @@ from app.core import db
 from app.core.azure_identity import managed_identity
 from app.core.config import get_settings, require_for
 from app.calendar.suggestions import SuggestedEvent
-from app.email_ingestion.providers.microsoft import ReauthorizationRequired
+from app.email_ingestion.providers.base import ReauthorizationRequired
 from app.email_ingestion import connections
 from app.email_ingestion.store import write_connection
 from app.email_ingestion.extraction import AzureExtractor, EXTRACTION_VERSION, Extraction
@@ -79,8 +79,6 @@ def _commit_result(conn, job: EmailScanJob, original: MailboxConnection, extract
 
 
 def process_job(job: EmailScanJob, extractor) -> str:
-    if job.provider != "microsoft":
-        return "unsupported"
     with db.connection() as conn:
         # Try-lock avoids occupying a pool slot waiting on duplicate model work.
         locked = conn.execute("SELECT pg_try_advisory_xact_lock(hashtextextended(%s, 0))",
@@ -100,7 +98,7 @@ def process_job(job: EmailScanJob, extractor) -> str:
         if current is None or current.consented_at != mailbox.consented_at:
             return "inactive"
         try:
-            message = asyncio.run(connections._provider().fetch_message(token, job.message_id))
+            message = asyncio.run(connections._provider(job.provider).fetch_message(token, job.message_id))
         except ReauthorizationRequired:
             connections.lock_mailbox(conn, mailbox.user_id, mailbox.case_id)
             current = _active_connection(conn, job)

@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, Field, SecretStr
 
 from app.accounts.sessions import get_current_user
 from app.accounts.users import User
 from app.cases.store import get_case_owner
-from app.email_ingestion.providers.microsoft import ProviderError
+from app.core.config import get_settings
+from app.email_ingestion.providers.base import ProviderError
 from app.email_ingestion import connections, credentials
 from app.email_ingestion.models import MailboxConnection
 from app.email_ingestion.store import list_connections
@@ -29,21 +32,22 @@ class PublicConnection(BaseModel):
     status: str
     mailbox_address: str | None = None
     consented_at: str
-    # Authorization alone does not mean the ingestion pipeline is running.
+    # Connected mailboxes are scanned: Microsoft through Graph notifications, Gmail hourly.
     scanning_active: bool = False
 
     @classmethod
     def from_mailbox(cls, mailbox: MailboxConnection) -> PublicConnection:
         return cls(id=mailbox.id, case_id=mailbox.case_id, provider=mailbox.provider,
                    status=mailbox.status, mailbox_address=mailbox.mailbox_address,
-                   consented_at=mailbox.consented_at.isoformat())
+                   consented_at=mailbox.consented_at.isoformat(),
+                   scanning_active=mailbox.status == "connected")
 
 
 @router.get("/providers")
 def providers(response: Response, user: User = Depends(get_current_user)) -> dict:
     response.headers["Cache-Control"] = "no-store"
     return {"microsoft": {"available": True, "account_type": "organization"},
-            "google": {"available": False}}
+            "google": {"available": get_settings().google_mail_available}}
 
 
 @router.get("/connections", response_model=list[PublicConnection])
@@ -57,16 +61,24 @@ class ConnectRequest(BaseModel):
     case_id: str = Field(min_length=1, max_length=128)
 
 
-@router.post("/microsoft/connect")
-def connect(body: ConnectRequest, response: Response, user: User = Depends(get_current_user)) -> dict:
+Provider = Literal["microsoft", "google"]
+NAMES = {"microsoft": "Microsoft", "google": "Google"}
+
+
+@router.post("/{provider}/connect")
+def connect(provider: Provider, body: ConnectRequest, response: Response,
+            user: User = Depends(get_current_user)) -> dict:
     response.headers["Cache-Control"] = "no-store"
     _owner(body.case_id, user)
+    if provider == "google" and not get_settings().google_mail_available:
+        raise HTTPException(503, "Gmail connections are not available yet")
     try:
-        return {"authorization_url": connections.begin_connection(user_id=user.id, case_id=body.case_id)}
+        return {"authorization_url": connections.begin_connection(
+            user_id=user.id, case_id=body.case_id, provider=provider)}
     except connections.ConnectionError:
         raise HTTPException(404, "Case not found") from None
     except (ProviderError, credentials.CredentialError):
-        raise HTTPException(503, "Microsoft mailbox connections are temporarily unavailable") from None
+        raise HTTPException(503, f"{NAMES[provider]} mailbox connections are temporarily unavailable") from None
 
 
 class CallbackRequest(BaseModel):
@@ -75,19 +87,21 @@ class CallbackRequest(BaseModel):
     denied: bool = False
 
 
-@router.post("/microsoft/callback", response_model=PublicConnection)
-def callback(body: CallbackRequest, response: Response, user: User = Depends(get_current_user)):
+@router.post("/{provider}/callback", response_model=PublicConnection)
+def callback(provider: Provider, body: CallbackRequest, response: Response,
+             user: User = Depends(get_current_user)):
     response.headers["Cache-Control"] = "no-store"
     if not 20 <= len(body.state.get_secret_value()) <= 512:
         raise HTTPException(400, "Connection request is invalid")
     try:
-        mailbox = connections.finish_connection(user_id=user.id, state=body.state.get_secret_value(),
+        mailbox = connections.finish_connection(
+            user_id=user.id, provider=provider, state=body.state.get_secret_value(),
             code=body.code.get_secret_value() if body.code else None, denied=body.denied)
         return PublicConnection.from_mailbox(mailbox)
     except connections.ConnectionError:
         raise HTTPException(400, "Connection request expired, was cancelled, or was already used") from None
     except ProviderError:
-        raise HTTPException(400, "Microsoft authorization failed. Please connect again.") from None
+        raise HTTPException(400, f"{NAMES[provider]} authorization failed. Please connect again.") from None
     except credentials.CredentialError:
         raise HTTPException(503, "Credential storage is temporarily unavailable") from None
 

@@ -9,6 +9,14 @@ from pydantic import AwareDatetime, BaseModel, SecretStr
 from app.email_ingestion.models import EmailMessage, EmailProviderName
 
 
+class ProviderError(Exception):
+    """Fixed-message provider failure; never carries tokens or message content."""
+
+
+class ReauthorizationRequired(ProviderError):
+    pass
+
+
 class OAuthTokens(BaseModel):
     access_token: SecretStr
     refresh_token: SecretStr
@@ -29,6 +37,8 @@ class EmailSubscription(BaseModel):
 
 
 class EmailProvider(Protocol):
+    """Microsoft is push-driven (subscribe/renew/unsubscribe/list_subscriptions); Google is polled
+    hourly through list_message_ids_since and implements only the methods below those four."""
     name: EmailProviderName
 
     def authorize(self, *, state: str, code_challenge: str, nonce: str) -> str: ...

@@ -19,18 +19,11 @@ from pydantic import SecretStr
 from app.core.config import get_settings
 from app.email_ingestion.models import EmailMessage
 from app.email_ingestion.privacy import private_transport
-from app.email_ingestion.providers.base import AuthorizedMailbox, EmailSubscription, OAuthTokens
+from app.email_ingestion.providers.base import (AuthorizedMailbox, EmailSubscription, OAuthTokens, ProviderError,
+                                                ReauthorizationRequired)
 
 GRAPH = "https://graph.microsoft.com/v1.0"
 SCOPES = "openid profile offline_access https://graph.microsoft.com/Mail.Read"
-
-
-class ProviderError(Exception):
-    pass
-
-
-class ReauthorizationRequired(ProviderError):
-    pass
 
 
 class MicrosoftEmailProvider:

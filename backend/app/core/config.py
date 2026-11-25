@@ -1,3 +1,4 @@
+import re
 from functools import lru_cache
 from urllib.parse import urlparse
 from uuid import UUID
@@ -56,6 +57,10 @@ class Settings(BaseSettings):
     email_managed_identity_client_id: str = ""
     email_openai_endpoint: str = ""
     email_openai_deployment: str = ""
+    # Gmail (polled hourly). Unset client id or redirect = Gmail connections are unavailable.
+    email_google_client_id: str = ""
+    email_google_redirect_uri: str = ""
+    email_google_client_secret_name: str = "ilera-google-client-secret"
 
     # Intake document assistance: a dedicated Azure OpenAI resource, separate from eligibility
     # research and email scanning, reached with managed identity.
@@ -102,16 +107,28 @@ class Settings(BaseSettings):
                 raise ValueError("personal Microsoft accounts are not supported")
         return value
 
-    @field_validator("email_microsoft_redirect_uri", "email_microsoft_notification_url")
+    @field_validator("email_google_client_id")
+    @classmethod
+    def _google_client_id(cls, value: str) -> str:
+        if value and not re.fullmatch(r"[0-9]+-[a-z0-9]+\.apps\.googleusercontent\.com", value):
+            raise ValueError("must be a Google OAuth web client id (<number>-<id>.apps.googleusercontent.com)")
+        return value
+
+    @field_validator("email_microsoft_redirect_uri", "email_microsoft_notification_url", "email_google_redirect_uri")
     @classmethod
     def _email_endpoint(cls, value: str, info) -> str:
         path = {"email_microsoft_redirect_uri": "/api/email/microsoft/callback",
-                "email_microsoft_notification_url": "/api/email/microsoft/notifications"}[info.field_name]
+                "email_microsoft_notification_url": "/api/email/microsoft/notifications",
+                "email_google_redirect_uri": "/api/email/google/callback"}[info.field_name]
         u = urlparse(value)
         if value and not (u.scheme == "https" and u.hostname and not u.username and not u.password
                           and not u.query and not u.fragment and u.path == path):
             raise ValueError(f"must be an https URL ending in {path}")
         return value
+
+    @property
+    def google_mail_available(self) -> bool:
+        return bool(self.email_google_client_id and self.email_google_redirect_uri)
 
 
 _EMAIL = ("database_url", "email_microsoft_tenant_id", "email_microsoft_client_id",
