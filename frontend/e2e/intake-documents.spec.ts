@@ -1,8 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
 // A one-page PDF whose text layer holds `text` (the stand-in model keys its reply off a marker word).
-function pdf(text: string): Buffer {
-  const stream = `BT /F1 12 Tf 72 720 Td (${text}) Tj ET`;
+function pdf(text: string, stream = `BT /F1 12 Tf 72 720 Td (${text}) Tj ET`): Buffer {
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
@@ -151,6 +150,18 @@ test("a DD-214 fills a veteran's service record", async ({ page }) => {
   await advanceTo(page, "recipient.va_service_start");
   await panel(page).getByRole("button", { name: "Use this answer" }).first().click();
   await expect(page.locator('[data-field-id="recipient.va_service_start"] input')).toHaveValue("1968-03-04");
+});
+
+test("a PDF that takes too long to read is stopped, and the next upload still works", async ({ page }) => {
+  await startAt(page, "household_assets");
+  // Valid but slow: one content stream with 200,000 text operations parses for several seconds,
+  // past the e2e API's 2-second limit.
+  const slow = pdf("", `BT /F1 1 Tf\n${"1 0 Td (ab) Tj\n".repeat(200_000)}ET`);
+  await upload(page, { name: "slow.pdf", mimeType: "application/pdf", buffer: slow });
+  await expect(page.getByText("We couldn't open this file.")).toBeVisible();
+
+  await upload(page, file("october-stub.pdf", "PAYSTUB Gross pay 2,000.00 CA SDI 24.00"));
+  await expect(page.getByText(/suggested answers? /)).toBeVisible();
 });
 
 test("unreadable files and untrusted model output are handled at the boundary", async ({ page, request }) => {

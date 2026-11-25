@@ -1,6 +1,7 @@
 """Launch the real API for the browser tests, replacing only the external services.
 
 - the document model client → the local fake (frontend/e2e/fake-azure-openai.mjs)
+- the PDF parse time limit → 2 seconds
 - outgoing email (ACS) → captured, readable at GET /__e2e/mail/{address}
 - the Azure Functions eligibility pipeline → not started (cases stay "processing";
   POST /__e2e/cases/{id}/eligible/{program} records one program's result)
@@ -37,7 +38,7 @@ os.environ.update(
 
 from app.accounts import mail as account_mail  # noqa: E402
 from app.cases import pipeline  # noqa: E402
-from app.intake.documents import extractor  # noqa: E402
+from app.intake.documents import extractor, upload  # noqa: E402
 from app.main import app  # noqa: E402
 from tests.intake_helpers import complete_current_intake  # noqa: E402
 
@@ -52,6 +53,8 @@ async def no_pipeline(profile):
 
 outbox: dict[str, list[dict]] = defaultdict(list)
 extractor.open_client = fake_client
+# A short PDF time limit, so the spec's slow-but-valid PDF hits it in seconds.
+upload.PDF_TIMEOUT_S = 2
 pipeline.start_eligibility_orchestration = no_pipeline
 account_mail.send_verification_link = lambda email, token: outbox[email.lower()].append({"kind": "verify", "token": token})
 account_mail.send_login_code = lambda email, code: outbox[email.lower()].append({"kind": "otp", "code": code})
