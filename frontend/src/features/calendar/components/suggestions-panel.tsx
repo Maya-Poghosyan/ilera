@@ -139,7 +139,7 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
               <div className={`min-h-0 ${leaving[e.id] ? "overflow-hidden" : ""}`}>
               <div className="pb-2">
               <div data-arrived={arrived.has(e.id) || undefined}
-                className={`flex items-center gap-4 rounded-lg border border-dashed border-primary/30 bg-card px-4 py-3 transition-transform duration-300 ease-out motion-reduce:transition-none ${leaving[e.id] === "dismissed" ? "-translate-x-6" : ""} ${arrived.has(e.id) ? "motion-safe:animate-suggestion-arrive" : ""}`}>
+                className={`flex items-start gap-4 rounded-lg border border-dashed border-primary/30 bg-card px-4 py-3 transition-transform duration-300 ease-out motion-reduce:transition-none ${leaving[e.id] === "dismissed" ? "-translate-x-6" : ""} ${arrived.has(e.id) ? "motion-safe:animate-suggestion-arrive" : ""}`}>
                 <div className="flex w-14 shrink-0 flex-col items-center rounded-md bg-brand-subtle py-1.5 text-primary">
                   {e.date ? (
                     <time dateTime={e.date} aria-label={formatISODate(e.date)} className="contents">
@@ -147,7 +147,7 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                       <span className="text-2xl leading-tight">{dateParts(e.date).day}</span>
                     </time>
                   ) : (
-                    <span className="py-2 text-2xl leading-tight text-muted-foreground" aria-hidden="true">?</span>
+                    <span className="px-1 py-1 text-center text-xs leading-tight text-muted-foreground">Date unknown</span>
                   )}
                 </div>
                 <div className="min-w-0 flex-1 space-y-1">
