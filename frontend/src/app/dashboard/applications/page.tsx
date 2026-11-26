@@ -11,6 +11,8 @@ import { useCaseId } from "@/features/accounts/auth-context";
 import { APPLICATION_GROUPS, ApplicationList, EMPTY_GROUP_MESSAGES, applicationGroup, type ApplicationGroup } from "@/features/applications/components/application-list";
 import { ApprovalForm } from "@/features/applications/components/approval-form";
 import { DocumentAutofill } from "@/features/applications/components/document-autofill";
+import { DocumentGuideDetails } from "@/features/applications/components/document-guide-item";
+import { autofillDocuments, guideFor } from "@/features/applications/document-guide";
 import { QuestionScreen } from "@/features/applications/components/question-screen";
 import { APP_STATUS_LABELS, STEP_LABELS, type ApplicationStep, type ApprovalDetails, type AppStatus } from "@/features/applications/types";
 import { useApplicationFlow } from "@/features/applications/use-application-flow";
@@ -136,10 +138,19 @@ export default function ApplicationsPage() {
     return (
       <StepLayout flow={f} program={flow.program} step={stage}>
         {error}
-        {flow.step === "questions" && (
+        {flow.step === "questions" && f.onAutofill && (
           <>
-            <DocumentAutofill suggested={[...new Set(activeApp.required_documents)]} documents={f.documents}
+            <DocumentAutofill suggested={autofillDocuments(activeApp.program)} documents={f.documents}
               onAdd={f.addDocuments} onRemove={f.removeDocument} />
+            <div className="flex justify-end">
+              <Button disabled={f.busy} onClick={f.toQuestions}>
+                {f.documents.some((d) => d.status === "read" && d.filled) ? "Review answers" : "Continue to questions"}
+              </Button>
+            </div>
+          </>
+        )}
+        {flow.step === "questions" && !f.onAutofill && (
+          <>
             <Progress value={((f.stepIndex + 1) / f.screens.length) * 100} />
             <p className="text-sm text-muted-foreground">Questions {f.stepIndex + 1} of {f.screens.length}</p>
             <Card>
@@ -148,7 +159,7 @@ export default function ApplicationsPage() {
               </CardContent>
             </Card>
             <div className="flex justify-between gap-2">
-              <Button variant="outline" disabled={f.busy || f.stepIndex === 0} onClick={f.back}>Back</Button>
+              <Button variant="outline" disabled={f.busy} onClick={f.back}>{f.stepIndex === 0 ? "Back to autofill" : "Back"}</Button>
               <Button disabled={f.busy} onClick={f.next}>{f.stepIndex >= f.screens.length - 1 ? "Continue to documents" : "Next"}</Button>
             </div>
           </>
@@ -157,7 +168,9 @@ export default function ApplicationsPage() {
           <>
             {items.length ? (
               <ul className="divide-y rounded-lg border bg-card">
-                {items.map((item) => (
+                {items.map((item) => {
+                  const guide = flow.step === "documents" ? guideFor(item, activeApp.program) : undefined;
+                  return (
                   <li key={item}>
                     <label className="flex cursor-pointer items-start gap-3 p-4">
                       <input
@@ -172,8 +185,15 @@ export default function ApplicationsPage() {
                       />
                       {item}
                     </label>
+                    {guide && (
+                      <details className="group -mt-2 px-4 pb-4 pl-11">
+                        <summary className="cursor-pointer text-sm text-primary underline underline-offset-2">What is this and where do I get it?</summary>
+                        <div className="pt-2"><DocumentGuideDetails guide={guide} /></div>
+                      </details>
+                    )}
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             ) : (
               <p className="text-muted-foreground">

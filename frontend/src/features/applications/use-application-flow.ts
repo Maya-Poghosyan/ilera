@@ -46,6 +46,8 @@ export function useApplicationFlow(caseId: string | null) {
   // Where a prefilled answer came from, until the caregiver changes it.
   const [filledFrom, setFilledFrom] = useState<Record<string, string>>({});
   const [documents, setDocuments] = useState<AppDocument[]>([]);
+  // Step 1 opens on its autofill page, before the question pages.
+  const [onAutofill, setOnAutofill] = useState(true);
   const pending = useRef(false);
   const answersRef = useRef(answers);
   useEffect(() => { answersRef.current = answers; }, [answers]);
@@ -112,6 +114,7 @@ export function useApplicationFlow(caseId: string | null) {
         setAnswers({ ...known, ...result.answers });
         setFilledFrom(Object.fromEntries(Object.keys(known).map((id) => [id, PROFILE_SOURCE])));
         setDocuments([]);
+        setOnAutofill(true);
         setErrors({});
         setStepIndex(0);
         setFlow({ step: "questions", program, questions: result.questions });
@@ -333,7 +336,13 @@ export function useApplicationFlow(caseId: string | null) {
     start, answer, next, reviewForms, download, followUp, saveFollowUps, updateStatus,
     previousStep, nextStep, goToPreviousStep, goToNextStep,
     reopenPreview: () => { if (activeApp) void run(() => showPreview(activeApp.program), "Could not open your forms. Please try again."); },
-    back: () => { setErrors({}); setStepIndex((index) => Math.max(0, index - 1)); },
+    onAutofill,
+    toQuestions: () => setOnAutofill(false),
+    back: () => {
+      setErrors({});
+      if (stepIndex === 0) setOnAutofill(true);
+      else setStepIndex((index) => index - 1);
+    },
     close: () => { setFailure(""); setFlow({ step: "list" }); },
   };
 }
