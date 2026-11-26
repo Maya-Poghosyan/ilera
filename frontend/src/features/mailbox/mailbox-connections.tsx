@@ -153,12 +153,12 @@ export function MailboxConnections({ description, className = "rounded-xl border
             <span className="min-w-0 break-words text-left">
               {connected.length ? connected.map((item) => (
                 <span key={item.id} className="block">
-                  {item.mailbox_address ? `Connected to ${item.mailbox_address}` : "Connected"}
+                  {item.mailbox_address || "Connected"}
                 </span>
               )) : "Not connected"}
             </span>
           </>;
-          const tile = "group flex w-full cursor-pointer items-center gap-3 rounded-lg border px-4 py-2 text-sm [&>svg]:shrink-0";
+          const tile = "group flex w-full cursor-pointer items-center gap-3 rounded-lg px-4 py-2 text-sm transition-colors hover:bg-muted [&>svg]:shrink-0";
           return connections.length ? (
             <details key={provider}>
               <summary className={`${tile} list-none`} aria-label={`Manage ${label}`}>{contents}</summary>

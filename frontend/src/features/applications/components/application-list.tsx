@@ -60,6 +60,7 @@ export function ApplicationList({ apps, onStart }: {
         const decision = app.determination ?? (app.status === "accepted" ? "approved" : app.status === "denied" ? "denied" : null);
         return (
           <Card key={app.program} className="gap-3">
+            <div className="px-(--card-spacing)"><StepProgress app={app} /></div>
             <CardHeader>
               <CardTitle className="text-2xl text-primary">
                 {app.program}{decision && ` (${decision})`}
@@ -88,7 +89,6 @@ export function ApplicationList({ apps, onStart }: {
                 </li>
                 <li><strong>Stage</strong> <span className="ml-2">{FINISHED_STATUSES.includes(app.status) ? APP_STATUS_LABELS[app.status] : STAGE_LABELS[app.stage]}</span></li>
               </ul>
-              <div className="mt-4"><StepProgress app={app} /></div>
             </CardContent>
           </Card>
         );
