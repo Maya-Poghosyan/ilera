@@ -103,7 +103,7 @@ function DocumentGallery({ owner }: { owner: string }) {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
           <h1 className="page-title">Documents</h1>
-          <p className="text-sm text-muted-foreground">Files added here are saved in this browser. PDF, JPG or PNG, up to 10 MB each.</p>
+          <p className="text-sm text-muted-foreground">PDF, JPG or PNG, up to 10 MB each.</p>
         </div>
         <input ref={input} type="file" multiple accept={ACCEPTED.join(",")} aria-label="Upload files" className="sr-only" tabIndex={-1}
           onChange={(event) => { const files = Array.from(event.target.files ?? []); event.target.value = ""; void upload(files); }} />

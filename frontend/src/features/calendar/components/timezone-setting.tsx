@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe } from "lucide-react";
+import { ChevronDown, Globe } from "lucide-react";
 
 import { US_TIMEZONES, timezoneLabel } from "@/features/calendar/timezone";
 
@@ -17,7 +17,7 @@ export function TimezoneSetting({ timezone, onChange }: {
       <select
         aria-label="Calendar time zone"
         title="Emails that give a time without a time zone use this one"
-        className="h-7 rounded-md border border-input bg-card pr-2 pl-7 text-[0.8rem] text-foreground shadow-xs focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+        className="h-7 appearance-none field-sizing-content rounded-md border border-input bg-card pr-7 pl-7 text-[0.8rem] text-foreground shadow-xs focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
         value={timezone ?? ""}
         onChange={(e) => onChange(e.target.value)}
       >
@@ -28,6 +28,7 @@ export function TimezoneSetting({ timezone, onChange }: {
           </option>
         ))}
       </select>
+      <ChevronDown className="pointer-events-none absolute top-1/2 right-2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
     </div>
   );
 }

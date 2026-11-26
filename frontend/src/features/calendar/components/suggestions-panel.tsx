@@ -104,10 +104,10 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
           <Button variant="outline" size="sm" onClick={onRetry}>Retry</Button>
         </div>
       ) : loading ? (
-        <p className="text-xs text-muted-foreground">Loading suggestions&hellip;</p>
+        <p className="text-sm text-muted-foreground">Loading suggestions&hellip;</p>
       ) : (
         <>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {pending.length > 0
               ? "Detected from your connected mailbox. Review each one before it joins your calendar."
               : "No suggestions to review."}
