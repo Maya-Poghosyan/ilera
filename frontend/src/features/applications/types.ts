@@ -94,5 +94,7 @@ export interface StartApplicationResult {
   total_fields: number;
   questions: AppQuestion[];
   answers?: Answers;
+  /** Answers already known from the profile or another application, not yet saved on this one. */
+  profile_answers?: Answers;
   error?: string;
 }

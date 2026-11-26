@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { completeApplication, listApplications, previewApplication, saveApplicationProgress, startApplication, updateAppStatus } from "@/features/applications/api";
+import { completeApplication, listApplications, previewApplication, readApplicationDocument, saveApplicationProgress, startApplication, updateAppStatus } from "@/features/applications/api";
 import { visibleScreens } from "@/features/applications/screens";
 import type { AppQuestion, ApplicationEntry, ApplicationStep, ApprovalDetails, AppStatus } from "@/features/applications/types";
 import { applicationSteps } from "@/features/applications/types";
@@ -14,6 +14,16 @@ type Flow =
   | { step: "preview"; program: string; pdfUrl: string };
 
 type Progress = Parameters<typeof saveApplicationProgress>[2];
+
+/** A document read to fill in answers. Kept in memory only. */
+export type AppDocument = { id: string; name: string } & (
+  | { status: "reading" }
+  | { status: "read"; filled: number; kept: number }
+  | { status: "failed"; message: string }
+);
+
+const PROFILE_SOURCE = "your profile";
+const isBlank = (value: AnswerValue | undefined) => value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0);
 
 const FLOW_STEPS: Record<Exclude<Flow["step"], "list" | "loading">, ApplicationStep> = {
   questions: "update_information",
@@ -33,7 +43,12 @@ export function useApplicationFlow(caseId: string | null) {
   const [stepIndex, setStepIndex] = useState(0);
   const [checked, setChecked] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  // Where a prefilled answer came from, until the caregiver changes it.
+  const [filledFrom, setFilledFrom] = useState<Record<string, string>>({});
+  const [documents, setDocuments] = useState<AppDocument[]>([]);
   const pending = useRef(false);
+  const answersRef = useRef(answers);
+  useEffect(() => { answersRef.current = answers; }, [answers]);
 
   useEffect(() => {
     if (!caseId) return;
@@ -93,7 +108,10 @@ export function useApplicationFlow(caseId: string | null) {
       const result = await startApplication(caseId, program);
       if (result.error) throw new Error(result.error);
       if (result.questions.length) {
-        setAnswers(result.answers ?? {});
+        const known = result.profile_answers ?? {};
+        setAnswers({ ...known, ...result.answers });
+        setFilledFrom(Object.fromEntries(Object.keys(known).map((id) => [id, PROFILE_SOURCE])));
+        setDocuments([]);
         setErrors({});
         setStepIndex(0);
         setFlow({ step: "questions", program, questions: result.questions });
@@ -133,6 +151,12 @@ export function useApplicationFlow(caseId: string | null) {
 
   function answer(fieldId: string, value: AnswerValue) {
     setAnswers((prev) => ({ ...prev, [fieldId]: value }));
+    setFilledFrom((prev) => {
+      if (!(fieldId in prev)) return prev;
+      const next = { ...prev };
+      delete next[fieldId];
+      return next;
+    });
     setErrors((prev) => {
       if (!prev[fieldId]) return prev;
       const next = { ...prev };
@@ -141,12 +165,47 @@ export function useApplicationFlow(caseId: string | null) {
     });
   }
 
+  /** Answers on the screens currently shown, ready to save. */
+  function visibleAnswers() {
+    return Object.fromEntries(screens.flat(2).filter((question) => question.field_id in answers)
+      .map((question) => [question.field_id, answers[question.field_id]]));
+  }
+
   function next() {
     if (flow.step !== "questions") return;
     const invalid = validateQuestions(currentScreen.flat() as Question[], answers);
     if (Object.keys(invalid).length) return setErrors(invalid);
-    if (stepIndex < screens.length - 1) return setStepIndex((index) => index + 1);
-    finishQuestions();
+    if (stepIndex >= screens.length - 1) return finishQuestions();
+    // Each page is saved as it is finished, so leaving partway keeps what was entered.
+    const { program } = flow;
+    void run(async () => {
+      await save(program, { stage: "update_information", answers: visibleAnswers() });
+      setStepIndex((index) => index + 1);
+    }, "Could not save your answers. Please try again.");
+  }
+
+  /** Reads documents and fills the blank answers they give; answers already given are kept. */
+  function addDocuments(files: File[]) {
+    if (!caseId || flow.step !== "questions") return;
+    const { program } = flow;
+    for (const file of files) {
+      const id = crypto.randomUUID();
+      setDocuments((prev) => [...prev, { id, name: file.name, status: "reading" }]);
+      void readApplicationDocument(caseId, program, file).then((result) => {
+        if (!result.ok) {
+          setDocuments((prev) => prev.map((d) => d.id === id ? { id, name: d.name, status: "failed", message: result.message } : d));
+          return;
+        }
+        const current = answersRef.current;
+        const entries = Object.entries(result.answers);
+        const blank = entries.filter(([field]) => isBlank(current[field]));
+        const kept = entries.filter(([field, value]) => !isBlank(current[field]) && JSON.stringify(current[field]) !== JSON.stringify(value)).length;
+        setAnswers((prev) => ({ ...prev, ...Object.fromEntries(blank.filter(([field]) => isBlank(prev[field]))) }));
+        setFilledFrom((prev) => ({ ...prev, ...Object.fromEntries(blank.map(([field]) => [field, `${file.name}, page ${result.pages[field] ?? 1}`])) }));
+        setErrors((prev) => Object.fromEntries(Object.entries(prev).filter(([field]) => !blank.some(([f]) => f === field))));
+        setDocuments((prev) => prev.map((d) => d.id === id ? { id, name: d.name, status: "read", filled: blank.length, kept } : d));
+      });
+    }
   }
 
   /** Saves the answers and moves to documents, or shows the first screen with a missing answer. */
@@ -160,10 +219,9 @@ export function useApplicationFlow(caseId: string | null) {
       }
     }
     const { program } = flow;
-    const visibleAnswers = Object.fromEntries(screens.flat(2).filter((question) => question.field_id in answers)
-      .map((question) => [question.field_id, answers[question.field_id]]));
+    const toSave = visibleAnswers();
     void run(async () => {
-      await save(program, { stage: "gather_documents", answers: visibleAnswers });
+      await save(program, { stage: "gather_documents", answers: toSave });
       setChecked(activeApp?.ready_documents ?? []);
       setFlow({ step: "documents", program });
     }, "Could not save your answers. Please try again.");
@@ -271,6 +329,7 @@ export function useApplicationFlow(caseId: string | null) {
   return {
     apps, loading: Boolean(caseId && loadedCase !== caseId), activeApp, flow, failure, busy,
     answers, errors, stepIndex, screens, currentScreen, checked, setChecked,
+    filledFrom, documents, addDocuments, removeDocument: (id: string) => setDocuments((prev) => prev.filter((d) => d.id !== id)),
     start, answer, next, reviewForms, download, followUp, saveFollowUps, updateStatus,
     previousStep, nextStep, goToPreviousStep, goToNextStep,
     reopenPreview: () => { if (activeApp) void run(() => showPreview(activeApp.program), "Could not open your forms. Please try again."); },

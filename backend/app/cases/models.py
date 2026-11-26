@@ -100,6 +100,9 @@ class CaseProfile(BaseModel):
     # "recipient.adl_needs"). This is the canonical record of what the user
     # entered; the typed fields above are projected from it via intake.mapping.
     answers: dict[str, Any] = Field(default_factory=dict)
+    # Answers to application form questions, keyed by question id. Group ids name the same fact on
+    # every form, so an answer given on one program's application prefills the others.
+    application_answers: dict[str, Any] = Field(default_factory=dict)
     resolution: ResolutionState = Field(default_factory=ResolutionState)
     fact_revision: int = 0
     fact_metadata: dict[str, FactMetadata] = Field(default_factory=dict)

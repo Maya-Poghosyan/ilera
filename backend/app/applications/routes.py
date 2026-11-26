@@ -1,17 +1,23 @@
 from datetime import date
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import Response
 from pydantic import BaseModel, Field, model_validator
 
 from app.accounts.access import require_case_access
 from app.applications.service import (canonical_program, complete_application, get_program_forms, list_programs, program_is_active, start_application,
                                       submit_answers)
+from app.applications.documents import DocumentAnswers, read_application_document
+from app.applications.profile_facts import apply_facts, is_fact
 from app.applications.state import AppStatus, ApplicationStage, ApplicationState, get_app_state, list_app_states, save_app_state
 from app.cases.models import EligibilityResult
-from app.cases.store import get_profile
+from app.cases.store import get_profile, mutate_profile
 from app.core import db
+from app.intake.documents.models import HTTP_STATUS, DocumentError, ErrorCode
+from app.intake.documents.routes import _read_body, spend_limit
+from app.intake.documents.upload import Upload
 from app.records.service import RenewalItem, list_renewal_items, save_renewal_item
 
 router = APIRouter()
@@ -96,7 +102,19 @@ def api_save_progress(
         allowed = {question.field_id for question in state.questions}
         if body.answers.keys() - allowed:
             raise HTTPException(422, "Unknown application answer")
-        state.answers.update(body.answers)
+        facts = {k: v for k, v in body.answers.items() if is_fact(k)}
+        answers = {k: v for k, v in body.answers.items() if not is_fact(k)}
+        state.answers.update(answers)
+
+        # Personal details go to the profile; form answers are also shared with other applications.
+        def share(current):
+            apply_facts(current, facts)
+            current.application_answers.update(answers)
+            return current, None
+        try:
+            mutate_profile(case_id, share)
+        except ValueError:
+            raise HTTPException(422, "Invalid personal details") from None
     if body.ready_documents is not None:
         state.ready_documents = [item for item in dict.fromkeys(body.ready_documents) if item in result.required_documents]
     if body.completed_follow_ups is not None:
@@ -252,3 +270,23 @@ def api_preview_stitched(
         content=pdf_bytes,
         media_type="application/pdf",
     )
+
+
+@router.post("/api/applications/{case_id}/{program}/documents", response_model=DocumentAnswers)
+async def api_read_application_document(
+    case_id: str, program: str, request: Request, _: str = Depends(require_case_access)
+) -> DocumentAnswers:
+    """Read one document (the raw request body) in memory and propose answers to this application's questions.
+
+    - Nothing is stored or logged; the caregiver reviews and saves answers through `/progress`
+    """
+    state = get_app_state(case_id, canonical_program(program))
+    if state is None or not state.questions:
+        raise HTTPException(409, "Open the application before adding documents")
+    try:
+        upload = Upload.parse(await _read_body(request))
+        if not spend_limit.allow():
+            raise DocumentError(ErrorCode.RATE_LIMITED)
+        return await run_in_threadpool(read_application_document, upload, state.questions)
+    except DocumentError as err:
+        raise HTTPException(HTTP_STATUS[err.code], err.code.value) from None

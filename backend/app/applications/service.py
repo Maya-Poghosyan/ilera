@@ -14,6 +14,7 @@ from app.forms.discovery import discover_fields, field_index
 from app.forms.filler import load_schema, pdf_path, resolve_fields, write_values
 from app.applications.questions import (build_question, group_questions, grouped_values, merge_question, same_fact,
                                          to_pdf_value)
+from app.applications.profile_facts import fact_questions, fact_value, is_fact, program_facts
 from app.applications.state import AppQuestion, AppStatus, ApplicationState, get_app_state, save_app_state
 from app.cases.models import CaseProfile
 
@@ -108,9 +109,11 @@ def list_programs() -> list[dict[str, Any]]:
 def start_application(
     case_id: str, program: str, profile: CaseProfile
 ) -> dict[str, Any]:
-    """Start or resume an application: autofill all forms and return the questions intake missed.
+    """Start or resume an application: autofill all forms and return the questions to review.
 
-    - Questions answered on an earlier visit come back with their saved answers."""
+    - Personal details the forms read from the profile come first, prefilled and editable
+    - Questions answered on an earlier visit come back with their saved answers
+    - Questions answered on another program's application come back as `profile_answers`"""
     form_ids = get_program_forms(program)
     if not form_ids:
         return {
@@ -122,7 +125,8 @@ def start_application(
             "error": f"No forms mapped for program '{program}'",
         }
 
-    questions: list[AppQuestion] = []
+    facts = program_facts(form_ids, profile)
+    questions: list[AppQuestion] = fact_questions(facts)
     by_question_id: dict[str, AppQuestion] = {}
     total_autofilled = 0
     total_fields = 0
@@ -174,7 +178,7 @@ def start_application(
             # A box no group claimed still asks something, and the something is often
             # a question already on screen: the form reprints the applicant's middle
             # name beside a section it belongs to.
-            asked = same_fact(loose, questions)
+            asked = same_fact(loose, [q for q in questions if not is_fact(q.field_id)])
             if asked is not None:
                 merge_question(asked, loose)
                 continue
@@ -195,14 +199,28 @@ def start_application(
     ] + questions
     save_app_state(state)
 
+    answers = {q.field_id: existing_answers[q.field_id] for q in questions
+               if q.field_id in existing_answers and not is_fact(q.field_id)}
+    shared = {fact: fact_value(profile, fact) for fact in facts}
+    shared.update({q.field_id: profile.application_answers[q.field_id] for q in questions
+                   if q.field_id in profile.application_answers and _fits(q, profile.application_answers[q.field_id])})
     return {
         "program": program,
         "form_ids": form_ids,
         "autofilled": total_autofilled,
         "total_fields": total_fields,
         "questions": [q.model_dump() for q in questions],
-        "answers": {q.field_id: existing_answers[q.field_id] for q in questions if q.field_id in existing_answers},
+        "answers": answers,
+        "profile_answers": {k: v for k, v in shared.items() if v not in (None, "", []) and k not in answers},
     }
+
+
+def _fits(question: AppQuestion, value: Any) -> bool:
+    """Whether another form's answer is a valid answer here: a choice must be one of these options."""
+    if not question.options or question.type not in ("single_select", "multi_select"):
+        return True
+    chosen = value if isinstance(value, list) else [value]
+    return all(c in question.options for c in chosen)
 
 
 def submit_answers(
@@ -225,6 +243,8 @@ def submit_answers(
 
         form_fields = set(load_schema(form_id).get("fields") or {})
         for field_id, raw in state.answers.items():
+            if is_fact(field_id):
+                continue  # read from the profile by resolve_fields
             question = questions_by_id.get(field_id)
             if question is not None:
                 if question.group_id:

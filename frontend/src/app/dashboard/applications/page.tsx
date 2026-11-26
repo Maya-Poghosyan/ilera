@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useCaseId } from "@/features/accounts/auth-context";
 import { APPLICATION_GROUPS, ApplicationList, EMPTY_GROUP_MESSAGES, applicationGroup, type ApplicationGroup } from "@/features/applications/components/application-list";
 import { ApprovalForm } from "@/features/applications/components/approval-form";
+import { DocumentAutofill } from "@/features/applications/components/document-autofill";
 import { QuestionScreen } from "@/features/applications/components/question-screen";
 import { APP_STATUS_LABELS, STEP_LABELS, type ApplicationStep, type ApprovalDetails, type AppStatus } from "@/features/applications/types";
 import { useApplicationFlow } from "@/features/applications/use-application-flow";
@@ -137,11 +138,13 @@ export default function ApplicationsPage() {
         {error}
         {flow.step === "questions" && (
           <>
+            <DocumentAutofill suggested={[...new Set(activeApp.required_documents)]} documents={f.documents}
+              onAdd={f.addDocuments} onRemove={f.removeDocument} />
             <Progress value={((f.stepIndex + 1) / f.screens.length) * 100} />
             <p className="text-sm text-muted-foreground">Questions {f.stepIndex + 1} of {f.screens.length}</p>
             <Card>
               <CardContent className="divide-y pt-6">
-                <QuestionScreen screen={f.currentScreen} answers={f.answers} errors={f.errors} onAnswer={f.answer} />
+                <QuestionScreen screen={f.currentScreen} answers={f.answers} errors={f.errors} filledFrom={f.filledFrom} onAnswer={f.answer} />
               </CardContent>
             </Card>
             <div className="flex justify-between gap-2">
