@@ -1,119 +1,127 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FileText, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { getFormDownloadUrl, listForms } from "@/features/forms/api";
-import type { FormSchema } from "@/features/forms/types";
-import { useCaseId } from "@/features/accounts/auth-context";
+import { useAuth } from "@/features/accounts/auth-context";
+import { pdfThumbnail } from "@/features/documents/pdf-thumbnail";
+import { deleteDocument, listDocuments, saveDocument, type SavedDocument } from "@/features/documents/storage";
 
-export default function DocumentsPage() {
-  const [forms, setForms] = useState<FormSchema[]>([]);
+const ACCEPTED = ["application/pdf", "image/jpeg", "image/png"];
+const MAX_BYTES = 10 * 1024 * 1024;
+
+function DocumentTile({ entry, onRemove }: { entry: SavedDocument; onRemove: () => void }) {
+  const [urls, setUrls] = useState<{ download: string; thumbnail: string | null } | null>(null);
+  useEffect(() => {
+    const download = URL.createObjectURL(entry.file);
+    const thumbnail = entry.thumbnail ? URL.createObjectURL(entry.thumbnail)
+      : entry.file.type.startsWith("image/") ? download : null;
+    const next = { download, thumbnail };
+    // Assign only after mount so object URLs always have a matching cleanup.
+    const timer = window.setTimeout(() => setUrls(next), 0);
+    return () => {
+      window.clearTimeout(timer);
+      URL.revokeObjectURL(download);
+      if (thumbnail && thumbnail !== download) URL.revokeObjectURL(thumbnail);
+    };
+  }, [entry]);
+
+  return (
+    <li className="relative min-w-0">
+      <a download={entry.file.name} href={urls?.download} aria-label={`Download ${entry.file.name}`}
+        className="group block rounded-lg focus-visible:outline-2 focus-visible:outline-primary">
+        <div className="flex aspect-[4/5] items-center justify-center overflow-hidden rounded-lg border bg-muted/40 group-hover:bg-muted">
+          {urls?.thumbnail ? (
+            // Blob URLs resolve in the browser and require no image proxy.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={urls.thumbnail} alt="" className="size-full object-contain p-2" />
+          ) : <FileText aria-hidden="true" className="size-10 text-muted-foreground" />}
+        </div>
+        <p className="mt-2 break-words text-sm font-medium">{entry.file.name}</p>
+      </a>
+      <Button type="button" size="icon-sm" variant="outline" className="absolute right-2 top-2 bg-card"
+        aria-label={`Remove ${entry.file.name}`} onClick={onRemove}><Trash2 /></Button>
+    </li>
+  );
+}
+
+function DocumentGallery({ owner }: { owner: string }) {
+  const input = useRef<HTMLInputElement>(null);
+  const [documents, setDocuments] = useState<SavedDocument[]>([]);
   const [loading, setLoading] = useState(true);
-  const caseId = useCaseId();
-  const [downloading, setDownloading] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    listForms()
-      .then((data) => setForms(data.forms))
-      .catch(() => setForms([]))
-      .finally(() => setLoading(false));
-  }, []);
+    let active = true;
+    listDocuments(owner)
+      .then((files) => { if (active) setDocuments(files); })
+      .catch(() => { if (active) setError("Could not load documents saved in this browser."); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [owner]);
 
-  function handleDownload(formId: string) {
-    if (!caseId) return;
-    setDownloading(formId);
-    const url = getFormDownloadUrl(formId, caseId);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${formId}_${caseId}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => setDownloading(null), 2000);
+  async function upload(files: File[]) {
+    if (!files.length) return;
+    setBusy(true);
+    setError("");
+    const errors: string[] = [];
+    try {
+      for (const file of files) {
+        if (!ACCEPTED.includes(file.type) || !file.size || file.size > MAX_BYTES) {
+          errors.push(`${file.name}: choose a PDF, JPG or PNG up to 10 MB.`);
+          continue;
+        }
+        const thumbnail = file.type === "application/pdf" ? await pdfThumbnail(file).catch(() => null) : null;
+        const entry = { owner, id: crypto.randomUUID(), file, thumbnail, createdAt: Date.now() };
+        try {
+          await saveDocument(entry);
+          setDocuments((current) => [entry, ...current]);
+        } catch {
+          errors.push(`Could not save ${file.name} in this browser.`);
+        }
+      }
+    } finally {
+      setError(errors.join(" "));
+      setBusy(false);
+    }
   }
 
-  const programGroups = forms.reduce<Record<string, FormSchema[]>>((acc, f) => {
-    const key = `${f.agency} / ${f.program}`;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(f);
-    return acc;
-  }, {});
+  async function remove(entry: SavedDocument) {
+    if (!window.confirm(`Remove ${entry.file.name} from Documents?`)) return;
+    setError("");
+    try {
+      await deleteDocument(owner, entry.id);
+      setDocuments((current) => current.filter(({ id }) => id !== entry.id));
+    } catch {
+      setError(`Could not remove ${entry.file.name}.`);
+    }
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-1">
           <h1 className="page-title">Documents</h1>
-          <p className="text-sm text-muted-foreground">
-            Auto-filled government benefit forms. Select a form and download the
-            pre-populated PDF.
-          </p>
+          <p className="text-sm text-muted-foreground">Files added here are saved in this browser. PDF, JPG or PNG, up to 10 MB each.</p>
         </div>
-      </div>
-
-      {!caseId && (
-        <Card>
-          <CardContent className="py-6">
-            <p className="text-sm text-muted-foreground">
-              Complete the intake wizard first to create a case profile, then
-              return here to download auto-filled forms.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {loading && (
-        <p className="text-sm text-muted-foreground">Loading forms...</p>
-      )}
-
-      {Object.entries(programGroups).map(([group, groupForms]) => (
-        <div key={group} className="space-y-3">
-          <h2 className="text-lg">{group}</h2>
-          {groupForms.map((f) => {
-            const hasMappings = f.mapped_fields > 0;
-            return (
-              <Card key={f.form_id}>
-                <CardHeader className="flex flex-row items-center justify-between py-4">
-                  <div className="flex items-center gap-3">
-                    <CardTitle className="text-base">{f.title}</CardTitle>
-                    <Badge variant={hasMappings ? "default" : "secondary"}>
-                      {f.form_id}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-muted-foreground">
-                      {f.mapped_fields}/{f.total_pdf_fields} fields mapped
-                    </span>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex items-center gap-2 py-0 pb-4">
-                  <Button
-                    size="sm"
-                    disabled={!caseId || downloading === f.form_id}
-                    onClick={() => handleDownload(f.form_id)}
-                  >
-                    {downloading === f.form_id
-                      ? "Downloading..."
-                      : "Download Filled PDF"}
-                  </Button>
-                  {f.source_url && (
-                    <a
-                      href={f.source_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-muted-foreground underline-offset-4 hover:underline"
-                    >
-                      Source
-                    </a>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      ))}
+        <input ref={input} type="file" multiple accept={ACCEPTED.join(",")} aria-label="Upload files" className="sr-only" tabIndex={-1}
+          onChange={(event) => { const files = Array.from(event.target.files ?? []); event.target.value = ""; void upload(files); }} />
+        <Button disabled={busy || loading} onClick={() => input.current?.click()}>
+          <Upload /> {busy ? "Saving files…" : "Upload documents"}
+        </Button>
+      </header>
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+      {loading ? <p role="status">Loading documents…</p> : documents.length ? (
+        <ul aria-label="Uploaded documents" className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-5">
+          {documents.map((entry) => <DocumentTile key={entry.id} entry={entry} onRemove={() => void remove(entry)} />)}
+        </ul>
+      ) : <p className="text-muted-foreground">No documents uploaded yet.</p>}
     </div>
   );
+}
+
+export default function DocumentsPage() {
+  const { user } = useAuth();
+  return user ? <DocumentGallery key={user.id} owner={user.id} /> : null;
 }
