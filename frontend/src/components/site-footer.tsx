@@ -22,10 +22,7 @@ const columns = [
 export function SiteFooter() {
   return (
     <footer className="bg-muted">
-      <div className="mx-auto grid w-full max-w-5xl gap-10 px-6 pt-14 pb-10 sm:grid-cols-[1fr_auto_auto] sm:gap-16">
-        <div className="max-w-xs">
-          <Logo size="lg" />
-        </div>
+      <div className="mx-auto grid w-full max-w-5xl gap-10 px-6 pt-14 pb-10 sm:grid-cols-[auto_auto_1fr] sm:gap-16">
         {columns.map((col) => (
           <div key={col.heading} className="space-y-3">
             <p className="text-xs tracking-wide text-muted-foreground uppercase">{col.heading}</p>
@@ -40,6 +37,9 @@ export function SiteFooter() {
             </ul>
           </div>
         ))}
+        <div className="sm:justify-self-end">
+          <Logo size="lg" />
+        </div>
       </div>
       <div className="mx-auto w-full max-w-5xl px-6">
         <p className="border-t border-border py-6 text-xs text-muted-foreground">

@@ -59,7 +59,7 @@ export function ApplicationList({ apps, onStart }: {
             </CardHeader>
             <CardContent className="text-base">
               <ul className="space-y-3 [&_strong]:text-primary">
-                {PROGRAM_BENEFITS[app.program] && <li><strong>Program Overview</strong><p>{PROGRAM_BENEFITS[app.program]}</p></li>}
+                {PROGRAM_BENEFITS[app.program] && <li><strong>Program Overview</strong> <span className="ml-2">{PROGRAM_BENEFITS[app.program]}</span></li>}
                 <li>
                   <strong>Program Match Level</strong>
                   <span className="ml-2 inline-flex items-center gap-1.5">

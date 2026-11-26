@@ -160,9 +160,9 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                   <button
                     className={`${iconButton} text-primary hover:bg-primary hover:text-white`}
                     aria-label="Accept"
-                    title={e.date ? "Add to calendar" : "Add a date first (edit)"}
-                    disabled={!e.date || !!leaving[e.id]}
-                    onClick={() => decide(e, "accepted")}
+                    title={e.date ? "Add to calendar" : "Add a date to accept"}
+                    disabled={!!leaving[e.id]}
+                    onClick={() => (e.date ? decide(e, "accepted") : setEditing(e.id))}
                   >
                     <Check className="size-3.5" />
                   </button>
