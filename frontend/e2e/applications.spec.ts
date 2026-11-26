@@ -13,14 +13,31 @@ test("an application can be marked pending, archived, restored, and accepted", a
   await expect(page.getByRole("heading", { name: "IHSS" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Update Information" })).toBeVisible();
   await expect(page.getByText(/^Questions 1 of \d+$/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Previous step/ })).toHaveCount(0);
+  // The next-step arrow needs every required answer first.
+  await page.getByRole("button", { name: "Next step: Gather documents" }).click();
+  await expect(page.getByRole("heading", { name: "Update Information" })).toBeVisible();
 
-  await page.getByRole("button", { name: "Update status", exact: true }).click();
+  // Skip ahead to follow-up, where the next step is the status update.
+  await page.getByRole("button", { name: "Back to applications" }).click();
+  expect((await page.request.put(`/api/applications/${caseId}/IHSS/progress`, { data: { stage: "follow_up" } })).ok()).toBe(true);
+  await page.reload();
+  await page.getByRole("button", { name: "Open IHSS application" }).click();
+  await expect(page.getByRole("heading", { name: "Follow-up Steps" })).toBeVisible();
+  await page.getByRole("button", { name: "Next step: Update status" }).click();
+  await expect(page.getByRole("heading", { name: "Update status" })).toBeVisible();
+  await page.getByRole("button", { name: "Previous step: Follow-up Steps" }).click();
+  await expect(page.getByRole("heading", { name: "Follow-up Steps" })).toBeVisible();
+  await page.getByRole("button", { name: "Previous step: Review application forms" }).click();
+  await expect(page.getByTitle("Filled application forms")).toBeVisible();
+  await page.getByRole("button", { name: "Next step: Follow-up Steps" }).click();
+  await page.getByRole("button", { name: "Next step: Update status" }).click();
   await page.getByRole("button", { name: "Mark pending determination" }).click();
   await expect(page.getByRole("heading", { name: "Program Applications" })).toBeVisible();
 
   const open = page.getByRole("button", { name: "Open IHSS application" });
   await open.click();
-  await expect(page.getByRole("heading", { name: "Update application status" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Update status" })).toBeVisible();
   await expect(page.getByText("Pending determination", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Archive application" }).click();
   const archived = page.getByRole("button", { name: /^Archived/ });

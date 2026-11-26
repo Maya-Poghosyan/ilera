@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import type { ReactNode } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -10,8 +11,57 @@ import { useCaseId } from "@/features/accounts/auth-context";
 import { APPLICATION_GROUPS, ApplicationList, EMPTY_GROUP_MESSAGES, applicationGroup, type ApplicationGroup } from "@/features/applications/components/application-list";
 import { ApprovalForm } from "@/features/applications/components/approval-form";
 import { QuestionScreen } from "@/features/applications/components/question-screen";
-import { APP_STATUS_LABELS, STAGE_LABELS, type ApprovalDetails, type AppStatus } from "@/features/applications/types";
+import { APP_STATUS_LABELS, STEP_LABELS, type ApplicationStep, type ApprovalDetails, type AppStatus } from "@/features/applications/types";
 import { useApplicationFlow } from "@/features/applications/use-application-flow";
+
+function StepArrow({ direction, step, disabled, onClick }: {
+  direction: "previous" | "next";
+  step: ApplicationStep | null;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  if (!step) return null;
+  // Pinned to the screen's vertical middle, over the grid column kept free for it beside the sidebar (w-60 + p-8).
+  const Icon = direction === "previous" ? ChevronLeft : ChevronRight;
+  return (
+    <button type="button" disabled={disabled} onClick={onClick}
+      aria-label={`${direction === "previous" ? "Previous" : "Next"} step: ${STEP_LABELS[step]}`}
+      className={`group fixed top-1/2 z-10 flex w-32 -translate-y-1/2 flex-col ${direction === "previous" ? "left-[17rem]" : "right-8"} items-center gap-2 rounded-lg p-2 text-center text-sm text-muted-foreground transition-colors hover:text-primary disabled:opacity-50`}>
+      <span className="flex size-12 items-center justify-center rounded-full border border-border bg-card transition-colors group-hover:border-primary">
+        <Icon aria-hidden="true" className="size-6" />
+      </span>
+      <span className="text-xs uppercase tracking-wide">{direction === "previous" ? "Previous" : "Next"}</span>
+      <span className="font-medium text-foreground group-hover:text-primary">{STEP_LABELS[step]}</span>
+    </button>
+  );
+}
+
+/** One application step, with the way back to the list and arrows to the neighbouring steps. */
+function StepLayout({ flow, program, step, children }: {
+  flow: ReturnType<typeof useApplicationFlow>;
+  program: string;
+  step: ApplicationStep;
+  children: ReactNode;
+}) {
+  return (
+    <div className="space-y-6">
+      <Button variant="ghost" size="lg" className="-ml-3 text-base" disabled={flow.busy} onClick={flow.close}>
+        <ArrowLeft aria-hidden="true" className="size-5" /> Back to applications
+      </Button>
+      <div className="grid grid-cols-[8rem_minmax(0,1fr)_8rem] gap-6">
+        <div><StepArrow direction="previous" step={flow.previousStep} disabled={flow.busy} onClick={flow.goToPreviousStep} /></div>
+        <div className="mx-auto w-full max-w-4xl space-y-6">
+          <header className="space-y-2">
+            <h1 className="page-title">{program}</h1>
+            <h2 className="text-2xl">{STEP_LABELS[step]}</h2>
+          </header>
+          {children}
+        </div>
+        <div><StepArrow direction="next" step={flow.nextStep} disabled={flow.busy} onClick={flow.goToNextStep} /></div>
+      </div>
+    </div>
+  );
+}
 
 export default function ApplicationsPage() {
   const caseId = useCaseId();
@@ -43,12 +93,7 @@ export default function ApplicationsPage() {
   if (flow.step === "status" && activeApp) {
     const status = activeApp.status;
     return (
-      <div className="mx-auto w-full max-w-3xl space-y-6">
-        <Button variant="ghost" disabled={f.busy} onClick={f.close}>Back to applications</Button>
-        <header className="space-y-2">
-          <h1 className="page-title">{flow.program}</h1>
-          <h2 className="text-2xl">Update application status</h2>
-        </header>
+      <StepLayout flow={f} program={flow.program} step="update_status">
         {error}
         <Card>
           <CardContent className="space-y-4">
@@ -77,7 +122,7 @@ export default function ApplicationsPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </StepLayout>
     );
   }
 
@@ -89,15 +134,7 @@ export default function ApplicationsPage() {
     const items = [...new Set(checklist)];
 
     return (
-      <div className="mx-auto w-full max-w-4xl space-y-6">
-        <div className="flex flex-wrap justify-between gap-2">
-          <Button variant="ghost" disabled={f.busy} onClick={f.close}>Back to applications</Button>
-          <Button variant="outline" disabled={f.busy} onClick={f.openStatus}>Update status</Button>
-        </div>
-        <header className="space-y-2">
-          <h1 className="page-title">{flow.program}</h1>
-          <h2 className="text-2xl">{STAGE_LABELS[stage]}</h2>
-        </header>
+      <StepLayout flow={f} program={flow.program} step={stage}>
         {error}
         {flow.step === "questions" && (
           <>
@@ -163,7 +200,7 @@ export default function ApplicationsPage() {
             </div>
           </>
         )}
-      </div>
+      </StepLayout>
     );
   }
 

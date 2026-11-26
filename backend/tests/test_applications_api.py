@@ -103,3 +103,24 @@ def test_denied_decision_remains_listed_after_eligibility_changes(client):
     [entry] = client.get(base).json()["applications"]
     assert (entry["program"], entry["determination"]) == ("Medicare", "denied")
     assert client.get(f"/api/records/renewals/{case_id}").json() == []
+
+
+def test_revisiting_questions_returns_saved_answers(client):
+    from app.cases.models import EligibilityResult
+    from app.cases.store import get_profile, save_profile
+
+    case_id = client.post("/api/intake", json={"answers": complete_current_intake()}).json()["id"]
+    profile = get_profile(case_id)
+    profile.eligibility["ihss"] = EligibilityResult(program="IHSS", status="likely")
+    save_profile(profile)
+    base = f"/api/applications/{case_id}/IHSS"
+    first = client.post(f"{base}/start").json()
+    question = first["questions"][0]
+    answer = question["options"][0] if question["options"] else "Test"
+    assert client.put(f"{base}/progress", json={
+        "stage": "gather_documents", "answers": {question["field_id"]: answer}
+    }).status_code == 200
+
+    again = client.post(f"{base}/start").json()
+    assert [q["field_id"] for q in again["questions"]] == [q["field_id"] for q in first["questions"]]
+    assert again["answers"] == {question["field_id"]: answer}

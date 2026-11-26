@@ -108,7 +108,9 @@ def list_programs() -> list[dict[str, Any]]:
 def start_application(
     case_id: str, program: str, profile: CaseProfile
 ) -> dict[str, Any]:
-    """Start or resume an application: autofill all forms and compose missing questions."""
+    """Start or resume an application: autofill all forms and return the questions intake missed.
+
+    - Questions answered on an earlier visit come back with their saved answers."""
     form_ids = get_program_forms(program)
     if not form_ids:
         return {
@@ -147,8 +149,6 @@ def start_application(
         grouped, covered = group_questions(form_id, profile, askable)
         for question in grouped:
             seen_fields |= set(question.fields)
-            if question.field_id in existing_answers:
-                continue
             # Group ids are shared across forms, so one fact asked by two forms in the
             # same program becomes a single question that fills both.
             already = by_question_id.get(question.field_id)
@@ -162,8 +162,6 @@ def start_application(
         for q in needs:
             field = q.get("field", "")
             if not field or field in covered or field in seen_fields:
-                continue
-            if field in existing_answers:
                 continue
             seen_fields.add(field)
             loose = build_question(
@@ -190,8 +188,11 @@ def start_application(
         )
     elif state.status == AppStatus.open:
         state.status = AppStatus.in_progress
-    # Saved answers still need their field mappings when a later visit resumes.
-    state.questions = [q for q in state.questions if q.field_id in existing_answers] + questions
+    # Saved answers whose question is no longer asked keep their field mappings.
+    asked_ids = {q.field_id for q in questions}
+    state.questions = [
+        q for q in state.questions if q.field_id in existing_answers and q.field_id not in asked_ids
+    ] + questions
     save_app_state(state)
 
     return {
@@ -200,6 +201,7 @@ def start_application(
         "autofilled": total_autofilled,
         "total_fields": total_fields,
         "questions": [q.model_dump() for q in questions],
+        "answers": {q.field_id: existing_answers[q.field_id] for q in questions if q.field_id in existing_answers},
     }
 
 

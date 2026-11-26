@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { completeApplication, listApplications, previewApplication, saveApplicationProgress, startApplication, updateAppStatus } from "@/features/applications/api";
 import { visibleScreens } from "@/features/applications/screens";
-import type { AppQuestion, ApplicationEntry, ApprovalDetails, AppStatus } from "@/features/applications/types";
+import type { AppQuestion, ApplicationEntry, ApplicationStep, ApprovalDetails, AppStatus } from "@/features/applications/types";
 import { type Answers, type AnswerValue, type Question, validateQuestions } from "@/features/intake/schema";
 
 type Flow =
@@ -13,6 +13,14 @@ type Flow =
   | { step: "preview"; program: string; pdfUrl: string };
 
 type Progress = Parameters<typeof saveApplicationProgress>[2];
+
+const FLOW_STEPS: Record<Exclude<Flow["step"], "list" | "loading">, ApplicationStep> = {
+  questions: "update_information",
+  documents: "gather_documents",
+  preview: "review_forms",
+  follow_up: "follow_up",
+  status: "update_status",
+};
 
 export function useApplicationFlow(caseId: string | null) {
   const [apps, setApps] = useState<ApplicationEntry[]>([]);
@@ -75,6 +83,30 @@ export function useApplicationFlow(caseId: string | null) {
     setFlow({ step: "preview", program, pdfUrl: URL.createObjectURL(blob) });
   }
 
+  /** Loads the form questions, with any saved answers filled in. */
+  async function openQuestions(app: ApplicationEntry) {
+    if (!caseId) return;
+    const { program } = app;
+    setFlow({ step: "loading", program });
+    try {
+      const result = await startApplication(caseId, program);
+      if (result.error) throw new Error(result.error);
+      if (result.questions.length) {
+        setAnswers(result.answers ?? {});
+        setErrors({});
+        setStepIndex(0);
+        setFlow({ step: "questions", program, questions: result.questions });
+      } else {
+        await save(program, { stage: "gather_documents" });
+        setChecked(app.ready_documents);
+        setFlow({ step: "documents", program });
+      }
+    } catch (error) {
+      setFlow({ step: "list" });
+      throw error;
+    }
+  }
+
   function start(program: string) {
     const app = apps.find((item) => item.program === program);
     if (!caseId || !app) return;
@@ -93,21 +125,7 @@ export function useApplicationFlow(caseId: string | null) {
         setChecked(app.ready_documents);
         setFlow({ step: "documents", program });
       } else {
-        setFlow({ step: "loading", program });
-        try {
-          const result = await startApplication(caseId, program);
-          if (result.error) throw new Error(result.error);
-          if (result.questions.length) {
-            setFlow({ step: "questions", program, questions: result.questions });
-          } else {
-            await save(program, { stage: "gather_documents" });
-            setChecked(app.ready_documents);
-            setFlow({ step: "documents", program });
-          }
-        } catch (error) {
-          setFlow({ step: "list" });
-          throw error;
-        }
+        await openQuestions(app);
       }
     }, `Could not open the ${program} application. Please try again.`);
   }
@@ -127,6 +145,19 @@ export function useApplicationFlow(caseId: string | null) {
     const invalid = validateQuestions(currentScreen.flat() as Question[], answers);
     if (Object.keys(invalid).length) return setErrors(invalid);
     if (stepIndex < screens.length - 1) return setStepIndex((index) => index + 1);
+    finishQuestions();
+  }
+
+  /** Saves the answers and moves to documents, or shows the first screen with a missing answer. */
+  function finishQuestions() {
+    if (flow.step !== "questions") return;
+    for (const [index, screen] of screens.entries()) {
+      const invalid = validateQuestions(screen.flat() as Question[], answers);
+      if (Object.keys(invalid).length) {
+        setStepIndex(index);
+        return setErrors(invalid);
+      }
+    }
     const { program } = flow;
     const visibleAnswers = Object.fromEntries(screens.flat(2).filter((question) => question.field_id in answers)
       .map((question) => [question.field_id, answers[question.field_id]]));
@@ -192,16 +223,57 @@ export function useApplicationFlow(caseId: string | null) {
     }, "Could not update the application status. Please try again.");
   }
 
+  const steps: ApplicationStep[] = activeApp?.has_forms
+    ? ["update_information", "gather_documents", "review_forms", "follow_up", "update_status"]
+    : ["follow_up", "update_status"];
+  const step = flow.step === "list" || flow.step === "loading" ? null : FLOW_STEPS[flow.step];
+  const stepAt = step ? steps.indexOf(step) : -1;
+  const previousStep = stepAt > 0 ? steps[stepAt - 1] : null;
+  const nextStep = stepAt >= 0 && stepAt < steps.length - 1 ? steps[stepAt + 1] : null;
+
+  /** Moving forward saves the step like its own continue button; moving back keeps the saved stage. */
+  function goToNextStep() {
+    if (!activeApp) return;
+    if (flow.step === "questions") return finishQuestions();
+    if (flow.step === "documents") return reviewForms();
+    if (flow.step === "preview") return followUp();
+    if (flow.step === "follow_up") {
+      const { program, stage, completed_follow_ups } = activeApp;
+      void run(async () => {
+        if (checked.join() !== completed_follow_ups.join()) await save(program, { stage, completed_follow_ups: checked });
+        setFlow({ step: "status", program });
+      }, "Could not save your follow-up steps. Please try again.");
+    }
+  }
+
+  function goToPreviousStep() {
+    if (!activeApp || !previousStep) return;
+    const { program, stage } = activeApp;
+    void run(async () => {
+      // Checklist ticks are kept when leaving a step backwards.
+      if (flow.step === "documents" && checked.join() !== activeApp.ready_documents.join()) {
+        await save(program, { stage, ready_documents: checked });
+      }
+      if (flow.step === "follow_up" && checked.join() !== activeApp.completed_follow_ups.join()) {
+        await save(program, { stage, completed_follow_ups: checked });
+      }
+      if (previousStep === "update_information") await openQuestions(activeApp);
+      else if (previousStep === "gather_documents") {
+        setChecked(activeApp.ready_documents);
+        setFlow({ step: "documents", program });
+      } else if (previousStep === "review_forms") await showPreview(program);
+      else if (previousStep === "follow_up") {
+        setChecked(activeApp.completed_follow_ups);
+        setFlow({ step: "follow_up", program });
+      }
+    }, "Could not open the previous step. Please try again.");
+  }
+
   return {
     apps, loading: Boolean(caseId && loadedCase !== caseId), activeApp, flow, failure, busy,
     answers, errors, stepIndex, screens, currentScreen, checked, setChecked,
     start, answer, next, reviewForms, download, followUp, saveFollowUps, updateStatus,
-    openStatus: () => {
-      if (activeApp) {
-        setFailure("");
-        setFlow({ step: "status", program: activeApp.program });
-      }
-    },
+    previousStep, nextStep, goToPreviousStep, goToNextStep,
     reopenPreview: () => { if (activeApp) void run(() => showPreview(activeApp.program), "Could not open your forms. Please try again."); },
     back: () => { setErrors({}); setStepIndex((index) => Math.max(0, index - 1)); },
     close: () => { setFailure(""); setFlow({ step: "list" }); },

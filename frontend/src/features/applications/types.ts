@@ -1,3 +1,4 @@
+import type { Answers } from "@/features/intake/schema";
 import type { FieldType } from "@/features/intake/schema";
 import type { EligibilityStatus } from "@/features/cases/types";
 
@@ -21,6 +22,14 @@ export const STAGE_LABELS: Record<ApplicationStage, string> = {
   gather_documents: "Gather documents",
   review_forms: "Review application forms",
   follow_up: "Follow-up Steps",
+};
+
+/** Every step of an application, in order; `update_status` follows the saved stages. */
+export type ApplicationStep = ApplicationStage | "update_status";
+
+export const STEP_LABELS: Record<ApplicationStep, string> = {
+  ...STAGE_LABELS,
+  update_status: "Update status",
 };
 
 export interface ApprovalDetails {
@@ -77,5 +86,6 @@ export interface StartApplicationResult {
   autofilled: number;
   total_fields: number;
   questions: AppQuestion[];
+  answers?: Answers;
   error?: string;
 }
