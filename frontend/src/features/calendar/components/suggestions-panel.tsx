@@ -14,9 +14,6 @@ function formatISODate(iso: string): string {
   return new Date(year, month - 1, day).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
-// Only appointments have somewhere to go; deadlines, renewals and tasks show no location row.
-const HAS_LOCATION = new Set(["Appointment"]);
-
 const iconButton = "flex size-9 items-center justify-center rounded-full bg-brand-subtle transition-colors disabled:opacity-40";
 // A reviewed suggestion fades (and, when dismissed, slides) out while its space collapses; the
 // decision is sent once the motion ends, so the list never jumps.
@@ -58,12 +55,10 @@ function SuggestionEditor({ suggestion, onSave, onCancel }: {
           <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
         </label>
       </div>
-      {HAS_LOCATION.has(suggestion.kind) && (
-        <label className="block space-y-1 text-xs text-muted-foreground">
-          <span>Location (optional)</span>
-          <Input value={location} maxLength={160} onChange={(e) => setLocation(e.target.value)} />
-        </label>
-      )}
+      <label className="block space-y-1 text-xs text-muted-foreground">
+        <span>Location (optional)</span>
+        <Input value={location} maxLength={160} onChange={(e) => setLocation(e.target.value)} />
+      </label>
       <div className="flex gap-2">
         <Button type="submit" size="sm" disabled={saving || !title.trim()}>Save</Button>
         <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
@@ -157,13 +152,11 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                       ? <>{formatISODate(e.date)}{e.time && `, ${e.time}${zoneSuffix(e.timezone, e.date, timezone)}`}</>
                       : <span className="text-foreground">Needs updating</span>}
                   </p>
-                  {HAS_LOCATION.has(e.kind) && (
-                    <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <MapPin aria-hidden="true" className="size-3.5 shrink-0" />
-                      <span className="sr-only">Location: </span>
-                      {e.location || <span className="text-foreground">Needs updating</span>}
-                    </p>
-                  )}
+                  <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <MapPin aria-hidden="true" className="size-3.5 shrink-0" />
+                    <span className="sr-only">Location: </span>
+                    {e.location || <span className="text-foreground">Needs updating</span>}
+                  </p>
                   {e.action_required && (
                     <p className="text-sm text-foreground">Action needed: {e.action_required}</p>
                   )}
