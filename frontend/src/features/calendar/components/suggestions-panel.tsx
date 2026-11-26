@@ -150,12 +150,12 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                     <span className="sr-only">Date and time: </span>
                     {e.date
                       ? <>{formatISODate(e.date)}{e.time && `, ${e.time}${zoneSuffix(e.timezone, e.date, timezone)}`}</>
-                      : <span className="text-foreground">Needs updating</span>}
+                      : <span className="text-foreground">Needs date</span>}
                   </p>
                   <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     <MapPin aria-hidden="true" className="size-3.5 shrink-0" />
                     <span className="sr-only">Location: </span>
-                    {e.location || <span className="text-foreground">Needs updating</span>}
+                    {e.location || <span className="text-foreground">Needs location</span>}
                   </p>
                   {e.action_required && (
                     <p className="text-sm text-foreground">Action needed: {e.action_required}</p>
