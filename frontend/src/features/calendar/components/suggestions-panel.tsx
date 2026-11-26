@@ -3,7 +3,6 @@
 import { Check, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
 import { useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { SuggestedEventAPI, SuggestionEdits } from "@/features/calendar/api";
@@ -14,7 +13,13 @@ function formatISODate(iso: string): string {
   return new Date(year, month - 1, day).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
-const iconButton = "flex size-7 items-center justify-center rounded-full bg-brand-subtle transition-colors disabled:opacity-40";
+/** Month and day for the date block on the left of a suggestion. */
+function dateParts(iso: string): { month: string; day: number } {
+  const [year, month, day] = iso.split("-").map(Number);
+  return { month: new Date(year, month - 1, day).toLocaleDateString("en-US", { month: "short" }), day };
+}
+
+const iconButton = "flex size-9 items-center justify-center rounded-full bg-brand-subtle transition-colors disabled:opacity-40";
 // A reviewed suggestion fades (and, when dismissed, slides) out while its space collapses; the
 // decision is sent once the motion ends, so the list never jumps.
 const EXIT_MS = 280;
@@ -90,11 +95,21 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
       });
     }, wait);
   }
+  // Suggestions with a date can go straight onto the calendar.
+  const ready = pending.filter((e) => e.date && !leaving[e.id]);
   return (
     <section aria-label="Suggested events" className="rounded-xl border border-brand-subtle bg-card p-5 space-y-3">
-      <div className="flex items-center gap-2 text-primary">
-        <Sparkles className="size-5" />
-        <h3 className="text-2xl">Suggested Events</h3>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-primary">
+          <Sparkles className="size-5" />
+          <h3 className="text-2xl">Suggested Events</h3>
+        </div>
+        {!failed && !loading && ready.length > 1 && (
+          <Button variant="outline" size="sm" disabled={ready.some((e) => leaving[e.id])}
+            onClick={() => ready.forEach((e) => decide(e, "accepted"))}>
+            <Check aria-hidden="true" /> Add all ({ready.length})
+          </Button>
+        )}
       </div>
       {failed ? (
         <div className="flex items-center justify-between rounded-lg border border-dashed border-red-300 bg-card px-3 py-2.5">
@@ -107,11 +122,7 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
         <p className="text-sm text-muted-foreground">Loading suggestions&hellip;</p>
       ) : (
         <>
-          <p className="text-sm text-muted-foreground">
-            {pending.length > 0
-              ? "Detected from your connected mailbox. Review each one before it joins your calendar."
-              : "No suggestions to review."}
-          </p>
+          {pending.length === 0 && <p className="text-sm text-muted-foreground">No suggestions to review.</p>}
           <div>
             {pending.map((e) => editing === e.id ? (
               <div key={e.id} className="pb-2">
@@ -128,29 +139,31 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
               <div className={`min-h-0 ${leaving[e.id] ? "overflow-hidden" : ""}`}>
               <div className="pb-2">
               <div data-arrived={arrived.has(e.id) || undefined}
-                className={`flex items-start justify-between rounded-lg border border-dashed border-primary/30 bg-card px-3 py-2.5 transition-transform duration-300 ease-out motion-reduce:transition-none ${leaving[e.id] === "dismissed" ? "-translate-x-6" : ""} ${arrived.has(e.id) ? "motion-safe:animate-suggestion-arrive" : ""}`}>
+                className={`flex items-center gap-4 rounded-lg border border-dashed border-primary/30 bg-card px-4 py-3 transition-transform duration-300 ease-out motion-reduce:transition-none ${leaving[e.id] === "dismissed" ? "-translate-x-6" : ""} ${arrived.has(e.id) ? "motion-safe:animate-suggestion-arrive" : ""}`}>
+                <div className="flex w-14 shrink-0 flex-col items-center rounded-md bg-brand-subtle py-1.5 text-primary">
+                  {e.date ? (
+                    <time dateTime={e.date} aria-label={formatISODate(e.date)} className="contents">
+                      <span className="text-xs font-medium uppercase">{dateParts(e.date).month}</span>
+                      <span className="text-2xl leading-tight">{dateParts(e.date).day}</span>
+                    </time>
+                  ) : (
+                    <span className="py-2 text-2xl leading-tight text-muted-foreground" aria-hidden="true">?</span>
+                  )}
+                </div>
                 <div className="min-w-0 flex-1 space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-medium text-foreground">{e.title}</p>
-                    {e.source && (
-                      <Badge variant="secondary" className="text-[10px] capitalize">
-                        {e.source === "email" ? "From email" : e.source}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {e.date && `${formatISODate(e.date)} · `}
+                  <p className="text-base font-medium text-foreground">{e.title}</p>
+                  <p className="text-sm text-muted-foreground">
                     {e.time ? `${e.time}${zoneSuffix(e.timezone, e.date, timezone)} · ` : ""}
                     {e.kind}
                   </p>
                   {!e.date && (
-                    <p className="flex items-center gap-1 text-xs text-foreground"><TriangleAlert aria-hidden="true" className="size-3 text-muted-foreground" />Missing: date</p>
+                    <p className="flex items-center gap-1.5 text-sm text-foreground"><TriangleAlert aria-hidden="true" className="size-3.5 text-muted-foreground" />Missing: date</p>
                   )}
                   {e.action_required && (
-                    <p className="text-xs text-foreground">Action needed: {e.action_required}</p>
+                    <p className="text-sm text-foreground">Action needed: {e.action_required}</p>
                   )}
                 </div>
-                <div className="ml-3 flex shrink-0 items-center gap-1 pt-0.5">
+                <div className="flex shrink-0 items-center gap-1.5">
                   <button
                     className={`${iconButton} text-muted-foreground hover:bg-primary hover:text-white`}
                     aria-label={`Edit ${e.title}`}
@@ -158,7 +171,7 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                     disabled={!!leaving[e.id]}
                     onClick={() => setEditing(e.id)}
                   >
-                    <Pencil className="size-3.5" />
+                    <Pencil className="size-4" />
                   </button>
                   <button
                     className={`${iconButton} text-primary hover:bg-primary hover:text-white`}
@@ -167,7 +180,7 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                     disabled={!!leaving[e.id]}
                     onClick={() => (e.date ? decide(e, "accepted") : setEditing(e.id))}
                   >
-                    <Check className="size-3.5" />
+                    <Check className="size-4" />
                   </button>
                   <button
                     className={`${iconButton} text-muted-foreground hover:bg-red-100 hover:text-red-600`}
@@ -175,7 +188,7 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                     disabled={!!leaving[e.id]}
                     onClick={() => decide(e, "dismissed")}
                   >
-                    <X className="size-3.5" />
+                    <X className="size-4" />
                   </button>
                 </div>
               </div>
