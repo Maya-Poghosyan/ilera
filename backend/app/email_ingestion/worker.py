@@ -19,7 +19,9 @@ from app.calendar.timezones import calendar_timezone
 from app.email_ingestion.providers.base import ReauthorizationRequired
 from app.email_ingestion import connections
 from app.email_ingestion.store import write_connection
-from app.email_ingestion.extraction import AzureExtractor, EXTRACTION_VERSION, MIN_SUGGESTION_CONFIDENCE, Extraction
+from app.email_ingestion.extraction import (
+    CARE_SENDERS, EXTRACTION_VERSION, MIN_SUGGESTION_CONFIDENCE, AzureExtractor, Extraction,
+)
 from app.email_ingestion.models import EmailScanJob, MailboxConnection, ScanResult
 from app.email_ingestion.privacy import private_transport_logs
 
@@ -54,7 +56,8 @@ def _commit_result(conn, job: EmailScanJob, original: MailboxConnection, extract
     # Preserve first-seen order, but remove repeated identical events within this email.
     seen = set()
     for item in extraction.events:
-        if item.relevance in {"unrelated", "uncertain"} or item.confidence < MIN_SUGGESTION_CONFIDENCE:
+        if (item.relevance in {"unrelated", "uncertain"} or item.confidence < MIN_SUGGESTION_CONFIDENCE
+                or item.sender_role not in CARE_SENDERS or item.selling):
             continue
         fingerprint = item.model_dump_json()
         if fingerprint in seen:
