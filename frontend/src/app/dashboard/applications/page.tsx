@@ -1,101 +1,190 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useState } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useCaseId } from "@/features/accounts/auth-context";
-import { ApplicationList } from "@/features/applications/components/application-list";
+import { APPLICATION_GROUPS, ApplicationList, applicationGroup, type ApplicationGroup } from "@/features/applications/components/application-list";
+import { ApprovalForm } from "@/features/applications/components/approval-form";
 import { QuestionScreen } from "@/features/applications/components/question-screen";
+import { APP_STATUS_LABELS, STAGE_LABELS } from "@/features/applications/types";
 import { useApplicationFlow } from "@/features/applications/use-application-flow";
-
-function Working({ title, detail }: { title: string; detail: string }) {
-  return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 py-20">
-      <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
-      <h2 className="text-lg">{title}</h2>
-      <p className="text-sm text-muted-foreground">{detail}</p>
-    </div>
-  );
-}
 
 export default function ApplicationsPage() {
   const caseId = useCaseId();
+  const [group, setGroup] = useState<ApplicationGroup>("likely");
   const f = useApplicationFlow(caseId);
-  const { flow } = f;
+  const [showApproval, setShowApproval] = useState(false);
+  const { flow, activeApp } = f;
+  const error = f.failure && <p role="alert" className="text-destructive">{f.failure}</p>;
 
   if (flow.step === "loading") {
-    return <Working title={`Auto-filling forms for ${flow.program}…`} detail="Resolving your profile against form templates." />;
-  }
-  if (flow.step === "completing") {
-    return <Working title={`Generating combined PDF for ${flow.program}…`} detail="Filling remaining fields and stitching forms together." />;
+    return <p role="status" className="py-8">Preparing your {flow.program} application…</p>;
   }
 
-  if (flow.step === "questions") {
-    const last = f.stepIndex >= f.screens.length - 1;
+  if (flow.step === "status" && activeApp && showApproval && !activeApp.renewal_record_id) {
     return (
-      <div className="mx-auto w-full max-w-2xl space-y-6">
-        <Button variant="ghost" size="sm" onClick={f.close}>&larr; Back to applications</Button>
-        <div className="space-y-1">
+      <ApprovalForm program={activeApp.program} busy={f.busy} error={f.failure}
+        onSave={(details) => f.updateStatus("accepted", details)} onCancel={() => setShowApproval(false)} />
+    );
+  }
+
+  if (flow.step === "status" && activeApp) {
+    const status = activeApp.status;
+    return (
+      <div className="mx-auto w-full max-w-3xl space-y-6">
+        <Button variant="ghost" disabled={f.busy} onClick={f.close}>Back to applications</Button>
+        <header className="space-y-2">
           <h1 className="page-title">{flow.program}</h1>
-          <p className="text-sm text-muted-foreground">
-            Filled {flow.autofilled} of {flow.totalFields} fields automatically. We need a few more answers to complete your forms.
-          </p>
-        </div>
-        <div className="space-y-2">
-          <Progress value={((f.stepIndex + 1) / f.screens.length) * 100} />
-          <p className="text-xs text-muted-foreground">Step {f.stepIndex + 1} of {f.screens.length}</p>
-        </div>
+          <h2 className="text-2xl">Update application status</h2>
+        </header>
+        {error}
         <Card>
-          <CardContent className="divide-y pt-6">
-            <QuestionScreen screen={f.currentScreen} answers={f.answers} errors={f.errors} onAnswer={f.answer} />
+          <CardContent className="space-y-4">
+            <p>Current status <strong className="ml-2">{APP_STATUS_LABELS[status]}</strong></p>
+            <div className="flex flex-wrap gap-2">
+              {status === "accepted" && (activeApp.renewal_record_id
+                ? <Link className={buttonVariants({ variant: "outline" })} href="/dashboard/records#renewals">View records</Link>
+                : <Button disabled={f.busy} onClick={() => setShowApproval(true)}>Add to Records &amp; Renewal</Button>)}
+              {status === "archived" ? (
+                <Button disabled={f.busy} onClick={() => f.updateStatus("restore")}>Restore application</Button>
+              ) : (
+                <>
+                  {status === "pending_determination" && (
+                    <>
+                      <Button disabled={f.busy} onClick={() => setShowApproval(true)}>Mark accepted</Button>
+                      <Button variant="outline" disabled={f.busy} onClick={() => f.updateStatus("in_progress")}>Move back to in progress</Button>
+                    </>
+                  )}
+                  {status !== "pending_determination" && status !== "accepted" && (
+                    <Button disabled={f.busy} onClick={() => f.updateStatus("pending_determination")}>Mark pending determination</Button>
+                  )}
+                  <Button variant="outline" disabled={f.busy} onClick={() => f.updateStatus("archived")}>Archive application</Button>
+                </>
+              )}
+            </div>
           </CardContent>
         </Card>
-        <div className="flex justify-between">
-          <Button variant="outline" disabled={f.stepIndex === 0} onClick={f.back}>Back</Button>
-          <Button onClick={f.next}>{last ? "Generate preview" : "Next"}</Button>
-        </div>
       </div>
     );
   }
 
-  if (flow.step === "preview") {
+  if (flow.step !== "list" && activeApp) {
+    const stage = flow.step === "questions" ? "update_information"
+      : flow.step === "documents" ? "gather_documents"
+      : flow.step === "preview" ? "review_forms" : "follow_up";
+    const checklist = flow.step === "documents" ? activeApp.required_documents : activeApp.next_steps;
+    const items = [...new Set(checklist)];
+
     return (
-      <div className="flex flex-1 flex-col gap-4">
-        <Button variant="ghost" size="sm" onClick={f.close}>&larr; Back to applications</Button>
-        <div className="space-y-1">
-          <h1 className="page-title">{flow.program} &mdash; Preview</h1>
-          <p className="text-sm text-muted-foreground">Review the completed forms below, then export.</p>
+      <div className="mx-auto w-full max-w-4xl space-y-6">
+        <div className="flex flex-wrap justify-between gap-2">
+          <Button variant="ghost" disabled={f.busy} onClick={f.close}>Back to applications</Button>
+          <Button variant="outline" disabled={f.busy} onClick={f.openStatus}>Update status</Button>
         </div>
-        <div className="flex-1 overflow-hidden rounded-lg border border-border">
-          <iframe src={`${flow.pdfUrl}#navpanes=0`} className="h-[75vh] w-full" title="PDF Preview" />
-        </div>
-        <div className="flex justify-end pb-4">
-          <Button onClick={f.exportAndClose}>Export &amp; return to dashboard</Button>
-        </div>
+        <header className="space-y-2">
+          <h1 className="page-title">{flow.program}</h1>
+          <h2 className="text-2xl">{STAGE_LABELS[stage]}</h2>
+        </header>
+        {error}
+        {flow.step === "questions" && (
+          <>
+            <Progress value={((f.stepIndex + 1) / f.screens.length) * 100} />
+            <p className="text-sm text-muted-foreground">Questions {f.stepIndex + 1} of {f.screens.length}</p>
+            <Card>
+              <CardContent className="divide-y pt-6">
+                <QuestionScreen screen={f.currentScreen} answers={f.answers} errors={f.errors} onAnswer={f.answer} />
+              </CardContent>
+            </Card>
+            <div className="flex justify-between gap-2">
+              <Button variant="outline" disabled={f.busy || f.stepIndex === 0} onClick={f.back}>Back</Button>
+              <Button disabled={f.busy} onClick={f.next}>{f.stepIndex >= f.screens.length - 1 ? "Continue to documents" : "Next"}</Button>
+            </div>
+          </>
+        )}
+        {(flow.step === "documents" || flow.step === "follow_up") && (
+          <>
+            {items.length ? (
+              <ul className="divide-y rounded-lg border bg-card">
+                {items.map((item) => (
+                  <li key={item}>
+                    <label className="flex cursor-pointer items-start gap-3 p-4">
+                      <input
+                        type="checkbox"
+                        className="mt-1 size-4 shrink-0 accent-primary"
+                        checked={f.checked.includes(item)}
+                        disabled={f.busy}
+                        onChange={(event) => {
+                          const selected = event.target.checked;
+                          f.setChecked((prev) => selected ? [...prev, item] : prev.filter((value) => value !== item));
+                        }}
+                      />
+                      {item}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground">
+                {flow.step === "documents" ? "There are no supporting documents on your checklist." : "There are no follow-up steps on your checklist."}
+              </p>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {flow.step === "documents" ? (
+                <Button disabled={f.busy} onClick={f.reviewForms}>{f.busy ? "Preparing forms…" : "Continue to form review"}</Button>
+              ) : (
+                <>
+                  {activeApp.has_forms && <Button variant="outline" disabled={f.busy} onClick={f.reopenPreview}>View forms</Button>}
+                  <Button variant="outline" disabled={f.busy} onClick={() => f.saveFollowUps()}>Save progress</Button>
+                  {activeApp.status !== "completed" && <Button disabled={f.busy || items.some((item) => !f.checked.includes(item))} onClick={() => f.saveFollowUps(true)}>Mark as complete</Button>}
+                </>
+              )}
+            </div>
+          </>
+        )}
+        {flow.step === "preview" && (
+          <>
+            <iframe src={`${flow.pdfUrl}#navpanes=0`} className="h-[75vh] w-full rounded-lg border" title="Filled application forms" />
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={f.download}>Download forms</Button>
+              <Button disabled={f.busy} onClick={f.followUp}>Continue to follow-up steps</Button>
+            </div>
+          </>
+        )}
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="page-title">Your applications</h1>
-        <p className="text-sm text-muted-foreground">Programs ranked by eligibility. Click to fill and download the required forms.</p>
-      </div>
-      {f.failure && <p role="alert" className="text-sm text-destructive">{f.failure}</p>}
-      {!caseId && !f.loading && (
-        <Card><CardContent className="py-6"><p className="text-sm text-muted-foreground">Complete the intake wizard and eligibility assessment first.</p></CardContent></Card>
+      <header className="space-y-1">
+        <h1 className="page-title">Program Applications</h1>
+        <p className="text-muted-foreground">Caregiver assistance programs you may be eligible for, ranked by match strength</p>
+      </header>
+      {error}
+      {f.loading ? (
+        <p role="status">Loading applications…</p>
+      ) : (
+        !f.apps.length && !f.failure && <p className="text-muted-foreground">
+          {caseId ? "There are no new program applications to show." : "Complete intake and eligibility to see program applications."}
+        </p>
       )}
-      {f.loading && (
-        <div className="flex items-center gap-3 py-8">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-primary" />
-          <p className="text-sm text-muted-foreground">Loading applications&hellip;</p>
-        </div>
+      {f.apps.length > 0 && (
+        <>
+          <div role="group" aria-label="Filter applications" className="flex flex-wrap gap-2">
+            {(Object.keys(APPLICATION_GROUPS) as ApplicationGroup[]).map((key) => (
+              <Button key={key} aria-pressed={group === key} variant={group === key ? "default" : "outline"} onClick={() => setGroup(key)}>
+                {APPLICATION_GROUPS[key]}
+              </Button>
+            ))}
+          </div>
+          {f.apps.some((app) => applicationGroup(app) === group)
+            ? <ApplicationList apps={f.apps.filter((app) => applicationGroup(app) === group)} onStart={(program) => { setShowApproval(false); f.start(program); }} />
+            : <p className="text-muted-foreground">There are no applications in this group.</p>}
+        </>
       )}
-      {f.apps.length === 0 && !f.loading && caseId && (
-        <Card><CardContent className="py-6"><p className="text-sm text-muted-foreground">No eligible programs found yet. Complete the eligibility assessment to see available applications.</p></CardContent></Card>
-      )}
-      <ApplicationList apps={f.apps} onStatus={f.setStatus} onStart={f.start} />
     </div>
   );
 }

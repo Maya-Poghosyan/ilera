@@ -136,25 +136,29 @@ export function MailboxConnections() {
   return (
     <section className="space-y-4 rounded-xl border border-brand-subtle bg-card p-5" aria-labelledby="email-connections-title">
       <h2 id="email-connections-title" className="text-2xl">Connect email inbox <span className="text-lg text-muted-foreground">(optional)</span></h2>
-      <div className="flex flex-wrap items-start gap-4">
+      <div className="grid gap-2">
         {(["google", "microsoft"] as const).map((provider) => {
           const { label } = PROVIDERS[provider];
           const connections = current?.connections.filter((item) => item.provider === provider
             && (item.status === "connected" || item.status === "reauthorization_required")) ?? [];
-          const connected = connections.some((item) => item.status === "connected");
+          const connected = connections.filter((item) => item.status === "connected");
           const contents = <>
             <ProviderLogo provider={provider} />
-            <span className="font-medium">{label}</span>
-            <span className="text-xs text-muted-foreground">{connected ? "Connected" : "Not connected"}</span>
-            {connections.map((item) => item.mailbox_address && <span key={item.id} className="max-w-full break-all text-xs">{item.mailbox_address}</span>)}
+            <span className="min-w-0 break-words text-left">
+              {connected.length ? connected.map((item) => (
+                <span key={item.id} className="block">
+                  {item.mailbox_address ? `Connected to ${item.mailbox_address}` : "Connected"}
+                </span>
+              )) : "Not connected"}
+            </span>
           </>;
-          const tile = "group flex min-w-32 cursor-pointer flex-col items-center gap-1 rounded-lg border px-4 py-3 text-sm";
+          const tile = "group flex w-full cursor-pointer items-center gap-3 rounded-lg border px-4 py-2 text-sm [&>svg]:shrink-0";
           return connections.length ? (
             <details key={provider}>
               <summary className={`${tile} list-none`} aria-label={`Manage ${label}`}>{contents}</summary>
               <div className="space-y-2 p-2">
                 {connections.map((item) => <div key={item.id} className="flex flex-wrap gap-2">
-                  {item.status === "reauthorization_required" && <Button size="sm" variant="outline" disabled={!available(provider) || busy} onClick={() => connect(provider)}>Reconnect {label}</Button>}
+                  {item.status === "reauthorization_required" && <Button size="sm" variant="outline" disabled={!available(provider) || busy} onClick={() => connect(provider)} aria-label={`Reconnect ${label}`}>Reconnect</Button>}
                   <Button size="sm" variant="outline" disabled={busy} aria-label={`Disconnect ${item.mailbox_address || label}`} onClick={() => disconnect(item)}>Disconnect</Button>
                 </div>)}
               </div>

@@ -58,10 +58,10 @@ export function RenewalsSection({ records }: { records: Records }) {
   });
 
   return (
-    <section className="space-y-3">
+    <section id="renewals" className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-xl">Renewals</h2>
+          <h2 className="text-xl">Programs and renewals</h2>
           {overdue > 0 && (
             <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800 border border-red-300">{overdue} overdue</span>
           )}
@@ -147,6 +147,14 @@ export function RenewalsSection({ records }: { records: Records }) {
                   {r.renewal_period_months ? ` · Renews every ${r.renewal_period_months} mo` : ""}
                   {r.last_completed_date ? ` · Last completed ${formatDate(r.last_completed_date)}` : ""}
                 </p>
+                {(r.approval_date || r.effective_date || r.benefit_end_date || r.tax_year) && (
+                  <dl className="grid gap-x-4 gap-y-1 text-sm sm:grid-cols-2">
+                    {r.approval_date && <div><dt className="inline font-medium">Approved </dt><dd className="inline">{formatDate(r.approval_date)}</dd></div>}
+                    {r.effective_date && <div><dt className="inline font-medium">Effective </dt><dd className="inline">{formatDate(r.effective_date)}</dd></div>}
+                    {r.benefit_end_date && <div><dt className="inline font-medium">Benefit period ends </dt><dd className="inline">{formatDate(r.benefit_end_date)}</dd></div>}
+                    {r.tax_year && <div><dt className="inline font-medium">Tax year </dt><dd className="inline">{r.tax_year}</dd></div>}
+                  </dl>
+                )}
                 {r.notes && <p className="text-sm whitespace-pre-wrap">{r.notes}</p>}
               </CardContent>
             </Card>

@@ -11,7 +11,7 @@ from typing import Any
 from pypdf import PdfWriter
 
 from app.forms.discovery import discover_fields, field_index
-from app.forms.filler import load_schema, resolve_fields, write_values
+from app.forms.filler import load_schema, pdf_path, resolve_fields, write_values
 from app.applications.questions import (build_question, group_questions, grouped_values, merge_question, same_fact,
                                          to_pdf_value)
 from app.applications.state import AppQuestion, AppStatus, ApplicationState, get_app_state, save_app_state
@@ -31,8 +31,48 @@ PROGRAM_FORMS: dict[str, list[str]] = {
 }
 
 
+PROGRAM_ALIASES = {
+    "ihss": "IHSS",
+    "in-home supportive services": "IHSS",
+    "medical": "Medi-Cal",
+    "medi cal": "Medi-Cal",
+    "medi-cal": "Medi-Cal",
+    "medicaid": "Medi-Cal",
+    "va": "VA Caregiver Support",
+    "va caregiver support": "VA Caregiver Support",
+    "pfl": "Paid Family Leave",
+    "medicare": "Medicare",
+    "tax": "Caregiver Tax Relief",
+}
+
+
+def canonical_program(program: str) -> str:
+    return PROGRAM_ALIASES.get(program.strip().casefold(), program.strip())
+
+
 def get_program_forms(program: str) -> list[str]:
-    return PROGRAM_FORMS.get(program, [])
+    forms = PROGRAM_FORMS.get(canonical_program(program), [])
+    return list(forms) if all(pdf_path(form) for form in forms) else []
+
+
+def program_is_active(profile: CaseProfile, program: str) -> bool:
+    recipient = profile.care_recipient
+    coverage = set(recipient.health_coverage)
+    if program == "Medi-Cal" and (
+        recipient.medicaid_status == "Enrolled now" or recipient.insurance == "medi-cal"
+        or coverage.intersection({"Medicaid", "Medi-Cal", "Both Medicare and Medicaid"})
+    ):
+        return True
+    if program == "Medicare" and (
+        recipient.insurance == "medicare" or coverage.intersection({"Medicare", "Both Medicare and Medicaid"})
+    ):
+        return True
+    statuses = profile.answers.get("recipient.program_statuses")
+    return isinstance(statuses, dict) and any(
+        (canonical_program(name) == program or program == "Medi-Cal" and name == "Medi-Cal care services or waiver")
+        and status in ("Currently receiving benefits", "Renewal due", "Approved, awaiting services")
+        for name, status in statuses.items()
+    )
 
 
 def list_programs() -> list[dict[str, Any]]:
@@ -148,9 +188,10 @@ def start_application(
             program=program,
             status=AppStatus.in_progress,
         )
-    else:
+    elif state.status == AppStatus.open:
         state.status = AppStatus.in_progress
-    state.questions = questions
+    # Saved answers still need their field mappings when a later visit resumes.
+    state.questions = [q for q in state.questions if q.field_id in existing_answers] + questions
     save_app_state(state)
 
     return {
@@ -219,10 +260,12 @@ def stitch_pdfs(pdf_bytes_list: list[bytes]) -> bytes:
     return buf.getvalue()
 
 
-def complete_application(case_id: str, program: str) -> None:
+def complete_application(case_id: str, program: str) -> AppStatus:
     """Mark an application as completed."""
     state = get_app_state(case_id, program)
     if state is None:
         state = ApplicationState(case_id=case_id, program=program)
-    state.status = AppStatus.completed
-    save_app_state(state)
+    if state.status in (AppStatus.open, AppStatus.in_progress, AppStatus.needs_info):
+        state.status = AppStatus.completed
+        save_app_state(state)
+    return state.status

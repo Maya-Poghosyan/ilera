@@ -77,7 +77,7 @@ export default function CalendarPage() {
         cells={calendar.cells}
         events={calendar.events}
         timezone={zone.timezone}
-        actions={<TimezoneSetting timezone={zone.timezone} source={zone.source} onChange={zone.change} />}
+        actions={<TimezoneSetting timezone={zone.timezone} onChange={zone.change} />}
         onMonth={calendar.goToMonth}
         onToday={calendar.goToday}
       />

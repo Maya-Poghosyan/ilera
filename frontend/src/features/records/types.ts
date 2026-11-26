@@ -49,6 +49,11 @@ export interface RenewalItem {
   case_id: string;
   program: string;
   due_date: string | null;
+  source_application?: string | null;
+  approval_date?: string | null;
+  effective_date?: string | null;
+  benefit_end_date?: string | null;
+  tax_year?: number | null;
   status: RenewalStatus;
   notes: string;
   last_completed_date: string | null;

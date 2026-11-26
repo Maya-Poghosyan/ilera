@@ -90,6 +90,11 @@ class RenewalItem(BaseModel):
     case_id: str
     program: str = "IHSS"
     due_date: Optional[str] = None  # ISO date
+    source_application: Optional[str] = None
+    approval_date: Optional[str] = None
+    effective_date: Optional[str] = None
+    benefit_end_date: Optional[str] = None
+    tax_year: Optional[int] = None
     status: str = "active"  # active | pending | overdue — caregiver-set lifecycle
     notes: str = ""
     last_completed_date: Optional[str] = None  # ISO date the renewal was last filed
@@ -165,8 +170,8 @@ def delete_journal(entry_id: str, case_id: str) -> bool:
 # --- Renewals (multiple per case) ---
 
 
-def save_renewal_item(item: RenewalItem) -> None:
-    _renewal_items.put((item.case_id, item.id), item.model_dump_json())
+def save_renewal_item(item: RenewalItem, *, transaction=None) -> None:
+    _renewal_items.put((item.case_id, item.id), item.model_dump_json(), transaction=transaction)
 
 
 def get_renewal_item(case_id: str, item_id: str) -> Optional[RenewalItem]:
@@ -174,8 +179,8 @@ def get_renewal_item(case_id: str, item_id: str) -> Optional[RenewalItem]:
     return RenewalItem.model_validate(doc) if doc else None
 
 
-def list_renewal_items(case_id: str) -> list[RenewalItem]:
-    items = [RenewalItem.model_validate(doc) for doc in _renewal_items.list(case_id)]
+def list_renewal_items(case_id: str, *, transaction=None) -> list[RenewalItem]:
+    items = [RenewalItem.model_validate(doc) for doc in _renewal_items.list(case_id, transaction=transaction)]
     # Undated renewals sort last; otherwise soonest due date first.
     return sorted(
         items,

@@ -1,12 +1,43 @@
 import type { FieldType } from "@/features/intake/schema";
 import type { EligibilityStatus } from "@/features/cases/types";
 
-export type AppStatus = "open" | "in_progress" | "needs_info" | "completed";
+export type AppStatus = "open" | "in_progress" | "needs_info" | "completed" | "pending_determination" | "accepted" | "archived";
+
+export const APP_STATUS_LABELS: Record<AppStatus, string> = {
+  open: "Open",
+  in_progress: "In progress",
+  needs_info: "Needs information",
+  completed: "Completed",
+  pending_determination: "Pending determination",
+  accepted: "Accepted",
+  archived: "Archived",
+};
+
+export type ApplicationStage = "update_information" | "gather_documents" | "review_forms" | "follow_up";
+
+export const STAGE_LABELS: Record<ApplicationStage, string> = {
+  update_information: "Update Information",
+  gather_documents: "Gather documents",
+  review_forms: "Review application forms",
+  follow_up: "Follow-up Steps",
+};
+
+export interface ApprovalDetails {
+  approval_date?: string;
+  effective_date?: string;
+  due_date?: string;
+  benefit_end_date?: string;
+  tax_year?: number;
+}
 
 export interface ApplicationEntry {
   program: string;
   status: AppStatus;
+  renewal_record_id?: string | null;
   form_ids: string[];
+  stage: ApplicationStage;
+  ready_documents: string[];
+  completed_follow_ups: string[];
   eligibility_status: EligibilityStatus | null;
   confidence: number;
   rationale: string;
