@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { completeApplication, listApplications, previewApplication, saveApplicationProgress, startApplication, updateAppStatus } from "@/features/applications/api";
 import { visibleScreens } from "@/features/applications/screens";
 import type { AppQuestion, ApplicationEntry, ApplicationStep, ApprovalDetails, AppStatus } from "@/features/applications/types";
+import { applicationSteps } from "@/features/applications/types";
 import { type Answers, type AnswerValue, type Question, validateQuestions } from "@/features/intake/schema";
 
 type Flow =
@@ -223,9 +224,7 @@ export function useApplicationFlow(caseId: string | null) {
     }, "Could not update the application status. Please try again.");
   }
 
-  const steps: ApplicationStep[] = activeApp?.has_forms
-    ? ["update_information", "gather_documents", "review_forms", "follow_up", "update_status"]
-    : ["follow_up", "update_status"];
+  const steps = applicationSteps(!!activeApp?.has_forms);
   const step = flow.step === "list" || flow.step === "loading" ? null : FLOW_STEPS[flow.step];
   const stepAt = step ? steps.indexOf(step) : -1;
   const previousStep = stepAt > 0 ? steps[stepAt - 1] : null;

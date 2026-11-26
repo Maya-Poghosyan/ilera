@@ -1,7 +1,7 @@
 import { ArrowUpRight, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { APP_STATUS_LABELS, STAGE_LABELS, type ApplicationEntry } from "@/features/applications/types";
+import { APP_STATUS_LABELS, STAGE_LABELS, applicationSteps, type ApplicationEntry } from "@/features/applications/types";
 import { PROGRAM_BENEFITS, PROGRAM_WEBSITES } from "@/features/cases/program-benefits";
 import type { EligibilityStatus } from "@/features/cases/types";
 
@@ -28,6 +28,25 @@ export const EMPTY_GROUP_MESSAGES: Record<ApplicationGroup, string> = {
 export function applicationGroup(app: ApplicationEntry): ApplicationGroup {
   if (app.determination || ["archived", "accepted", "denied"].includes(app.status)) return "archived";
   return app.eligibility_status === "unlikely" ? "unlikely" : "likely";
+}
+
+const FINISHED_STATUSES = ["completed", "pending_determination", "accepted", "denied", "archived"];
+
+/** Segmented bar: one segment per step, filled up to the current one. */
+function StepProgress({ app }: { app: ApplicationEntry }) {
+  const steps = applicationSteps(app.has_forms);
+  const done = FINISHED_STATUSES.includes(app.status) ? steps.length : Math.max(steps.indexOf(app.stage), 0) + 1;
+  return (
+    <div role="progressbar" aria-label={`${app.program} progress`} aria-valuemin={0} aria-valuemax={steps.length} aria-valuenow={done}
+      aria-valuetext={`Step ${done} of ${steps.length}`} className="space-y-1.5">
+      <div className="flex gap-1">
+        {steps.map((s, i) => (
+          <span key={s} className={`h-1.5 flex-1 rounded-full ${i < done ? "bg-primary" : "bg-muted"}`} />
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">Step {done} of {steps.length}</p>
+    </div>
+  );
 }
 
 export function ApplicationList({ apps, onStart }: {
@@ -67,8 +86,9 @@ export function ApplicationList({ apps, onStart }: {
                     {MATCH_LABELS[match]}
                   </span>
                 </li>
-                <li><strong>Stage</strong> <span className="ml-2">{["completed", "pending_determination", "accepted", "denied", "archived"].includes(app.status) ? APP_STATUS_LABELS[app.status] : STAGE_LABELS[app.stage]}</span></li>
+                <li><strong>Stage</strong> <span className="ml-2">{FINISHED_STATUSES.includes(app.status) ? APP_STATUS_LABELS[app.status] : STAGE_LABELS[app.stage]}</span></li>
               </ul>
+              <div className="mt-4"><StepProgress app={app} /></div>
             </CardContent>
           </Card>
         );

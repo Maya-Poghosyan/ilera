@@ -139,10 +139,13 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {e.date ? formatISODate(e.date) : "Date needs review"}
-                    {e.time ? ` · ${e.time}${zoneSuffix(e.timezone, e.date, timezone)}` : ""}{" · "}
+                    {e.date && `${formatISODate(e.date)} · `}
+                    {e.time ? `${e.time}${zoneSuffix(e.timezone, e.date, timezone)} · ` : ""}
                     {e.kind}
                   </p>
+                  {!e.date && (
+                    <p className="text-xs font-medium text-red-600">Missing: date</p>
+                  )}
                   {e.action_required && (
                     <p className="text-xs font-medium text-amber-600">Action needed: {e.action_required}</p>
                   )}

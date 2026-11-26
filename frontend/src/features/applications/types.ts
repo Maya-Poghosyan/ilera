@@ -27,6 +27,13 @@ export const STAGE_LABELS: Record<ApplicationStage, string> = {
 /** Every step of an application, in order; `update_status` follows the saved stages. */
 export type ApplicationStep = ApplicationStage | "update_status";
 
+/** The steps an application walks through; programs with no forms go straight to follow-up. */
+export function applicationSteps(hasForms: boolean): ApplicationStep[] {
+  return hasForms
+    ? ["update_information", "gather_documents", "review_forms", "follow_up", "update_status"]
+    : ["follow_up", "update_status"];
+}
+
 export const STEP_LABELS: Record<ApplicationStep, string> = {
   ...STAGE_LABELS,
   update_status: "Update status",
