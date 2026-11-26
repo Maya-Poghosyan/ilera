@@ -38,20 +38,23 @@ def api_list_applications(case_id: str, _: str = Depends(require_case_access)) -
     candidates += [
         (name, None) for name, state in existing.items()
         if name not in profile.eligibility
-        and state.status in (AppStatus.pending_determination, AppStatus.accepted, AppStatus.archived)
+        and state.status in (AppStatus.pending_determination, AppStatus.accepted, AppStatus.denied, AppStatus.archived)
     ]
     for name, eligibility in candidates:
         program_name = canonical_program(name)
         state = existing.get(program_name) or existing.get(name)
         tracking_decision = state and state.status in (
-            AppStatus.pending_determination, AppStatus.accepted, AppStatus.archived
+            AppStatus.pending_determination, AppStatus.accepted, AppStatus.denied, AppStatus.archived
         )
         if program_name in seen or (program_is_active(profile, program_name) and not tracking_decision):
             continue
         seen.add(program_name)
         forms = get_program_forms(program_name)
+        decision_status = state.pre_archive_status if state and state.status == AppStatus.archived else state.status if state else None
+        determination = {AppStatus.accepted: "approved", AppStatus.denied: "denied"}.get(decision_status)
         apps.append({
             "program": program_name,
+            "determination": determination,
             "status": state.status if state else "open",
             "form_ids": forms,
             "renewal_record_id": state.renewal_record_id if state else None,
@@ -172,6 +175,8 @@ def api_update_app_status(
         state = get_app_state(case_id, program, transaction=conn)
         if state is None:
             state = ApplicationState(case_id=case_id, program=program)
+        if body.status == AppStatus.denied and state.status not in (AppStatus.pending_determination, AppStatus.denied):
+            raise HTTPException(409, "Mark the application pending determination before recording denial")
         if body.status == "restore":
             if state.status == AppStatus.archived:
                 state.status = state.pre_archive_status or AppStatus.open

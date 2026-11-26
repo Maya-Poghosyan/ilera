@@ -92,3 +92,14 @@ def test_approval_links_existing_record_and_does_not_duplicate_on_retry(client):
     assert record["due_date"] == "2027-11-02"
     assert record["last_completed_date"] is None
     assert record["notes"] == "County contact saved"
+
+
+def test_denied_decision_remains_listed_after_eligibility_changes(client):
+    case_id = client.post("/api/intake", json={"answers": complete_current_intake()}).json()["id"]
+    base = f"/api/applications/{case_id}"
+    application = f"{base}/Medicare"
+    assert client.patch(application, json={"status": "pending_determination"}).status_code == 200
+    assert client.patch(application, json={"status": "denied"}).json()["status"] == "denied"
+    [entry] = client.get(base).json()["applications"]
+    assert (entry["program"], entry["determination"]) == ("Medicare", "denied")
+    assert client.get(f"/api/records/renewals/{case_id}").json() == []

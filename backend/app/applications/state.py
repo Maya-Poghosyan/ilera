@@ -15,6 +15,7 @@ class AppStatus(str, Enum):
     completed = "completed"
     pending_determination = "pending_determination"
     accepted = "accepted"
+    denied = "denied"
     archived = "archived"
 
 

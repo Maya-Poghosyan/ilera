@@ -2,20 +2,29 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useCaseId } from "@/features/accounts/auth-context";
-import { APPLICATION_GROUPS, ApplicationList, applicationGroup, type ApplicationGroup } from "@/features/applications/components/application-list";
+import { APPLICATION_GROUPS, ApplicationList, EMPTY_GROUP_MESSAGES, applicationGroup, type ApplicationGroup } from "@/features/applications/components/application-list";
 import { ApprovalForm } from "@/features/applications/components/approval-form";
 import { QuestionScreen } from "@/features/applications/components/question-screen";
-import { APP_STATUS_LABELS, STAGE_LABELS } from "@/features/applications/types";
+import { APP_STATUS_LABELS, STAGE_LABELS, type ApprovalDetails, type AppStatus } from "@/features/applications/types";
 import { useApplicationFlow } from "@/features/applications/use-application-flow";
 
 export default function ApplicationsPage() {
   const caseId = useCaseId();
-  const [group, setGroup] = useState<ApplicationGroup>("likely");
+  const [expanded, setExpanded] = useState<Set<ApplicationGroup>>(() => new Set(["likely"]));
   const f = useApplicationFlow(caseId);
+  const toggle = (group: ApplicationGroup, open: boolean) => setExpanded((prev) => {
+    const next = new Set(prev);
+    if (open) next.add(group); else next.delete(group);
+    return next;
+  });
+  // Expands the section an updated application lands in, so it stays in view.
+  const updateStatus = (status: AppStatus | "restore", details?: ApprovalDetails) =>
+    f.updateStatus(status, details, (app) => toggle(applicationGroup(app), true));
   const [showApproval, setShowApproval] = useState(false);
   const { flow, activeApp } = f;
   const error = f.failure && <p role="alert" className="text-destructive">{f.failure}</p>;
@@ -27,7 +36,7 @@ export default function ApplicationsPage() {
   if (flow.step === "status" && activeApp && showApproval && !activeApp.renewal_record_id) {
     return (
       <ApprovalForm program={activeApp.program} busy={f.busy} error={f.failure}
-        onSave={(details) => f.updateStatus("accepted", details)} onCancel={() => setShowApproval(false)} />
+        onSave={(details) => updateStatus("accepted", details)} onCancel={() => setShowApproval(false)} />
     );
   }
 
@@ -49,19 +58,20 @@ export default function ApplicationsPage() {
                 ? <Link className={buttonVariants({ variant: "outline" })} href="/dashboard/records#renewals">View records</Link>
                 : <Button disabled={f.busy} onClick={() => setShowApproval(true)}>Add to Records &amp; Renewal</Button>)}
               {status === "archived" ? (
-                <Button disabled={f.busy} onClick={() => f.updateStatus("restore")}>Restore application</Button>
+                <Button disabled={f.busy} onClick={() => updateStatus("restore")}>Restore application</Button>
               ) : (
                 <>
                   {status === "pending_determination" && (
                     <>
-                      <Button disabled={f.busy} onClick={() => setShowApproval(true)}>Mark accepted</Button>
-                      <Button variant="outline" disabled={f.busy} onClick={() => f.updateStatus("in_progress")}>Move back to in progress</Button>
+                      <Button disabled={f.busy} onClick={() => setShowApproval(true)}>Mark approved</Button>
+                      <Button variant="outline" disabled={f.busy} onClick={() => updateStatus("denied")}>Mark denied</Button>
+                      <Button variant="outline" disabled={f.busy} onClick={() => updateStatus("in_progress")}>Move back to in progress</Button>
                     </>
                   )}
-                  {status !== "pending_determination" && status !== "accepted" && (
-                    <Button disabled={f.busy} onClick={() => f.updateStatus("pending_determination")}>Mark pending determination</Button>
+                  {status !== "pending_determination" && status !== "accepted" && status !== "denied" && (
+                    <Button disabled={f.busy} onClick={() => updateStatus("pending_determination")}>Mark pending determination</Button>
                   )}
-                  <Button variant="outline" disabled={f.busy} onClick={() => f.updateStatus("archived")}>Archive application</Button>
+                  {status !== "accepted" && status !== "denied" && <Button variant="outline" disabled={f.busy} onClick={() => updateStatus("archived")}>Archive application</Button>}
                 </>
               )}
             </div>
@@ -171,20 +181,29 @@ export default function ApplicationsPage() {
           {caseId ? "There are no new program applications to show." : "Complete intake and eligibility to see program applications."}
         </p>
       )}
-      {f.apps.length > 0 && (
-        <>
-          <div role="group" aria-label="Filter applications" className="flex flex-wrap gap-2">
-            {(Object.keys(APPLICATION_GROUPS) as ApplicationGroup[]).map((key) => (
-              <Button key={key} aria-pressed={group === key} variant={group === key ? "default" : "outline"} onClick={() => setGroup(key)}>
-                {APPLICATION_GROUPS[key]}
-              </Button>
-            ))}
-          </div>
-          {f.apps.some((app) => applicationGroup(app) === group)
-            ? <ApplicationList apps={f.apps.filter((app) => applicationGroup(app) === group)} onStart={(program) => { setShowApproval(false); f.start(program); }} />
-            : <p className="text-muted-foreground">There are no applications in this group.</p>}
-        </>
-      )}
+      {f.apps.length > 0 && (Object.keys(APPLICATION_GROUPS) as ApplicationGroup[]).map((group) => {
+        const apps = f.apps.filter((app) => applicationGroup(app) === group);
+        const open = expanded.has(group);
+        return (
+          <section key={group} className="space-y-4">
+            <h2>
+              <button type="button" aria-expanded={open} aria-controls={`applications-${group}`} onClick={() => toggle(group, !open)}
+                className="flex w-full items-center gap-2 border-b pb-2 text-left text-xl text-primary">
+                <ChevronDown aria-hidden="true" className={`size-5 transition-transform ${open ? "" : "-rotate-90"}`} />
+                {APPLICATION_GROUPS[group]}
+                <span className="text-base text-muted-foreground">({apps.length})</span>
+              </button>
+            </h2>
+            {open && (
+              <div id={`applications-${group}`}>
+                {apps.length
+                  ? <ApplicationList apps={apps} onStart={(program) => { setShowApproval(false); f.start(program); }} />
+                  : <p className="text-muted-foreground">{EMPTY_GROUP_MESSAGES[group]}</p>}
+              </div>
+            )}
+          </section>
+        );
+      })}
     </div>
   );
 }

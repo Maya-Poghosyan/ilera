@@ -82,7 +82,7 @@ export function useApplicationFlow(caseId: string | null) {
     setErrors({});
     setStepIndex(0);
     void run(async () => {
-      if (["pending_determination", "accepted", "archived"].includes(app.status)) {
+      if (["pending_determination", "accepted", "denied", "archived"].includes(app.status)) {
         setFlow({ step: "status", program });
       } else if (!app.has_forms || app.stage === "follow_up" || app.status === "completed") {
         setChecked(app.completed_follow_ups);
@@ -177,12 +177,17 @@ export function useApplicationFlow(caseId: string | null) {
     }, "Could not save your follow-up steps. Please try again.");
   }
 
-  function updateStatus(status: AppStatus | "restore", approval?: ApprovalDetails) {
+  function updateStatus(status: AppStatus | "restore", approval?: ApprovalDetails, onSaved?: (app: ApplicationEntry) => void) {
     if (!caseId || !activeApp) return;
     const { program } = activeApp;
     void run(async () => {
       const saved = await updateAppStatus(caseId, program, status, approval);
-      setApps((prev) => prev.map((app) => app.program === program ? { ...app, ...saved } : app));
+      const updated: ApplicationEntry = {
+        ...activeApp, ...saved,
+        determination: saved.status === "accepted" ? "approved" : saved.status === "denied" ? "denied" : activeApp.determination,
+      };
+      setApps((prev) => prev.map((app) => app.program === program ? updated : app));
+      onSaved?.(updated);
       setFlow({ step: "list" });
     }, "Could not update the application status. Please try again.");
   }
