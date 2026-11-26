@@ -91,10 +91,10 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
     }, wait);
   }
   return (
-    <section aria-label="Suggested events" className="rounded-xl border border-brand-subtle bg-brand-subtle/30 p-4 space-y-3">
+    <section aria-label="Suggested events" className="rounded-xl border border-brand-subtle bg-card p-5 space-y-3">
       <div className="flex items-center gap-2 text-primary">
-        <Sparkles className="size-4" />
-        <h3 className="text-sm">Suggested Events</h3>
+        <Sparkles className="size-5" />
+        <h3 className="text-2xl">Suggested Events</h3>
       </div>
       {failed ? (
         <div className="flex items-center justify-between rounded-lg border border-dashed border-red-300 bg-card px-3 py-2.5">

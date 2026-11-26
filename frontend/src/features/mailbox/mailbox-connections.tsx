@@ -33,7 +33,10 @@ function ProviderLogo({ provider }: { provider: MailboxProvider }) {
   );
 }
 
-export function MailboxConnections() {
+export function MailboxConnections({ description, className = "rounded-xl border border-brand-subtle bg-card p-5" }: {
+  description?: string;
+  className?: string;
+}) {
   const { user } = useAuth();
   const caseId = user?.case_id;
   const [snapshot, setSnapshot] = useState<{
@@ -134,8 +137,11 @@ export function MailboxConnections() {
   }
 
   return (
-    <section className="space-y-4 rounded-xl border border-brand-subtle bg-card p-5" aria-labelledby="email-connections-title">
-      <h2 id="email-connections-title" className="text-2xl">Connect email inbox <span className="text-lg text-muted-foreground">(optional)</span></h2>
+    <section className={`space-y-4 ${className}`} aria-labelledby="email-connections-title">
+      <div className="space-y-1">
+        <h2 id="email-connections-title" className="text-2xl">Connect email inbox <span className="text-lg text-muted-foreground">(optional)</span></h2>
+        {description && <p className="text-sm text-muted-foreground">{description}</p>}
+      </div>
       <div className="grid gap-2">
         {(["google", "microsoft"] as const).map((provider) => {
           const { label } = PROVIDERS[provider];

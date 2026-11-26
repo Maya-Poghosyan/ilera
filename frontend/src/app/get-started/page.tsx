@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
 import { useAuth } from "@/features/accounts/auth-context";
+import { MailboxConnections } from "@/features/mailbox/mailbox-connections";
 
 export default function GetStartedPage() {
   const router = useRouter();
@@ -50,7 +51,11 @@ export default function GetStartedPage() {
                   : "Let\u2019s figure out which benefits you qualify for."}
               </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
+              {user.case_id && (
+                <MailboxConnections className="border-y py-6 text-left"
+                  description="You can also connect your email inboxes later on the Care Calendar page." />
+              )}
               <Button size="lg" className="w-full" render={<Link href={nextHref} />}>
                 {user.case_id ? "See my results" : "Start benefits intake"}
                 <ArrowRight className="size-4" />

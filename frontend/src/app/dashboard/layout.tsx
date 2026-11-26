@@ -40,7 +40,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
           </Button>
         </div>
       </aside>
-      <div className="flex-1 bg-muted/40 p-8">{children}</div>
+      <div className="flex-1 bg-white p-8 dark:bg-background">{children}</div>
     </div>
   );
 }

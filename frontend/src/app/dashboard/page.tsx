@@ -40,13 +40,11 @@ export default function CalendarPage() {
         </div>
         <div className="flex flex-wrap gap-3">
           {(["Appointment", "Visit", "Deadline"] as const).map((kind) => (
-            <Button key={kind} className="px-8" onClick={() => setEventKind(kind)}>+ {kind}</Button>
+            <Button key={kind} className="px-8 font-heading text-base" onClick={() => setEventKind(kind)}>+ {kind}</Button>
           ))}
-          <Button className="px-8" onClick={reminders.startNew}>+ Reminder</Button>
+          <Button className="px-8 font-heading text-base" onClick={reminders.startNew}>+ Reminder</Button>
         </div>
       </div>
-
-      <MailboxConnections />
 
       {eventKind && <EventForm kind={eventKind} onClose={() => setEventKind(null)} onSaved={() => {
         setEventKind(null);
@@ -81,6 +79,8 @@ export default function CalendarPage() {
         onMonth={calendar.goToMonth}
         onToday={calendar.goToday}
       />
+
+      <MailboxConnections />
 
       {!reminders.loading && (
         <ReminderList reminders={reminders.reminders} onEdit={reminders.edit} onToggle={reminders.toggle} onDelete={reminders.remove} />

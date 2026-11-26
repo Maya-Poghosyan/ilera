@@ -40,6 +40,8 @@ test("a caregiver submits intake, creates an account and keeps reminders across 
   const { token } = await lastMail(request, email, "verify");
   await page.goto(`/verify-email?token=${token}`);
   await expect(page).toHaveURL(/\/get-started$/);
+  await expect(page.getByText("You can also connect your email inboxes later on the Care Calendar page.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Connect Gmail" })).toBeVisible();
   // The account now owns the case submitted before signup.
   await expect(page.locator(`a[href="/eligibility/${caseId}"]`, { hasText: "See my results" })).toBeVisible();
 
