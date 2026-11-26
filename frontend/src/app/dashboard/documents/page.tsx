@@ -45,7 +45,7 @@ export default function DocumentsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl">Documents</h1>
+          <h1 className="page-title">Documents</h1>
           <p className="text-sm text-muted-foreground">
             Auto-filled government benefit forms. Select a form and download the
             pre-populated PDF.

@@ -19,7 +19,7 @@ export function ReviewScreen({ issues, name, submitting, submitLabel, saveMessag
   const sections = [...new Set(issues.map((issue) => issue.section))];
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-8 px-6 py-14">
-      <h1 id="intake-review-title" tabIndex={-1} className="text-2xl">{issues.length ? "Complete your answers" : "Ready to submit"}</h1>
+      <h1 id="intake-review-title" tabIndex={-1} className="page-title">{issues.length ? "Complete your answers" : "Ready to submit"}</h1>
       {sections.map((section) => (
         <Card key={section}>
           <CardHeader><CardTitle>{interpolateName(section, name)}</CardTitle></CardHeader>

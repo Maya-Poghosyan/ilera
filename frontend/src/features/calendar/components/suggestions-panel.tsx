@@ -110,7 +110,7 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
           <p className="text-xs text-muted-foreground">
             {pending.length > 0
               ? "Detected from your connected mailbox. Review each one before it joins your calendar."
-              : "No suggestions to review. New ones appear here after a connected mailbox is scanned."}
+              : "No suggestions to review."}
           </p>
           <div>
             {pending.map((e) => editing === e.id ? (

@@ -94,6 +94,7 @@ export interface EligibilityResult {
 
 export interface EligibilityResponse {
   status: BandStatus;
+  county?: string;
   results: EligibilityResult[];
   strategy: string;
   strategy_complete: boolean;

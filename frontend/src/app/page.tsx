@@ -43,7 +43,7 @@ export default function Home() {
       <SiteHeader />
 
       <section className="mx-auto flex max-w-3xl flex-1 flex-col items-center justify-center gap-6 px-6 py-24 text-center">
-        <h1 className="text-balance text-4xl sm:text-5xl">
+        <h1 className="page-title">
           Benefits navigation that works for caregivers
         </h1>
         <p className="max-w-xl text-pretty text-lg text-muted-foreground">

@@ -13,7 +13,7 @@ import { clearDraft, type Draft, readDraft, writeDraft } from "@/features/intake
 import { LoadFailure } from "@/components/load-failure";
 import { Button } from "@/components/ui/button";
 import { UncurlingArrow } from "@/components/uncurling-arrow";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/features/accounts/auth-context";
 import { ApiError } from "@/lib/http";
@@ -78,7 +78,7 @@ export default function IntakePage() {
     queueMicrotask(() => {
       if (cancelled || submittingRef.current) return;
       try {
-        setSaveMessage(writeDraft(draft) === "saved" ? "Saved on this browser" : null);
+        setSaveMessage(writeDraft(draft) === "saved" ? "Saved" : null);
       } catch {
         setSaveMessage("Couldn’t save. Keep this tab open.");
       }
@@ -128,7 +128,7 @@ export default function IntakePage() {
     if (!started || !schema || showReview || submittingRef.current || event.defaultPrevented || event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     const target = event.target;
-    if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable="true"], [role="combobox"], [role="listbox"], [role="menu"], [role="slider"], [role="spinbutton"], [role="grid"], [role="dialog"]')) return;
+    if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable="true"], [role="combobox"], [role="listbox"], [role="menu"], [role="slider"], [role="spinbutton"], [role="grid"], dialog, [role="dialog"]')) return;
     if (event.key === 'ArrowRight' && isLast) return;
     event.preventDefault();
     if (event.key === 'ArrowLeft') back();
@@ -161,7 +161,7 @@ export default function IntakePage() {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-6 py-16">
         <div className="space-y-6">
-          <h1 className="text-xl">{schema.welcome.header}</h1>
+          <h1 className="page-title">{schema.welcome.header}</h1>
           {schema.welcome.body && (
             <p className="text-sm text-muted-foreground">{schema.welcome.body}</p>
           )}
@@ -282,6 +282,15 @@ export default function IntakePage() {
     }
   }
 
+  if (submitting) {
+    return (
+      <main role="status" className="mx-auto flex flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
+        <div className="size-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
+        <h1 className="page-title">Saving your answers…</h1>
+      </main>
+    );
+  }
+
   if (showReview) {
     return (
       <ReviewScreen
@@ -306,13 +315,13 @@ export default function IntakePage() {
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-8 px-6 py-14">
       <div className="space-y-2">
-        {page.kind === "questions" && <h2 className="text-2xl">{interpolateName(sectionTitle ?? page.title, name)}</h2>}
+        {page.kind === "questions" && <h1 className="page-title">{interpolateName(sectionTitle ?? page.title, name)}</h1>}
         <Progress value={pct} />
       </div>
 
       <Card key={page.key} className="overflow-visible text-base [--card-spacing:--spacing(7)]">
         {showPageTitle && <CardHeader>
-          <CardTitle className="text-2xl">{interpolateName(page.title, name)}</CardTitle>
+          <h1 className="page-title">{interpolateName(page.title, name)}</h1>
         </CardHeader>}
         <CardContent className={`space-y-7 overflow-visible ${showPageTitle ? "-mt-3" : ""}`}>
           {page.kind === "questions" && (page.helperText || page.helperLink) && <div className="space-y-2">

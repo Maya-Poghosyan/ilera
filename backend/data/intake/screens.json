@@ -47,6 +47,7 @@
       {
         "field_id": "caregiver.citizenship_residency",
         "text": "Which best describes your citizenship or immigration status?",
+        "answer_aliases": {"No current immigration status": null},
         "type": "single_select",
         "required": true,
         "show_when": {
@@ -66,7 +67,6 @@
           "U.S. national",
           "Lawful permanent resident",
           "Another immigration status",
-          "No current immigration status",
           "I'm not sure",
           "Prefer not to answer"
         ],
@@ -222,6 +222,7 @@
       {
         "field_id": "recipient.citizenship_residency",
         "text": "Which best describes [recipient name]’s citizenship or immigration status?",
+        "answer_aliases": {"No current immigration status": null},
         "type": "single_select",
         "required": true,
         "option_labels": {
@@ -233,7 +234,6 @@
           "U.S. national",
           "Lawful permanent resident",
           "Another immigration status",
-          "No current immigration status",
           "I'm not sure",
           "Prefer not to answer"
         ],
@@ -557,7 +557,7 @@
           "No",
           "I'm not sure"
         ],
-        "helper_text": "For example, a doctor or other health professional has noted the condition or care needs in a visit summary, medical record or diagnosis letter. Choose “I’m not sure” if you need to check.",
+        "helper_text": "For example, a doctor or other health professional has noted the condition or care needs in a visit summary, medical record or diagnosis letter.",
         "page_group": "Medical documentation",
         "page_title": "Medical documentation",
         "group": "Medical documentation"
@@ -1020,8 +1020,7 @@
         },
         "page_group": "How caregiving affects work",
         "page_title": "How caregiving affects work",
-        "group": "How caregiving affects work",
-        "helper_text": "Select reduced hours if caregiving has changed your regular schedule, even over several years. Select a leave option only if you have taken, are taking, or plan a specific period away from work or a leave arrangement with reduced hours."
+        "group": "How caregiving affects work"
       },
       {
         "field_id": "caregiver.leave_start",
@@ -1133,7 +1132,7 @@
             "Have taken leave"
           ]
         },
-        "helper_text": "Look under deductions on your pay statements for CASDI or SDI. We’re asking about the last 18 months. Choose ‘I’m not sure’ if you need to check.",
+        "helper_text": "Look under deductions on your pay statements for CASDI or SDI. We’re asking about the last 18 months.",
         "page_group": "Leave coverage",
         "page_title": "Leave coverage",
         "group": "Leave coverage"
@@ -1408,9 +1407,9 @@
         "text": "Do you plan to claim [recipient name] as a dependent on your tax return?",
         "type": "boolean",
         "required": true,
-        "page_group": "Who claims them",
-        "page_title": "Who claims them",
-        "group": "Who claims them"
+        "page_group": "Their tax return",
+        "page_title": "Their tax return",
+        "group": "Their tax return"
       },
       {
         "field_id": "recipient.claimed_as_dependent",
@@ -1427,9 +1426,9 @@
           "No",
           "I'm not sure"
         ],
-        "page_group": "Who claims them",
-        "page_title": "Who claims them",
-        "group": "Who claims them"
+        "page_group": "Their tax return",
+        "page_title": "Their tax return",
+        "group": "Their tax return"
       },
       {
         "field_id": "recipient.dependent_claimant_relationship",
@@ -1458,9 +1457,9 @@
             }
           ]
         },
-        "page_group": "Who claims them",
-        "page_title": "Who claims them",
-        "group": "Who claims them"
+        "page_group": "Their tax return",
+        "page_title": "Their tax return",
+        "group": "Their tax return"
       },
       {
         "field_id": "recipient.claims_dependents",
@@ -1489,7 +1488,7 @@
         "text": "Household members and income",
         "type": "household_members",
         "required": true,
-        "helper_text": "Add anyone else who lives in their household or is connected to them through a tax return.",
+        "helper_text": "Add anyone else who lives with the recipient or is connected through a tax return. People who live elsewhere are listed separately.",
         "helper_link": {
           "text": "Where to find income before deductions",
           "href": "/api/reference-guides/ssa-benefit-letter"
@@ -1642,7 +1641,7 @@
             }
           ]
         },
-        "helper_text": "Start with an estimate of what the property could sell for today. Then subtract the amount still owed on its mortgage or other loans secured by the property. For example, if it could sell for $300,000 and $200,000 is still owed, enter $100,000. A rough estimate is fine; choose “I’m not sure” if you need to check.",
+        "helper_text": "Start with an estimate of what the property could sell for today. Then subtract the amount still owed on its mortgage or other loans secured by the property. For example, if it could sell for $300,000 and $200,000 is still owed, enter $100,000. A rough estimate is fine.",
         "helper_link": {
           "text": "Understanding property value after mortgage debt",
           "href": "https://www.consumerfinance.gov/ask-cfpb/what-is-a-home-equity-loan-en-106/"
@@ -1853,13 +1852,65 @@
           "op": "equals",
           "value": "Yes"
         },
-        "helper_text": "Include things owned jointly.",
+        "helper_text": "Primary home means the home where their spouse or partner usually lives. Include assets they own jointly.",
         "validation": {
           "exclusive_options": [
             "None",
             "I'm not sure"
           ]
         },
+        "page_group": "Things their spouse or partner owns",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.assets_joint",
+        "text": "Does their spouse or partner share legal ownership of any of these assets?",
+        "type": "single_select",
+        "required": true,
+        "options": [
+          "Yes",
+          "No",
+          "I'm not sure"
+        ],
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets",
+              "op": "answered"
+            },
+            {
+              "not": {
+                "field": "recipient.spouse.assets",
+                "op": "includes_any",
+                "value": [
+                  "None",
+                  "I'm not sure"
+                ]
+              }
+            }
+          ]
+        },
+        "page_group": "Things their spouse or partner owns",
+        "page_title": "",
+        "group": "Things their spouse or partner owns"
+      },
+      {
+        "field_id": "recipient.spouse.assets_joint_details",
+        "text": "Which assets are shared, and with whom?",
+        "type": "long_text",
+        "required": true,
+        "allow_not_sure": true,
+        "show_when": {
+          "all": [
+            {
+              "field": "recipient.spouse.assets_joint",
+              "op": "equals",
+              "value": "Yes"
+            }
+          ]
+        },
+        "helper_text": "Use relationships, such as “savings with spouse”, and their share if known.",
         "page_group": "Things their spouse or partner owns",
         "page_title": "",
         "group": "Things their spouse or partner owns"
@@ -1933,7 +1984,7 @@
             }
           ]
         },
-        "helper_text": "Start with an estimate of what the property could sell for today. Then subtract the amount still owed on its mortgage or other loans secured by the property. For example, if it could sell for $300,000 and $200,000 is still owed, enter $100,000. A rough estimate is fine; choose “I’m not sure” if you need to check.",
+        "helper_text": "Start with an estimate of what the property could sell for today. Then subtract the amount still owed on its mortgage or other loans secured by the property. For example, if it could sell for $300,000 and $200,000 is still owed, enter $100,000. A rough estimate is fine.",
         "helper_link": {
           "text": "Understanding property value after mortgage debt",
           "href": "https://www.consumerfinance.gov/ask-cfpb/what-is-a-home-equity-loan-en-106/"
@@ -2021,57 +2072,6 @@
           "max": 1000000000
         },
         "page_group": "recipient.spouse.assets_life_insurance_cash_value",
-        "page_title": "",
-        "group": "Things their spouse or partner owns"
-      },
-      {
-        "field_id": "recipient.spouse.assets_joint",
-        "text": "Are any of those assets owned jointly with someone else?",
-        "type": "single_select",
-        "required": true,
-        "options": [
-          "Yes",
-          "No",
-          "I'm not sure"
-        ],
-        "show_when": {
-          "all": [
-            {
-              "field": "recipient.spouse.assets",
-              "op": "answered"
-            },
-            {
-              "not": {
-                "field": "recipient.spouse.assets",
-                "op": "includes_any",
-                "value": [
-                  "None"
-                ]
-              }
-            }
-          ]
-        },
-        "page_group": "recipient.spouse.assets_joint",
-        "page_title": "",
-        "group": "Things their spouse or partner owns"
-      },
-      {
-        "field_id": "recipient.spouse.assets_joint_details",
-        "text": "Which assets are shared, and with whom?",
-        "type": "long_text",
-        "required": true,
-        "allow_not_sure": true,
-        "show_when": {
-          "all": [
-            {
-              "field": "recipient.spouse.assets_joint",
-              "op": "equals",
-              "value": "Yes"
-            }
-          ]
-        },
-        "helper_text": "Use relationships, such as “savings with spouse”, and their share if known.",
-        "page_group": "recipient.spouse.assets_joint_details",
         "page_title": "",
         "group": "Things their spouse or partner owns"
       },
@@ -2183,28 +2183,23 @@
   {
     "id": "tax_information",
     "title": "Tax Information",
-    "intro_text": "These questions help check caregiving-related tax savings. To upload your return and W-2s, choose “Use my documents” on the next page. Answer what you know. Amounts can be looked up later.",
+    "intro_text": "These questions help check caregiving-related tax savings. Answer what you know. Amounts can be looked up later.",
     "intro_emphasis": "Answer what you know. Amounts can be looked up later.",
     "questions": [
       {
         "field_id": "tax.entry_method",
-        "text": "How would you like to answer the tax questions?",
+        "text": "Would you like to check for tax savings?",
+        "answer_aliases": {"Use my documents": "Continue with tax questions", "Enter answers myself": "Continue with tax questions"},
         "type": "single_select",
         "required": true,
         "options": [
-          "Use my documents",
-          "Enter answers myself",
+          "Continue with tax questions",
           "Skip tax savings for now"
         ],
-        "helper_text": "Documents can suggest answers that you review. If you skip, we keep your household, income and asset answers, and you can check tax savings later.",
+        "helper_text": "You can skip this section and check for tax savings later.",
         "page_group": "Tax entry",
         "page_title": "",
-        "group": "Tax entry",
-        "upload_when": {
-          "field": "tax.entry_method",
-          "op": "equals",
-          "value": "Use my documents"
-        }
+        "group": "Tax entry"
       },
       {
         "field_id": "tax.year",
@@ -2361,7 +2356,7 @@
         "type": "number",
         "required": true,
         "allow_not_sure": true,
-        "helper_text": "A previous return can help you estimate: look for “adjusted gross income” on Form 1040. Choose “I’m not sure” if you need to check.",
+        "helper_text": "A previous return can help you estimate: look for “adjusted gross income” on Form 1040.",
         "helper_link": {
           "text": "Where to find your adjusted gross income (AGI)",
           "href": "https://www.irs.gov/filing/adjusted-gross-income"
@@ -2794,7 +2789,7 @@
       {
         "field_id": "recipient.medicaid_covered",
         "text": "Are they currently covered by Medi-Cal, California’s Medicaid program?",
-        "helper_text": "Check the Medi-Cal status in their BenefitsCal account. Their case must be linked to the account before its status will appear. If you cannot find the status or it is unclear, their county Medi-Cal office can confirm whether coverage is active. Choose “I’m not sure” if you still need to check.",
+        "helper_text": "Check the Medi-Cal status in their BenefitsCal account. Their case must be linked to the account before its status will appear. If you cannot find the status or it is unclear, their county Medi-Cal office can confirm whether coverage is active.",
         "helper_link": {
           "text": "How to check whether Medi-Cal is active",
           "href": "https://ehsd.org/2026/01/30/medi-cal-frequently-asked-questions/"
@@ -2868,7 +2863,7 @@
             ]
           ]
         },
-        "helper_text": "Select coverage and income benefits separately. “No health coverage” can be selected alongside an income benefit such as SSI.",
+        "helper_text": "Select any health coverage and benefits they receive. SSI is a cash benefit.",
         "page_group": "Current coverage and benefits",
         "page_title": "Current coverage and benefits",
         "group": "Current coverage and benefits"
@@ -3205,8 +3200,7 @@
         },
         "page_group": "Their residence history",
         "page_title": "Their residence history",
-        "group": "Their residence history",
-        "helper_text": "This helps check Medicare enrollment options when premium-free eligibility is unresolved. Five years of continuous residence is not a blanket requirement for every Medicare or Medi-Cal pathway."
+        "group": "Their residence history"
       },
       {
         "field_id": "recipient.pregnancy_postpartum",
@@ -3980,7 +3974,7 @@
             }
           ]
         },
-        "helper_text": "A DD214 or service record lists the dates. Choose “I’m not sure” if you need to check.",
+        "helper_text": "A DD214 or service record lists the dates.",
         "page_group": "VA coverage and caregiver support",
         "page_title": "VA coverage and caregiver support",
         "group": "VA coverage and caregiver support"

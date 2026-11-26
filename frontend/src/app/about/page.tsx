@@ -50,7 +50,7 @@ export default function AboutPage() {
       <SiteHeader />
 
       <section className="mx-auto flex max-w-3xl flex-col items-center gap-5 px-6 py-20 text-center">
-        <h1 className="text-balance text-4xl sm:text-5xl">
+        <h1 className="page-title">
           About Ilera
         </h1>
         <p className="max-w-2xl text-pretty text-lg text-muted-foreground">

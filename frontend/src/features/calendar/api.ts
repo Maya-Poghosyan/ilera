@@ -62,6 +62,19 @@ export function listCalendarEvents(): Promise<CalendarEventAPI[]> {
   return request<CalendarEventAPI[]>("/api/calendar-events");
 }
 
+export function createCalendarEvent(event: {
+  request_id: string;
+  title: string;
+  date: string;
+  time: string | null;
+  kind: "Appointment" | "Visit" | "Deadline";
+}): Promise<CalendarEventAPI> {
+  return request<CalendarEventAPI>("/api/calendar-events", {
+    method: "POST",
+    body: JSON.stringify(event),
+  });
+}
+
 export function deleteCalendarEvent(id: string): Promise<{ deleted: boolean }> {
   return request<{ deleted: boolean }>(`/api/calendar-events/${id}`, { method: "DELETE" });
 }

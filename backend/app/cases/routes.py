@@ -59,6 +59,7 @@ def read_case(case_id: str, _: str = Depends(require_case_access)) -> CaseProfil
 
 class EligibilityResponse(BaseModel):
     status: EligibilityStatus
+    county: str = ""
     results: list[EligibilityResult]
     strategy: str = ""
     strategy_complete: bool = False
@@ -102,6 +103,7 @@ def _eligibility_response(profile: CaseProfile) -> EligibilityResponse:
     )
     return EligibilityResponse(
         status=profile.eligibility_status,
+        county=profile.care_recipient.county,
         results=results,
         strategy=profile.strategy,
         strategy_complete=profile.strategy_complete,

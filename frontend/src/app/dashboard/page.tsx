@@ -2,12 +2,14 @@
 
 import { useCallback, useState } from "react";
 
+import { SidePanel } from "@/components/side-panel";
+import { EventForm } from "@/features/calendar/components/event-form";
 import { Button } from "@/components/ui/button";
 import { useCaseId } from "@/features/accounts/auth-context";
 import { MonthGrid } from "@/features/calendar/components/month-grid";
 import { SuggestionsPanel } from "@/features/calendar/components/suggestions-panel";
 import { TimezoneSetting } from "@/features/calendar/components/timezone-setting";
-import { useCalendar } from "@/features/calendar/use-calendar";
+import { useCalendar, type EventKind } from "@/features/calendar/use-calendar";
 import { useCalendarTimezone } from "@/features/calendar/use-calendar-timezone";
 import { MailboxConnections } from "@/features/mailbox/mailbox-connections";
 import { ReminderForm } from "@/features/reminders/components/reminder-form";
@@ -15,6 +17,7 @@ import { ReminderList } from "@/features/reminders/components/reminder-list";
 import { useReminders } from "@/features/reminders/use-reminders";
 
 export default function CalendarPage() {
+  const [eventKind, setEventKind] = useState<EventKind | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const notify = useCallback((message: string) => {
     setToast(message);
@@ -33,23 +36,28 @@ export default function CalendarPage() {
 
       <div className="space-y-6">
         <div className="space-y-3">
-          <h1 className="text-4xl">Care Calendar</h1>
-          <p className="max-w-xl text-sm text-muted-foreground">
-            Email scanning will surface care appointments and deadlines here.
-          </p>
+          <h1 className="page-title">Care Calendar</h1>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button className="px-8">+ Appointment</Button>
-          <Button className="px-8">+ Visit</Button>
-          <Button className="px-8">+ Deadline</Button>
+          {(["Appointment", "Visit", "Deadline"] as const).map((kind) => (
+            <Button key={kind} className="px-8" onClick={() => setEventKind(kind)}>+ {kind}</Button>
+          ))}
           <Button className="px-8" onClick={reminders.startNew}>+ Reminder</Button>
         </div>
       </div>
 
       <MailboxConnections />
 
+      {eventKind && <EventForm kind={eventKind} onClose={() => setEventKind(null)} onSaved={() => {
+        setEventKind(null);
+        notify("Added to your calendar");
+        void calendar.refresh();
+      }} />}
+
       {reminders.draft && (
-        <ReminderForm draft={reminders.draft} onChange={reminders.change} onSave={reminders.save} onCancel={reminders.cancel} />
+        <SidePanel title={reminders.draft.id ? "Edit reminder" : "Add reminder"} onClose={reminders.cancel}>
+          <ReminderForm draft={reminders.draft} onChange={reminders.change} onSave={reminders.save} onCancel={reminders.cancel} />
+        </SidePanel>
       )}
 
       <SuggestionsPanel

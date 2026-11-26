@@ -17,7 +17,7 @@ export default function RecordsPage() {
   if (!caseId && !loading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-4xl">Records &amp; Renewal</h1>
+        <h1 className="page-title">Records &amp; Renewal</h1>
         <Card>
           <CardContent className="py-6">
             <p className="text-sm text-muted-foreground">
@@ -34,7 +34,7 @@ export default function RecordsPage() {
   return (
     <div className="space-y-6">
       <fieldset disabled={pending || loading || loadError} className="space-y-6 min-w-0">
-        <h1 className="text-4xl">Records &amp; Renewal</h1>
+        <h1 className="page-title">Records &amp; Renewal</h1>
 
         <div className="flex flex-wrap items-end gap-4">
           <div className="space-y-1"><Label htmlFor="records-from">From</Label><Input id="records-from" type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} /></div>

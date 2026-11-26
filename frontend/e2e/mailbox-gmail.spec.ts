@@ -10,7 +10,7 @@ const GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
 /** Stand in for Google's sign-in page: register a code for `address`, then send the browser back
  * to the app's callback the way Google would. `scope` is what the caregiver left ticked. */
 async function googleSignsIn(page: Page, baseURL: string, address: string, scope?: string) {
-  await page.route("https://accounts.google.com/**", async route => {
+  await page.context().route("https://accounts.google.com/**", async route => {
     const asked = new URL(route.request().url()).searchParams;
     expect(asked.get("scope")).toContain(GMAIL_SCOPE);
     expect(asked.get("access_type")).toBe("offline");
@@ -38,9 +38,12 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   const zone = page.getByLabel("Calendar time zone");
   await expect(zone).toHaveValue("America/Los_Angeles");
   await expect(zone.locator("option:checked")).toHaveText("Pacific time (from your intake)");
+  const opened = page.context().waitForEvent("page");
   await page.getByRole("button", { name: "Connect Gmail" }).click();
-  await expect(page.getByText("Gmail connected.")).toBeVisible();
-  await expect(page.getByText(`${address} · Connected`)).toBeVisible();
+  const signIn = await opened;
+  await expect(signIn.getByText("Gmail connected.")).toBeVisible();
+  await signIn.close();
+  await expect(page.getByText(address, { exact: true })).toBeVisible();
 
   // A county notice arrives; the hourly pass finds it and the worker reads it.
   await page.request.post(`${GOOGLE}/__mail`, { data: { email: address, id: "new-1",
@@ -101,9 +104,10 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   await expect(zone).toHaveValue("America/New_York");
   await expect(zone.locator("option:checked")).toHaveText("Eastern time");
 
-  await page.getByRole("button", { name: "Disconnect" }).click();
+  await page.getByLabel("Manage Gmail").click();
+  await page.getByRole("button", { name: `Disconnect ${address}` }).click();
   await expect(page.getByText("Gmail disconnected and saved credentials deleted.")).toBeVisible();
-  await expect(page.getByText(`${address} · Connected`)).toHaveCount(0);
+  await expect(page.getByText(address, { exact: true })).toHaveCount(0);
   expect(await (await page.request.get(`${GOOGLE}/__revoked`)).json()).toContain(address);
 });
 
@@ -113,7 +117,10 @@ test("Gmail doesn't connect when the caregiver unticks mail access on Google's c
   await googleSignsIn(page, baseURL!, address, "openid https://www.googleapis.com/auth/userinfo.email");
 
   await page.goto("/dashboard");
+  const opened = page.context().waitForEvent("page");
   await page.getByRole("button", { name: "Connect Gmail" }).click();
-  await expect(page.getByText("Gmail could not connect. Please sign in and try again.")).toBeVisible();
+  const signIn = await opened;
+  await expect(signIn.getByText("Gmail could not connect. Please sign in and try again.")).toBeVisible();
+  await signIn.close();
   await expect(page.getByText(address)).toHaveCount(0);
 });
