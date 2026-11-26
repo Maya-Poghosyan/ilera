@@ -6,13 +6,12 @@ const columns = [
   {
     heading: "Product",
     links: [
-      { href: "/intake", label: "Discover programs" },
       { href: "/login", label: "Sign in" },
       { href: "/dashboard", label: "Dashboard" },
     ],
   },
   {
-    heading: "Company",
+    heading: "More info",
     links: [
       { href: "/about", label: "About" },
       { href: "/privacy", label: "Privacy" },
@@ -24,11 +23,8 @@ export function SiteFooter() {
   return (
     <footer className="bg-muted">
       <div className="mx-auto grid w-full max-w-5xl gap-10 px-6 pt-14 pb-10 sm:grid-cols-[1fr_auto_auto] sm:gap-16">
-        <div className="max-w-xs space-y-3">
+        <div className="max-w-xs">
           <Logo size="lg" />
-          <p className="text-sm text-muted-foreground">
-            Built for caregivers. Grounded in official program documentation.
-          </p>
         </div>
         {columns.map((col) => (
           <div key={col.heading} className="space-y-3">

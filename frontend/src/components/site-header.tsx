@@ -15,7 +15,7 @@ function DefaultNav() {
     <nav className="flex items-center gap-7">
       <Link href="/about" className={navLink}>About</Link>
       {!loading && user ? (
-        <Button render={<Link href="/dashboard" />}>Dashboard</Button>
+        <Link href="/dashboard" className="max-w-56 truncate text-sm font-medium transition-colors hover:text-primary" title={user.email}>{user.email}</Link>
       ) : (
         <>
           <Link href="/login" className={navLink}>Sign in</Link>

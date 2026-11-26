@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { UncurlingArrow } from "@/components/uncurling-arrow";
+import { useAuth } from "@/features/accounts/auth-context";
 
 const features = [
   {
@@ -38,6 +39,8 @@ const features = [
 ];
 
 export default function Home() {
+  const { user, loading } = useAuth();
+  const signedIn = !loading && !!user;
   return (
     <main className="flex flex-1 flex-col">
       <SiteHeader />
@@ -50,8 +53,8 @@ export default function Home() {
           Unpaid caregivers spend hours navigating fragmented benefits programs. Ilera finds
           what you qualify for, optimizes your strategy, and completes the applications for you.
         </p>
-        <Button size="lg" className="hover:pr-7" render={<Link href="/intake" />}>
-          Discover programs
+        <Button size="lg" className="hover:pr-7" render={<Link href={signedIn ? "/dashboard" : "/intake"} />}>
+          {signedIn ? "Open Dashboard" : "Discover programs"}
           <UncurlingArrow />
         </Button>
       </section>
