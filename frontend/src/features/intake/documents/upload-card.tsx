@@ -51,7 +51,7 @@ export function UploadCard({ suggested, limits, documents, passed, onAdd, onRemo
   return (
     <Card aria-labelledby={headingId} className="text-base [--card-spacing:--spacing(7)]">
       <CardHeader>
-        <CardTitle id={headingId} className="text-lg">Add documents (optional)</CardTitle>
+        <CardTitle id={headingId} className="text-lg">Autofill with documents (optional)</CardTitle>
       </CardHeader>
       <CardContent className="-mt-3 space-y-4 text-sm text-muted-foreground">
         <p>We&rsquo;ll read these and suggest answers in the questions ahead. You review every suggestion, and you can always enter answers yourself.</p>
@@ -66,7 +66,7 @@ export function UploadCard({ suggested, limits, documents, passed, onAdd, onRemo
         <Button variant="outline" onClick={() => inputRef.current?.click()}>
           <Upload aria-hidden="true" /> Choose files
         </Button>
-        <p className="text-xs">PDF, JPG or PNG, up to {mb(limits.max_bytes)} each. Files are read once and not stored. Suggestions stay in this tab until you use them.</p>
+        <p className="text-xs">PDF, JPG, PNG, up to {mb(limits.max_bytes)}</p>
         {error && <p role="alert" className="text-destructive">{error}</p>}
         {documents.length > 0 && <ul aria-label="Your documents" aria-live="polite" className="divide-y rounded-lg border">
           {documents.map(d => <li key={d.id} className="flex items-start gap-3 px-3 py-2">

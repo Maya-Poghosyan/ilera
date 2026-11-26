@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
 import { useAuth } from "@/features/accounts/auth-context";
 
@@ -37,13 +37,13 @@ export default function GetStartedPage() {
     <main className="flex flex-1 flex-col">
       <SiteHeader actions={null} />
 
-      <section className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
+      <section className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
           <Card className="w-full px-8 py-6">
             <CardHeader className="text-center">
               <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Check className="size-6" />
               </div>
-              <CardTitle className="text-2xl">You&apos;re all set!</CardTitle>
+              <h1 className="page-title">You&apos;re all set!</h1>
               <p className="text-base text-muted-foreground">
                 {user.case_id
                   ? "Your answers are saved to your account. Here are the programs you qualify for."

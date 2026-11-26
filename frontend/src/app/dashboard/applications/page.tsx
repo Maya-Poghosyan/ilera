@@ -36,7 +36,7 @@ export default function ApplicationsPage() {
       <div className="mx-auto w-full max-w-2xl space-y-6">
         <Button variant="ghost" size="sm" onClick={f.close}>&larr; Back to applications</Button>
         <div className="space-y-1">
-          <h1 className="text-2xl">{flow.program}</h1>
+          <h1 className="page-title">{flow.program}</h1>
           <p className="text-sm text-muted-foreground">
             Filled {flow.autofilled} of {flow.totalFields} fields automatically. We need a few more answers to complete your forms.
           </p>
@@ -63,7 +63,7 @@ export default function ApplicationsPage() {
       <div className="flex flex-1 flex-col gap-4">
         <Button variant="ghost" size="sm" onClick={f.close}>&larr; Back to applications</Button>
         <div className="space-y-1">
-          <h1 className="text-2xl">{flow.program} &mdash; Preview</h1>
+          <h1 className="page-title">{flow.program} &mdash; Preview</h1>
           <p className="text-sm text-muted-foreground">Review the completed forms below, then export.</p>
         </div>
         <div className="flex-1 overflow-hidden rounded-lg border border-border">
@@ -79,7 +79,7 @@ export default function ApplicationsPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl">Your applications</h1>
+        <h1 className="page-title">Your applications</h1>
         <p className="text-sm text-muted-foreground">Programs ranked by eligibility. Click to fill and download the required forms.</p>
       </div>
       {f.failure && <p role="alert" className="text-sm text-destructive">{f.failure}</p>}

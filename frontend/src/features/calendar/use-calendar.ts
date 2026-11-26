@@ -143,5 +143,5 @@ export function useCalendar(notify: (message: string) => void) {
     setViewMonth(t.getMonth());
   };
 
-  return { viewYear, viewMonth, cells, events, pending, arrived, loading, failed, retry, review, edit, goToMonth, goToday };
+  return { refresh: load, viewYear, viewMonth, cells, events, pending, arrived, loading, failed, retry, review, edit, goToMonth, goToday };
 }

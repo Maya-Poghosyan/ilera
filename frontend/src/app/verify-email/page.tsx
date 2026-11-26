@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, XCircle } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { SiteHeader } from "@/components/site-header";
 
 function VerifyEmailContent() {
@@ -53,7 +53,7 @@ function VerifyEmailContent() {
           {status === "verifying" && (
             <>
               <CardHeader>
-                <CardTitle className="text-xl">Verifying your email…</CardTitle>
+                <h1 className="page-title">Verifying your email…</h1>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">Just a moment.</p>
@@ -67,7 +67,7 @@ function VerifyEmailContent() {
                 <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-green-100">
                   <CheckCircle className="size-6 text-green-600" />
                 </div>
-                <CardTitle className="text-xl">Email verified</CardTitle>
+                <h1 className="page-title">Email verified</h1>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">Taking you to your account…</p>
@@ -81,7 +81,7 @@ function VerifyEmailContent() {
                 <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-destructive/10">
                   <XCircle className="size-6 text-destructive" />
                 </div>
-                <CardTitle className="text-xl">Verification failed</CardTitle>
+                <h1 className="page-title">Verification failed</h1>
               </CardHeader>
               <CardContent className="space-y-3">
                 <p className="text-sm text-muted-foreground">{token ? errorMessage : "This verification link is invalid. Please sign up again."}</p>

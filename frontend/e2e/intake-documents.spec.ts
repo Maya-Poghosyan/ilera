@@ -70,7 +70,7 @@ const panel = (page: Page) => page.getByRole("region", { name: "Suggestions from
 
 test("a paystub fills answers in two sections only after the caregiver confirms", async ({ page }) => {
   await startAt(page, "work_caregiving");
-  await expect(page.getByText("Add documents (optional)")).toBeVisible();
+  await expect(page.getByText("Autofill with documents (optional)")).toBeVisible();
   await upload(page, file("october-stub.pdf", "PAYSTUB Gross pay 2,000.00 CA SDI 24.00"));
   await expect(page.getByText("2 suggested answers to review in the questions ahead")).toBeVisible();
 
@@ -93,14 +93,12 @@ test("a paystub fills answers in two sections only after the caregiver confirms"
 
 test("tax: documents that disagree are both shown, and a year mismatch is flagged", async ({ page }) => {
   await startAt(page, "tax_information");
-  await page.getByRole("button", { name: "Continue" }).click();
-  const entry = page.locator('[data-field-id="tax.entry_method"]');
-  await expect(page.getByText("Add documents (optional)")).toHaveCount(0);
-  await entry.getByRole("button", { name: "Use my documents" }).click();
-  await expect(page.getByText("Add documents (optional)")).toBeVisible();
+  await expect(page.getByText("Autofill with documents (optional)")).toBeVisible();
   await upload(page, file("return-2024.pdf", "RETURN2024 Form 1040"), file("return-2025.pdf", "RETURN2025 Form 1040"));
   await expect(page.getByText(/suggested answers? to review/)).toHaveCount(2);
 
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByRole("button", { name: "Continue with tax questions" }).click();
   await advanceTo(page, "tax.year");
   await page.locator('[data-field-id="tax.year"] input').fill("2025");
   await advanceTo(page, "tax.adjusted_gross_income");

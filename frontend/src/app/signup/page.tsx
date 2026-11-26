@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ArrowRight, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SiteHeader } from "@/components/site-header";
@@ -49,13 +49,13 @@ export default function SignupPage() {
     return (
       <main className="flex flex-1 flex-col">
         {header}
-        <section className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
+        <section className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
           <Card className="w-full">
             <CardHeader className="text-center">
               <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-primary/10">
                 <Mail className="size-6 text-primary" />
               </div>
-              <CardTitle className="text-xl">Check your email</CardTitle>
+              <h1 className="page-title">Check your email</h1>
               <p className="text-sm text-muted-foreground">
                 We sent a verification link to{" "}
                 <span className="font-medium text-foreground">{email}</span>.
@@ -84,10 +84,10 @@ export default function SignupPage() {
     <main className="flex flex-1 flex-col">
       {header}
 
-      <section className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
+      <section className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
         <Card className="w-full">
           <CardHeader className="text-center">
-            <CardTitle className="text-xl">Create your account</CardTitle>
+            <h1 className="page-title">Create your account</h1>
             <p className="text-sm text-muted-foreground">
               Save your plan, start your applications, and get reminders.
             </p>

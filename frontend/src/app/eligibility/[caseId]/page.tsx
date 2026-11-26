@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadFailure } from "@/components/load-failure";
@@ -13,34 +12,24 @@ import { useAuth } from "@/features/accounts/auth-context";
 import { determineEligibility, getEligibility } from "@/features/cases/api";
 import type { EligibilityResponse } from "@/features/cases/types";
 
-const statusColor: Record<string, string> = {
-  likely: "border-transparent bg-emerald-600 text-white",
-  possible: "border-transparent bg-amber-500 text-white",
-  unlikely: "border-transparent bg-muted text-muted-foreground",
-  needs_info: "border-transparent bg-muted text-muted-foreground",
-};
-
-const statusLabel: Record<string, string> = {
-  likely: "likely",
-  possible: "possible",
-  unlikely: "unlikely",
-  needs_info: "needs info",
+const PROGRAM_BENEFITS: Record<string, string> = {
+  "IHSS": "Pays for eligible in-home help with daily care.",
+  "Medi-Cal": "Health coverage that can include long-term services and supports.",
+  "Medicare": "Health coverage that can help pay for hospital care, medical visits, and prescriptions.",
+  "Paid Family Leave": "Replaces part of your wages while you take time away from work to care for a family member.",
+  "VA Caregiver Support": "Offers caregiver education and support, and a stipend for some eligible caregivers.",
+  "Caregiver Tax Relief": "Tax credits and other tax savings for eligible caregiving expenses.",
 };
 
 const LOADING_MESSAGES = [
   "Reading your answers…",
   "Checking the rules in your county…",
-  "Consulting official program documents…",
+  "Consulting program documents…",
   "Comparing programs you may qualify for…",
-  "Putting your plan together…",
 ];
 
-/** The strategy is stored as one bullet per line; older cases hold a paragraph or two. */
-function strategyBullets(strategy: string): string[] {
-  return strategy
-    .split("\n")
-    .map((line) => line.replace(/^\s*(?:[-*•–—]|\(?\d+[.)])\s+/, "").trim())
-    .filter(Boolean);
+function resultsReady(data: EligibilityResponse) {
+  return data.status === "complete" || (data.status === "processing" && data.results.length > 0);
 }
 
 const POLL_MS = 3000;
@@ -58,7 +47,7 @@ export default function EligibilityPage() {
     let active = true;
 
     const shouldKeepPolling = (res: EligibilityResponse) =>
-      res.status === "idle" || res.status === "processing" || !res.strategy_complete;
+      res.status !== "error" && !resultsReady(res);
 
     const poll = () => {
       getEligibility(caseId)
@@ -94,7 +83,7 @@ export default function EligibilityPage() {
     };
   }, [caseId, attempt]);
 
-  const processing = !data || data.status === "idle" || data.status === "processing";
+  const processing = !data || (data.status !== "error" && !resultsReady(data));
 
   useEffect(() => {
     if (error || !processing) return;
@@ -113,7 +102,7 @@ export default function EligibilityPage() {
   if (data && data.status === "error") {
     return (
       <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
-        <h1 className="text-xl text-rose-600">Eligibility could not be completed</h1>
+        <h1 className="page-title text-rose-600">Eligibility could not be completed</h1>
         <p className="max-w-sm text-sm text-muted-foreground">
           {data.error || "We couldn't finish reviewing your programs. Please try again."}
         </p>
@@ -128,12 +117,12 @@ export default function EligibilityPage() {
     return (
       <main className="mx-auto flex max-w-xl flex-1 flex-col items-center justify-center gap-4 px-6 py-20 text-center">
         <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
-        <h1 className="text-xl">Determining eligibility…</h1>
+        <h1 className="page-title">Determining eligibility…</h1>
         <p
           key={messageIndex}
           className="min-h-10 max-w-sm text-sm text-foreground animate-in fade-in duration-700"
         >
-          {LOADING_MESSAGES[messageIndex]}
+          {messageIndex === 1 && data?.county ? `Checking county rules for ${data.county}…` : LOADING_MESSAGES[messageIndex]}
         </p>
       </main>
     );
@@ -145,77 +134,23 @@ export default function EligibilityPage() {
         actions={<Button variant="outline" size="sm" render={<Link href="/intake" />}> Edit intake </Button>}
       />
       <main className="mx-auto w-full max-w-5xl flex-1 space-y-6 px-6 py-12">
-        <div className="space-y-1">
-          <h1 className="text-2xl">Your eligibility results</h1>
-          <p className="text-sm text-muted-foreground">
-            How well each program matches your situation.
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Your plan</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {data.strategy ? (
-              <div className="space-y-2">
-                {strategyBullets(data.strategy).map((bullet, i) => (
-                  <p key={i} className="text-sm">{bullet}</p>
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Finalizing your plan…</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {(() => {
-          const qualified = data.results.filter(
-            (r) => r.status === "likely" || r.status === "possible",
-          );
-          const notLikely = data.results.filter(
-            (r) => r.status === "unlikely" || r.status === "needs_info",
-          );
-          const ProgramCard = ({ r }: { r: typeof data.results[0] }) => (
-            <Card key={r.program} size="sm" className="gap-3">
-              <CardHeader className="gap-2">
-                <div className="flex items-center justify-between gap-2">
-                  <CardTitle className="text-base">{r.program}</CardTitle>
-                  <Badge className={statusColor[r.status] ?? "border-transparent bg-muted text-muted-foreground"}>
-                    {statusLabel[r.status] ?? r.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="text-xs">
-                <p className="text-muted-foreground">{r.rationale}</p>
-              </CardContent>
-            </Card>
-          );
-          return (
-            <>
-              {qualified.length > 0 && (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {qualified.map((r) => <ProgramCard key={r.program} r={r} />)}
-                </div>
-              )}
-              {notLikely.length > 0 && (
-                <details className="group">
-                  <summary className="cursor-pointer list-none">
-                    <span className="text-sm font-medium text-muted-foreground group-open:hidden">
-                      Show {notLikely.length} program{notLikely.length !== 1 ? "s" : ""} unlikely to apply ›
-                    </span>
-                    <span className="hidden text-sm font-medium text-muted-foreground group-open:inline">
-                      Hide ‹
-                    </span>
-                  </summary>
-                  <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {notLikely.map((r) => <ProgramCard key={r.program} r={r} />)}
-                  </div>
-                </details>
-              )}
-            </>
-          );
-        })()}
+        <h1 className="page-title">Your eligibility results</h1>
+        {[
+          { title: "Likely", open: true, programs: data.results.filter(({ status }) => status === "likely" || status === "possible") },
+          { title: "Unlikely or needs more information", open: false, programs: data.results.filter(({ status }) => status === "unlikely" || status === "needs_info") },
+        ].filter(({ programs }) => programs.length > 0).map(({ title, open, programs }) => (
+          <details key={title} open={open} className="rounded-xl border bg-card px-5">
+            <summary className="cursor-pointer py-4 text-xl">{title}</summary>
+            <ul className="divide-y">
+              {programs.map(({ program, status }) => (
+                <li key={program} className="space-y-1 py-4">
+                  <h2 className="text-xl">{program}{status === "possible" && <span className="ml-2 font-sans text-xs text-muted-foreground">Possible</span>}{status === "needs_info" && <span className="ml-2 font-sans text-xs text-muted-foreground">Needs more information</span>}</h2>
+                  {PROGRAM_BENEFITS[program] && <p className="text-sm text-muted-foreground">{PROGRAM_BENEFITS[program]}</p>}
+                </li>
+              ))}
+            </ul>
+          </details>
+        ))}
 
         {authLoading ? null : user ? (
           <Button render={<Link href="/dashboard/applications" />}>
@@ -225,7 +160,7 @@ export default function EligibilityPage() {
         ) : (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Keep this plan</CardTitle>
+              <CardTitle className="text-base">Save your results</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">

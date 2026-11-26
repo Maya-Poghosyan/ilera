@@ -25,7 +25,7 @@ export default function PrivacyPage() {
       <SiteHeader />
       <article className="mx-auto w-full max-w-3xl space-y-10 px-6 py-16 text-base leading-relaxed [&_li]:ml-5 [&_li]:list-disc [&_ul]:space-y-2">
         <header className="space-y-3">
-          <h1 className="text-4xl">Privacy Policy</h1>
+          <h1 className="page-title">Privacy Policy</h1>
           <p className="text-sm text-muted-foreground">Last updated {UPDATED}</p>
           <p>
             Ilera helps family caregivers find benefit programs, fill out applications and keep track of care.

@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SiteHeader } from "@/components/site-header";
@@ -71,12 +71,12 @@ export default function LoginPage() {
   return (
     <main className="flex flex-1 flex-col">
       {header}
-      <section className="mx-auto flex max-w-md flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
+      <section className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
         <Card className="w-full">
           {step === "credentials" ? (
             <>
               <CardHeader className="text-center">
-                <CardTitle className="text-xl">Sign in to Ilera</CardTitle>
+                <h1 className="page-title">Sign in to Ilera</h1>
                 <p className="text-sm text-muted-foreground">
                   Enter your email and password to continue.
                 </p>
@@ -126,7 +126,7 @@ export default function LoginPage() {
           ) : (
             <>
               <CardHeader className="text-center">
-                <CardTitle className="text-xl">Check your email</CardTitle>
+                <h1 className="page-title">Check your email</h1>
                 <p className="text-sm text-muted-foreground">
                   We sent a 6-digit code to{" "}
                   <span className="font-medium text-foreground">{email}</span>.

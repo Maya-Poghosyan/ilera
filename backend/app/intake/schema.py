@@ -39,38 +39,6 @@ DELAYED_QUESTIONS = ['Social Security number',
  'Direct-deposit information',
  'Portal usernames or passwords']
 
-TAX_ENTRY_FIELD = 'tax.entry_method'
-TAX_SKIP = 'Skip tax savings for now'
-
-
-def _add_tax_entry_choice(screens: list[dict]) -> None:
-    """Let caregivers use documents, answer manually, or defer the tax questions.
-
-    Skipping hides only the Tax Information questions; household members, income,
-    relationships and assets are asked in other sections and are kept."""
-    tax = next(s for s in screens if s['id'] == 'tax_information')
-    if tax['questions'][0]['field_id'] == TAX_ENTRY_FIELD:
-        return
-    not_skipped = {'not': {'field': TAX_ENTRY_FIELD, 'op': 'equals', 'value': TAX_SKIP}}
-    for question in tax['questions']:
-        question['show_when'] = ({'all': [not_skipped, question['show_when']]}
-                                 if question.get('show_when') else not_skipped)
-    tax['questions'].insert(0, {
-        'field_id': TAX_ENTRY_FIELD,
-        'text': 'How would you like to answer the tax questions?',
-        'type': 'single_select',
-        'required': True,
-        'options': ['Use my documents', 'Enter answers myself', TAX_SKIP],
-        'helper_text': 'Documents can suggest answers that you review. If you skip, we keep your household, '
-                       'income and asset answers, and you can check tax savings later.',
-        'page_group': 'Tax entry',
-        'page_title': '',
-        'group': 'Tax entry',
-    })
-
-
-_add_tax_entry_choice(SCREENS)
-
 # Optional document assistance (docs/research/document-uploads-2026-11-15/report.md). Shown after
 # the section's title card; `upload_when` on a question shows it again on that question's page.
 DOCUMENT_UPLOAD = {
@@ -88,13 +56,13 @@ UPLOAD_DOCUMENTS = {
         {'document': 'EDD Paid Family Leave notice', 'fills': 'Paid Family Leave in the past 12 months',
          'location': 'your myEDD account'},
         {'document': 'IHSS provider pay stub', 'fills': 'Whether you are paid to provide care',
-         'location': 'the IHSS Electronic Services Portal'},
+         'location': 'your IHSS Electronic Services Portal account'},
     ],
     'household_assets': [
         {'document': 'A recent paystub for anyone in the household', 'fills': 'Monthly income',
-         'location': 'their payroll portal'},
+         'location': 'your household’s payroll records'},
         {'document': 'Social Security or pension benefit letter', 'fills': 'Monthly benefit and SSDI start date',
-         'location': 'my Social Security account or the pension provider’s site'},
+         'location': 'your Social Security or pension records'},
     ],
     'tax_information': [
         {'document': 'Form 1040, pages 1–2', 'fills': 'Tax year, filing status and adjusted gross income',
@@ -106,22 +74,20 @@ UPLOAD_DOCUMENTS = {
     ],
     'coverage_benefits': [
         {'document': 'Medi-Cal notice', 'fills': 'Whether Medi-Cal is active',
-         'location': 'their BenefitsCal account or county mail'},
+         'location': 'your BenefitsCal account or county mail'},
         {'document': 'IHSS notice of action', 'fills': 'Whether they have applied for or receive IHSS',
-         'location': 'mail from the county IHSS office'},
+         'location': 'your county IHSS mail'},
         {'document': 'Medicare card or coverage record', 'fills': 'Active Medicare parts and start dates',
-         'location': 'their card or Medicare.gov account', 'cover': 'the Medicare number'},
+         'location': 'your Medicare records or Medicare.gov account', 'cover': 'the Medicare number'},
         {'document': 'VA benefit summary letter', 'fills': 'Disability rating, pension and VA health care',
-         'location': 'the letters page on VA.gov'},
+         'location': 'your letters on VA.gov'},
         {'document': 'DD-214, for a veteran', 'fills': 'Service dates and character of discharge',
-         'location': 'their records or the National Archives (eVetRecs)', 'cover': 'the SSN in block 3'},
+         'location': 'your military records or the National Archives (eVetRecs)', 'cover': 'the SSN in block 3'},
     ],
 }
 for _screen in SCREENS:
     if _screen['id'] in UPLOAD_DOCUMENTS:
         _screen['upload_documents'] = UPLOAD_DOCUMENTS[_screen['id']]
-next(q for s in SCREENS for q in s['questions'] if q['field_id'] == TAX_ENTRY_FIELD)['upload_when'] = {
-    'field': TAX_ENTRY_FIELD, 'op': 'equals', 'value': 'Use my documents'}
 
 
 def build_schema() -> dict:
