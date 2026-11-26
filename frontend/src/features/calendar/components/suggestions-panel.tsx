@@ -144,10 +144,10 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                     {e.kind}
                   </p>
                   {!e.date && (
-                    <p className="flex items-center gap-1 text-xs font-medium text-foreground"><TriangleAlert aria-hidden="true" className="size-3 text-muted-foreground" />Missing: date</p>
+                    <p className="flex items-center gap-1 text-xs text-foreground"><TriangleAlert aria-hidden="true" className="size-3 text-muted-foreground" />Missing: date</p>
                   )}
                   {e.action_required && (
-                    <p className="text-xs font-medium text-foreground">Action needed: {e.action_required}</p>
+                    <p className="text-xs text-foreground">Action needed: {e.action_required}</p>
                   )}
                 </div>
                 <div className="ml-3 flex shrink-0 items-center gap-1 pt-0.5">
