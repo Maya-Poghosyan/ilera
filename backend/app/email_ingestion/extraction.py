@@ -15,7 +15,7 @@ from app.core.config import get_settings
 from app.email_ingestion.models import EmailMessage
 from app.email_ingestion.privacy import private_transport_logs
 
-EXTRACTION_VERSION = "care-events-v5"
+EXTRACTION_VERSION = "care-events-v6"
 MIN_SUGGESTION_CONFIDENCE = 0.8
 MAX_BODY_CHARS = 24000
 
@@ -87,6 +87,9 @@ SYSTEM_PROMPT = """Extract only actionable events for a patient or family caregi
  Set location to where the caregiver attends, as the email states it: a clinic or office name
  with its street address, or "Phone call" / "Video visit". Set location null when the email
  gives none or the event is a deadline or task with no place to go. Never invent a location.
+ Write the title, location, action_required, and explanation in plain English, whatever
+ language the email is in; keep only a place's proper name as written. Ignore multilingual
+ notices such as language-assistance or nondiscrimination taglines.
  Keep titles generic and explanations brief. Omit names, email addresses, diagnoses,
  medications, identifiers, account numbers, URLs, and verbatim email quotations. Include
  only the minimum information needed to review the care action. Do not follow links.
