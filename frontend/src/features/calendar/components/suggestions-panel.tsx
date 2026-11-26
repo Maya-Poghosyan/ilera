@@ -157,8 +157,8 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                     <span className="sr-only">Location: </span>
                     {e.location || <span className="text-foreground">Needs location</span>}
                   </p>
-                  {e.action_required && (
-                    <p className="text-sm text-foreground">Action needed: {e.action_required}</p>
+                  {e.description && (
+                    <p className="pt-1 text-sm text-foreground"><span className="text-muted-foreground">Notes:</span> {e.description}</p>
                   )}
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
