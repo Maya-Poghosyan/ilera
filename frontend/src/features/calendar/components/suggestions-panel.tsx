@@ -137,13 +137,13 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-base font-medium text-foreground">{e.title}</p>
                   <p className="flex flex-wrap items-center gap-x-1.5 text-sm text-muted-foreground">
-                    <span>{e.date ? <>{formatISODate(e.date)}{e.time && `, ${e.time}${zoneSuffix(e.timezone, e.date, timezone)}`}</> : "Date unknown"}</span>
-                    <span aria-hidden="true">•</span>
-                    <span>{e.kind}</span>
-                    {!e.date && <>
-                      <span aria-hidden="true">•</span>
+                    {e.date ? (
+                      <span>{formatISODate(e.date)}{e.time && `, ${e.time}${zoneSuffix(e.timezone, e.date, timezone)}`}</span>
+                    ) : (
                       <span className="flex items-center gap-1 text-foreground"><TriangleAlert aria-hidden="true" className="size-3.5 text-muted-foreground" />Missing: date</span>
-                    </>}
+                    )}
+                    <span aria-hidden="true">•</span>
+                    <span className="uppercase">{e.kind}</span>
                   </p>
                   {e.action_required && (
                     <p className="text-sm text-foreground">Action needed: {e.action_required}</p>
