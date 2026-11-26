@@ -37,13 +37,13 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   // The calendar's time zone starts from the intake address (California).
   const zone = page.getByLabel("Calendar time zone");
   await expect(zone).toHaveValue("America/Los_Angeles");
-  await expect(zone.locator("option:checked")).toHaveText("Pacific time (from your intake)");
+  await expect(zone.locator("option:checked")).toHaveText("Pacific time");
   const opened = page.context().waitForEvent("page");
   await page.getByRole("button", { name: "Connect Gmail" }).click();
   const signIn = await opened;
   await expect(signIn.getByText("Gmail connected.")).toBeVisible();
   await signIn.close();
-  await expect(page.getByText(address, { exact: true })).toBeVisible();
+  await expect(page.getByText(`Connected to ${address}`, { exact: true })).toBeVisible();
 
   // A county notice arrives; the hourly pass finds it and the worker reads it.
   await page.request.post(`${GOOGLE}/__mail`, { data: { email: address, id: "new-1",
@@ -64,6 +64,14 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   // The model's own reasoning and confidence stay out of the caregiver's view.
   await expect(suggestions.getByText(/confidence/i)).toHaveCount(0);
   await expect(suggestions.getByText("A county IHSS notice schedules a reassessment visit.")).toHaveCount(0);
+
+  await page.request.post(`${GOOGLE}/__mail`, { data: { email: address, id: "unrelated-1",
+    from: "Newsletter <newsletter@example.test>", subject: "Public wellness webinar",
+    body: "UNRELATEDWEBINAR Join our public webinar on December 8, 2026 at noon." } });
+  await page.request.post(`${API}/__e2e/email/maintain`);
+  expect(await (await page.request.post(`${API}/__e2e/email/scan`)).json()).toContain("no_event");
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(suggestions.getByText("Public wellness webinar")).toHaveCount(0);
 
   // The caregiver corrects the time before accepting it.
   await suggestions.getByRole("button", { name: "Edit IHSS reassessment visit" }).click();
@@ -107,7 +115,7 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   await page.getByLabel("Manage Gmail").click();
   await page.getByRole("button", { name: `Disconnect ${address}` }).click();
   await expect(page.getByText("Gmail disconnected and saved credentials deleted.")).toBeVisible();
-  await expect(page.getByText(address, { exact: true })).toHaveCount(0);
+  await expect(page.getByText(`Connected to ${address}`, { exact: true })).toHaveCount(0);
   expect(await (await page.request.get(`${GOOGLE}/__revoked`)).json()).toContain(address);
 });
 

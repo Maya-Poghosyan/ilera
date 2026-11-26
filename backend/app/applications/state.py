@@ -1,7 +1,7 @@
 """Per-case application state: status, answers and the questions asked so far."""
 
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -13,6 +13,9 @@ class AppStatus(str, Enum):
     in_progress = "in_progress"
     needs_info = "needs_info"
     completed = "completed"
+    pending_determination = "pending_determination"
+    accepted = "accepted"
+    archived = "archived"
 
 
 class AppQuestion(BaseModel):
@@ -50,10 +53,18 @@ class AppQuestion(BaseModel):
     ask_when: str = ""
 
 
+ApplicationStage = Literal["update_information", "gather_documents", "review_forms", "follow_up"]
+
+
 class ApplicationState(BaseModel):
     case_id: str
     program: str
     status: AppStatus = AppStatus.open
+    renewal_record_id: str | None = None
+    pre_archive_status: AppStatus | None = None
+    stage: ApplicationStage = "update_information"
+    ready_documents: list[str] = Field(default_factory=list)
+    completed_follow_ups: list[str] = Field(default_factory=list)
     answers: dict[str, Any] = Field(default_factory=dict)
     questions: list[AppQuestion] = Field(default_factory=list)
 
@@ -65,12 +76,12 @@ def _slug(program: str) -> str:
     return program.lower().replace(" ", "_").replace("/", "_")
 
 
-def save_app_state(state: ApplicationState) -> None:
-    _store.put((state.case_id, _slug(state.program)), state.model_dump_json())
+def save_app_state(state: ApplicationState, *, transaction=None) -> None:
+    _store.put((state.case_id, _slug(state.program)), state.model_dump_json(), transaction=transaction)
 
 
-def get_app_state(case_id: str, program: str) -> Optional[ApplicationState]:
-    doc = _store.get((case_id, _slug(program)))
+def get_app_state(case_id: str, program: str, *, transaction=None) -> Optional[ApplicationState]:
+    doc = _store.get((case_id, _slug(program)), transaction=transaction)
     return ApplicationState.model_validate(doc) if doc else None
 
 

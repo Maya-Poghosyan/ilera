@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import logging
 import threading
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from typing import Any, Iterator, Optional, Sequence
 
 from app.core.config import get_settings
@@ -227,7 +227,7 @@ class JsonStore:
     def _where(self) -> str:
         return " AND ".join(f"{k} = %s" for k in self.keys)
 
-    def put(self, key: str | Sequence[str], payload: str, case_id: str = "") -> None:
+    def put(self, key: str | Sequence[str], payload: str, case_id: str = "", *, transaction: Any = None) -> None:
         key = self._as_key(key)
         columns = self._columns()
         values = [*key, *((case_id,) if self.scoped_by_case else ()), payload]
@@ -235,16 +235,16 @@ class JsonStore:
         updates = ", ".join(
             [f"{c} = EXCLUDED.{c}" for c in columns if c not in self.keys] + ["updated_at = now()"]
         )
-        with connection() as conn:
+        with (connection() if transaction is None else nullcontext(transaction)) as conn:
             conn.execute(
                 f"INSERT INTO {self.table} ({', '.join(columns)}) VALUES ({placeholders}) "  # noqa: S608
                 f"ON CONFLICT ({', '.join(self.keys)}) DO UPDATE SET {updates}",
                 values,
             )
 
-    def get(self, key: str | Sequence[str]) -> Optional[dict]:
+    def get(self, key: str | Sequence[str], *, transaction: Any = None) -> Optional[dict]:
         key = self._as_key(key)
-        with connection() as conn:
+        with (connection() if transaction is None else nullcontext(transaction)) as conn:
             row = conn.execute(
                 f"SELECT doc FROM {self.table} WHERE {self._where()}", key  # noqa: S608
             ).fetchone()
@@ -258,7 +258,7 @@ class JsonStore:
             )
             return cur.rowcount > 0
 
-    def list(self, case_id: str = "") -> list[dict]:
+    def list(self, case_id: str = "", *, transaction: Any = None) -> list[dict]:
         """Every document, or only a case's when `case_id` is given (requires a case
         column or a case key)."""
         column = "case_id" if self.scoped_by_case or "case_id" in self.keys else ""
@@ -267,5 +267,5 @@ class JsonStore:
         if case_id and column:
             sql += f" WHERE {column} = %s"
             params = (case_id,)
-        with connection() as conn:
+        with (connection() if transaction is None else nullcontext(transaction)) as conn:
             return [row[0] for row in conn.execute(sql, params).fetchall()]

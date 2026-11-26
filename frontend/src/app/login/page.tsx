@@ -77,9 +77,6 @@ export default function LoginPage() {
             <>
               <CardHeader className="text-center">
                 <h1 className="page-title">Sign in to Ilera</h1>
-                <p className="text-sm text-muted-foreground">
-                  Enter your email and password to continue.
-                </p>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleCredentials} className="space-y-4">
@@ -111,8 +108,7 @@ export default function LoginPage() {
                     />
                   </div>
                   <Button className="w-full" type="submit" disabled={submitting}>
-                    {submitting ? "Checking..." : "Continue"}
-                    <ArrowRight className="size-4" />
+                    Sign in
                   </Button>
                 </form>
                 <p className="mt-4 text-center text-sm text-muted-foreground">

@@ -10,16 +10,8 @@ import { LoadFailure } from "@/components/load-failure";
 import { SiteHeader } from "@/components/site-header";
 import { useAuth } from "@/features/accounts/auth-context";
 import { determineEligibility, getEligibility } from "@/features/cases/api";
+import { PROGRAM_BENEFITS } from "@/features/cases/program-benefits";
 import type { EligibilityResponse } from "@/features/cases/types";
-
-const PROGRAM_BENEFITS: Record<string, string> = {
-  "IHSS": "Pays for eligible in-home help with daily care.",
-  "Medi-Cal": "Health coverage that can include long-term services and supports.",
-  "Medicare": "Health coverage that can help pay for hospital care, medical visits, and prescriptions.",
-  "Paid Family Leave": "Replaces part of your wages while you take time away from work to care for a family member.",
-  "VA Caregiver Support": "Offers caregiver education and support, and a stipend for some eligible caregivers.",
-  "Caregiver Tax Relief": "Tax credits and other tax savings for eligible caregiving expenses.",
-};
 
 const LOADING_MESSAGES = [
   "Reading your answers…",

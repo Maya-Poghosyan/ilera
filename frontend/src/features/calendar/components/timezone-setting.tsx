@@ -5,9 +5,8 @@ import { Globe } from "lucide-react";
 import { US_TIMEZONES, timezoneLabel } from "@/features/calendar/timezone";
 
 /** The calendar's time zone, in its top bar. Emails that give a time without a zone use it. */
-export function TimezoneSetting({ timezone, source, onChange }: {
+export function TimezoneSetting({ timezone, onChange }: {
   timezone: string | null;
-  source: "setting" | "intake" | null;
   onChange: (zone: string) => void;
 }) {
   const options = timezone && !US_TIMEZONES.some((z) => z.zone === timezone)
@@ -25,7 +24,7 @@ export function TimezoneSetting({ timezone, source, onChange }: {
         {!timezone && <option value="" disabled>Time zone</option>}
         {options.map((z) => (
           <option key={z.zone} value={z.zone}>
-            {z.label} time{z.zone === timezone && source === "intake" ? " (from your intake)" : ""}
+            {z.label} time
           </option>
         ))}
       </select>

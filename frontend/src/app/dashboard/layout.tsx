@@ -25,9 +25,9 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
           <Logo />
         </div>
         <DashboardNav />
-        <div className="mt-auto border-t border-sidebar-border pt-4">
+        <div className="mt-5 border-t border-sidebar-border pt-4">
           <div className="px-1 text-xs text-muted-foreground truncate">
-            {user?.name}
+            {user?.email}
           </div>
           <Button
             variant="ghost"

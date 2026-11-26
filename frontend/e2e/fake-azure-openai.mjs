@@ -32,9 +32,13 @@ const REPLIES = {
   // Email extraction (the email worker's care_events schema). The email names no zone, so the
   // time is kept as written with no timezone.
   IHSSVISIT: { events: [{
-    title: "IHSS reassessment visit", date: "2026-12-08", date_status: "known", time: "10:00",
+    relevance: "caregiving_services", title: "IHSS reassessment visit", date: "2026-12-08", date_status: "known", time: "10:00",
     timezone: null, kind: "Appointment", action_required: "Be home for the visit",
     confidence: 0.9, explanation: "A county IHSS notice schedules a reassessment visit." }] },
+  UNRELATEDWEBINAR: { events: [{
+    relevance: "unrelated", title: "Public wellness webinar", date: "2026-12-08",
+    date_status: "known", time: "12:00", timezone: null, kind: "Appointment",
+    action_required: null, confidence: 0.95, explanation: "The email promotes a webinar." }] },
   // Model output the backend must not trust: wrong person, invalid option, identifier in evidence.
   HOSTILE: { document_kind: "paystub", suggestions: [
     answer("caregiver.sdi_deductions", "Yes", "spouse"),
