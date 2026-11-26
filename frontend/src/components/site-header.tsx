@@ -31,7 +31,7 @@ export function SiteHeader({ actions }: { actions?: React.ReactNode }) {
   return (
     <header className="sticky top-0 z-10 border-b border-border/60 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-6">
-        <Logo size="lg" />
+        <Logo size="xl" />
         {actions === undefined ? <DefaultNav /> : actions}
       </div>
     </header>

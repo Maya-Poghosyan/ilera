@@ -6,6 +6,7 @@ const sizes = {
   sm: { text: "text-base" },
   md: { text: "text-lg" },
   lg: { text: "text-2xl" },
+  xl: { text: "text-3xl" },
 } as const;
 
 type LogoProps = {

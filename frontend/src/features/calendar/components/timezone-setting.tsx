@@ -2,7 +2,7 @@
 
 import { ChevronDown, Globe } from "lucide-react";
 
-import { US_TIMEZONES, timezoneLabel } from "@/features/calendar/timezone";
+import { US_TIMEZONES, gmtOffset, timezoneLabel } from "@/features/calendar/timezone";
 
 /** The calendar's time zone, in its top bar. Emails that give a time without a zone use it. */
 export function TimezoneSetting({ timezone, onChange }: {
@@ -24,7 +24,7 @@ export function TimezoneSetting({ timezone, onChange }: {
         {!timezone && <option value="" disabled>Time zone</option>}
         {options.map((z) => (
           <option key={z.zone} value={z.zone}>
-            {z.label} time
+            {z.label} time{gmtOffset(z.zone) && ` (${gmtOffset(z.zone)})`}
           </option>
         ))}
       </select>

@@ -21,12 +21,11 @@ function StepArrow({ direction, step, disabled, onClick }: {
   onClick: () => void;
 }) {
   if (!step) return null;
-  // Pinned to the screen's vertical middle, over the grid column kept free for it beside the sidebar (w-60 + p-8).
   const Icon = direction === "previous" ? ChevronLeft : ChevronRight;
   return (
     <button type="button" disabled={disabled} onClick={onClick}
       aria-label={`${direction === "previous" ? "Previous" : "Next"} step: ${STEP_LABELS[step]}`}
-      className={`group fixed top-1/2 z-10 flex w-32 -translate-y-1/2 flex-col ${direction === "previous" ? "left-[17rem]" : "right-8"} items-center gap-2 rounded-lg p-2 text-center text-sm text-muted-foreground transition-colors hover:text-primary disabled:opacity-50`}>
+      className={`group flex w-full flex-col items-center gap-2 rounded-lg p-2 text-center text-sm text-muted-foreground transition-colors hover:text-primary disabled:opacity-50`}>
       <span className="flex size-12 items-center justify-center rounded-full border border-border bg-card transition-colors group-hover:border-primary">
         <Icon aria-hidden="true" className="size-6" />
       </span>

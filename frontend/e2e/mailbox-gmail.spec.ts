@@ -37,7 +37,7 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   // The calendar's time zone starts from the intake address (California).
   const zone = page.getByLabel("Calendar time zone");
   await expect(zone).toHaveValue("America/Los_Angeles");
-  await expect(zone.locator("option:checked")).toHaveText("Pacific time");
+  await expect(zone.locator("option:checked")).toHaveText(/^Pacific time \(GMT-[78]\)$/);
   const opened = page.context().waitForEvent("page");
   await page.getByRole("button", { name: "Connect Gmail" }).click();
   const signIn = await opened;
@@ -110,7 +110,7 @@ test("a caregiver connects Gmail, a new email becomes a suggestion to review, an
   await expect(grid).toContainText("11:30 PST");
   await page.reload();
   await expect(zone).toHaveValue("America/New_York");
-  await expect(zone.locator("option:checked")).toHaveText("Eastern time");
+  await expect(zone.locator("option:checked")).toHaveText(/^Eastern time \(GMT-[45]\)$/);
 
   await page.getByLabel("Manage Gmail").click();
   await page.getByRole("button", { name: `Disconnect ${address}` }).click();

@@ -22,7 +22,7 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-full flex-1">
       <aside className="flex w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-4">
         <div className="mb-6 px-1">
-          <Logo />
+          <Logo size="lg" />
         </div>
         <DashboardNav />
         <div className="mt-5 border-t border-sidebar-border pt-4">

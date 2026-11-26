@@ -14,6 +14,16 @@ export function timezoneLabel(zone: string): string {
   return US_TIMEZONES.find((z) => z.zone === zone)?.label ?? zone.split("/").pop()!.replaceAll("_", " ");
 }
 
+/** The zone's current offset from GMT, e.g. "GMT-8" (or "GMT-7" during daylight saving time). */
+export function gmtOffset(zone: string, at = new Date()): string {
+  try {
+    return new Intl.DateTimeFormat("en-US", { timeZone: zone, timeZoneName: "shortOffset" })
+      .formatToParts(at).find((p) => p.type === "timeZoneName")?.value ?? "";
+  } catch {
+    return "";
+  }
+}
+
 /** The zone's short name on that date (e.g. "EST"), shown only when it isn't the calendar's own zone. */
 export function zoneSuffix(eventZone: string | null | undefined, isoDate: string | null | undefined, calendarZone: string | null): string {
   if (!eventZone || !isoDate || eventZone === calendarZone) return "";
