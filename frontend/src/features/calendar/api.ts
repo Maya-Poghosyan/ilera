@@ -10,6 +10,7 @@ export type SuggestedEventAPI = {
   title: string;
   time?: string;
   kind: string;
+  location?: string | null;
   description?: string;
   source: string;
   action_required?: string | null;
@@ -44,7 +45,7 @@ export function reviewSuggestedEvent(
   });
 }
 
-export type SuggestionEdits = { title?: string; date?: string; time?: string | null };
+export type SuggestionEdits = { title?: string; date?: string; time?: string | null; location?: string | null };
 
 /** Correct a pending suggestion before deciding on it. */
 export function editSuggestedEvent(id: string, edits: SuggestionEdits): Promise<SuggestedEventAPI> {

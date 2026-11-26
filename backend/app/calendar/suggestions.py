@@ -23,6 +23,7 @@ class SuggestedEvent(BaseModel):
     title: str
     time: Optional[str] = None
     kind: str = "Appointment"
+    location: Optional[str] = None
     description: Optional[str] = None
     source: str = "manual"
     user_id: Optional[str] = None

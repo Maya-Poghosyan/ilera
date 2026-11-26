@@ -15,7 +15,7 @@ from app.core.config import get_settings
 from app.email_ingestion.models import EmailMessage
 from app.email_ingestion.privacy import private_transport_logs
 
-EXTRACTION_VERSION = "care-events-v4"
+EXTRACTION_VERSION = "care-events-v5"
 MIN_SUGGESTION_CONFIDENCE = 0.8
 MAX_BODY_CHARS = 24000
 
@@ -33,6 +33,7 @@ class ExtractedEvent(BaseModel):
     time: str | None = Field(pattern=r"^([01][0-9]|2[0-3]):[0-5][0-9]$")
     timezone: str | None
     kind: Literal["Appointment", "Deadline", "Renewal", "Task"]
+    location: str | None = Field(max_length=160)
     action_required: str | None = Field(max_length=240)
     confidence: float = Field(ge=0, le=1, allow_inf_nan=False)
     explanation: str = Field(min_length=1, max_length=240)
@@ -83,6 +84,9 @@ SYSTEM_PROMPT = """Extract only actionable events for a patient or family caregi
  Central/CT -> America/Chicago, Eastern/ET -> America/New_York). Keep every stated time:
  when the email gives no zone, set timezone null and keep the time as written. Never invent
  a time. Do not assume the reader's or server's timezone.
+ Set location to where the caregiver attends, as the email states it: a clinic or office name
+ with its street address, or "Phone call" / "Video visit". Set location null when the email
+ gives none or the event is a deadline or task with no place to go. Never invent a location.
  Keep titles generic and explanations brief. Omit names, email addresses, diagnoses,
  medications, identifiers, account numbers, URLs, and verbatim email quotations. Include
  only the minimum information needed to review the care action. Do not follow links.

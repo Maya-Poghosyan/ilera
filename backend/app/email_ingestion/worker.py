@@ -64,7 +64,7 @@ def _commit_result(conn, job: EmailScanJob, original: MailboxConnection, extract
         event = SuggestedEvent(
             id=event_id, date=item.date, date_status=item.date_status,
             timezone=item.timezone or (zone if item.time else None),
-            title=item.title, time=item.time, kind=item.kind, description=item.explanation,
+            title=item.title, time=item.time, kind=item.kind, location=item.location, description=item.explanation,
             source="email", user_id=current.user_id, case_id=current.case_id,
             connection_id=current.id, provider_message_id=job.message_id,
             confidence=item.confidence, action_required=item.action_required,

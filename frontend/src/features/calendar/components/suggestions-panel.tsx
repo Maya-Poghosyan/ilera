@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, Pencil, Sparkles, TriangleAlert, X } from "lucide-react";
+import { Check, Clock, MapPin, Pencil, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { SuggestedEventAPI, SuggestionEdits } from "@/features/calendar/api";
@@ -12,6 +13,9 @@ function formatISODate(iso: string): string {
   const [year, month, day] = iso.split("-").map(Number);
   return new Date(year, month - 1, day).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
+
+// Only appointments have somewhere to go; deadlines, renewals and tasks show no location row.
+const HAS_LOCATION = new Set(["Appointment"]);
 
 const iconButton = "flex size-9 items-center justify-center rounded-full bg-brand-subtle transition-colors disabled:opacity-40";
 // A reviewed suggestion fades (and, when dismissed, slides) out while its space collapses; the
@@ -28,12 +32,13 @@ function SuggestionEditor({ suggestion, onSave, onCancel }: {
   const [title, setTitle] = useState(suggestion.title);
   const [date, setDate] = useState(suggestion.date ?? "");
   const [time, setTime] = useState(suggestion.time ?? "");
+  const [location, setLocation] = useState(suggestion.location ?? "");
   const [saving, setSaving] = useState(false);
 
   async function save(event: React.FormEvent) {
     event.preventDefault();
     setSaving(true);
-    const saved = await onSave({ title: title.trim(), ...(date ? { date } : {}), time: time || null });
+    const saved = await onSave({ title: title.trim(), ...(date ? { date } : {}), time: time || null, location: location.trim() || null });
     if (!saved) setSaving(false);
   }
 
@@ -53,6 +58,12 @@ function SuggestionEditor({ suggestion, onSave, onCancel }: {
           <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
         </label>
       </div>
+      {HAS_LOCATION.has(suggestion.kind) && (
+        <label className="block space-y-1 text-xs text-muted-foreground">
+          <span>Location (optional)</span>
+          <Input value={location} maxLength={160} onChange={(e) => setLocation(e.target.value)} />
+        </label>
+      )}
       <div className="flex gap-2">
         <Button type="submit" size="sm" disabled={saving || !title.trim()}>Save</Button>
         <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
@@ -135,16 +146,24 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
               <div data-arrived={arrived.has(e.id) || undefined}
                 className={`flex items-start gap-4 rounded-lg border border-dashed border-primary/30 bg-card px-4 py-3 transition-transform duration-300 ease-out motion-reduce:transition-none ${leaving[e.id] === "dismissed" ? "-translate-x-6" : ""} ${arrived.has(e.id) ? "motion-safe:animate-suggestion-arrive" : ""}`}>
                 <div className="min-w-0 flex-1 space-y-1">
-                  <p className="text-base font-medium text-foreground">{e.title}</p>
-                  <p className="flex flex-wrap items-center gap-x-1.5 text-sm text-muted-foreground">
-                    {e.date ? (
-                      <span>{formatISODate(e.date)}{e.time && `, ${e.time}${zoneSuffix(e.timezone, e.date, timezone)}`}</span>
-                    ) : (
-                      <span className="flex items-center gap-1 text-foreground"><TriangleAlert aria-hidden="true" className="size-3.5 text-muted-foreground" />Missing: date</span>
-                    )}
-                    <span aria-hidden="true">•</span>
-                    <span className="uppercase">{e.kind}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-base font-medium text-foreground">{e.title}</p>
+                    <Badge variant="secondary" className="uppercase">{e.kind}</Badge>
+                  </div>
+                  <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Clock aria-hidden="true" className="size-3.5 shrink-0" />
+                    <span className="sr-only">Date and time: </span>
+                    {e.date
+                      ? <>{formatISODate(e.date)}{e.time && `, ${e.time}${zoneSuffix(e.timezone, e.date, timezone)}`}</>
+                      : <span className="text-foreground">Needs updating</span>}
                   </p>
+                  {HAS_LOCATION.has(e.kind) && (
+                    <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <MapPin aria-hidden="true" className="size-3.5 shrink-0" />
+                      <span className="sr-only">Location: </span>
+                      {e.location || <span className="text-foreground">Needs updating</span>}
+                    </p>
+                  )}
                   {e.action_required && (
                     <p className="text-sm text-foreground">Action needed: {e.action_required}</p>
                   )}

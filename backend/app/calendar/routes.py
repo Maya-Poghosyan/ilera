@@ -42,11 +42,12 @@ def api_list_suggested_events(
 class SuggestedEventReview(BaseModel):
     """A review decision, and/or the caregiver's corrections to a pending suggestion.
 
-    Only the fields sent are changed. `time: null` clears the time."""
+    Only the fields sent are changed. `time: null` clears the time; `location: null` clears the location."""
     status: Literal["pending", "accepted", "dismissed"] | None = None
     title: str | None = Field(default=None, min_length=1, max_length=120)
     date: date_cls | None = None
     time: str | None = Field(default=None, pattern=r"^([01][0-9]|2[0-3]):[0-5][0-9]$")
+    location: str | None = Field(default=None, max_length=160)
 
 
 @router.patch("/api/suggested-events/{event_id}")
@@ -76,6 +77,8 @@ def api_review_suggested_event(
         # A time typed without a zone is in the caregiver's calendar zone.
         if event.time and not event.timezone and event.case_id:
             event.timezone = calendar_timezone(event.case_id)[0]
+    if "location" in edits:
+        event.location = (body.location or "").strip() or None
     if body.status is None and not edits:
         raise HTTPException(status_code=422, detail="nothing to change")
     if body.status is not None:
@@ -96,6 +99,7 @@ def api_review_suggested_event(
             time=event.time,
             kind=event.kind,
             description=event.description,
+            location=event.location,
         )
     else:
         # A suggestion no longer accepted should not linger on the calendar.

@@ -27,6 +27,7 @@ class CalendarEvent(BaseModel):
     title: str
     time: Optional[str] = None
     kind: str = "Appointment"
+    location: Optional[str] = None
     description: Optional[str] = None
     # Where this event came from: "manual" or "email" (via an accepted suggestion).
     source: str = "manual"
@@ -62,6 +63,7 @@ def accept_from_suggestion(
     time: Optional[str],
     kind: str,
     description: Optional[str],
+    location: Optional[str] = None,
 ) -> CalendarEvent:
     """Create (or refresh) the calendar event for a suggestion. Idempotent by suggestion id."""
     event = CalendarEvent(
@@ -71,6 +73,7 @@ def accept_from_suggestion(
         title=title,
         time=time,
         kind=kind,
+        location=location,
         description=description,
         source="email",
         source_suggestion_id=suggestion_id,
