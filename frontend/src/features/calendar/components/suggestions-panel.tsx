@@ -21,8 +21,10 @@ const EXIT_MS = 280;
 type Decision = "accepted" | "dismissed";
 
 /** The caregiver's corrections to one suggestion, made before accepting it. */
-function SuggestionEditor({ suggestion, onSave, onCancel }: {
+function SuggestionEditor({ suggestion, needsDate, onSave, onCancel }: {
   suggestion: SuggestedEventAPI;
+  /** Opened from Accept on an undated suggestion: the date is flagged until one is entered. */
+  needsDate: boolean;
   onSave: (edits: SuggestionEdits) => Promise<boolean>;
   onCancel: () => void;
 }) {
@@ -47,8 +49,9 @@ function SuggestionEditor({ suggestion, onSave, onCancel }: {
       </label>
       <div className="flex flex-wrap gap-2">
         <label className="space-y-1 text-xs text-muted-foreground">
-          <span>Date</span>
-          <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <span>Date{needsDate && <span className="text-destructive" aria-hidden="true"> *</span>}</span>
+          <Input type="date" value={date} required={needsDate} aria-invalid={needsDate && !date}
+            onChange={(e) => setDate(e.target.value)} />
         </label>
         <label className="space-y-1 text-xs text-muted-foreground">
           <span>Time (optional)</span>
@@ -80,6 +83,12 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
   onEdit: (s: SuggestedEventAPI, edits: SuggestionEdits) => Promise<boolean>;
 }) {
   const [editing, setEditing] = useState<string | null>(null);
+  // Set when Accept opened the editor because the suggestion has no date.
+  const [needsDate, setNeedsDate] = useState(false);
+  function edit(id: string | null, missingDate = false) {
+    setEditing(id);
+    setNeedsDate(missingDate);
+  }
   const [leaving, setLeaving] = useState<Record<string, Decision>>({});
 
   function decide(e: SuggestedEventAPI, decision: Decision) {
@@ -126,10 +135,10 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
           <div>
             {pending.map((e) => editing === e.id ? (
               <div key={e.id} className="pb-2">
-              <SuggestionEditor suggestion={e} onCancel={() => setEditing(null)}
+              <SuggestionEditor suggestion={e} needsDate={needsDate} onCancel={() => edit(null)}
                 onSave={async (edits) => {
                   const saved = await onEdit(e, edits);
-                  if (saved) setEditing(null);
+                  if (saved) edit(null);
                   return saved;
                 }} />
               </div>
@@ -167,7 +176,7 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                     aria-label={`Edit ${e.title}`}
                     title="Edit"
                     disabled={!!leaving[e.id]}
-                    onClick={() => setEditing(e.id)}
+                    onClick={() => edit(e.id)}
                   >
                     <Pencil className="size-4" />
                   </button>
@@ -176,7 +185,7 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                     aria-label="Accept"
                     title={e.date ? "Add to calendar" : "Add a date to accept"}
                     disabled={!!leaving[e.id]}
-                    onClick={() => (e.date ? decide(e, "accepted") : setEditing(e.id))}
+                    onClick={() => (e.date ? decide(e, "accepted") : edit(e.id, true))}
                   >
                     <Check className="size-4" />
                   </button>
