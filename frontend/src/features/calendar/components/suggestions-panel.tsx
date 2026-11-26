@@ -13,12 +13,6 @@ function formatISODate(iso: string): string {
   return new Date(year, month - 1, day).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
-/** Month and day for the date block on the left of a suggestion. */
-function dateParts(iso: string): { month: string; day: number } {
-  const [year, month, day] = iso.split("-").map(Number);
-  return { month: new Date(year, month - 1, day).toLocaleDateString("en-US", { month: "short" }), day };
-}
-
 const iconButton = "flex size-9 items-center justify-center rounded-full bg-brand-subtle transition-colors disabled:opacity-40";
 // A reviewed suggestion fades (and, when dismissed, slides) out while its space collapses; the
 // decision is sent once the motion ends, so the list never jumps.
@@ -140,25 +134,19 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
               <div className="pb-2">
               <div data-arrived={arrived.has(e.id) || undefined}
                 className={`flex items-start gap-4 rounded-lg border border-dashed border-primary/30 bg-card px-4 py-3 transition-transform duration-300 ease-out motion-reduce:transition-none ${leaving[e.id] === "dismissed" ? "-translate-x-6" : ""} ${arrived.has(e.id) ? "motion-safe:animate-suggestion-arrive" : ""}`}>
-                <div className="flex w-14 shrink-0 flex-col items-center self-center uppercase text-primary">
-                  {e.date ? (
-                    <time dateTime={e.date} aria-label={formatISODate(e.date)} className="contents">
-                      <span className="text-xs font-medium">{dateParts(e.date).month}</span>
-                      <span className="text-2xl leading-tight">{dateParts(e.date).day}</span>
-                    </time>
-                  ) : (
-                    <span className="text-center text-xs font-medium leading-tight text-muted-foreground">Date unknown</span>
-                  )}
-                </div>
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-base font-medium text-foreground">{e.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {e.time ? `${e.time}${zoneSuffix(e.timezone, e.date, timezone)} · ` : ""}
-                    {e.kind}
+                  <p className="flex flex-wrap items-center gap-x-1.5 text-sm text-muted-foreground">
+                    {e.date && <>
+                      <span>{formatISODate(e.date)}{e.time && `, ${e.time}${zoneSuffix(e.timezone, e.date, timezone)}`}</span>
+                      <span aria-hidden="true">•</span>
+                    </>}
+                    <span>{e.kind}</span>
+                    {!e.date && <>
+                      <span aria-hidden="true">•</span>
+                      <span className="flex items-center gap-1 text-foreground"><TriangleAlert aria-hidden="true" className="size-3.5 text-muted-foreground" />Missing: date</span>
+                    </>}
                   </p>
-                  {!e.date && (
-                    <p className="flex items-center gap-1.5 text-sm text-foreground"><TriangleAlert aria-hidden="true" className="size-3.5 text-muted-foreground" />Missing: date</p>
-                  )}
                   {e.action_required && (
                     <p className="text-sm text-foreground">Action needed: {e.action_required}</p>
                   )}
