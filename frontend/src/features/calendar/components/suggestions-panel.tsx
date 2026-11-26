@@ -164,7 +164,7 @@ export function SuggestionsPanel({ pending, arrived, timezone, loading, failed, 
                   <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     <MapPin aria-hidden="true" className="size-3.5 shrink-0" />
                     <span className="sr-only">Location: </span>
-                    {e.location || <span className="text-foreground">Needs location</span>}
+                    {e.location || <span className="text-foreground">No location</span>}
                   </p>
                   {e.description && (
                     <p className="pt-1 text-sm text-foreground">{e.description}</p>
