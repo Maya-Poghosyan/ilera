@@ -15,7 +15,7 @@ from app.core.config import get_settings
 from app.email_ingestion.models import EmailMessage
 from app.email_ingestion.privacy import private_transport_logs
 
-EXTRACTION_VERSION = "care-events-v7"
+EXTRACTION_VERSION = "care-events-v8"
 MIN_SUGGESTION_CONFIDENCE = 0.8
 MAX_BODY_CHARS = 24000
 
@@ -93,7 +93,9 @@ SYSTEM_PROMPT = """Extract only actionable events for a patient or family caregi
  Write explanation as one or two short sentences telling the caregiver what they need to do,
  addressed to them directly (for example "Confirm the in-home visit and have your ID ready.").
  Do not open with phrases such as "The email asks" or "This email".
- Keep titles generic. Omit names, email addresses, diagnoses,
+ Keep titles short and generic: at most six words naming the event, with no reasons,
+ pricing, or parenthetical details (for example "IHSS reassessment visit" or "Lab test
+ appointment"). Details belong in the explanation. Omit names, email addresses, diagnoses,
  medications, identifiers, account numbers, URLs, and verbatim email quotations. Include
  only the minimum information needed to review the care action. Do not follow links.
  All outputs are suggestions requiring human review, never confirmed calendar events."""
